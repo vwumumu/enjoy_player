@@ -1,24 +1,118 @@
-/// Audio-only layout: transcript-first reading experience.
+/// Audio-only layout: optional hero artwork + transcript-first reading.
 library;
 
+import 'dart:io' show File, Platform;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 
-class AudioPlayerLayout extends StatelessWidget {
-  const AudioPlayerLayout({required this.transcript, super.key});
+import '../../application/player_controller.dart';
+
+class AudioPlayerLayout extends ConsumerWidget {
+  const AudioPlayerLayout({
+    required this.transcript,
+    super.key,
+  });
 
   final Widget transcript;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = EnjoyThemeTokens.of(context);
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: t.contentMaxWidth),
-        child: Padding(
-          padding: EdgeInsets.all(t.space16),
-          child: transcript,
+    final session = ref.watch(playerControllerProvider);
+    final cs = Theme.of(context).colorScheme;
+
+    final thumbPath = session?.thumbnailUrl;
+    File? thumbFile;
+    if (thumbPath != null &&
+        thumbPath.isNotEmpty &&
+        (Platform.isWindows ||
+            Platform.isLinux ||
+            Platform.isMacOS ||
+            Platform.isAndroid ||
+            Platform.isIOS)) {
+      final f = File(thumbPath);
+      if (f.existsSync()) thumbFile = f;
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 520;
+        final hero = Padding(
+          padding: EdgeInsets.only(bottom: t.space24),
+          child: Center(
+            child: Material(
+              elevation: t.elevationSurface,
+              borderRadius: BorderRadius.circular(t.radiusXl),
+              clipBehavior: Clip.antiAlias,
+              child: SizedBox(
+                width: wide ? 256 : 200,
+                height: wide ? 256 : 200,
+                child:
+                    thumbFile != null
+                        ? Image.file(
+                          thumbFile,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder:
+                              (_, _, _) => _AudioArtFallback(cs: cs),
+                        )
+                        : _AudioArtFallback(cs: cs),
+              ),
+            ),
+          ),
+        );
+
+        final body = ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: t.contentMaxWidth),
+          child: Padding(
+            padding: EdgeInsets.all(t.space16),
+            child: transcript,
+          ),
+        );
+
+        return Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                hero,
+                body,
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AudioArtFallback extends StatelessWidget {
+  const _AudioArtFallback({required this.cs});
+
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            cs.surfaceContainerHighest,
+            cs.primary.withValues(alpha: 0.35),
+            cs.surfaceContainer,
+          ],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.audiotrack_rounded,
+          size: 88,
+          color: cs.onSurfaceVariant,
         ),
       ),
     );

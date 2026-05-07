@@ -15,6 +15,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryTitle => 'Library';
 
   @override
+  String get homeTitle => 'Home';
+
+  @override
+  String get homeRecentMedia => 'Recent media';
+
+  @override
+  String get homeEmptyTitle => 'No recent media';
+
+  @override
+  String get homeEmptyHint => 'Open a file or drop one here to start.';
+
+  @override
+  String get libraryTabMusic => 'Music';
+
+  @override
+  String get libraryTabVideo => 'Video';
+
+  @override
+  String get libraryEmptyMusicTitle => 'We couldn\'t find any music';
+
+  @override
+  String get libraryEmptyMusicHint =>
+      'Your library doesn\'t contain any music content.';
+
+  @override
+  String get libraryEmptyVideoTitle => 'We couldn\'t find any videos';
+
+  @override
+  String get libraryEmptyVideoHint =>
+      'Your library doesn\'t contain any video content.';
+
+  @override
+  String get actionOpenFiles => 'Open file(s)';
+
+  @override
+  String get searchHint => 'Search';
+
+  @override
+  String get transportRepeat => 'Repeat';
+
+  @override
+  String get transportFullscreen => 'Fullscreen';
+
+  @override
+  String get transportMore => 'More';
+
+  @override
+  String get transportCollapse => 'Collapse player';
+
+  @override
+  String get transportExpand => 'Expand player';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -53,7 +106,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enjoy Player — local transcripts and shadow reading.';
 
   @override
-  String get settingsThemeRowTitle => 'System theme';
+  String get settingsThemeRowTitle => 'Theme';
+
+  @override
+  String get settingsThemeDarkLocked => 'Premium UI uses dark theme.';
 
   @override
   String get play => 'Play';

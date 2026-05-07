@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:enjoy_player/features/library/presentation/home_screen.dart';
 import 'package:enjoy_player/features/library/presentation/library_screen.dart';
 import 'package:enjoy_player/features/player/presentation/expanded_player_screen.dart';
 import 'package:enjoy_player/features/player/presentation/root_shell.dart';
@@ -22,6 +23,10 @@ GoRouter appRouter(Ref ref) {
         routes: [
           GoRoute(
             path: '/',
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: '/library',
             builder: (context, state) => const LibraryScreen(),
           ),
           GoRoute(

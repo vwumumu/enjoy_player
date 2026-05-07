@@ -24,7 +24,7 @@ flowchart TB
 
 ```mermaid
 sequenceDiagram
-  participant Lib as LibraryScreen
+  participant Lib as LibraryScreen / HomeScreen
   participant Repo as MediaLibraryRepository
   participant DB as AppDatabase
   participant PC as PlayerController
@@ -49,7 +49,7 @@ sequenceDiagram
 
 ## Routing
 
-[`GoRouter`](../lib/core/routing/app_router.dart) + [`ShellRoute`](../lib/features/player/presentation/root_shell.dart): child routes render above [`MiniPlayerBar`](../lib/features/player/presentation/mini_player_bar.dart) when a session exists.
+[`GoRouter`](../lib/core/routing/app_router.dart) + [`ShellRoute`](../lib/features/player/presentation/root_shell.dart): routes render beside an extended sidebar at wide breakpoints; [`GlobalTransportBar`](../lib/features/player/presentation/widgets/global_transport_bar.dart) spans the bottom when a playback session exists.
 
 ## Manual providers
 

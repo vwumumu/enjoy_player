@@ -4,7 +4,6 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
@@ -76,41 +75,58 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
           final vw = math.max(0.0, total - tw - _kSplitterHitWidth);
           final cs = Theme.of(context).colorScheme;
 
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(
-                width: vw,
-                child: _VideoStageBackground(
-                  padding: EdgeInsets.zero,
-                  child: LayoutBuilder(
-                    builder: (context, c) {
-                      return _VideoWidthAspectViewport(
-                        controller: widget.controller,
-                        maxWidth: c.maxWidth,
-                        maxHeight: c.maxHeight,
-                        fill: cs.surface,
-                      );
-                    },
+          // One continuous backdrop across video + transcript removes the harsh
+          // vertical seam from mismatched gradients vs flat [surface].
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  cs.surfaceContainerLow,
+                  cs.surface,
+                  cs.surfaceContainerLow,
+                ],
+                stops: const [0.0, 0.52, 1.0],
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  width: vw,
+                  child: _VideoStageBackground(
+                    padding: EdgeInsets.zero,
+                    showGradient: false,
+                    child: LayoutBuilder(
+                      builder: (context, c) {
+                        return _VideoWidthAspectViewport(
+                          controller: widget.controller,
+                          maxWidth: c.maxWidth,
+                          maxHeight: c.maxHeight,
+                          fill: cs.surface,
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-              _ResizeSplitter(
-                hitWidth: _kSplitterHitWidth,
-                hovered: _splitterHovered,
-                onHover: (v) => setState(() => _splitterHovered = v),
-                semanticLabel:
-                    AppLocalizations.of(context)!.playerTranscriptResizeHint,
-                onDragDelta: (dx) => _applyDragDelta(total, dx),
-              ),
-              SizedBox(
-                width: tw,
-                child: ColoredBox(
-                  color: Theme.of(context).colorScheme.surface,
-                  child: widget.transcript,
+                _ResizeSplitter(
+                  hitWidth: _kSplitterHitWidth,
+                  hovered: _splitterHovered,
+                  onHover: (v) => setState(() => _splitterHovered = v),
+                  semanticLabel:
+                      AppLocalizations.of(context)!.playerTranscriptResizeHint,
+                  onDragDelta: (dx) => _applyDragDelta(total, dx),
                 ),
-              ),
-            ],
+                SizedBox(
+                  width: tw,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: widget.transcript,
+                  ),
+                ),
+              ],
+            ),
           );
         }
         return Column(
@@ -214,18 +230,25 @@ class _VideoWidthAspectViewport extends StatelessWidget {
 }
 
 /// Soft gradient behind the video — avoids a flat “box” and matches surface tokens.
+/// When [showGradient] is false, only padding is applied so a parent can own one
+/// unified backdrop (wide video + transcript split).
 class _VideoStageBackground extends StatelessWidget {
   const _VideoStageBackground({
     required this.child,
     required this.padding,
+    this.showGradient = true,
   });
 
   final Widget child;
   final EdgeInsets padding;
+  final bool showGradient;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    if (!showGradient) {
+      return Padding(padding: padding, child: child);
+    }
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(

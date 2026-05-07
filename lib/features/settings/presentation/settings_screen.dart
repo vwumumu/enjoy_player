@@ -25,7 +25,7 @@ class SettingsScreen extends StatelessWidget {
             leading: Icon(Icons.palette_outlined, color: cs.primary),
             title: Text(l10n.settingsThemeRowTitle, style: tt.titleMedium),
             subtitle: Text(
-              l10n.settingsAppearanceSubtitle,
+              l10n.settingsThemeDarkLocked,
               style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
             ),
           ),

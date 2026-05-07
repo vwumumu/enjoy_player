@@ -1,11 +1,13 @@
-/// Full-screen player with transcript + controls.
+/// Full-screen player: docked top toolbar + video/transcript (no overlap).
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
+
 import '../application/embedded_tracks_notifier.dart';
 import '../application/player_controller.dart';
 import '../application/player_ui_provider.dart';
@@ -13,7 +15,6 @@ import '../../transcript/presentation/subtitle_track_picker_sheet.dart';
 import '../../transcript/presentation/transcript_panel.dart';
 import 'layouts/audio_player_layout.dart';
 import 'layouts/video_player_layout.dart';
-import 'widgets/player_controls_bar.dart';
 
 class ExpandedPlayerScreen extends ConsumerStatefulWidget {
   const ExpandedPlayerScreen({required this.mediaId, super.key});
@@ -30,9 +31,6 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Only re-open the media when navigating to a different source. Re-opening
-      // the same media via mk.Player.open() restarts playback from the
-      // beginning, which is jarring when expanding back from the mini bar.
       final current = ref.read(playerControllerProvider);
       if (current?.mediaId != widget.mediaId) {
         await ref
@@ -48,7 +46,6 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
     final session = ref.watch(playerControllerProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    // Show a one-shot snackbar when embedded tracks are newly found.
     ref.listen(embeddedTracksProvider, (_, event) {
       if (event == null) return;
       if (event.mediaId != widget.mediaId) return;
@@ -67,8 +64,16 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
 
     if (session == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.loading)),
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              SizedBox(height: EnjoyThemeTokens.of(context).space16),
+              Text(l10n.loading),
+            ],
+          ),
+        ),
       );
     }
 
@@ -77,23 +82,19 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
         ref.read(playerControllerProvider.notifier).videoController;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.expand_more_rounded),
-          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          onPressed: () {
-            ref.read(playerUiProvider.notifier).collapse();
-            context.pop();
-          },
-        ),
-        title: Text(
-          session.mediaTitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SafeArea(
+            bottom: false,
+            child: _ExpandedTopBar(
+              title: session.mediaTitle,
+              onCollapse: () {
+                ref.read(playerUiProvider.notifier).collapse();
+                context.pop();
+              },
+            ),
+          ),
           Expanded(
             child:
                 isVideo
@@ -105,8 +106,70 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
                       transcript: TranscriptPanel(mediaId: widget.mediaId),
                     ),
           ),
-          const PlayerControlsBar(),
         ],
+      ),
+    );
+  }
+}
+
+/// Full-width docked toolbar — does not overlay the video; lives in layout flow.
+class _ExpandedTopBar extends StatelessWidget {
+  const _ExpandedTopBar({
+    required this.title,
+    required this.onCollapse,
+  });
+
+  final String title;
+  final VoidCallback onCollapse;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+
+    return Material(
+      color: cs.surfaceContainerHigh.withValues(alpha: 0.96),
+      elevation: 0,
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: cs.outlineVariant.withValues(alpha: 0.45),
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: t.space8),
+            child: Row(
+              children: [
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                  icon: const Icon(Icons.expand_more_rounded),
+                  onPressed: onCollapse,
+                ),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: AppLocalizations.of(context)!.transportMore,
+                  icon: Icon(Icons.more_horiz_rounded, color: cs.onSurfaceVariant),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

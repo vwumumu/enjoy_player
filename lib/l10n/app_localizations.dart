@@ -106,6 +106,108 @@ abstract class AppLocalizations {
   /// **'Library'**
   String get libraryTitle;
 
+  /// No description provided for @homeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeTitle;
+
+  /// No description provided for @homeRecentMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent media'**
+  String get homeRecentMedia;
+
+  /// No description provided for @homeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent media'**
+  String get homeEmptyTitle;
+
+  /// No description provided for @homeEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a file or drop one here to start.'**
+  String get homeEmptyHint;
+
+  /// No description provided for @libraryTabMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get libraryTabMusic;
+
+  /// No description provided for @libraryTabVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get libraryTabVideo;
+
+  /// No description provided for @libraryEmptyMusicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find any music'**
+  String get libraryEmptyMusicTitle;
+
+  /// No description provided for @libraryEmptyMusicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your library doesn\'t contain any music content.'**
+  String get libraryEmptyMusicHint;
+
+  /// No description provided for @libraryEmptyVideoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find any videos'**
+  String get libraryEmptyVideoTitle;
+
+  /// No description provided for @libraryEmptyVideoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your library doesn\'t contain any video content.'**
+  String get libraryEmptyVideoHint;
+
+  /// No description provided for @actionOpenFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Open file(s)'**
+  String get actionOpenFiles;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchHint;
+
+  /// No description provided for @transportRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get transportRepeat;
+
+  /// No description provided for @transportFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen'**
+  String get transportFullscreen;
+
+  /// No description provided for @transportMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get transportMore;
+
+  /// No description provided for @transportCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse player'**
+  String get transportCollapse;
+
+  /// No description provided for @transportExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand player'**
+  String get transportExpand;
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
@@ -181,8 +283,14 @@ abstract class AppLocalizations {
   /// No description provided for @settingsThemeRowTitle.
   ///
   /// In en, this message translates to:
-  /// **'System theme'**
+  /// **'Theme'**
   String get settingsThemeRowTitle;
+
+  /// No description provided for @settingsThemeDarkLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium UI uses dark theme.'**
+  String get settingsThemeDarkLocked;
 
   /// No description provided for @play.
   ///

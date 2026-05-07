@@ -1,4 +1,4 @@
-/// Application shell: adaptive navigation + page stack + mini player.
+/// Application shell: adaptive navigation + page stack + global transport.
 library;
 
 import 'dart:async';
@@ -8,11 +8,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/app_background.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import '../application/player_controller.dart';
 import '../application/player_ui_provider.dart';
-import 'mini_player_bar.dart';
+import 'widgets/app_sidebar.dart';
+import 'widgets/global_transport_bar.dart';
 
 class RootShell extends ConsumerStatefulWidget {
   const RootShell({required this.child, super.key});
@@ -38,9 +40,6 @@ class _RootShellState extends ConsumerState<RootShell> {
     final player = ref.read(playerControllerProvider.notifier).player;
     final ui = ref.read(playerUiProvider.notifier);
 
-    // Streams are broadcast and don't replay. The player has typically already
-    // started playing by the time openMedia awaits resolve and we get attached,
-    // so seed UI from the current snapshot before subscribing to future events.
     ui.setPlaying(player.state.playing);
     ui.setBuffering(player.state.buffering);
 
@@ -49,15 +48,21 @@ class _RootShellState extends ConsumerState<RootShell> {
   }
 
   int _navIndexForPath(String path) {
-    if (path.startsWith('/settings')) return 1;
+    if (path.startsWith('/settings')) return 2;
+    if (path.startsWith('/library')) return 1;
     return 0;
   }
 
   void _goNavIndex(BuildContext context, int index) {
-    if (index == 0) {
-      context.go('/');
-    } else {
-      context.go('/settings');
+    switch (index) {
+      case 0:
+        context.go('/');
+      case 1:
+        context.go('/library');
+      case 2:
+        context.go('/settings');
+      default:
+        context.go('/');
     }
   }
 
@@ -74,77 +79,63 @@ class _RootShellState extends ConsumerState<RootShell> {
     final path = GoRouterState.of(context).uri.path;
     final onPlayer = path.startsWith('/player/');
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final tokens = EnjoyThemeTokens.of(context);
-        final useRail =
-            constraints.maxWidth >= tokens.breakpointRail && !onPlayer;
+    return AppBackground(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final tokens = EnjoyThemeTokens.of(context);
+          final useSidebar =
+              constraints.maxWidth >= tokens.breakpointRail && !onPlayer;
 
-        final content = Column(
-          children: [
-            Expanded(child: widget.child),
-            if (session != null) const MiniPlayerBar(),
-            if (!onPlayer && !useRail)
-              NavigationBar(
-                selectedIndex: _navIndexForPath(path),
-                onDestinationSelected: (i) => _goNavIndex(context, i),
-                destinations: [
-                  NavigationDestination(
-                    icon: const Icon(Icons.library_music_outlined),
-                    selectedIcon: const Icon(Icons.library_music_rounded),
-                    label: l10n.libraryTitle,
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.settings_outlined),
-                    selectedIcon: const Icon(Icons.settings_rounded),
-                    label: l10n.settingsTitle,
-                  ),
-                ],
-              ),
-          ],
-        );
-
-        if (useRail) {
-          return Scaffold(
-            body: SafeArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Semantics(
-                    container: true,
-                    label: l10n.navMainLabel,
-                    child: NavigationRail(
-                      selectedIndex: _navIndexForPath(path),
-                      onDestinationSelected: (i) => _goNavIndex(context, i),
-                      labelType: NavigationRailLabelType.all,
-                      destinations: [
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.library_music_outlined),
-                          selectedIcon: const Icon(Icons.library_music_rounded),
-                          label: Text(l10n.libraryTitle),
-                        ),
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.settings_outlined),
-                          selectedIcon: const Icon(Icons.settings_rounded),
-                          label: Text(l10n.settingsTitle),
-                        ),
-                      ],
+          final pageColumn = Column(
+            children: [
+              Expanded(child: widget.child),
+              if (session != null) const GlobalTransportBar(),
+              if (!useSidebar && !onPlayer)
+                NavigationBar(
+                  selectedIndex: _navIndexForPath(path),
+                  onDestinationSelected: (i) => _goNavIndex(context, i),
+                  destinations: [
+                    NavigationDestination(
+                      icon: const Icon(Icons.home_outlined),
+                      selectedIcon: const Icon(Icons.home_rounded),
+                      label: l10n.homeTitle,
                     ),
-                  ),
-                  VerticalDivider(
-                    width: 1,
-                    thickness: 1,
-                    color: Theme.of(context).dividerTheme.color,
-                  ),
-                  Expanded(child: content),
-                ],
-              ),
-            ),
+                    NavigationDestination(
+                      icon: const Icon(Icons.library_music_outlined),
+                      selectedIcon: const Icon(Icons.library_music_rounded),
+                      label: l10n.libraryTitle,
+                    ),
+                    NavigationDestination(
+                      icon: const Icon(Icons.settings_outlined),
+                      selectedIcon: const Icon(Icons.settings_rounded),
+                      label: l10n.settingsTitle,
+                    ),
+                  ],
+                ),
+            ],
           );
-        }
 
-        return Scaffold(body: SafeArea(child: content));
-      },
+          if (useSidebar) {
+            return Scaffold(
+              body: SafeArea(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Semantics(
+                      container: true,
+                      label: l10n.navMainLabel,
+                      child: const AppSidebar(),
+                    ),
+                    Expanded(child: pageColumn),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return Scaffold(body: SafeArea(child: pageColumn));
+        },
+      ),
     );
   }
 

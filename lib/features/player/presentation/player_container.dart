@@ -1,3 +1,3 @@
-/// Shell routing between mini and expanded chrome lives in [RootShell]
-/// and [MiniPlayerBar]; expanded route uses [ExpandedPlayerScreen].
+/// Shell routing: [RootShell] hosts primary navigation and [GlobalTransportBar];
+/// expanded route uses [ExpandedPlayerScreen].
 library;

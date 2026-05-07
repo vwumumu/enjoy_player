@@ -17,9 +17,9 @@ class EnjoyApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
       onGenerateTitle: (ctx) => AppLocalizations.of(ctx)!.appTitle,
-      theme: buildAppTheme(Brightness.light),
+      theme: buildAppTheme(Brightness.dark),
       darkTheme: buildAppTheme(Brightness.dark),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       locale: const Locale('en'),
       localizationsDelegates: const [
         AppLocalizations.delegate,

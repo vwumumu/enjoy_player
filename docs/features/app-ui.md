@@ -1,28 +1,28 @@
 # App UI (premium shell & theming)
 
-## Baseline (pre-redesign reference)
+## Overview
 
-- **Entry**: `MaterialApp.router` in `lib/app.dart` with light/dark `ThemeData` from `lib/core/theme/app_theme.dart`.
-- **Navigation**: `go_router` `ShellRoute` → `RootShell` wraps `LibraryScreen`, `ExpandedPlayerScreen`, `SettingsScreen`.
-- **Persistent chrome**: `MiniPlayerBar` when a session exists and chrome is not expanded.
+- **Entry**: `MaterialApp.router` in `lib/app.dart` with dark `ThemeData` from `lib/core/theme/app_theme.dart` (violet seed on deep plum surfaces).
+- **Navigation**: `go_router` `ShellRoute` → `RootShell` wraps **Home** (`/`), **Library** (`/library`), **ExpandedPlayerScreen** (`/player/:id`), **Settings** (`/settings`).
+- **Persistent chrome**: [`GlobalTransportBar`](../../lib/features/player/presentation/widgets/global_transport_bar.dart) when a session exists (full-width glass transport + progress). Extended **sidebar** (brand, search, nav) at widths ≥ `EnjoyThemeTokens.breakpointRail`; compact **NavigationBar** (Home / Library / Settings) below that. Sidebar and nav chrome are hidden on `/player/*` for focus.
 
-## Anti-patterns removed or addressed
+## Design tokens
 
-- **Seed-only theme**: Replaced with tuned typography, component themes, and `ThemeExtension` tokens.
-- **Magic spacing/radius**: Centralized in `EnjoyThemeTokens` (`lib/core/theme/enjoy_tokens.dart`).
-- **Unused semantic colors**: `AppColors` wired into tokens and echo / transcript accents.
-- **Template library**: Card-based list, structured empty state, import in app bar (shell owns bottom/rail nav).
-- **No adaptive shell**: `NavigationRail` at wide breakpoints; `NavigationBar` on compact; nav hidden on `/player/*` for focus.
+- **Spacing / radii / breakpoints**: `EnjoyThemeTokens` (`lib/core/theme/enjoy_tokens.dart`).
+- **Background**: radial gradient via [`AppBackground`](../../lib/core/theme/widgets/app_background.dart).
+- **Glass panels**: [`GlassSurface`](../../lib/core/theme/widgets/glass_surface.dart) for sidebar and transport.
 
 ## Behavior
 
-- **Breakpoints** (from `EnjoyThemeTokens`): transcript side-by-side vs stacked; rail vs bottom nav.
-- **Wide video + transcript**: No fixed vertical rule; transcript width is draggable (min ~240px, max 50% of width). Dragging the handle **left** widens the transcript / narrows the video; **right** does the reverse. The video uses **full zone width** with **native display aspect ratio** from `Player` `videoParams` (fallback 16:9), `BoxFit.contain`, and vertical centering + clip if the frame is taller than the zone. Video stage uses a soft surface gradient behind the frame.
-- **Theme mode**: Still follows system (`ThemeMode.system` in `EnjoyApp`).
-- **Motion**: Short fade on non-shell route transitions where configured in `app_router.dart`.
+- **Breakpoints**: transcript side-by-side vs stacked (`breakpointTranscriptSideBySide`); sidebar vs bottom nav (`breakpointRail`).
+- **Wide video + transcript**: Transcript width is draggable (min ~240px, max 50% of width). Video uses `BoxFit.contain` with native aspect ratio from the player.
+- **Theme mode**: `ThemeMode.dark` in `EnjoyApp` for the premium shell.
+- **Motion**: Short fade on expanded player route transitions in `app_router.dart`.
 
 ## Verification (after UI changes)
 
+- `dart run build_runner build --delete-conflicting-outputs` (if `@Riverpod` / Drift touched)
+- `flutter gen-l10n`
 - `flutter analyze`
 - `flutter test`
-- Manual: light/dark, Library / Settings / Player, mini bar, subtitle sheet; narrow vs wide window (rail at ≥900px); wide player: drag between video and transcript to resize (Android + desktop targets as available).
+- Manual: Home grid + Library tabs + Settings; open player; transport ring + collapse/expand; narrow vs wide window.

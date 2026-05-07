@@ -4,14 +4,17 @@ library;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'colors.dart';
 import 'enjoy_tokens.dart';
 
 ThemeData buildAppTheme(Brightness brightness) {
-  const seed = Color(0xFF0D47A1);
-  final colorScheme = ColorScheme.fromSeed(
-    seedColor: seed,
+  final baseScheme = ColorScheme.fromSeed(
+    seedColor: AppColors.seedViolet,
     brightness: brightness,
   );
+
+  final colorScheme =
+      brightness == Brightness.dark ? _premiumDarkScheme(baseScheme) : baseScheme;
 
   final tokens = brightness == Brightness.light
       ? EnjoyThemeTokens.light(colorScheme)
@@ -24,13 +27,44 @@ ThemeData buildAppTheme(Brightness brightness) {
     visualDensity: VisualDensity.adaptivePlatformDensity,
   );
 
-  final textTheme = GoogleFonts.interTextTheme(baseTheme.textTheme).apply(
+  final inter = GoogleFonts.interTextTheme(baseTheme.textTheme).apply(
     bodyColor: colorScheme.onSurface,
     displayColor: colorScheme.onSurface,
   );
 
+  final textTheme = inter.copyWith(
+    displayMedium: inter.displayMedium?.copyWith(
+      fontSize: 40,
+      fontWeight: FontWeight.w600,
+      letterSpacing: tokens.heroTitleLetterSpacing,
+      height: 1.15,
+    ),
+    headlineLarge: inter.headlineLarge?.copyWith(
+      fontSize: 32,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.5,
+      height: 1.2,
+    ),
+    headlineMedium: inter.headlineMedium?.copyWith(
+      fontSize: 26,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.4,
+      height: 1.22,
+    ),
+    headlineSmall: inter.headlineSmall?.copyWith(
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.2,
+    ),
+    labelMedium: inter.labelMedium?.copyWith(letterSpacing: 0.2),
+    labelSmall: inter.labelSmall?.copyWith(
+      letterSpacing: 0.15,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    ),
+  );
+
   final navigationBarTheme = NavigationBarThemeData(
     height: 72,
+    backgroundColor: colorScheme.surface.withValues(alpha: 0.72),
     indicatorColor: colorScheme.secondaryContainer,
     labelTextStyle: WidgetStateProperty.resolveWith((states) {
       final selected = states.contains(WidgetState.selected);
@@ -43,7 +77,8 @@ ThemeData buildAppTheme(Brightness brightness) {
       final selected = states.contains(WidgetState.selected);
       return IconThemeData(
         size: 24,
-        color: selected ? colorScheme.onSecondaryContainer : colorScheme.onSurfaceVariant,
+        color:
+            selected ? colorScheme.onSecondaryContainer : colorScheme.onSurfaceVariant,
       );
     }),
   );
@@ -64,12 +99,15 @@ ThemeData buildAppTheme(Brightness brightness) {
     minExtendedWidth: 200,
   );
 
+  final inactiveSlider =
+      colorScheme.onSurface.withValues(alpha: brightness == Brightness.dark ? 0.12 : 0.18);
+
   final sliderTheme = SliderThemeData(
-    trackHeight: 3,
-    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-    overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+    trackHeight: 2,
+    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 0),
+    overlayShape: SliderComponentShape.noOverlay,
     activeTrackColor: colorScheme.primary,
-    inactiveTrackColor: colorScheme.surfaceContainerHighest,
+    inactiveTrackColor: inactiveSlider,
     thumbColor: colorScheme.primary,
     overlayColor: colorScheme.primary.withValues(alpha: 0.12),
   );
@@ -104,9 +142,12 @@ ThemeData buildAppTheme(Brightness brightness) {
     margin: EdgeInsets.zero,
     clipBehavior: Clip.antiAlias,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(tokens.radiusMd),
+      borderRadius: BorderRadius.circular(tokens.radiusLg),
+      side: BorderSide(
+        color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+      ),
     ),
-    color: colorScheme.surfaceContainerLow,
+    color: colorScheme.surfaceContainerLow.withValues(alpha: 0.6),
   );
 
   final listTileTheme = ListTileThemeData(
@@ -129,12 +170,12 @@ ThemeData buildAppTheme(Brightness brightness) {
     visualDensity: VisualDensity.adaptivePlatformDensity,
     extensions: <ThemeExtension<dynamic>>[tokens],
     textTheme: textTheme,
-    scaffoldBackgroundColor: colorScheme.surface,
+    scaffoldBackgroundColor: Colors.transparent,
     appBarTheme: AppBarTheme(
       centerTitle: false,
       elevation: 0,
-      scrolledUnderElevation: 0.5,
-      backgroundColor: colorScheme.surface,
+      scrolledUnderElevation: 0,
+      backgroundColor: Colors.transparent,
       foregroundColor: colorScheme.onSurface,
       surfaceTintColor: Colors.transparent,
       titleTextStyle: textTheme.titleLarge?.copyWith(
@@ -161,8 +202,6 @@ ThemeData buildAppTheme(Brightness brightness) {
         textStyle: textTheme.labelLarge?.copyWith(letterSpacing: 0.2),
       ),
     ),
-    // Do not set a global IconButton foregroundColor: it overrides
-    // [IconButton.filled] (play/pause) and washes the icon on primary.
     iconTheme: IconThemeData(
       color: colorScheme.onSurfaceVariant,
       size: 24,
@@ -196,5 +235,20 @@ ThemeData buildAppTheme(Brightness brightness) {
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       },
     ),
+  );
+}
+
+/// Deep plum surfaces + slightly brighter inverse primary for chips on inverse surface.
+ColorScheme _premiumDarkScheme(ColorScheme base) {
+  return base.copyWith(
+    surface: AppColors.surface,
+    surfaceDim: AppColors.surfaceContainerLowest,
+    surfaceBright: AppColors.surfaceContainerHighest,
+    surfaceContainerLowest: AppColors.surfaceContainerLowest,
+    surfaceContainerLow: AppColors.surfaceContainerLow,
+    surfaceContainer: AppColors.surfaceContainer,
+    surfaceContainerHigh: AppColors.surfaceContainerHigh,
+    surfaceContainerHighest: AppColors.surfaceContainerHighest,
+    inversePrimary: Color.lerp(base.inversePrimary, const Color(0xFFE8DEF8), 0.35)!,
   );
 }
