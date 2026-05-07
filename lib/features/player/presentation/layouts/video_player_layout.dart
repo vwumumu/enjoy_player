@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -82,15 +83,15 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
                 width: vw,
                 child: _VideoStageBackground(
                   padding: EdgeInsets.zero,
-                  child: ClipRect(
-                    child: SizedBox.expand(
-                      child: Video(
+                  child: LayoutBuilder(
+                    builder: (context, c) {
+                      return _VideoWidthAspectViewport(
                         controller: widget.controller,
-                        controls: AdaptiveVideoControls,
-                        fit: BoxFit.cover,
+                        maxWidth: c.maxWidth,
+                        maxHeight: c.maxHeight,
                         fill: cs.surface,
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -118,27 +119,86 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
               flex: 2,
               child: _VideoStageBackground(
                 padding: EdgeInsets.zero,
-                child: ClipRect(
-                  child: LayoutBuilder(
-                    builder: (context, c) {
-                      final cs = Theme.of(context).colorScheme;
-                      return SizedBox(
-                        width: c.maxWidth,
-                        height: c.maxHeight,
-                        child: Video(
-                          controller: widget.controller,
-                          controls: AdaptiveVideoControls,
-                          fit: BoxFit.cover,
-                          fill: cs.surface,
-                        ),
-                      );
-                    },
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    final cs = Theme.of(context).colorScheme;
+                    return _VideoWidthAspectViewport(
+                      controller: widget.controller,
+                      maxWidth: c.maxWidth,
+                      maxHeight: c.maxHeight,
+                      fill: cs.surface,
+                    );
+                  },
                 ),
               ),
             ),
             Expanded(flex: 3, child: widget.transcript),
           ],
+        );
+      },
+    );
+  }
+}
+
+/// Full zone width, native display aspect ratio, [BoxFit.contain] — no stretch.
+/// Taller-than-zone frames are centered and clipped; shorter frames letterbox
+/// (gradient shows in [_VideoStageBackground]).
+class _VideoWidthAspectViewport extends StatelessWidget {
+  const _VideoWidthAspectViewport({
+    required this.controller,
+    required this.maxWidth,
+    required this.maxHeight,
+    required this.fill,
+  });
+
+  final VideoController controller;
+  final double maxWidth;
+  final double maxHeight;
+  final Color fill;
+
+  static double _aspectRatio(VideoParams vp, PlayerState state) {
+    if (vp.aspect != null && vp.aspect! > 0) {
+      return vp.aspect!;
+    }
+    final ww = vp.dw ?? vp.w ?? state.width;
+    final hh = vp.dh ?? vp.h ?? state.height;
+    if (ww != null && hh != null && ww > 0 && hh > 0) {
+      return ww / hh;
+    }
+    return 16 / 9;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (maxWidth <= 0 || maxHeight <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    return StreamBuilder<VideoParams>(
+      stream: controller.player.stream.videoParams,
+      initialData: controller.player.state.videoParams,
+      builder: (context, snapshot) {
+        final vp = snapshot.data ?? const VideoParams();
+        final ar = _aspectRatio(vp, controller.player.state);
+        final w = maxWidth;
+        final h = w / ar;
+
+        return ClipRect(
+          child: Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: w,
+              height: h,
+              child: Video(
+                controller: controller,
+                controls: AdaptiveVideoControls,
+                width: w,
+                height: h,
+                fit: BoxFit.contain,
+                fill: fill,
+              ),
+            ),
+          ),
         );
       },
     );

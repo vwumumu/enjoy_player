@@ -12,11 +12,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../player/application/display_position_provider.dart';
 import '../../player/application/echo_mode_provider.dart';
 import '../../player/application/player_interactions.dart';
-import '../application/active_transcript_provider.dart';
-import '../application/all_transcripts_provider.dart';
 import '../application/transcript_lines_provider.dart';
 import '../application/transcript_repository_provider.dart';
-import 'subtitle_track_picker_sheet.dart';
 
 class TranscriptPanel extends ConsumerWidget {
   const TranscriptPanel({required this.mediaId, super.key});
@@ -50,48 +47,10 @@ class TranscriptPanel extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
     final linesAsync = ref.watch(transcriptLinesForMediaProvider(mediaId));
-    final tracksAsync = ref.watch(allTranscriptsForMediaProvider(mediaId));
-    final activeIdAsync = ref.watch(activeTranscriptIdProvider(mediaId));
-
-    final tracks = tracksAsync.value ?? [];
-    final activeId = activeIdAsync.value;
-    final activeTrack = tracks.where((t) => t.id == activeId).firstOrNull;
-    final activeLabel =
-        (activeTrack?.label.isNotEmpty == true) ? activeTrack!.label : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(t.space8, t.space8, t.space8, t.space4),
-          child: Row(
-            children: [
-              // Active track chip — tap to open picker
-              if (tracks.isNotEmpty)
-                ActionChip(
-                  avatar: const Icon(Icons.closed_caption_outlined, size: 16),
-                  label: Text(
-                    activeLabel ?? l10n.subtitles,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  onPressed:
-                      () => showSubtitleTrackPicker(context, ref, mediaId),
-                )
-              else
-                Text(
-                  l10n.transcript,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: () => _import(context, ref),
-                icon: const Icon(Icons.upload_file),
-                label: Text(l10n.importSubtitle),
-              ),
-            ],
-          ),
-        ),
         Expanded(
           child: linesAsync.when(
             data: (lines) {

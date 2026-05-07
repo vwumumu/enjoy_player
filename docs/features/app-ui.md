@@ -17,7 +17,7 @@
 ## Behavior
 
 - **Breakpoints** (from `EnjoyThemeTokens`): transcript side-by-side vs stacked; rail vs bottom nav.
-- **Wide video + transcript**: No fixed vertical rule; transcript width is draggable (min ~240px, max 50% of width). Dragging the handle **left** widens the transcript / narrows the video; **right** does the reverse. The video uses **`BoxFit.cover`** so it always fills the video zone (cropped as needed). Video stage uses a soft surface gradient behind the frame.
+- **Wide video + transcript**: No fixed vertical rule; transcript width is draggable (min ~240px, max 50% of width). Dragging the handle **left** widens the transcript / narrows the video; **right** does the reverse. The video uses **full zone width** with **native display aspect ratio** from `Player` `videoParams` (fallback 16:9), `BoxFit.contain`, and vertical centering + clip if the frame is taller than the zone. Video stage uses a soft surface gradient behind the frame.
 - **Theme mode**: Still follows system (`ThemeMode.system` in `EnjoyApp`).
 - **Motion**: Short fade on non-shell route transitions where configured in `app_router.dart`.
 
