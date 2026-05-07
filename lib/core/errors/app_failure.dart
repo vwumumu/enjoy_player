@@ -1,0 +1,22 @@
+/// Typed failures for UI and repositories.
+library;
+
+sealed class AppFailure implements Exception {
+  const AppFailure(this.message);
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+final class FileFailure extends AppFailure {
+  const FileFailure(super.message);
+}
+
+final class DatabaseFailure extends AppFailure {
+  const DatabaseFailure(super.message);
+}
+
+final class PlaybackFailure extends AppFailure {
+  const PlaybackFailure(super.message);
+}
