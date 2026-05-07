@@ -10,7 +10,7 @@ part of 'transcript_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(transcriptRepository)
-const transcriptRepositoryProvider = TranscriptRepositoryProvider._();
+final transcriptRepositoryProvider = TranscriptRepositoryProvider._();
 
 final class TranscriptRepositoryProvider
     extends
@@ -20,7 +20,7 @@ final class TranscriptRepositoryProvider
           TranscriptRepository
         >
     with $Provider<TranscriptRepository> {
-  const TranscriptRepositoryProvider._()
+  TranscriptRepositoryProvider._()
     : super(
         from: null,
         argument: null,

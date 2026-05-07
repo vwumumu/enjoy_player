@@ -10,11 +10,11 @@ part of 'player_ui_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(PlayerUi)
-const playerUiProvider = PlayerUiProvider._();
+final playerUiProvider = PlayerUiProvider._();
 
 final class PlayerUiProvider
     extends $NotifierProvider<PlayerUi, PlayerUiState> {
-  const PlayerUiProvider._()
+  PlayerUiProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$PlayerUi extends $Notifier<PlayerUiState> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<PlayerUiState, PlayerUiState>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$PlayerUi extends $Notifier<PlayerUiState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

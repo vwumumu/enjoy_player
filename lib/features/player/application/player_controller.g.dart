@@ -10,11 +10,11 @@ part of 'player_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(PlayerController)
-const playerControllerProvider = PlayerControllerProvider._();
+final playerControllerProvider = PlayerControllerProvider._();
 
 final class PlayerControllerProvider
     extends $NotifierProvider<PlayerController, PlaybackSession?> {
-  const PlayerControllerProvider._()
+  PlayerControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$PlayerController extends $Notifier<PlaybackSession?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<PlaybackSession?, PlaybackSession?>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$PlayerController extends $Notifier<PlaybackSession?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

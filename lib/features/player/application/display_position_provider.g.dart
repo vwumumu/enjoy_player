@@ -10,13 +10,13 @@ part of 'display_position_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(displayPosition)
-const displayPositionProvider = DisplayPositionProvider._();
+final displayPositionProvider = DisplayPositionProvider._();
 
 final class DisplayPositionProvider
     extends
         $FunctionalProvider<AsyncValue<Duration>, Duration, Stream<Duration>>
     with $FutureModifier<Duration>, $StreamProvider<Duration> {
-  const DisplayPositionProvider._()
+  DisplayPositionProvider._()
     : super(
         from: null,
         argument: null,

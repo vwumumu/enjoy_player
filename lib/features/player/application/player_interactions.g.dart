@@ -10,11 +10,11 @@ part of 'player_interactions.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(PlayerInteractions)
-const playerInteractionsProvider = PlayerInteractionsProvider._();
+final playerInteractionsProvider = PlayerInteractionsProvider._();
 
 final class PlayerInteractionsProvider
     extends $NotifierProvider<PlayerInteractions, int> {
-  const PlayerInteractionsProvider._()
+  PlayerInteractionsProvider._()
     : super(
         from: null,
         argument: null,
@@ -42,14 +42,13 @@ final class PlayerInteractionsProvider
 }
 
 String _$playerInteractionsHash() =>
-    r'f36adec998288dcc8560f2bd88584639eeaed663';
+    r'40abec20b2b8276c62754efdae8709f3c97724ed';
 
 abstract class _$PlayerInteractions extends $Notifier<int> {
   int build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<int, int>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$PlayerInteractions extends $Notifier<int> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

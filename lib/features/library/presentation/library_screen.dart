@@ -76,7 +76,7 @@ class LibraryScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         tooltip: l10n.importMedia,
         onPressed: () async {
-          final pick = await FilePicker.platform.pickFiles(type: FileType.media);
+          final pick = await FilePicker.pickFiles(type: FileType.media);
           if (pick == null || pick.files.isEmpty) return;
           final path = pick.files.single.path;
           if (path == null) return;

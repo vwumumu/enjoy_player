@@ -10,7 +10,7 @@ part of 'library_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(mediaLibraryRepository)
-const mediaLibraryRepositoryProvider = MediaLibraryRepositoryProvider._();
+final mediaLibraryRepositoryProvider = MediaLibraryRepositoryProvider._();
 
 final class MediaLibraryRepositoryProvider
     extends
@@ -20,7 +20,7 @@ final class MediaLibraryRepositoryProvider
           MediaLibraryRepository
         >
     with $Provider<MediaLibraryRepository> {
-  const MediaLibraryRepositoryProvider._()
+  MediaLibraryRepositoryProvider._()
     : super(
         from: null,
         argument: null,

@@ -10,10 +10,10 @@ part of 'echo_mode_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(EchoMode)
-const echoModeProvider = EchoModeProvider._();
+final echoModeProvider = EchoModeProvider._();
 
 final class EchoModeProvider extends $NotifierProvider<EchoMode, EchoState> {
-  const EchoModeProvider._()
+  EchoModeProvider._()
     : super(
         from: null,
         argument: null,
@@ -47,7 +47,6 @@ abstract class _$EchoMode extends $Notifier<EchoState> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<EchoState, EchoState>;
     final element =
         ref.element
@@ -57,6 +56,6 @@ abstract class _$EchoMode extends $Notifier<EchoState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

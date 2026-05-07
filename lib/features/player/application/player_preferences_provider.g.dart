@@ -10,11 +10,11 @@ part of 'player_preferences_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(PlayerPreferencesCtrl)
-const playerPreferencesCtrlProvider = PlayerPreferencesCtrlProvider._();
+final playerPreferencesCtrlProvider = PlayerPreferencesCtrlProvider._();
 
 final class PlayerPreferencesCtrlProvider
     extends $NotifierProvider<PlayerPreferencesCtrl, PlayerPreferences> {
-  const PlayerPreferencesCtrlProvider._()
+  PlayerPreferencesCtrlProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$PlayerPreferencesCtrl extends $Notifier<PlayerPreferences> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<PlayerPreferences, PlayerPreferences>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$PlayerPreferencesCtrl extends $Notifier<PlayerPreferences> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

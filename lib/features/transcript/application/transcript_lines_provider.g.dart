@@ -10,7 +10,7 @@ part of 'transcript_lines_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(transcriptLinesForMedia)
-const transcriptLinesForMediaProvider = TranscriptLinesForMediaFamily._();
+final transcriptLinesForMediaProvider = TranscriptLinesForMediaFamily._();
 
 final class TranscriptLinesForMediaProvider
     extends
@@ -22,7 +22,7 @@ final class TranscriptLinesForMediaProvider
     with
         $FutureModifier<List<TranscriptLine>>,
         $StreamProvider<List<TranscriptLine>> {
-  const TranscriptLinesForMediaProvider._({
+  TranscriptLinesForMediaProvider._({
     required TranscriptLinesForMediaFamily super.from,
     required String super.argument,
   }) : super(
@@ -72,7 +72,7 @@ String _$transcriptLinesForMediaHash() =>
 
 final class TranscriptLinesForMediaFamily extends $Family
     with $FunctionalFamilyOverride<Stream<List<TranscriptLine>>, String> {
-  const TranscriptLinesForMediaFamily._()
+  TranscriptLinesForMediaFamily._()
     : super(
         retry: null,
         name: r'transcriptLinesForMediaProvider',

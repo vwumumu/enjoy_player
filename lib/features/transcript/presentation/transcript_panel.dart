@@ -20,7 +20,7 @@ class TranscriptPanel extends ConsumerWidget {
   final String mediaId;
 
   Future<void> _import(BuildContext context, WidgetRef ref) async {
-    final pick = await FilePicker.platform.pickFiles(
+    final pick = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['srt', 'vtt'],
     );
