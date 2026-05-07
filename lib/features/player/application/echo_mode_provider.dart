@@ -1,0 +1,70 @@
+/// Echo / shadow-reading region state (maps web `player-echo-store`).
+library;
+
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'echo_mode_provider.g.dart';
+
+class EchoState {
+  const EchoState({
+    required this.active,
+    required this.startLineIndex,
+    required this.endLineIndex,
+    required this.startTimeSeconds,
+    required this.endTimeSeconds,
+  });
+
+  final bool active;
+  final int startLineIndex;
+  final int endLineIndex;
+  final double startTimeSeconds;
+  final double endTimeSeconds;
+
+  static const inactive = EchoState(
+    active: false,
+    startLineIndex: -1,
+    endLineIndex: -1,
+    startTimeSeconds: -1,
+    endTimeSeconds: -1,
+  );
+}
+
+@Riverpod(keepAlive: true)
+class EchoMode extends _$EchoMode {
+  @override
+  EchoState build() => EchoState.inactive;
+
+  void activate({
+    required int startLineIndex,
+    required int endLineIndex,
+    required double startTimeSeconds,
+    required double endTimeSeconds,
+  }) {
+    state = EchoState(
+      active: true,
+      startLineIndex: startLineIndex,
+      endLineIndex: endLineIndex,
+      startTimeSeconds: startTimeSeconds,
+      endTimeSeconds: endTimeSeconds,
+    );
+  }
+
+  void deactivate() {
+    state = EchoState.inactive;
+  }
+
+  void restoreFromSession({
+    required int startLine,
+    required int endLine,
+    required int echoStartMs,
+    required int echoEndMs,
+  }) {
+    state = EchoState(
+      active: true,
+      startLineIndex: startLine,
+      endLineIndex: endLine,
+      startTimeSeconds: echoStartMs / 1000.0,
+      endTimeSeconds: echoEndMs / 1000.0,
+    );
+  }
+}
