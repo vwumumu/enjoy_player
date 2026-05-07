@@ -148,6 +148,10 @@ class _SidebarNavItem extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: t.space8, vertical: t.space4),
       child: Material(
         color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(t.radiusSm),
+        ),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(t.radiusSm),

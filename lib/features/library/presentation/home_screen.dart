@@ -188,62 +188,59 @@ class _HomeMediaTileState extends State<_HomeMediaTile> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(t.radiusMd),
-          onTap: () => context.push('/player/${widget.media.id}'),
-          child: AnimatedOpacity(
-            duration: t.motionFast,
-            opacity: 1,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: AnimatedContainer(
-                    duration: t.motionFast,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(t.radiusMd),
-                      border: Border.all(
-                        color:
-                            _hover
-                                ? cs.primary.withValues(alpha: 0.85)
-                                : cs.outlineVariant.withValues(alpha: 0.35),
-                        width: _hover ? 1.5 : 1,
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child:
-                        thumb != null
-                            ? Image.file(
-                              thumb,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                              errorBuilder:
-                                  (_, _, _) => _placeholder(cs, isVideo),
-                            )
-                            : _placeholder(cs, isVideo),
-                  ),
-                ),
-                SizedBox(height: t.space8),
-                Text(
-                  widget.media.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: t.space4),
-                Text(
-                  '${isVideo ? l10n.miniPlayerMediaVideo : l10n.miniPlayerMediaAudio} · $dur',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => context.push('/player/${widget.media.id}'),
+        child: AnimatedContainer(
+          duration: t.motionFast,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(t.radiusMd),
+            color:
+                _hover
+                    ? cs.primary.withValues(alpha: 0.10)
+                    : Colors.transparent,
+            border: Border.all(
+              color:
+                  _hover
+                      ? cs.primary.withValues(alpha: 0.85)
+                      : cs.outlineVariant.withValues(alpha: 0.35),
+              width: _hover ? 1.5 : 1,
             ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child:
+                    thumb != null
+                        ? Image.file(
+                          thumb,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder:
+                              (_, _, _) => _placeholder(cs, isVideo),
+                        )
+                        : _placeholder(cs, isVideo),
+              ),
+              SizedBox(height: t.space8),
+              Text(
+                widget.media.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: t.space4),
+              Text(
+                '${isVideo ? l10n.miniPlayerMediaVideo : l10n.miniPlayerMediaAudio} · $dur',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
         ),
       ),

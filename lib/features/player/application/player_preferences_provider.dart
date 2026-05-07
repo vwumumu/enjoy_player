@@ -15,6 +15,9 @@ const _prefsKey = 'player_preferences_v1';
 
 @Riverpod(keepAlive: true)
 class PlayerPreferencesCtrl extends _$PlayerPreferencesCtrl {
+  /// Last audible level used when restoring from mute (not persisted).
+  double _lastNonZeroVolume = 1;
+
   @override
   PlayerPreferences build() {
     Future<void>.microtask(_hydrate);
@@ -34,6 +37,8 @@ class PlayerPreferencesCtrl extends _$PlayerPreferencesCtrl {
         repeatMode: RepeatMode
             .values[repeatIdx.clamp(0, RepeatMode.values.length - 1)],
       );
+      final v = state.volume;
+      _lastNonZeroVolume = v > 0.01 ? v : 1;
       await ref.read(playerControllerProvider.notifier).applyPreferences(state);
     } catch (_) {
       /* ignore corrupt prefs */
@@ -53,9 +58,22 @@ class PlayerPreferencesCtrl extends _$PlayerPreferencesCtrl {
   }
 
   Future<void> setVolume(double v) async {
-    state = state.copyWith(volume: v.clamp(0, 1));
+    final clamped = v.clamp(0.0, 1.0).toDouble();
+    state = state.copyWith(volume: clamped);
+    if (clamped > 0.01) {
+      _lastNonZeroVolume = clamped;
+    }
     await _persist();
     await ref.read(playerControllerProvider.notifier).applyPreferences(state);
+  }
+
+  Future<void> toggleMute() async {
+    if (state.volume <= 0.01) {
+      await setVolume(_lastNonZeroVolume.clamp(0.05, 1.0).toDouble());
+    } else {
+      _lastNonZeroVolume = state.volume;
+      await setVolume(0);
+    }
   }
 
   Future<void> setPlaybackRate(double r) async {

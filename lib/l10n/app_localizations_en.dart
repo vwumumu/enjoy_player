@@ -164,6 +164,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volume => 'Volume';
 
   @override
+  String get transportMute => 'Mute';
+
+  @override
+  String get transportUnmute => 'Unmute';
+
+  @override
   String get repeatNone => 'Repeat off';
 
   @override

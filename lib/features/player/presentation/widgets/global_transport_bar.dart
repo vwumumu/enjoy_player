@@ -1,6 +1,7 @@
 /// Full-width bottom transport: progress, times, artwork, play ring, tools.
 library;
 
+import 'dart:async' show Timer;
 import 'dart:io' show File, Platform;
 
 import 'package:flutter/material.dart';
@@ -33,13 +34,11 @@ class GlobalTransportBar extends ConsumerStatefulWidget {
 
 class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
   bool _sliderHovered = false;
-  bool _volumeHovered = false;
 
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(playerControllerProvider);
     final ui = ref.watch(playerUiProvider);
-    final prefs = ref.watch(playerPreferencesCtrlProvider);
     final echo = ref.watch(echoModeProvider);
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
@@ -93,17 +92,24 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                           SizedBox(width: t.space12),
                         ],
                         Flexible(
-                          child: InkWell(
-                            onTap: onPlayer
-                                ? null
-                                : () => context.push('/player/${session.mediaId}'),
-                            borderRadius: BorderRadius.circular(t.radiusSm),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: t.space4,
-                                horizontal: t.space4,
+                          child: Material(
+                            color: Colors.transparent,
+                            clipBehavior: Clip.antiAlias,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(t.radiusSm),
+                            ),
+                            child: InkWell(
+                              onTap: onPlayer
+                                  ? null
+                                  : () => context.push('/player/${session.mediaId}'),
+                              borderRadius: BorderRadius.circular(t.radiusSm),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: t.space4,
+                                  horizontal: t.space4,
+                                ),
+                                child: _TransportMeta(session: session),
                               ),
-                              child: _TransportMeta(session: session),
                             ),
                           ),
                         ),
@@ -199,65 +205,7 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                               child: Icon(Icons.speed_rounded, color: cs.onSurfaceVariant),
                             ),
                           ),
-                          MouseRegion(
-                            onEnter: (_) => setState(() => _volumeHovered = true),
-                            onExit: (_) => setState(() => _volumeHovered = false),
-                            child: AnimatedCrossFade(
-                              duration: t.motionFast,
-                              crossFadeState:
-                                  _volumeHovered
-                                      ? CrossFadeState.showSecond
-                                      : CrossFadeState.showFirst,
-                              firstChild: IconButton(
-                                tooltip: l10n.volume,
-                                icon: Icon(
-                                  prefs.volume <= 0.01
-                                      ? Icons.volume_off_rounded
-                                      : Icons.volume_up_rounded,
-                                ),
-                                onPressed: () {},
-                              ),
-                              secondChild: SizedBox(
-                                width: 132,
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.volume_down_rounded,
-                                      size: 18,
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                    Expanded(
-                                      child: SliderTheme(
-                                        data: SliderTheme.of(context).copyWith(
-                                          trackHeight: 3,
-                                          thumbShape: const RoundSliderThumbShape(
-                                            enabledThumbRadius: 6,
-                                          ),
-                                          overlayShape: const RoundSliderOverlayShape(
-                                            overlayRadius: 12,
-                                          ),
-                                        ),
-                                        child: Slider(
-                                          value: prefs.volume,
-                                          onChanged:
-                                              (v) => ref
-                                                  .read(
-                                                    playerPreferencesCtrlProvider.notifier,
-                                                  )
-                                                  .setVolume(v),
-                                        ),
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.volume_up_rounded,
-                                      size: 18,
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
+                          const _TransportVolumeButton(),
                           IconButton(
                             tooltip: l10n.transportFullscreen,
                             icon: const Icon(Icons.fullscreen_rounded),
@@ -295,6 +243,142 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
       child: Material(
         color: Colors.transparent,
         child: inner,
+      ),
+    );
+  }
+}
+
+class _TransportVolumeButton extends ConsumerStatefulWidget {
+  const _TransportVolumeButton();
+
+  @override
+  ConsumerState<_TransportVolumeButton> createState() =>
+      _TransportVolumeButtonState();
+}
+
+class _TransportVolumeButtonState extends ConsumerState<_TransportVolumeButton> {
+  static const double _popupW = 44;
+  static const double _popupH = 152;
+  static const double _gap = 4;
+
+  final OverlayPortalController _portal = OverlayPortalController();
+  Timer? _hideTimer;
+
+  void _cancelHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = null;
+  }
+
+  void _showPopup() {
+    _cancelHideTimer();
+    _portal.show();
+  }
+
+  void _scheduleHidePopup() {
+    _cancelHideTimer();
+    _hideTimer = Timer(const Duration(milliseconds: 200), () {
+      if (mounted) _portal.hide();
+    });
+  }
+
+  void _onPointerInside(bool inside) {
+    if (inside) _showPopup(); else _scheduleHidePopup();
+  }
+
+  void _toggleMute() {
+    _cancelHideTimer();
+    ref.read(playerPreferencesCtrlProvider.notifier).toggleMute();
+  }
+
+  /// Returns (left, top) in global coordinates for the popup card.
+  (double, double) _popupOffset() {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null) return (0, 0);
+    final pos = box.localToGlobal(Offset.zero);
+    final btnW = box.size.width;
+    return (pos.dx + (btnW - _popupW) / 2, pos.dy - _popupH - _gap);
+  }
+
+  @override
+  void dispose() {
+    _cancelHideTimer();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final prefs = ref.watch(playerPreferencesCtrlProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+
+    return OverlayPortal(
+      controller: _portal,
+      overlayChildBuilder: (overlayCtx) {
+        final (left, top) = _popupOffset();
+        return Positioned(
+          left: left,
+          top: top,
+          width: _popupW,
+          height: _popupH,
+          child: MouseRegion(
+            onEnter: (_) => _onPointerInside(true),
+            onExit: (_) => _onPointerInside(false),
+            child: Material(
+              elevation: 6,
+              shadowColor: Colors.black54,
+              borderRadius: BorderRadius.circular(t.radiusSm),
+              color: cs.surfaceContainerHigh,
+              clipBehavior: Clip.antiAlias,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                child: RotatedBox(
+                  quarterTurns: 3,
+                  child: SliderTheme(
+                    data: SliderTheme.of(overlayCtx).copyWith(
+                      trackHeight: 3,
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 6,
+                      ),
+                      overlayShape: const RoundSliderOverlayShape(
+                        overlayRadius: 12,
+                      ),
+                    ),
+                    child: Consumer(
+                      builder: (_, ref, __) {
+                        final vol = ref
+                            .watch(playerPreferencesCtrlProvider)
+                            .volume
+                            .clamp(0.0, 1.0);
+                        return Slider(
+                          value: vol,
+                          onChanged:
+                              (v) => ref
+                                  .read(playerPreferencesCtrlProvider.notifier)
+                                  .setVolume(v),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: MouseRegion(
+        onEnter: (_) => _onPointerInside(true),
+        onExit: (_) => _onPointerInside(false),
+        child: IconButton(
+          tooltip:
+              prefs.volume <= 0.01 ? l10n.transportUnmute : l10n.transportMute,
+          icon: Icon(
+            prefs.volume <= 0.01
+                ? Icons.volume_off_rounded
+                : Icons.volume_up_rounded,
+          ),
+          onPressed: _toggleMute,
+        ),
       ),
     );
   }
@@ -532,6 +616,8 @@ class _PlayRingButton extends StatelessWidget {
         message: playing ? l10n.pause : l10n.play,
         child: Material(
           color: Colors.transparent,
+          clipBehavior: Clip.antiAlias,
+          shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: onPressed,

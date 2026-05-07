@@ -96,21 +96,52 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                 padding: EdgeInsets.symmetric(horizontal: t.space24),
                 child: Material(
                   color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(t.radiusFull),
-                  child: TabBar(
-                    controller: _tabController,
-                    indicator: BoxDecoration(
-                      borderRadius: BorderRadius.circular(t.radiusFull),
-                      color: cs.primaryContainer.withValues(alpha: 0.55),
-                    ),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    labelColor: cs.onPrimaryContainer,
-                    unselectedLabelColor: cs.onSurfaceVariant,
-                    dividerColor: Colors.transparent,
-                    tabs: [
-                      Tab(text: l10n.libraryTabMusic),
-                      Tab(text: l10n.libraryTabVideo),
-                    ],
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(t.radiusFull),
+                  ),
+                  child: AnimatedBuilder(
+                    animation: _tabController,
+                    builder: (context, _) {
+                      return SegmentedButton<String>(
+                        style: SegmentedButton.styleFrom(
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: cs.onSurfaceVariant,
+                          selectedForegroundColor: cs.onPrimaryContainer,
+                          selectedBackgroundColor:
+                              cs.primaryContainer.withValues(alpha: 0.55),
+                          side: BorderSide.none,
+                          splashFactory: NoSplash.splashFactory,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(t.radiusFull),
+                          ),
+                        ),
+                        showSelectedIcon: false,
+                        emptySelectionAllowed: false,
+                        segments: [
+                          ButtonSegment<String>(
+                            value: 'audio',
+                            label: Text(l10n.libraryTabMusic),
+                          ),
+                          ButtonSegment<String>(
+                            value: 'video',
+                            label: Text(l10n.libraryTabVideo),
+                          ),
+                        ],
+                        selected: {
+                          _tabController.index == 0 ? 'audio' : 'video',
+                        },
+                        onSelectionChanged: (next) {
+                          final v = next.single;
+                          final i = v == 'audio' ? 0 : 1;
+                          if (_tabController.index != i) {
+                            _tabController.animateTo(i);
+                          }
+                        },
+                      );
+                    },
                   ),
                 ),
               ),
@@ -306,6 +337,10 @@ class _MusicRowCardState extends State<_MusicRowCard> {
         duration: t.motionFast,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(t.radiusLg),
+          color:
+              _hover
+                  ? cs.primary.withValues(alpha: 0.08)
+                  : null,
           border: Border.all(
             color:
                 _hover
@@ -313,11 +348,12 @@ class _MusicRowCardState extends State<_MusicRowCard> {
                     : cs.outlineVariant.withValues(alpha: 0.18),
           ),
         ),
-        child: InkWell(
-          onTap: () => context.push('/player/${widget.media.id}'),
-          child: MouseRegion(
-            onEnter: (_) => setState(() => _hover = true),
-            onExit: (_) => setState(() => _hover = false),
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.push('/player/${widget.media.id}'),
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: t.space16,
@@ -437,38 +473,39 @@ class _VideoTileState extends State<_VideoTile> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(t.radiusMd),
-          onTap: () => context.push('/player/${widget.media.id}'),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => context.push('/player/${widget.media.id}'),
+        child: AnimatedContainer(
+          duration: t.motionFast,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(t.radiusMd),
+            color:
+                _hover
+                    ? cs.primary.withValues(alpha: 0.10)
+                    : Colors.transparent,
+            border: Border.all(
+              color:
+                  _hover
+                      ? cs.primary.withValues(alpha: 0.85)
+                      : cs.outlineVariant.withValues(alpha: 0.35),
+            ),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: AnimatedContainer(
-                  duration: t.motionFast,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(t.radiusMd),
-                    border: Border.all(
-                      color:
-                          _hover
-                              ? cs.primary.withValues(alpha: 0.85)
-                              : cs.outlineVariant.withValues(alpha: 0.35),
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child:
-                      thumb != null
-                          ? Image.file(
-                            thumb,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            errorBuilder: (_, _, _) => _videoPlaceholder(cs),
-                          )
-                          : _videoPlaceholder(cs),
-                ),
+                child:
+                    thumb != null
+                        ? Image.file(
+                          thumb,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (_, _, _) => _videoPlaceholder(cs),
+                        )
+                        : _videoPlaceholder(cs),
               ),
               SizedBox(height: t.space8),
               Text(

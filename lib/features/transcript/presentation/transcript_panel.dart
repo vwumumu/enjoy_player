@@ -137,7 +137,10 @@ class _TranscriptBody extends ConsumerWidget {
           padding: EdgeInsets.only(bottom: tok.space8),
           child: Material(
             color: bg,
-            borderRadius: BorderRadius.circular(tok.radiusSm),
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(tok.radiusSm),
+            ),
             child: InkWell(
               borderRadius: BorderRadius.circular(tok.radiusSm),
               onTap:

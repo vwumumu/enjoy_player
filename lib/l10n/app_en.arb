@@ -50,6 +50,8 @@
   "error": "Error",
   "speed": "Speed",
   "volume": "Volume",
+  "transportMute": "Mute",
+  "transportUnmute": "Unmute",
   "repeatNone": "Repeat off",
   "repeatSegment": "Repeat segment",
   "settingsPlaceholder": "Player preferences will appear here.",

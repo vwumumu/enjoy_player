@@ -394,6 +394,18 @@ abstract class AppLocalizations {
   /// **'Volume'**
   String get volume;
 
+  /// No description provided for @transportMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get transportMute;
+
+  /// No description provided for @transportUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get transportUnmute;
+
   /// No description provided for @repeatNone.
   ///
   /// In en, this message translates to:
