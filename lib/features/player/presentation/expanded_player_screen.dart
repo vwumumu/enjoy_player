@@ -30,9 +30,15 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref
-          .read(playerControllerProvider.notifier)
-          .openMedia(widget.mediaId);
+      // Only re-open the media when navigating to a different source. Re-opening
+      // the same media via mk.Player.open() restarts playback from the
+      // beginning, which is jarring when expanding back from the mini bar.
+      final current = ref.read(playerControllerProvider);
+      if (current?.mediaId != widget.mediaId) {
+        await ref
+            .read(playerControllerProvider.notifier)
+            .openMedia(widget.mediaId);
+      }
       ref.read(playerUiProvider.notifier).expand();
     });
   }
