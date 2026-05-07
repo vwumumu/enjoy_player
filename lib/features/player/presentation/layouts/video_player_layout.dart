@@ -56,8 +56,7 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
     final minW = math.min(_kMinTranscriptWidth, maxW);
     final current = _transcriptWidthForTotal(totalWidth);
     setState(() {
-      // Subtract delta so the split follows the pointer: drag left widens
-      // transcript / narrows video; drag right does the opposite.
+      // Drag left widens transcript, drag right narrows it.
       _transcriptWidthPx = (current - deltaDx).clamp(minW, maxW);
     });
   }
@@ -69,86 +68,77 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
       builder: (context, constraints) {
         final wide =
             constraints.maxWidth > t.breakpointTranscriptSideBySide;
+
         if (wide) {
           final total = constraints.maxWidth;
           final tw = _transcriptWidthForTotal(total);
           final vw = math.max(0.0, total - tw - _kSplitterHitWidth);
-          final cs = Theme.of(context).colorScheme;
 
-          // One continuous backdrop across video + transcript removes the harsh
-          // vertical seam from mismatched gradients vs flat [surface].
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  cs.surfaceContainerLow,
-                  cs.surface,
-                  cs.surfaceContainerLow,
-                ],
-                stops: const [0.0, 0.52, 1.0],
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Pure black video stage — cinema-standard letterboxing.
+              SizedBox(
+                width: vw,
+                child: ColoredBox(
+                  color: Colors.black,
+                  child: LayoutBuilder(
+                    builder: (context, c) {
+                      return _VideoWidthAspectViewport(
+                        controller: widget.controller,
+                        maxWidth: c.maxWidth,
+                        maxHeight: c.maxHeight,
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  width: vw,
-                  child: _VideoStageBackground(
-                    padding: EdgeInsets.zero,
-                    showGradient: false,
-                    child: LayoutBuilder(
-                      builder: (context, c) {
-                        return _VideoWidthAspectViewport(
-                          controller: widget.controller,
-                          maxWidth: c.maxWidth,
-                          maxHeight: c.maxHeight,
-                          fill: cs.surface,
-                        );
-                      },
-                    ),
-                  ),
+              _ResizeSplitter(
+                hitWidth: _kSplitterHitWidth,
+                hovered: _splitterHovered,
+                onHover: (v) => setState(() => _splitterHovered = v),
+                semanticLabel:
+                    AppLocalizations.of(context)!.playerTranscriptResizeHint,
+                onDragDelta: (dx) => _applyDragDelta(total, dx),
+              ),
+              // Transcript panel — same black background as the video stage and
+              // navbar so the full window feels like one unified dark canvas.
+              SizedBox(
+                width: tw,
+                child: Material(
+                  color: Colors.black,
+                  child: widget.transcript,
                 ),
-                _ResizeSplitter(
-                  hitWidth: _kSplitterHitWidth,
-                  hovered: _splitterHovered,
-                  onHover: (v) => setState(() => _splitterHovered = v),
-                  semanticLabel:
-                      AppLocalizations.of(context)!.playerTranscriptResizeHint,
-                  onDragDelta: (dx) => _applyDragDelta(total, dx),
-                ),
-                SizedBox(
-                  width: tw,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: widget.transcript,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         }
+
+        // Narrow layout: video stacked above the transcript.
         return Column(
           children: [
             Expanded(
               flex: 2,
-              child: _VideoStageBackground(
-                padding: EdgeInsets.zero,
+              child: ColoredBox(
+                color: Colors.black,
                 child: LayoutBuilder(
                   builder: (context, c) {
-                    final cs = Theme.of(context).colorScheme;
                     return _VideoWidthAspectViewport(
                       controller: widget.controller,
                       maxWidth: c.maxWidth,
                       maxHeight: c.maxHeight,
-                      fill: cs.surface,
                     );
                   },
                 ),
               ),
             ),
-            Expanded(flex: 3, child: widget.transcript),
+            Expanded(
+              flex: 3,
+              child: Material(
+                color: Colors.black,
+                child: widget.transcript,
+              ),
+            ),
           ],
         );
       },
@@ -157,20 +147,17 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
 }
 
 /// Full zone width, native display aspect ratio, [BoxFit.contain] — no stretch.
-/// Taller-than-zone frames are centered and clipped; shorter frames letterbox
-/// (gradient shows in [_VideoStageBackground]).
+/// Taller-than-zone frames are letterboxed with pure black.
 class _VideoWidthAspectViewport extends StatelessWidget {
   const _VideoWidthAspectViewport({
     required this.controller,
     required this.maxWidth,
     required this.maxHeight,
-    required this.fill,
   });
 
   final VideoController controller;
   final double maxWidth;
   final double maxHeight;
-  final Color fill;
 
   static double _aspectRatio(VideoParams vp, PlayerState state) {
     if (vp.aspect != null && vp.aspect! > 0) {
@@ -218,51 +205,13 @@ class _VideoWidthAspectViewport extends StatelessWidget {
                   width: w,
                   height: h,
                   fit: BoxFit.contain,
-                  fill: fill,
+                  fill: Colors.black,
                 ),
               ),
             ),
           ),
         );
       },
-    );
-  }
-}
-
-/// Soft gradient behind the video — avoids a flat “box” and matches surface tokens.
-/// When [showGradient] is false, only padding is applied so a parent can own one
-/// unified backdrop (wide video + transcript split).
-class _VideoStageBackground extends StatelessWidget {
-  const _VideoStageBackground({
-    required this.child,
-    required this.padding,
-    this.showGradient = true,
-  });
-
-  final Widget child;
-  final EdgeInsets padding;
-  final bool showGradient;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    if (!showGradient) {
-      return Padding(padding: padding, child: child);
-    }
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            cs.surfaceContainerLow,
-            cs.surface,
-            Color.lerp(cs.surface, cs.surfaceContainerHigh, 0.55)!,
-          ],
-          stops: const [0.0, 0.42, 1.0],
-        ),
-      ),
-      child: Padding(padding: padding, child: child),
     );
   }
 }

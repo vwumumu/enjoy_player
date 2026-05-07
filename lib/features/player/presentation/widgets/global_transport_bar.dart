@@ -3,7 +3,7 @@ library;
 
 import 'dart:io' show File, Platform;
 
-import 'package:flutter/material.dart' hide RepeatMode;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -22,8 +22,6 @@ import '../../application/player_interactions.dart';
 import '../../application/player_preferences_provider.dart';
 import '../../application/player_ui_provider.dart';
 import '../../domain/playback_session.dart';
-import '../../domain/player_settings.dart';
-
 final _log = logNamed('GlobalTransportBar');
 
 class GlobalTransportBar extends ConsumerStatefulWidget {
@@ -66,12 +64,15 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
     final inner = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _TransportProgressStrip(
-          session: session,
-          position: pos,
-          fraction: value.clamp(0, 1),
-          hovered: _sliderHovered,
-          onHoverChanged: (v) => setState(() => _sliderHovered = v),
+        Padding(
+          padding: EdgeInsets.fromLTRB(t.space12, t.space8, t.space12, 0),
+          child: _TransportProgressStrip(
+            session: session,
+            position: pos,
+            fraction: value.clamp(0, 1),
+            hovered: _sliderHovered,
+            onHoverChanged: (v) => setState(() => _sliderHovered = v),
+          ),
         ),
         Padding(
           padding: EdgeInsets.fromLTRB(t.space12, t.space4, t.space12, t.space12),
@@ -87,11 +88,15 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _TransportArtwork(session: session),
-                        SizedBox(width: t.space12),
+                        if (!onPlayer) ...[
+                          _TransportArtwork(session: session),
+                          SizedBox(width: t.space12),
+                        ],
                         Flexible(
                           child: InkWell(
-                            onTap: () => context.push('/player/${session.mediaId}'),
+                            onTap: onPlayer
+                                ? null
+                                : () => context.push('/player/${session.mediaId}'),
                             borderRadius: BorderRadius.circular(t.radiusSm),
                             child: Padding(
                               padding: EdgeInsets.symmetric(
@@ -141,17 +146,16 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                                   .nextLine(),
                       icon: const Icon(Icons.skip_next_rounded),
                     ),
-                    _RepeatButton(
-                      mode: prefs.repeatMode,
-                      tooltip: l10n.transportRepeat,
-                      onPressed: () {
-                        final next = switch (prefs.repeatMode) {
-                          RepeatMode.none => RepeatMode.single,
-                          RepeatMode.single => RepeatMode.segment,
-                          RepeatMode.segment => RepeatMode.none,
-                        };
-                        ref.read(playerPreferencesCtrlProvider.notifier).setRepeatMode(next);
-                      },
+                    IconButton(
+                      tooltip: l10n.replayLine,
+                      iconSize: 22,
+                      onPressed:
+                          ui.isBuffering
+                              ? null
+                              : () => ref
+                                  .read(playerInteractionsProvider.notifier)
+                                  .replayLine(),
+                      icon: const Icon(Icons.replay_rounded),
                     ),
                   ],
                 ),
@@ -274,25 +278,6 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                               }
                             },
                           ),
-                          PopupMenuButton<String>(
-                            tooltip: l10n.transportMore,
-                            itemBuilder:
-                                (ctx) => [
-                                  PopupMenuItem(
-                                    value: 'replay',
-                                    child: Text(l10n.replayLine),
-                                  ),
-                                ],
-                            onSelected: (v) {
-                              if (v == 'replay') {
-                                ref.read(playerInteractionsProvider.notifier).replayLine();
-                              }
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.all(t.space8),
-                              child: Icon(Icons.more_horiz_rounded, color: cs.onSurfaceVariant),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -337,65 +322,47 @@ class _TransportProgressStrip extends ConsumerWidget {
     final durationSec =
         session.durationSeconds > 0 ? session.durationSeconds : 1.0;
 
+    final timeStyle = tt.labelSmall?.copyWith(
+      fontFeatures: const [FontFeature.tabularFigures()],
+      color: cs.onSurfaceVariant,
+    );
+
     return MouseRegion(
       onEnter: (_) => onHoverChanged(true),
       onExit: (_) => onHoverChanged(false),
-      child: SizedBox(
-        height: 26,
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.centerLeft,
-          children: [
-            Positioned(
-              left: 10,
-              right: 10,
-              bottom: 2,
-              child: SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  trackHeight: 3,
-                  thumbShape: RoundSliderThumbShape(
-                    enabledThumbRadius: hovered ? 6 : 0,
-                  ),
-                  overlayShape: SliderComponentShape.noOverlay,
-                  activeTrackColor: cs.primary,
-                  inactiveTrackColor: cs.onSurface.withValues(alpha: 0.12),
-                  thumbColor: cs.primary,
+      child: Row(
+        children: [
+          Text(_fmtDurationFull(position), style: timeStyle),
+          const SizedBox(width: 8),
+          Expanded(
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 3,
+                thumbShape: RoundSliderThumbShape(
+                  enabledThumbRadius: hovered ? 6 : 0,
                 ),
-                child: Slider(
-                  value: fraction.clamp(0, 1),
-                  onChanged:
-                      (v) => ref
-                          .read(playerInteractionsProvider.notifier)
-                          .seekToProgressFraction(v),
-                ),
+                overlayShape: SliderComponentShape.noOverlay,
+                activeTrackColor: cs.primary,
+                inactiveTrackColor: cs.onSurface.withValues(alpha: 0.12),
+                thumbColor: cs.primary,
+              ),
+              child: Slider(
+                value: fraction.clamp(0, 1),
+                onChanged:
+                    (v) => ref
+                        .read(playerInteractionsProvider.notifier)
+                        .seekToProgressFraction(v),
               ),
             ),
-            Positioned(
-              left: 12,
-              top: 2,
-              child: Text(
-                _fmtDurationFull(position),
-                style: tt.labelSmall?.copyWith(
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            _fmtDurationFull(
+              Duration(milliseconds: (durationSec * 1000).round()),
             ),
-            Positioned(
-              right: 12,
-              top: 2,
-              child: Text(
-                _fmtDurationFull(
-                  Duration(milliseconds: (durationSec * 1000).round()),
-                ),
-                style: tt.labelSmall?.copyWith(
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ],
-        ),
+            style: timeStyle,
+          ),
+        ],
       ),
     );
   }
@@ -607,39 +574,6 @@ class _PlayRingButton extends StatelessWidget {
   }
 }
 
-class _RepeatButton extends StatelessWidget {
-  const _RepeatButton({
-    required this.mode,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final RepeatMode mode;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final icon = switch (mode) {
-      RepeatMode.none => Icons.repeat_rounded,
-      RepeatMode.single => Icons.repeat_one_rounded,
-      RepeatMode.segment => Icons.repeat_rounded,
-    };
-    final active = mode != RepeatMode.none;
-    return IconButton(
-      tooltip: tooltip,
-      icon: Icon(icon, color: active ? cs.primary : cs.onSurfaceVariant),
-      style:
-          active
-              ? IconButton.styleFrom(
-                backgroundColor: cs.primaryContainer.withValues(alpha: 0.45),
-              )
-              : null,
-      onPressed: onPressed,
-    );
-  }
-}
 
 class _CcButton extends ConsumerWidget {
   const _CcButton({required this.mediaId});

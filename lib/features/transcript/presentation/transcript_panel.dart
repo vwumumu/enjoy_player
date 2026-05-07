@@ -128,7 +128,7 @@ class _TranscriptBody extends ConsumerWidget {
             inEcho
                 ? tok.echoActive.withValues(alpha: 0.22)
                 : isActive
-                ? Theme.of(context).colorScheme.surfaceContainerHighest
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.18)
                 : null;
 
         final secondaryText = _matchSecondary(line, secondaryLines)?.text;
