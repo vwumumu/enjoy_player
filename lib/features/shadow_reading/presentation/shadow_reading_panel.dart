@@ -12,7 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:enjoy_player/core/audio/shadow_recording_playback.dart';
+import 'package:enjoy_player/core/audio/recording_preview_player_provider.dart';
 import 'package:enjoy_player/core/audio/wav_duration_ms.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -226,7 +226,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
 
   Future<void> _playRecording(String path) async {
     try {
-      await playShadowRecordingFile(path);
+      await ref.read(recordingPreviewPlayerProvider).play(path);
     } catch (e, st) {
       _log.warning('shadow take playback failed', e, st);
       if (!mounted) return;

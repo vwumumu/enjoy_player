@@ -12,6 +12,10 @@ We need reliable cross-platform A/V playback (Android, iOS, Windows, macOS) with
 
 Use **media_kit** + **media_kit_video** + **media_kit_libs_video**. Instantiate **one** `Player` inside `PlayerController` and expose `VideoController` to widgets.
 
+## Scope
+
+The single-`Player` rule applies to **lesson playback** (`PlayerController` / `PlayerEngine`). A **second** `media_kit` `Player` used only for **shadow-reading take previews** is allowed — see `lib/core/audio/recording_preview_player.dart` — so previews never replace the loaded lesson media.
+
 ## Consequences
 
 - YouTube and other web-only sources are **out of scope** for this engine (handled later with `flutter_inappwebview`, separate ADR).
