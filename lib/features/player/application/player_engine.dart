@@ -16,6 +16,9 @@ abstract class PlayerEngine {
 
   Future<void> openUri(String uri);
 
+  /// Turns off libmpv / player subtitle output; transcripts use in-app UI only.
+  Future<void> disableRenderedSubtitles();
+
   Future<void> seek(Duration target);
 
   Future<void> setRate(double rate);
@@ -58,6 +61,10 @@ class MediaKitPlayerEngine implements PlayerEngine {
 
   @override
   Future<void> openUri(String uri) => _player.open(mk.Media(uri));
+
+  @override
+  Future<void> disableRenderedSubtitles() =>
+      _player.setSubtitleTrack(mk.SubtitleTrack.no());
 
   @override
   Future<void> seek(Duration target) => _player.seek(target);

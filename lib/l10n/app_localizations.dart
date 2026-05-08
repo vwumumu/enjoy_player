@@ -507,6 +507,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open a video with embedded subtitles, or import an .srt/.vtt file.'**
   String get noTranscriptHint;
+
+  /// No description provided for @expandEchoBackward.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand echo backward'**
+  String get expandEchoBackward;
+
+  /// No description provided for @expandEchoForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand echo forward'**
+  String get expandEchoForward;
+
+  /// No description provided for @shrinkEchoBackward.
+  ///
+  /// In en, this message translates to:
+  /// **'Shrink echo backward'**
+  String get shrinkEchoBackward;
+
+  /// No description provided for @shrinkEchoForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Shrink echo forward'**
+  String get shrinkEchoForward;
+
+  /// No description provided for @shadowReadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shadow reading'**
+  String get shadowReadingTitle;
+
+  /// No description provided for @shadowReadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice speaking along this segment. Recording and feedback will be added later.'**
+  String get shadowReadingHint;
+
+  /// No description provided for @shadowReadingReferenceSnippet.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get shadowReadingReferenceSnippet;
 }
 
 class _AppLocalizationsDelegate

@@ -220,4 +220,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noTranscriptHint =>
       'Open a video with embedded subtitles, or import an .srt/.vtt file.';
+
+  @override
+  String get expandEchoBackward => 'Expand echo backward';
+
+  @override
+  String get expandEchoForward => 'Expand echo forward';
+
+  @override
+  String get shrinkEchoBackward => 'Shrink echo backward';
+
+  @override
+  String get shrinkEchoForward => 'Shrink echo forward';
+
+  @override
+  String get shadowReadingTitle => 'Shadow reading';
+
+  @override
+  String get shadowReadingHint =>
+      'Practice speaking along this segment. Recording and feedback will be added later.';
+
+  @override
+  String get shadowReadingReferenceSnippet => 'Reference';
 }

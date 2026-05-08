@@ -68,5 +68,12 @@
   "subtitlesDetected": "Subtitles detected — tap CC to choose",
   "subtitlesChoose": "Choose",
   "importSubtitleSuccess": "Subtitle imported",
-  "noTranscriptHint": "Open a video with embedded subtitles, or import an .srt/.vtt file."
+  "noTranscriptHint": "Open a video with embedded subtitles, or import an .srt/.vtt file.",
+  "expandEchoBackward": "Expand echo backward",
+  "expandEchoForward": "Expand echo forward",
+  "shrinkEchoBackward": "Shrink echo backward",
+  "shrinkEchoForward": "Shrink echo forward",
+  "shadowReadingTitle": "Shadow reading",
+  "shadowReadingHint": "Practice speaking along this segment. Recording and feedback will be added later.",
+  "shadowReadingReferenceSnippet": "Reference"
 }

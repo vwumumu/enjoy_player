@@ -64,6 +64,9 @@ class FakePlayerEngine implements PlayerEngine {
   }
 
   @override
+  Future<void> disableRenderedSubtitles() async {}
+
+  @override
   Future<void> seek(Duration target) async {
     seekCalls.add(target);
   }

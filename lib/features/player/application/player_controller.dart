@@ -92,6 +92,9 @@ class PlayerController extends _$PlayerController {
     await engine.openUri(sourceUri);
     if (gen != _openGeneration) return;
 
+    await engine.disableRenderedSubtitles();
+    if (gen != _openGeneration) return;
+
     unawaited(
       ref.read(embeddedTrackSyncProvider).startForMedia(
         mediaId: mediaId,

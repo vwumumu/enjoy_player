@@ -9,10 +9,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/subtitle/subtitle_markup_parser.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
-import '../../../l10n/app_localizations.dart';
+import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../../player/application/display_position_provider.dart';
 import '../../player/application/echo_mode_provider.dart';
 import '../../player/application/player_interactions.dart';
+import '../../player/application/player_state_providers.dart';
+import 'echo_region_controls_bar.dart';
+import 'shadow_reading_zone_placeholder.dart';
 import '../application/transcript_lines_provider.dart';
 import '../application/transcript_repository_provider.dart';
 
@@ -93,19 +96,93 @@ class TranscriptPanel extends ConsumerWidget {
   }
 }
 
-class _TranscriptBody extends ConsumerWidget {
+class _TranscriptBody extends ConsumerStatefulWidget {
   const _TranscriptBody({required this.mediaId, required this.lines});
 
   final String mediaId;
   final List<TranscriptLine> lines;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_TranscriptBody> createState() => _TranscriptBodyState();
+}
+
+class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _activeLineKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scheduleScrollActiveLineIntoView() {
+    final playingAsync = ref.read(playerIsPlayingProvider);
+    final playing = switch (playingAsync) {
+      AsyncData(:final value) => value,
+      _ => false,
+    };
+    if (!playing) return;
+
+    final posAsync = ref.read(displayPositionProvider);
+    final timeSec = switch (posAsync) {
+      AsyncData(:final value) => value.inMilliseconds / 1000.0,
+      _ => 0.0,
+    };
+    final active = transcriptActiveIndex(widget.lines, timeSec);
+    if (active < 0) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final ctx = _activeLineKey.currentContext;
+      if (ctx == null) return;
+      final tok = EnjoyThemeTokens.of(context);
+      Scrollable.ensureVisible(
+        ctx,
+        alignment: 0.42,
+        duration: tok.motionStandard,
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  Widget _echoBarTop(List<TranscriptLine> lines, EchoState echo) {
+    final expandDisabled = echo.startLineIndex <= 0;
+    final shrinkDisabled = echo.startLineIndex >= echo.endLineIndex;
+    return EchoRegionControlsBar(
+      position: EchoRegionBarPosition.top,
+      expandDisabled: expandDisabled,
+      shrinkDisabled: shrinkDisabled,
+      onExpand:
+          () =>
+              ref.read(echoModeProvider.notifier).expandEchoBackward(lines),
+      onShrink:
+          () =>
+              ref.read(echoModeProvider.notifier).shrinkEchoBackward(lines),
+    );
+  }
+
+  Widget _echoBarBottom(List<TranscriptLine> lines, EchoState echo) {
+    final expandDisabled = echo.endLineIndex >= lines.length - 1;
+    final shrinkDisabled = echo.endLineIndex <= echo.startLineIndex;
+    return EchoRegionControlsBar(
+      position: EchoRegionBarPosition.bottom,
+      expandDisabled: expandDisabled,
+      shrinkDisabled: shrinkDisabled,
+      onExpand:
+          () => ref.read(echoModeProvider.notifier).expandEchoForward(lines),
+      onShrink:
+          () => ref.read(echoModeProvider.notifier).shrinkEchoForward(lines),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final echo = ref.watch(echoModeProvider);
     final posAsync = ref.watch(displayPositionProvider);
     final tok = EnjoyThemeTokens.of(context);
     final secondaryAsync = ref.watch(
-      secondaryTranscriptLinesForMediaProvider(mediaId),
+      secondaryTranscriptLinesForMediaProvider(widget.mediaId),
     );
     final secondaryLines = secondaryAsync.value ?? <TranscriptLine>[];
 
@@ -113,68 +190,116 @@ class _TranscriptBody extends ConsumerWidget {
       AsyncData(:final value) => value.inMilliseconds / 1000.0,
       _ => 0.0,
     };
-    final active = _activeIndex(lines, timeSec);
+    final active = transcriptActiveIndex(widget.lines, timeSec);
 
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: tok.space12, vertical: tok.space8),
-      itemCount: lines.length,
-      itemBuilder: (context, index) {
-        final line = lines[index];
-        final isActive = index == active;
-        final inEcho =
-            echo.active &&
-            index >= echo.startLineIndex &&
-            index <= echo.endLineIndex;
-        final secondaryText = _matchSecondary(line, secondaryLines)?.text;
+    ref.listen(displayPositionProvider, (_, _) {
+      _scheduleScrollActiveLineIntoView();
+    });
+    ref.listen(playerIsPlayingProvider, (_, _) {
+      _scheduleScrollActiveLineIntoView();
+    });
 
-        return Padding(
+    final lines = widget.lines;
+    final children = <Widget>[];
+
+    for (var i = 0; i < lines.length; i++) {
+      if (echo.active && i == echo.startLineIndex) {
+        children.add(_echoBarTop(lines, echo));
+      }
+
+      final line = lines[i];
+      final isActive = i == active;
+      final inEcho =
+          echo.active &&
+          i >= echo.startLineIndex &&
+          i <= echo.endLineIndex;
+      final secondaryText = transcriptMatchSecondary(line, secondaryLines)?.text;
+
+      Widget tile = _TranscriptLineTile(
+        line: line,
+        secondaryText: secondaryText,
+        isActive: isActive,
+        inEcho: inEcho,
+        onTap:
+            () => ref
+                .read(playerInteractionsProvider.notifier)
+                .seekToLine(line, i),
+      );
+
+      if (isActive) {
+        tile = KeyedSubtree(key: _activeLineKey, child: tile);
+      }
+
+      children.add(
+        Padding(
           padding: EdgeInsets.only(bottom: tok.space8),
-          child: _TranscriptLineTile(
-            line: line,
-            secondaryText: secondaryText,
-            isActive: isActive,
-            inEcho: inEcho,
-            onTap:
-                () => ref
-                    .read(playerInteractionsProvider.notifier)
-                    .seekToLine(line, index),
-          ),
-        );
-      },
+          child: tile,
+        ),
+      );
+
+      if (echo.active && i == echo.endLineIndex) {
+        children.add(_echoBarBottom(lines, echo));
+        if (echo.startTimeSeconds >= 0 && echo.endTimeSeconds >= 0) {
+          children.add(
+            ShadowReadingZonePlaceholder(
+              referenceSnippet: echoReferencePlainText(lines, echo),
+            ),
+          );
+        }
+      }
+    }
+
+    return ListView(
+      controller: _scrollController,
+      padding: EdgeInsets.symmetric(horizontal: tok.space12, vertical: tok.space8),
+      children: children,
     );
   }
+}
 
-  int _activeIndex(List<TranscriptLine> lines, double t) {
-    for (var i = 0; i < lines.length; i++) {
-      if (t >= lines[i].startSeconds && t < lines[i].endSeconds) return i;
-    }
-    for (var i = lines.length - 1; i >= 0; i--) {
-      if (t >= lines[i].startSeconds) return i;
-    }
-    return -1;
+/// Active cue index for [t] in seconds.
+int transcriptActiveIndex(List<TranscriptLine> lines, double t) {
+  for (var i = 0; i < lines.length; i++) {
+    if (t >= lines[i].startSeconds && t < lines[i].endSeconds) return i;
+  }
+  for (var i = lines.length - 1; i >= 0; i--) {
+    if (t >= lines[i].startSeconds) return i;
+  }
+  return -1;
+}
+
+/// Secondary line whose midpoint falls within [primary]'s range, else nearest.
+TranscriptLine? transcriptMatchSecondary(
+  TranscriptLine primary,
+  List<TranscriptLine> secondary,
+) {
+  if (secondary.isEmpty) return null;
+  final pStart = primary.startSeconds;
+  final pEnd = primary.endSeconds;
+
+  for (final s in secondary) {
+    final mid = s.startSeconds + (s.endSeconds - s.startSeconds) / 2;
+    if (mid >= pStart && mid < pEnd) return s;
   }
 
-  /// Returns the secondary line whose midpoint falls within [primary]'s range,
-  /// or the nearest secondary line if none overlaps.
-  TranscriptLine? _matchSecondary(
-    TranscriptLine primary,
-    List<TranscriptLine> secondary,
-  ) {
-    if (secondary.isEmpty) return null;
-    final pStart = primary.startSeconds;
-    final pEnd = primary.endSeconds;
-
-    for (final s in secondary) {
-      final mid = s.startSeconds + (s.endSeconds - s.startSeconds) / 2;
-      if (mid >= pStart && mid < pEnd) return s;
-    }
-
-    TranscriptLine? best;
-    for (final s in secondary) {
-      if (s.startSeconds < pEnd) best = s;
-    }
-    return best;
+  TranscriptLine? best;
+  for (final s in secondary) {
+    if (s.startSeconds < pEnd) best = s;
   }
+  return best;
+}
+
+String echoReferencePlainText(List<TranscriptLine> lines, EchoState echo) {
+  if (!echo.active) return '';
+  final start = echo.startLineIndex;
+  final end = echo.endLineIndex;
+  if (start < 0 || end < 0 || start > end) return '';
+  final parts = <String>[];
+  for (var i = start; i <= end && i < lines.length; i++) {
+    final plain = lines[i].text.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+    if (plain.isNotEmpty) parts.add(plain);
+  }
+  return parts.join(' ');
 }
 
 class _TranscriptLineTile extends StatefulWidget {

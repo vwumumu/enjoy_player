@@ -1,6 +1,7 @@
 /// Echo / shadow-reading region state (maps web `player-echo-store`).
 library;
 
+import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'echo_mode_provider.g.dart';
@@ -27,6 +28,22 @@ class EchoState {
     startTimeSeconds: -1,
     endTimeSeconds: -1,
   );
+
+  EchoState copyWith({
+    bool? active,
+    int? startLineIndex,
+    int? endLineIndex,
+    double? startTimeSeconds,
+    double? endTimeSeconds,
+  }) {
+    return EchoState(
+      active: active ?? this.active,
+      startLineIndex: startLineIndex ?? this.startLineIndex,
+      endLineIndex: endLineIndex ?? this.endLineIndex,
+      startTimeSeconds: startTimeSeconds ?? this.startTimeSeconds,
+      endTimeSeconds: endTimeSeconds ?? this.endTimeSeconds,
+    );
+  }
 }
 
 @Riverpod(keepAlive: true)
@@ -65,6 +82,56 @@ class EchoMode extends _$EchoMode {
       endLineIndex: endLine,
       startTimeSeconds: echoStartMs / 1000.0,
       endTimeSeconds: echoEndMs / 1000.0,
+    );
+  }
+
+  /// Add one line before the echo segment (web expand backward).
+  void expandEchoBackward(List<TranscriptLine> lines) {
+    if (!state.active || lines.isEmpty) return;
+    final start = state.startLineIndex;
+    if (start <= 0) return;
+    final nextStart = start - 1;
+    state = state.copyWith(
+      startLineIndex: nextStart,
+      startTimeSeconds: lines[nextStart].startSeconds,
+    );
+  }
+
+  /// Remove one line from the start of the echo segment (web shrink backward).
+  void shrinkEchoBackward(List<TranscriptLine> lines) {
+    if (!state.active || lines.isEmpty) return;
+    final start = state.startLineIndex;
+    final end = state.endLineIndex;
+    if (start >= end) return;
+    final nextStart = start + 1;
+    state = state.copyWith(
+      startLineIndex: nextStart,
+      startTimeSeconds: lines[nextStart].startSeconds,
+    );
+  }
+
+  /// Add one line after the echo segment (web expand forward).
+  void expandEchoForward(List<TranscriptLine> lines) {
+    if (!state.active || lines.isEmpty) return;
+    final end = state.endLineIndex;
+    if (end >= lines.length - 1) return;
+    final nextEnd = end + 1;
+    state = state.copyWith(
+      endLineIndex: nextEnd,
+      endTimeSeconds: lines[nextEnd].endSeconds,
+    );
+  }
+
+  /// Remove one line from the end of the echo segment (web shrink forward).
+  void shrinkEchoForward(List<TranscriptLine> lines) {
+    if (!state.active || lines.isEmpty) return;
+    final start = state.startLineIndex;
+    final end = state.endLineIndex;
+    if (end <= start) return;
+    final nextEnd = end - 1;
+    state = state.copyWith(
+      endLineIndex: nextEnd,
+      endTimeSeconds: lines[nextEnd].endSeconds,
     );
   }
 }

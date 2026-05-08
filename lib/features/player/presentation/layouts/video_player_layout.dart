@@ -206,6 +206,9 @@ class _VideoWidthAspectViewport extends StatelessWidget {
                   height: h,
                   fit: BoxFit.contain,
                   fill: Colors.black,
+                  subtitleViewConfiguration: const SubtitleViewConfiguration(
+                    visible: false,
+                  ),
                 ),
               ),
             ),
