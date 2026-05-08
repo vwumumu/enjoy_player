@@ -16,6 +16,7 @@ class EchoRegionControlsBar extends StatelessWidget {
     required this.shrinkDisabled,
     required this.onExpand,
     required this.onShrink,
+    this.dense = false,
     super.key,
   });
 
@@ -24,6 +25,9 @@ class EchoRegionControlsBar extends StatelessWidget {
   final bool shrinkDisabled;
   final VoidCallback onExpand;
   final VoidCallback onShrink;
+
+  /// Tighter vertical padding when nested inside a merged echo card.
+  final bool dense;
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +50,11 @@ class EchoRegionControlsBar extends StatelessWidget {
             : Icons.expand_more;
 
     final edgePadding =
-        position == EchoRegionBarPosition.top
-            ? EdgeInsets.only(bottom: tok.space4)
-            : EdgeInsets.only(top: tok.space4);
+        dense
+            ? EdgeInsets.symmetric(vertical: tok.space4)
+            : (position == EchoRegionBarPosition.top
+                ? EdgeInsets.only(bottom: tok.space4)
+                : EdgeInsets.only(top: tok.space4));
 
     return Padding(
       padding: edgePadding,

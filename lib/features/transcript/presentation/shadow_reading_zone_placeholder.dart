@@ -25,12 +25,12 @@ class ShadowReadingZonePlaceholder extends StatelessWidget {
     final titleStyle = Theme.of(context).textTheme.titleSmall;
 
     return Padding(
-      padding: EdgeInsets.only(top: tok.space8, bottom: tok.space8),
+      padding: EdgeInsets.only(bottom: tok.space8),
       child: Material(
         color: Color.lerp(
-          tok.echoActive.withValues(alpha: 0.28),
+          tok.echoActive.withValues(alpha: 0.24),
           scheme.surfaceContainerHighest,
-          0.35,
+          0.40,
         ),
         borderRadius: BorderRadius.circular(tok.radiusMd),
         child: Padding(
@@ -39,7 +39,7 @@ class ShadowReadingZonePlaceholder extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(l10n.shadowReadingTitle, style: titleStyle),
-              SizedBox(height: tok.space8),
+              SizedBox(height: tok.space4),
               Text(
                 l10n.shadowReadingHint,
                 style: bodyStyle?.copyWith(
@@ -48,7 +48,7 @@ class ShadowReadingZonePlaceholder extends StatelessWidget {
                 ),
               ),
               if (referenceSnippet.isNotEmpty) ...[
-                SizedBox(height: tok.space12),
+                SizedBox(height: tok.space8),
                 Text(
                   l10n.shadowReadingReferenceSnippet,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(

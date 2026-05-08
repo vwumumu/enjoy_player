@@ -146,36 +146,6 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
     });
   }
 
-  Widget _echoBarTop(List<TranscriptLine> lines, EchoState echo) {
-    final expandDisabled = echo.startLineIndex <= 0;
-    final shrinkDisabled = echo.startLineIndex >= echo.endLineIndex;
-    return EchoRegionControlsBar(
-      position: EchoRegionBarPosition.top,
-      expandDisabled: expandDisabled,
-      shrinkDisabled: shrinkDisabled,
-      onExpand:
-          () =>
-              ref.read(echoModeProvider.notifier).expandEchoBackward(lines),
-      onShrink:
-          () =>
-              ref.read(echoModeProvider.notifier).shrinkEchoBackward(lines),
-    );
-  }
-
-  Widget _echoBarBottom(List<TranscriptLine> lines, EchoState echo) {
-    final expandDisabled = echo.endLineIndex >= lines.length - 1;
-    final shrinkDisabled = echo.endLineIndex <= echo.startLineIndex;
-    return EchoRegionControlsBar(
-      position: EchoRegionBarPosition.bottom,
-      expandDisabled: expandDisabled,
-      shrinkDisabled: shrinkDisabled,
-      onExpand:
-          () => ref.read(echoModeProvider.notifier).expandEchoForward(lines),
-      onShrink:
-          () => ref.read(echoModeProvider.notifier).shrinkEchoForward(lines),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final echo = ref.watch(echoModeProvider);
@@ -202,9 +172,23 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
     final lines = widget.lines;
     final children = <Widget>[];
 
-    for (var i = 0; i < lines.length; i++) {
+    var i = 0;
+    while (i < lines.length) {
       if (echo.active && i == echo.startLineIndex) {
-        children.add(_echoBarTop(lines, echo));
+        children.add(
+          Padding(
+            padding: EdgeInsets.only(bottom: tok.space8),
+            child: _EchoRegionMergedCard(
+              lines: lines,
+              echo: echo,
+              activeCueIndex: active,
+              secondaryLines: secondaryLines,
+              activeLineKey: _activeLineKey,
+            ),
+          ),
+        );
+        i = echo.endLineIndex + 1;
+        continue;
       }
 
       final line = lines[i];
@@ -220,6 +204,7 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
         secondaryText: secondaryText,
         isActive: isActive,
         inEcho: inEcho,
+        groupedInEcho: false,
         onTap:
             () => ref
                 .read(playerInteractionsProvider.notifier)
@@ -236,23 +221,135 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
           child: tile,
         ),
       );
-
-      if (echo.active && i == echo.endLineIndex) {
-        children.add(_echoBarBottom(lines, echo));
-        if (echo.startTimeSeconds >= 0 && echo.endTimeSeconds >= 0) {
-          children.add(
-            ShadowReadingZonePlaceholder(
-              referenceSnippet: echoReferencePlainText(lines, echo),
-            ),
-          );
-        }
-      }
+      i++;
     }
 
     return ListView(
       controller: _scrollController,
       padding: EdgeInsets.symmetric(horizontal: tok.space12, vertical: tok.space8),
       children: children,
+    );
+  }
+}
+
+class _EchoRegionMergedCard extends ConsumerWidget {
+  const _EchoRegionMergedCard({
+    required this.lines,
+    required this.echo,
+    required this.activeCueIndex,
+    required this.secondaryLines,
+    required this.activeLineKey,
+  });
+
+  final List<TranscriptLine> lines;
+  final EchoState echo;
+  final int activeCueIndex;
+  final List<TranscriptLine> secondaryLines;
+  final GlobalKey activeLineKey;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final tok = EnjoyThemeTokens.of(context);
+
+    final shell = Color.lerp(
+      tok.echoActive.withValues(alpha: 0.16),
+      scheme.surfaceContainerHigh,
+      0.55,
+    )!;
+
+    final showShadow =
+        echo.startTimeSeconds >= 0 && echo.endTimeSeconds >= 0;
+
+    final lineWidgets = <Widget>[];
+    for (var i = echo.startLineIndex; i <= echo.endLineIndex; i++) {
+      if (i > echo.startLineIndex) {
+        lineWidgets.add(
+          Divider(
+            height: 1,
+            thickness: 1,
+            indent: tok.space12,
+            endIndent: tok.space12,
+            color: scheme.outlineVariant.withValues(alpha: 0.28),
+          ),
+        );
+      }
+
+      final line = lines[i];
+      final isActive = i == activeCueIndex;
+      final secondaryText = transcriptMatchSecondary(line, secondaryLines)?.text;
+
+      Widget tile = _TranscriptLineTile(
+        line: line,
+        secondaryText: secondaryText,
+        isActive: isActive,
+        inEcho: true,
+        groupedInEcho: true,
+        onTap:
+            () => ref
+                .read(playerInteractionsProvider.notifier)
+                .seekToLine(line, i),
+      );
+
+      if (isActive) {
+        tile = KeyedSubtree(key: activeLineKey, child: tile);
+      }
+
+      lineWidgets.add(tile);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        EchoRegionControlsBar(
+          position: EchoRegionBarPosition.top,
+          expandDisabled: echo.startLineIndex <= 0,
+          shrinkDisabled: echo.startLineIndex >= echo.endLineIndex,
+          dense: true,
+          onExpand:
+              () =>
+                  ref.read(echoModeProvider.notifier).expandEchoBackward(lines),
+          onShrink:
+              () =>
+                  ref.read(echoModeProvider.notifier).shrinkEchoBackward(lines),
+        ),
+        SizedBox(height: tok.space8),
+        Material(
+          color: shell,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tok.radiusMd),
+            side: BorderSide(color: tok.echoActive.withValues(alpha: 0.40)),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: lineWidgets,
+          ),
+        ),
+        SizedBox(height: tok.space8),
+        EchoRegionControlsBar(
+          position: EchoRegionBarPosition.bottom,
+          expandDisabled: echo.endLineIndex >= lines.length - 1,
+          shrinkDisabled: echo.endLineIndex <= echo.startLineIndex,
+          dense: true,
+          onExpand:
+              () =>
+                  ref.read(echoModeProvider.notifier).expandEchoForward(lines),
+          onShrink:
+              () =>
+                  ref.read(echoModeProvider.notifier).shrinkEchoForward(lines),
+        ),
+        if (showShadow) ...[
+          SizedBox(height: tok.space16),
+          ShadowReadingZonePlaceholder(
+            referenceSnippet: echoReferencePlainText(lines, echo),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -309,12 +406,16 @@ class _TranscriptLineTile extends StatefulWidget {
     required this.isActive,
     required this.inEcho,
     required this.onTap,
+    this.groupedInEcho = false,
   });
 
   final TranscriptLine line;
   final String? secondaryText;
   final bool isActive;
   final bool inEcho;
+
+  /// Echo cues rendered inside the echo-region transcript shell: flat rows.
+  final bool groupedInEcho;
   final VoidCallback onTap;
 
   @override
@@ -334,7 +435,17 @@ class _TranscriptLineTileState extends State<_TranscriptLineTile> {
     final echoCurrent = widget.isActive && widget.inEcho;
 
     Color? bg;
-    if (echoCurrent) {
+    if (widget.groupedInEcho) {
+      if (echoCurrent) {
+        bg = Color.lerp(
+          tok.echoActive.withValues(alpha: 0.38),
+          scheme.primary.withValues(alpha: 0.18),
+          0.42,
+        );
+      } else if (widget.inEcho) {
+        bg = Colors.transparent;
+      }
+    } else if (echoCurrent) {
       bg = Color.lerp(
         tok.echoActive.withValues(alpha: 0.42),
         scheme.primary.withValues(alpha: 0.22),
@@ -352,6 +463,63 @@ class _TranscriptLineTileState extends State<_TranscriptLineTile> {
       color: scheme.onSurfaceVariant,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
+
+    final content = Padding(
+      padding: tok.transcriptLinePadding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                formatTranscriptTimestampMs(widget.line.startMs),
+                style: timestampStyle,
+              ),
+            ],
+          ),
+          SizedBox(height: tok.space4),
+          Text.rich(
+            transcriptMarkupToTextSpan(
+              widget.line.text,
+              baseBody,
+              defaultColor: defaultFg,
+              emphasize: widget.isActive,
+            ),
+          ),
+          if (widget.secondaryText != null) ...[
+            SizedBox(height: tok.space4),
+            Text.rich(
+              transcriptMarkupToTextSpan(
+                widget.secondaryText!,
+                (Theme.of(context).textTheme.bodySmall ??
+                        const TextStyle())
+                    .copyWith(fontStyle: FontStyle.italic),
+                defaultColor: scheme.onSurfaceVariant,
+                emphasize: false,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (widget.groupedInEcho) {
+      return Material(
+        color: bg ?? Colors.transparent,
+        child: InkWell(
+          onTap: widget.onTap,
+          highlightColor:
+              echoCurrent
+                  ? tok.echoActive.withValues(alpha: 0.12)
+                  : scheme.onSurface.withValues(alpha: 0.05),
+          splashColor:
+              echoCurrent
+                  ? tok.echoActive.withValues(alpha: 0.16)
+                  : scheme.primary.withValues(alpha: 0.08),
+          child: content,
+        ),
+      );
+    }
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
@@ -374,44 +542,7 @@ class _TranscriptLineTileState extends State<_TranscriptLineTile> {
               echoCurrent
                   ? tok.echoActive.withValues(alpha: 0.18)
                   : scheme.primary.withValues(alpha: 0.12),
-          child: Padding(
-            padding: tok.transcriptLinePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      formatTranscriptTimestampMs(widget.line.startMs),
-                      style: timestampStyle,
-                    ),
-                  ],
-                ),
-                SizedBox(height: tok.space4),
-                Text.rich(
-                  transcriptMarkupToTextSpan(
-                    widget.line.text,
-                    baseBody,
-                    defaultColor: defaultFg,
-                    emphasize: widget.isActive,
-                  ),
-                ),
-                if (widget.secondaryText != null) ...[
-                  SizedBox(height: tok.space4),
-                  Text.rich(
-                    transcriptMarkupToTextSpan(
-                      widget.secondaryText!,
-                      (Theme.of(context).textTheme.bodySmall ??
-                              const TextStyle())
-                          .copyWith(fontStyle: FontStyle.italic),
-                      defaultColor: scheme.onSurfaceVariant,
-                      emphasize: false,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+          child: content,
         ),
       ),
     );

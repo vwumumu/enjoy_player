@@ -12,8 +12,7 @@
 - **Markup**: SSA/HTML-like cues (`<font color="…">`, `<b>`, `<i>`, `<br>`, etc.) are parsed in the transcript panel via `parseSubtitleMarkup` (`lib/data/subtitle/subtitle_markup_parser.dart`); colors and styles render as rich text instead of raw tags.
 - **Line UI**: Each cue has a **header row** (timestamp first; room for more labels). Body text follows on the next lines. Row backgrounds are **transparent** by default; **hover**, **active playback**, **echo-range**, and **active inside echo** use distinct tints (playback within the echo region blends echo orange with primary vs plain active vs echo-only lines).
 - **Auto-follow**: While the engine is **playing**, the list scrolls the **active cue** into view when it would be off-screen (`Scrollable.ensureVisible` on the active line). When paused, the list does not auto-scroll.
-- **Echo region controls** (echo mode on): **Expand / shrink** bars appear above the first and below the last cue in the echo segment (mirrors web `EchoRegionControls`); they update `EchoMode` line bounds and times only (full A–B loop / seek sync with the engine is future work).
-- **Shadow reading zone** (echo mode on): A **placeholder** card below the echo block shows a short hint and an optional **reference** snippet from the echo-range text; recording and analysis are not implemented yet.
+- **Echo region** (echo mode on): **Expand / shrink** controls sit **between** the transcript list and the shadow panel as separate rows (not inside the cue card). **Cue lines** use one merged rounded **transcript card**; **shadow reading** is a **second card** below with clear spacing.
 
 ## Future
 
