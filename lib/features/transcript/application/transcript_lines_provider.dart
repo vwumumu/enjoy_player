@@ -57,9 +57,21 @@ Stream<List<TranscriptLine>> _primaryLinesForMedia(
       onError: controller.addError,
     );
 
-    controller.onCancel = () async {
-      await subSession.cancel();
-      await subTranscripts.cancel();
+    Future<void> seedFromDb() async {
+      try {
+        session = await db.sessionDao.getForMedia(mediaId);
+        transcriptRows = await db.transcriptDao.listForMedia(mediaId);
+        emit();
+      } catch (e, st) {
+        controller.addError(e, st);
+      }
+    }
+
+    scheduleMicrotask(seedFromDb);
+
+    controller.onCancel = () {
+      subSession.cancel();
+      subTranscripts.cancel();
     };
   });
 }
@@ -110,9 +122,21 @@ Stream<List<TranscriptLine>> _secondaryLinesForMedia(
       onError: controller.addError,
     );
 
-    controller.onCancel = () async {
-      await subSession.cancel();
-      await subTranscripts.cancel();
+    Future<void> seedFromDb() async {
+      try {
+        session = await db.sessionDao.getForMedia(mediaId);
+        transcriptRows = await db.transcriptDao.listForMedia(mediaId);
+        emit();
+      } catch (e, st) {
+        controller.addError(e, st);
+      }
+    }
+
+    scheduleMicrotask(seedFromDb);
+
+    controller.onCancel = () {
+      subSession.cancel();
+      subTranscripts.cancel();
     };
   });
 }

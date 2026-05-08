@@ -1,13 +1,16 @@
 /// Scrollable transcript with tap-to-seek and echo-aware highlighting.
 library;
 
+import 'dart:ui' show FontFeature;
+
 import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import '../../../data/subtitle/transcript_line.dart';
+import 'package:enjoy_player/data/subtitle/subtitle_markup_parser.dart';
+import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../player/application/display_position_provider.dart';
 import '../../player/application/echo_mode_provider.dart';
@@ -124,55 +127,19 @@ class _TranscriptBody extends ConsumerWidget {
             echo.active &&
             index >= echo.startLineIndex &&
             index <= echo.endLineIndex;
-        final bg =
-            inEcho
-                ? tok.echoActive.withValues(alpha: 0.22)
-                : isActive
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.18)
-                : null;
-
         final secondaryText = _matchSecondary(line, secondaryLines)?.text;
 
         return Padding(
           padding: EdgeInsets.only(bottom: tok.space8),
-          child: Material(
-            color: bg,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(tok.radiusSm),
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(tok.radiusSm),
-              onTap:
-                  () => ref
-                      .read(playerInteractionsProvider.notifier)
-                      .seekToLine(line, index),
-              child: Padding(
-                padding: tok.transcriptLinePadding,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      line.text,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight:
-                            isActive ? FontWeight.w600 : FontWeight.normal,
-                      ),
-                    ),
-                    if (secondaryText != null) ...[
-                      SizedBox(height: tok.space4),
-                      Text(
-                        secondaryText,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
+          child: _TranscriptLineTile(
+            line: line,
+            secondaryText: secondaryText,
+            isActive: isActive,
+            inEcho: inEcho,
+            onTap:
+                () => ref
+                    .read(playerInteractionsProvider.notifier)
+                    .seekToLine(line, index),
           ),
         );
       },
@@ -199,17 +166,195 @@ class _TranscriptBody extends ConsumerWidget {
     final pStart = primary.startSeconds;
     final pEnd = primary.endSeconds;
 
-    // 1. Prefer a line whose midpoint is inside the primary range.
     for (final s in secondary) {
       final mid = s.startSeconds + (s.endSeconds - s.startSeconds) / 2;
       if (mid >= pStart && mid < pEnd) return s;
     }
 
-    // 2. Fall back to the last secondary line that started before primary ends.
     TranscriptLine? best;
     for (final s in secondary) {
       if (s.startSeconds < pEnd) best = s;
     }
     return best;
   }
+}
+
+class _TranscriptLineTile extends StatefulWidget {
+  const _TranscriptLineTile({
+    required this.line,
+    required this.secondaryText,
+    required this.isActive,
+    required this.inEcho,
+    required this.onTap,
+  });
+
+  final TranscriptLine line;
+  final String? secondaryText;
+  final bool isActive;
+  final bool inEcho;
+  final VoidCallback onTap;
+
+  @override
+  State<_TranscriptLineTile> createState() => _TranscriptLineTileState();
+}
+
+class _TranscriptLineTileState extends State<_TranscriptLineTile> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final tok = EnjoyThemeTokens.of(context);
+    final baseBody = Theme.of(context).textTheme.bodyLarge ?? const TextStyle();
+    final defaultFg = scheme.onSurface;
+
+    Color? bg;
+    if (widget.isActive) {
+      bg = scheme.primary.withValues(alpha: 0.18);
+    } else if (widget.inEcho) {
+      bg = tok.echoActive.withValues(alpha: 0.22);
+    } else if (_hover) {
+      bg = scheme.onSurface.withValues(alpha: 0.06);
+    }
+
+    final timestampStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+      color: scheme.onSurfaceVariant,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: Material(
+        color: bg ?? Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tok.radiusSm),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(tok.radiusSm),
+          onTap: widget.onTap,
+          hoverColor: Colors.transparent,
+          highlightColor: scheme.primary.withValues(alpha: 0.08),
+          splashColor: scheme.primary.withValues(alpha: 0.12),
+          child: Padding(
+            padding: tok.transcriptLinePadding,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 52,
+                  child: Text(
+                    formatTranscriptTimestampMs(widget.line.startMs),
+                    style: timestampStyle,
+                  ),
+                ),
+                SizedBox(width: tok.space8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text.rich(
+                        transcriptMarkupToTextSpan(
+                          widget.line.text,
+                          baseBody,
+                          defaultColor: defaultFg,
+                          emphasize: widget.isActive,
+                        ),
+                      ),
+                      if (widget.secondaryText != null) ...[
+                        SizedBox(height: tok.space4),
+                        Text.rich(
+                          transcriptMarkupToTextSpan(
+                            widget.secondaryText!,
+                            (Theme.of(context).textTheme.bodySmall ??
+                                    const TextStyle())
+                                .copyWith(fontStyle: FontStyle.italic),
+                            defaultColor: scheme.onSurfaceVariant,
+                            emphasize: false,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Formats [startMs] as `M:SS` or `H:MM:SS` when over one hour.
+String formatTranscriptTimestampMs(int startMs) {
+  final totalSec = (startMs / 1000).floor().clamp(0, 1 << 30);
+  final h = totalSec ~/ 3600;
+  final m = (totalSec % 3600) ~/ 60;
+  final s = totalSec % 60;
+  if (h > 0) {
+    return '$h:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+  return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+}
+
+/// Builds a [TextSpan] tree from SSA/HTML-like subtitle markup.
+TextSpan transcriptMarkupToTextSpan(
+  String raw,
+  TextStyle baseStyle, {
+  required Color defaultColor,
+  bool emphasize = false,
+}) {
+  final segments = parseSubtitleMarkup(raw);
+  if (segments.isEmpty) {
+    final plain = raw.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+    final text = plain.isEmpty ? raw : plain;
+    return TextSpan(
+      text: text,
+      style: _cueStyle(
+        baseStyle,
+        defaultColor: defaultColor,
+        emphasize: emphasize,
+      ),
+    );
+  }
+
+  return TextSpan(
+    children:
+        segments.map((seg) {
+          final fg = seg.colorArgb != null ? Color(seg.colorArgb!) : defaultColor;
+          return TextSpan(
+            text: seg.text,
+            style: _cueStyle(
+              baseStyle,
+              defaultColor: fg,
+              emphasize: emphasize,
+              bold: seg.bold,
+              italic: seg.italic,
+              underline: seg.underline,
+            ),
+          );
+        }).toList(),
+  );
+}
+
+TextStyle _cueStyle(
+  TextStyle base, {
+  required Color defaultColor,
+  bool emphasize = false,
+  bool bold = false,
+  bool italic = false,
+  bool underline = false,
+}) {
+  final weight =
+      emphasize || bold ? FontWeight.w600 : base.fontWeight ?? FontWeight.normal;
+  return base.copyWith(
+    color: defaultColor,
+    fontWeight: weight,
+    fontStyle: italic ? FontStyle.italic : base.fontStyle,
+    decoration:
+        underline ? TextDecoration.underline : TextDecoration.none,
+    decorationColor: defaultColor,
+  );
 }

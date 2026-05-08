@@ -47,9 +47,12 @@ class PlayerController extends _$PlayerController {
   PlaybackSession? build() {
     ref.watch(playerEngineProvider);
 
+    final persister = ref.read(playbackSessionPersisterProvider);
+    final embeddedSync = ref.read(embeddedTrackSyncProvider);
+
     ref.onDispose(() async {
-      ref.read(playbackSessionPersisterProvider).cancel();
-      await ref.read(embeddedTrackSyncProvider).cancel();
+      persister.cancel();
+      await embeddedSync.cancel();
       await _positionSub?.cancel();
       await _durationSub?.cancel();
       _positionSub = null;
