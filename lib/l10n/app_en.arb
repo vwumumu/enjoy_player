@@ -21,6 +21,8 @@
   "transportExpand": "Expand player",
   "settingsTitle": "Settings",
   "importMedia": "Import media",
+  "importingMedia": "Importing media…",
+  "importMediaFailed": "Could not import this file.",
   "noMediaYet": "No media yet",
   "tapImportToAdd": "Import audio or video from the toolbar.",
   "navMainLabel": "Primary navigation",

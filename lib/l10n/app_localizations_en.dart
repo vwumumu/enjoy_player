@@ -74,6 +74,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importMedia => 'Import media';
 
   @override
+  String get importingMedia => 'Importing media…';
+
+  @override
+  String get importMediaFailed => 'Could not import this file.';
+
+  @override
   String get noMediaYet => 'No media yet';
 
   @override

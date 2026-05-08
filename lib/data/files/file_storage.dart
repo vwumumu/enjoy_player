@@ -3,6 +3,7 @@ library;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:crypto/crypto.dart';
@@ -28,12 +29,77 @@ class FileImportResult {
   String get fileUri => Uri.file(localPath).toString();
 }
 
+/// Arguments for [_importMediaFileInIsolate]; only plain data for [Isolate.run].
+typedef _ImportIsolateArgs = ({
+  String sourcePath,
+  String mediaDirPath,
+  String tempFileName,
+  String ext,
+  String title,
+});
+
+typedef _ImportIsolateResult = ({
+  String localPath,
+  String fileHash,
+  int fileSize,
+  String title,
+});
+
+/// Heavy read + SHA-256 + write runs off the UI isolate.
+Future<_ImportIsolateResult> _importMediaFileInIsolate(_ImportIsolateArgs args) async {
+  final source = File(args.sourcePath);
+  final tempPath = p.join(args.mediaDirPath, args.tempFileName);
+  final tempFile = File(tempPath);
+
+  final controller = StreamController<List<int>>();
+  final hashFuture = sha256.bind(controller.stream).first;
+  var length = 0;
+  final sink = tempFile.openWrite();
+
+  await for (final chunk in source.openRead()) {
+    length += chunk.length;
+    sink.add(chunk);
+    controller.add(chunk);
+  }
+  await sink.flush();
+  await sink.close();
+  await controller.close();
+  final digest = await hashFuture;
+  final hash = digest.toString();
+
+  final destPath = p.join(args.mediaDirPath, '$hash${args.ext}');
+  final destFile = File(destPath);
+  if (await destFile.exists()) {
+    await tempFile.delete();
+    return (
+      localPath: destPath,
+      fileHash: hash,
+      fileSize: await destFile.length(),
+      title: args.title,
+    );
+  }
+
+  await tempFile.rename(destPath);
+
+  return (
+    localPath: destPath,
+    fileHash: hash,
+    fileSize: length,
+    title: args.title,
+  );
+}
+
 class FileStorage {
   // ignore: prefer_const_constructors
   static final Uuid _uuid = Uuid();
 
   Future<FileImportResult> importPickedFile(XFile file) async {
     try {
+      final path = file.path;
+      if (path.isEmpty) {
+        throw const FileFailure('Import failed: no file path');
+      }
+
       final docs = await getApplicationDocumentsDirectory();
       final mediaDir = Directory(p.join(docs.path, 'media'));
       if (!await mediaDir.exists()) {
@@ -41,47 +107,34 @@ class FileStorage {
       }
 
       final ext = p.extension(file.name).toLowerCase();
-      final tempPath = p.join(mediaDir.path, '.tmp_${_uuid.v4()}$ext');
-      final tempFile = File(tempPath);
+      final tempFileName = '.tmp_${_uuid.v4()}$ext';
+      final title = p.basenameWithoutExtension(file.name);
+      final mediaDirPath = mediaDir.path;
 
-      final controller = StreamController<List<int>>();
-      final hashFuture = sha256.bind(controller.stream).first;
-      var length = 0;
-      final sink = tempFile.openWrite();
-
-      await for (final chunk in file.openRead()) {
-        length += chunk.length;
-        sink.add(chunk);
-        controller.add(chunk);
-      }
-      await sink.flush();
-      await sink.close();
-      await controller.close();
-      final digest = await hashFuture;
-      final hash = digest.toString();
-
-      final destPath = p.join(mediaDir.path, '$hash$ext');
-      final destFile = File(destPath);
-      if (await destFile.exists()) {
-        await tempFile.delete();
-        return FileImportResult(
-          localPath: destPath,
-          fileHash: hash,
-          fileSize: await destFile.length(),
-          title: p.basenameWithoutExtension(file.name),
-        );
-      }
-
-      await tempFile.rename(destPath);
+      final worker = await Isolate.run(
+        () => _importMediaFileInIsolate((
+          sourcePath: path,
+          mediaDirPath: mediaDirPath,
+          tempFileName: tempFileName,
+          ext: ext,
+          title: title,
+        )),
+      );
 
       return FileImportResult(
-        localPath: destPath,
-        fileHash: hash,
-        fileSize: length,
-        title: p.basenameWithoutExtension(file.name),
+        localPath: worker.localPath,
+        fileHash: worker.fileHash,
+        fileSize: worker.fileSize,
+        title: worker.title,
       );
     } catch (e, st) {
-      Error.throwWithStackTrace(FileFailure('Import failed: $e'), st);
+      if (e is FileFailure) {
+        Error.throwWithStackTrace(e, st);
+      }
+      Error.throwWithStackTrace(
+        FileFailure('Import failed: $e'),
+        st,
+      );
     }
   }
 }

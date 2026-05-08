@@ -220,6 +220,18 @@ abstract class AppLocalizations {
   /// **'Import media'**
   String get importMedia;
 
+  /// No description provided for @importingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing media…'**
+  String get importingMedia;
+
+  /// No description provided for @importMediaFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import this file.'**
+  String get importMediaFailed;
+
   /// No description provided for @noMediaYet.
   ///
   /// In en, this message translates to:
