@@ -33,6 +33,7 @@ Mitigations:
 ## Windows
 
 - Default Flutter Windows runner; `media_kit_libs_video` ships native libs.
+- **Embedded subtitle extraction**: Place **`ffmpeg.exe`** at [`windows/ffmpeg/ffmpeg.exe`](../windows/ffmpeg/ffmpeg.exe) before `flutter build windows` so CMake installs it beside the executable, or install FFmpeg so **`ffmpeg`** is on `PATH`. See [`windows/ffmpeg/README.md`](../windows/ffmpeg/README.md) (download source, licensing).
 
 ## Release builds
 

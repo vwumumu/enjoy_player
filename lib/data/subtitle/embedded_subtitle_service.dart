@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:media_kit/media_kit.dart' show SubtitleTrack;
+import 'package:path/path.dart' as p;
 
 import '../../core/ids/enjoy_ids.dart';
 import '../../core/logging/log.dart';
@@ -17,6 +18,24 @@ class EmbeddedSubtitleService {
   const EmbeddedSubtitleService();
 
   static final _log = logNamed('EmbeddedSubtitleService');
+
+  static Future<String?>? _windowsFfmpegFuture;
+
+  /// Bundled next to [Platform.resolvedExecutable], or `ffmpeg` on PATH.
+  static Future<String?> _resolveWindowsFfmpeg() {
+    return _windowsFfmpegFuture ??= () async {
+      final bundled = p.join(
+        p.dirname(Platform.resolvedExecutable),
+        'ffmpeg.exe',
+      );
+      if (File(bundled).existsSync()) return bundled;
+      try {
+        final r = await Process.run('ffmpeg', ['-version']);
+        if (r.exitCode == 0) return 'ffmpeg';
+      } catch (_) {}
+      return null;
+    }();
+  }
 
   /// Extracts text lines from [mediaSourceUri] for each [SubtitleTrack] that
   /// is embedded (not loaded from an external URI / data string).
@@ -30,10 +49,17 @@ class EmbeddedSubtitleService {
     required List<SubtitleTrack> tracks,
     Set<int> existingTrackIndices = const {},
   }) async {
-    // ffmpeg_kit_flutter_new has no stable Windows plugin implementation in our
-    // current setup, so skip embedded extraction to avoid repeated runtime
-    // MissingPluginException spam.
-    if (Platform.isWindows) return const [];
+    String? windowsFfmpeg;
+    if (Platform.isWindows) {
+      windowsFfmpeg = await _resolveWindowsFfmpeg();
+      if (windowsFfmpeg == null) {
+        _log.fine(
+          'Embedded subtitle extraction skipped on Windows: '
+          'no ffmpeg.exe next to the app and no ffmpeg on PATH',
+        );
+        return const [];
+      }
+    }
 
     final results = <TranscriptRow>[];
     final localPath = Uri.parse(mediaSourceUri).toFilePath();
@@ -44,7 +70,10 @@ class EmbeddedSubtitleService {
       if (track.uri || track.data) continue;
       if (existingTrackIndices.contains(i)) continue;
 
-      final srtText = await _extractTrackAsSrt(localPath, i);
+      final srtText =
+          Platform.isWindows
+              ? await _extractTrackAsSrtProcess(windowsFfmpeg!, localPath, i)
+              : await _extractTrackAsSrtFfmpegKit(localPath, i);
       if (srtText == null || srtText.trim().isEmpty) continue;
 
       final cleaned = SubtitleParserFacade.stripAssTags(srtText);
@@ -89,7 +118,43 @@ class EmbeddedSubtitleService {
     return results;
   }
 
-  Future<String?> _extractTrackAsSrt(String filePath, int streamIndex) async {
+  Future<String?> _extractTrackAsSrtProcess(
+    String ffmpegExecutable,
+    String filePath,
+    int streamIndex,
+  ) async {
+    try {
+      final result = await Process.run(ffmpegExecutable, [
+        '-i',
+        filePath,
+        '-map',
+        '0:s:$streamIndex',
+        '-f',
+        'srt',
+        '-',
+      ], stdoutEncoding: utf8, stderrEncoding: utf8);
+      if (result.exitCode != 0) {
+        _log.fine(
+          'ffmpeg subtitle extract failed (stream $streamIndex, exit ${result.exitCode}): '
+          '${result.stderr}',
+        );
+        return null;
+      }
+      return result.stdout as String;
+    } catch (error, stackTrace) {
+      _log.warning(
+        'Embedded subtitle extraction failed for stream $streamIndex',
+        error,
+        stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<String?> _extractTrackAsSrtFfmpegKit(
+    String filePath,
+    int streamIndex,
+  ) async {
     // ffmpeg stream selector: subtitle stream by 0-based index (0:s:0, 0:s:1, …)
     try {
       final command = '-i "$filePath" -map 0:s:$streamIndex -f srt -';

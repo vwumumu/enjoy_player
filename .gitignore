@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Optional Windows FFmpeg binary (see windows/ffmpeg/README.md)
+/windows/ffmpeg/ffmpeg.exe
