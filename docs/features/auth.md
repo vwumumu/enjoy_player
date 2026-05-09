@@ -3,6 +3,7 @@
 ## Behavior
 
 - Optional sign-in via **browser redirect**: `POST /api/v1/sessions/start_auth`, then the user completes auth in the system browser; the app polls `GET /api/v1/sessions/poll` until `approved` or timeout (~5 minutes).
+- **Sign-in screen**: After approval the shell navigates **home** automatically; while polling, the user can **re-open browser** or **cancel**; failed loads show **network error** UI with **retry**.
 - **Bearer token** is stored in **flutter_secure_storage** (not in Drift).
 - Last **profile snapshot** is cached in Drift (`auth.last_profile`) for fast cold start when a token exists.
 - **Profile** screen calls `GET/PATCH /api/v1/profile` with camelCase JSON; the HTTP client maps camelCase ↔ snake_case like the web `@enjoy/api` client.

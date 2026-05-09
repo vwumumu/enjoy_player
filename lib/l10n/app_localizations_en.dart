@@ -430,6 +430,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authCancel => 'Cancel';
 
   @override
+  String get authSignedInSuccess => 'Signed in successfully';
+
+  @override
+  String get authReOpenBrowser => 'Re-open browser';
+
+  @override
   String get authSignOut => 'Sign out';
 
   @override

@@ -145,6 +145,8 @@
   "authSignInCta": "Continue in browser",
   "authWaitingForApproval": "Waiting for approval in your browser…",
   "authCancel": "Cancel",
+  "authSignedInSuccess": "Signed in successfully",
+  "authReOpenBrowser": "Re-open browser",
   "authSignOut": "Sign out",
   "profileTitle": "Profile",
   "profileFieldName": "Name",

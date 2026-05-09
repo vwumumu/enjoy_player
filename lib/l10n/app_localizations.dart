@@ -910,6 +910,18 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get authCancel;
 
+  /// No description provided for @authSignedInSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in successfully'**
+  String get authSignedInSuccess;
+
+  /// No description provided for @authReOpenBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-open browser'**
+  String get authReOpenBrowser;
+
   /// No description provided for @authSignOut.
   ///
   /// In en, this message translates to:
