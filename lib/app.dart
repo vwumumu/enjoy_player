@@ -20,16 +20,13 @@ class EnjoyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     final prefsAsync = ref.watch(appPreferencesCtrlProvider);
-    final light = buildAppTheme(Brightness.light);
-    final dark = buildAppTheme(Brightness.dark);
+    final theme = buildAppTheme();
 
     return prefsAsync.when(
       data: (prefs) {
         return MaterialApp.router(
           onGenerateTitle: (ctx) => AppLocalizations.of(ctx)!.appTitle,
-          theme: light,
-          darkTheme: dark,
-          themeMode: prefs.themeMode,
+          theme: theme,
           locale: prefs.locale,
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -51,18 +48,14 @@ class EnjoyApp extends ConsumerWidget {
       },
       loading:
           () => MaterialApp(
-            theme: light,
-            darkTheme: dark,
-            themeMode: ThemeMode.system,
+            theme: theme,
             home: const ConstrainedAppViewport(
               child: Scaffold(body: Center(child: CircularProgressIndicator())),
             ),
           ),
       error:
           (e, _) => MaterialApp(
-            theme: light,
-            darkTheme: dark,
-            themeMode: ThemeMode.system,
+            theme: theme,
             home: ConstrainedAppViewport(
               child: Scaffold(body: Center(child: Text('$e'))),
             ),

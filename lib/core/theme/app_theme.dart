@@ -1,4 +1,4 @@
-/// Material 3 theme — cinematic editorial with full light/dark parity.
+/// Material 3 theme — dark-only cinematic editorial (logo-aligned blue / purple).
 library;
 
 import 'package:flutter/material.dart';
@@ -7,27 +7,23 @@ import 'colors.dart';
 import 'enjoy_tokens.dart';
 import 'typography.dart';
 
-ThemeData buildAppTheme(Brightness brightness) {
-  final isDark = brightness == Brightness.dark;
-
+ThemeData buildAppTheme() {
   // ── Color scheme ────────────────────────────────────────────────────────
   final base = ColorScheme.fromSeed(
-    seedColor: AppColors.seedAmber,
-    brightness: brightness,
+    seedColor: AppColors.seedBrand,
+    brightness: Brightness.dark,
   );
 
-  final colorScheme = isDark ? _refinedDark(base) : _refinedLight(base);
+  final colorScheme = _refinedDark(base);
 
   // ── Tokens ──────────────────────────────────────────────────────────────
-  final tokens = isDark
-      ? EnjoyThemeTokens.dark(colorScheme)
-      : EnjoyThemeTokens.light(colorScheme);
+  final tokens = EnjoyThemeTokens.build(colorScheme);
 
   // ── Typography ──────────────────────────────────────────────────────────
   final baseTheme = ThemeData(
     colorScheme: colorScheme,
     useMaterial3: true,
-    brightness: brightness,
+    brightness: Brightness.dark,
   );
   final textTheme = buildBaseTextTheme(baseTheme.textTheme, colorScheme);
 
@@ -85,9 +81,7 @@ ThemeData buildAppTheme(Brightness brightness) {
     minExtendedWidth: 200,
   );
 
-  final inactiveSliderColor = colorScheme.onSurface.withValues(
-    alpha: isDark ? 0.12 : 0.15,
-  );
+  final inactiveSliderColor = colorScheme.onSurface.withValues(alpha: 0.12);
 
   final sliderTheme = SliderThemeData(
     trackHeight: 2,
@@ -105,11 +99,9 @@ ThemeData buildAppTheme(Brightness brightness) {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(tokens.radiusXl),
     ),
-    backgroundColor: isDark
-        ? colorScheme.surfaceContainerHigh
-        : colorScheme.inverseSurface,
+    backgroundColor: colorScheme.surfaceContainerHigh,
     contentTextStyle: textTheme.bodyMedium?.copyWith(
-      color: isDark ? colorScheme.onSurface : colorScheme.onInverseSurface,
+      color: colorScheme.onSurface,
     ),
     actionTextColor: colorScheme.primary,
   );
@@ -160,7 +152,7 @@ ThemeData buildAppTheme(Brightness brightness) {
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: true,
-    brightness: brightness,
+    brightness: Brightness.dark,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     extensions: <ThemeExtension<dynamic>>[tokens, transcriptTokens],
     textTheme: textTheme,
@@ -302,7 +294,7 @@ ThemeData buildAppTheme(Brightness brightness) {
   );
 }
 
-// ── Dark color scheme refinement ────────────────────────────────────────────
+// ── Dark color scheme refinement (surfaces + logo-aligned roles) ───────────
 ColorScheme _refinedDark(ColorScheme base) {
   return base.copyWith(
     surface: AppColors.surfaceDark,
@@ -313,34 +305,15 @@ ColorScheme _refinedDark(ColorScheme base) {
     surfaceContainer: AppColors.surfaceContainerDark,
     surfaceContainerHigh: AppColors.surfaceContainerHighDark,
     surfaceContainerHighest: AppColors.surfaceContainerHighestDark,
-    // Warm amber primary on dark
-    primary: AppColors.brandOnDark,
-    onPrimary: const Color(0xFF1A0F00),
-    primaryContainer: const Color(0xFF2A1E00),
-    onPrimaryContainer: const Color(0xFFFFD580),
-    // Accessible secondary
-    secondary: const Color(0xFFCBBAA0),
-    onSecondary: const Color(0xFF1E1500),
-    secondaryContainer: const Color(0xFF2E2200),
-    onSecondaryContainer: const Color(0xFFE8D5B0),
-  );
-}
-
-// ── Light color scheme refinement ───────────────────────────────────────────
-ColorScheme _refinedLight(ColorScheme base) {
-  return base.copyWith(
-    surface: AppColors.surfaceLight,
-    surfaceDim: AppColors.surfaceContainerHighestLight,
-    surfaceBright: AppColors.surfaceContainerLowestLight,
-    surfaceContainerLowest: AppColors.surfaceContainerLowestLight,
-    surfaceContainerLow: AppColors.surfaceContainerLowLight,
-    surfaceContainer: AppColors.surfaceContainerLight,
-    surfaceContainerHigh: AppColors.surfaceContainerHighLight,
-    surfaceContainerHighest: AppColors.surfaceContainerHighestLight,
-    // Warm amber primary on light — darker for contrast
-    primary: const Color(0xFF8B5000),
+    // Premium purple primary
+    primary: AppColors.brand,
     onPrimary: const Color(0xFFFFFFFF),
-    primaryContainer: const Color(0xFFFFDDB3),
-    onPrimaryContainer: const Color(0xFF2B1600),
+    primaryContainer: const Color(0xFF2B2250),
+    onPrimaryContainer: AppColors.brandOnDark,
+    // Logo blue secondary
+    secondary: AppColors.brandSecondary,
+    onSecondary: const Color(0xFFFFFFFF),
+    secondaryContainer: const Color(0xFF172554),
+    onSecondaryContainer: const Color(0xFFBFDBFE),
   );
 }

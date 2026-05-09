@@ -137,11 +137,11 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
   // ── Static accessor ────────────────────────────────────────────────────
   static EnjoyThemeTokens of(BuildContext context) {
     return Theme.of(context).extension<EnjoyThemeTokens>() ??
-        EnjoyThemeTokens.light(Theme.of(context).colorScheme);
+        EnjoyThemeTokens.build(Theme.of(context).colorScheme);
   }
 
-  // ── Constructors ───────────────────────────────────────────────────────
-  factory EnjoyThemeTokens.light(ColorScheme scheme) {
+  /// Dark-only app tokens derived from the active [ColorScheme].
+  factory EnjoyThemeTokens.build(ColorScheme scheme) {
     return EnjoyThemeTokens(
       space4: 4,
       space8: 8,
@@ -175,23 +175,11 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
         vertical: 10,
       ),
       contentMaxWidth: 720,
-      miniBarBlurSigma: 12,
+      miniBarBlurSigma: 20,
       sidebarWidth: 248,
       sidebarBrandHeight: 56,
       transportHeight: 88,
       heroTitleLetterSpacing: -1.2,
-      glassTint: scheme.surface.withValues(alpha: 0.72),
-      glassBorder: scheme.outlineVariant.withValues(alpha: 0.18),
-      gradientStart: AppColors.gradientStartLight,
-      gradientEnd: AppColors.gradientEndLight,
-      useGlassOnSidebar: false,
-    );
-  }
-
-  factory EnjoyThemeTokens.dark(ColorScheme scheme) {
-    return EnjoyThemeTokens.light(scheme).copyWith(
-      ccBadge: scheme.primary,
-      miniBarBlurSigma: 20,
       glassTint: scheme.surface.withValues(alpha: 0.55),
       glassBorder: scheme.outlineVariant.withValues(alpha: 0.22),
       gradientStart: AppColors.gradientStartDark,

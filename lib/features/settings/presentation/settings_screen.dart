@@ -1,11 +1,10 @@
-/// Settings — editorial grouped iOS-style cards with system/light/dark toggle.
+/// Settings — editorial grouped iOS-style cards.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
@@ -25,8 +24,6 @@ class SettingsScreen extends ConsumerWidget {
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final prefsAsync = ref.watch(appPreferencesCtrlProvider);
-    final currentMode = prefsAsync.value?.themeMode ?? ThemeMode.system;
 
     return Scaffold(
       body: CustomScrollView(
@@ -216,73 +213,6 @@ class SettingsScreen extends ConsumerWidget {
                         const SizedBox.shrink(),
                   );
                 },
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
-
-          // ── Appearance section ──────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _SectionLabel(text: l10n.settingsSectionAppearance),
-          ),
-          SliverToBoxAdapter(
-            child: _SettingsCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.palette_outlined, color: cs.primary, size: 22),
-                      SizedBox(width: t.space12),
-                      Text(
-                        l10n.settingsThemeRowTitle,
-                        style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: t.space12),
-                  // Segmented theme picker
-                  SegmentedButton<ThemeMode>(
-                    style: SegmentedButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity: VisualDensity.compact,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(t.radiusFull),
-                        side: BorderSide(
-                          color: cs.outlineVariant.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      splashFactory: NoSplash.splashFactory,
-                      textStyle: tt.labelMedium,
-                    ),
-                    showSelectedIcon: false,
-                    segments: [
-                      ButtonSegment<ThemeMode>(
-                        value: ThemeMode.system,
-                        icon: const Icon(Icons.brightness_auto_rounded, size: 16),
-                        label: Text(l10n.settingsThemeSystem),
-                      ),
-                      ButtonSegment<ThemeMode>(
-                        value: ThemeMode.light,
-                        icon: const Icon(Icons.light_mode_outlined, size: 16),
-                        label: Text(l10n.settingsThemeLight),
-                      ),
-                      ButtonSegment<ThemeMode>(
-                        value: ThemeMode.dark,
-                        icon: const Icon(Icons.dark_mode_outlined, size: 16),
-                        label: Text(l10n.settingsThemeDark),
-                      ),
-                    ],
-                    selected: {currentMode},
-                    onSelectionChanged: (set) {
-                      if (set.isEmpty) return;
-                      ref
-                          .read(appPreferencesCtrlProvider.notifier)
-                          .setThemeMode(set.single);
-                    },
-                  ),
-                ],
               ),
             ),
           ),
