@@ -265,15 +265,15 @@ class _ResizeSplitter extends StatelessWidget {
           child: Tooltip(
             message: semanticLabel,
             child: Center(
-              child: AnimatedContainer(
+                child: AnimatedContainer(
                 duration: const Duration(milliseconds: 160),
                 curve: Curves.easeOut,
-                width: hovered ? 3 : 0,
+                width: hovered ? 4 : 3,
                 height: 88,
                 decoration: BoxDecoration(
                   color: hovered
-                      ? cs.outline.withValues(alpha: 0.45)
-                      : Colors.transparent,
+                      ? cs.outline.withValues(alpha: 0.65)
+                      : cs.outline.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
