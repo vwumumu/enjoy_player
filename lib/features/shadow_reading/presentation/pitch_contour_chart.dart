@@ -50,6 +50,7 @@ class PitchContourChart extends StatelessWidget {
     required this.userColor,
     this.visibility = const PitchContourVisibility(),
     this.progress,
+    this.progressColor,
     super.key,
   });
 
@@ -61,11 +62,17 @@ class PitchContourChart extends StatelessWidget {
   /// Optional playback progress within segment `0..1`.
   final double? progress;
 
+  /// When null, resolved from [ThemeData.colorScheme] in [build].
+  final Color? progressColor;
+
   @override
   Widget build(BuildContext context) {
     if (points.isEmpty) {
       return const SizedBox.shrink();
     }
+    final resolvedProgressColor =
+        progressColor ??
+        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55);
     return LayoutBuilder(
       builder: (context, c) {
         final h = math.max(120.0, c.maxHeight.isFinite ? c.maxHeight : 180.0);
@@ -79,6 +86,7 @@ class PitchContourChart extends StatelessWidget {
               userColor: userColor,
               visibility: visibility,
               progress: progress,
+              progressColor: resolvedProgressColor,
             ),
           ),
         );
@@ -94,6 +102,7 @@ class _PitchContourPainter extends CustomPainter {
     required this.userColor,
     required this.visibility,
     required this.progress,
+    required this.progressColor,
   });
 
   final List<EchoRegionSeriesPoint> points;
@@ -101,6 +110,7 @@ class _PitchContourPainter extends CustomPainter {
   final Color userColor;
   final PitchContourVisibility visibility;
   final double? progress;
+  final Color progressColor;
 
   Offset _xy(Rect chart, double maxT, double t, double normY) {
     final x = chart.left + (t / maxT) * chart.width;
@@ -226,7 +236,7 @@ class _PitchContourPainter extends CustomPainter {
         Offset(x, chart.top),
         Offset(x, chart.bottom),
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.5)
+          ..color = progressColor
           ..strokeWidth = 1.2,
       );
     }
@@ -236,6 +246,7 @@ class _PitchContourPainter extends CustomPainter {
   bool shouldRepaint(covariant _PitchContourPainter oldDelegate) {
     return oldDelegate.points != points ||
         oldDelegate.progress != progress ||
+        oldDelegate.progressColor != progressColor ||
         oldDelegate.visibility != visibility ||
         oldDelegate.referenceColor != referenceColor ||
         oldDelegate.userColor != userColor;

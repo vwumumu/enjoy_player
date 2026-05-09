@@ -45,7 +45,7 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
     final paletteAsync = ref.watch(currentArtworkPaletteProvider);
     final accent = paletteAsync.value?.dominant;
     final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
 
     ref.listen(embeddedTracksProvider, (_, event) {
       if (event == null) return;
@@ -64,7 +64,7 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
 
     if (open.hasError) {
       return Scaffold(
-        backgroundColor: isDark ? const Color(0xFF0B0B10) : const Color(0xFFFAFAF7),
+        backgroundColor: cs.surface,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -79,7 +79,7 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
 
     if (session == null || session.mediaId != widget.mediaId) {
       return Scaffold(
-        backgroundColor: isDark ? const Color(0xFF0B0B10) : const Color(0xFFFAFAF7),
+        backgroundColor: cs.surface,
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -88,10 +88,8 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
     final videoController =
         isVideo ? ref.read(playerControllerProvider.notifier).videoController : null;
 
-    final cs = Theme.of(context).colorScheme;
-
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0B0B10) : const Color(0xFFFAFAF7),
+      backgroundColor: cs.surface,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,

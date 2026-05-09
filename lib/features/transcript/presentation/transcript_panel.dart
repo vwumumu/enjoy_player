@@ -512,7 +512,7 @@ class _TranscriptLineTileState extends State<_TranscriptLineTile> {
       bg = tok.echoActive.withValues(alpha: 0.06);
       railColor = tok.echoActive;
     } else if (widget.isActive) {
-      bg = scheme.primary.withValues(alpha: 0.06);
+      bg = scheme.primary.withValues(alpha: 0.08);
       railColor = scheme.primary;
     } else if (widget.inEcho) {
       bg = tok.echoActive.withValues(alpha: 0.04);

@@ -68,6 +68,7 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide =
@@ -105,16 +106,15 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
                     AppLocalizations.of(context)!.playerTranscriptResizeHint,
                 onDragDelta: (dx) => _applyDragDelta(total, dx),
               ),
-              // Transcript panel — warm near-black so reading isn't OLED-harsh;
-              // 1-pixel left rail painted by the parent Row's border decoration.
+              // Transcript panel — theme surface (ADR-0008); hairline vs video stage.
               SizedBox(
                 width: tw,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F0F14),
+                    color: cs.surface,
                     border: Border(
                       left: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.06),
+                        color: cs.outlineVariant.withValues(alpha: 0.4),
                         width: 1,
                       ),
                     ),
@@ -149,7 +149,7 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
             ),
             Expanded(
               child: ColoredBox(
-                color: const Color(0xFF0F0F14),
+                color: cs.surface,
                 child: widget.transcript,
               ),
             ),
