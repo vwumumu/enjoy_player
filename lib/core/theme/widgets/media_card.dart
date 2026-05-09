@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../enjoy_tokens.dart';
+import '../generative_media_cover.dart';
 
 // ── Tile (vertical, for grids) ──────────────────────────────────────────────
 
@@ -19,6 +20,7 @@ class MediaCardTile extends StatefulWidget {
     required this.title,
     required this.onTap,
     this.thumbnailFile,
+    this.coverSeed,
     this.subtitle,
     this.isVideo = false,
     this.accentColor,
@@ -27,6 +29,9 @@ class MediaCardTile extends StatefulWidget {
   final String title;
   final VoidCallback onTap;
   final File? thumbnailFile;
+
+  /// When [thumbnailFile] is null or fails to load, used for [GenerativeMediaCover].
+  final String? coverSeed;
   final String? subtitle;
   final bool isVideo;
   final Color? accentColor;
@@ -93,6 +98,7 @@ class _MediaCardTileState extends State<MediaCardTile> {
                     children: [
                       _Thumbnail(
                         file: widget.thumbnailFile,
+                        coverSeed: widget.coverSeed,
                         isVideo: widget.isVideo,
                         cs: cs,
                       ),
@@ -186,6 +192,7 @@ class MediaCardRow extends StatefulWidget {
     required this.title,
     required this.onTap,
     this.thumbnailFile,
+    this.coverSeed,
     this.subtitle,
     this.badge,
     this.isVideo = false,
@@ -196,6 +203,7 @@ class MediaCardRow extends StatefulWidget {
   final String title;
   final VoidCallback onTap;
   final File? thumbnailFile;
+  final String? coverSeed;
   final String? subtitle;
   final String? badge;
   final bool isVideo;
@@ -255,6 +263,7 @@ class _MediaCardRowState extends State<MediaCardRow> {
                     height: 56,
                     child: _Thumbnail(
                       file: widget.thumbnailFile,
+                      coverSeed: widget.coverSeed,
                       isVideo: widget.isVideo,
                       cs: cs,
                     ),
@@ -318,11 +327,13 @@ class _MediaCardRowState extends State<MediaCardRow> {
 class _Thumbnail extends StatelessWidget {
   const _Thumbnail({
     required this.file,
+    required this.coverSeed,
     required this.isVideo,
     required this.cs,
   });
 
   final File? file;
+  final String? coverSeed;
   final bool isVideo;
   final ColorScheme cs;
 
@@ -334,8 +345,15 @@ class _Thumbnail extends StatelessWidget {
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
-        errorBuilder: (_, _, _) => _placeholder(),
+        errorBuilder: (_, _, _) => _fallback(),
       );
+    }
+    return _fallback();
+  }
+
+  Widget _fallback() {
+    if (coverSeed != null && coverSeed!.isNotEmpty) {
+      return GenerativeMediaCover(seed: coverSeed!, isVideo: isVideo);
     }
     return _placeholder();
   }

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
+import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
@@ -83,7 +84,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 
               // Tab segment
               Padding(
-                padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, t.space12),
+                padding: EdgeInsets.fromLTRB(
+                  t.space24,
+                  0,
+                  t.space24,
+                  t.space12,
+                ),
                 child: AnimatedBuilder(
                   animation: _tabController,
                   builder: (context, _) {
@@ -91,10 +97,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       style: SegmentedButton.styleFrom(
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         visualDensity: VisualDensity.compact,
-                        backgroundColor: cs.surfaceContainerHighest.withValues(alpha: 0.45),
+                        backgroundColor: cs.surfaceContainerHighest.withValues(
+                          alpha: 0.45,
+                        ),
                         foregroundColor: cs.onSurfaceVariant,
                         selectedForegroundColor: cs.onPrimaryContainer,
-                        selectedBackgroundColor: cs.primaryContainer.withValues(alpha: 0.65),
+                        selectedBackgroundColor: cs.primaryContainer.withValues(
+                          alpha: 0.65,
+                        ),
                         side: BorderSide(
                           color: cs.outlineVariant.withValues(alpha: 0.3),
                         ),
@@ -102,7 +112,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(t.radiusFull),
                         ),
-                        textStyle: tt.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+                        textStyle: tt.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       showSelectedIcon: false,
                       emptySelectionAllowed: false,
@@ -118,9 +130,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                           label: Text(l10n.libraryTabVideo),
                         ),
                       ],
-                      selected: {
-                        _tabController.index == 0 ? 'audio' : 'video',
-                      },
+                      selected: {_tabController.index == 0 ? 'audio' : 'video'},
                       onSelectionChanged: (next) {
                         final v = next.single;
                         final i = v == 'audio' ? 0 : 1;
@@ -147,28 +157,33 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: EdgeInsets.all(t.space24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline_rounded, size: 48, color: cs.error),
-                SizedBox(height: t.space16),
-                Text(
-                  '${l10n.error}: $e',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
+        error:
+            (e, _) => Center(
+              child: Padding(
+                padding: EdgeInsets.all(t.space24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 48,
+                      color: cs.error,
+                    ),
+                    SizedBox(height: t.space16),
+                    Text(
+                      '${l10n.error}: $e',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    SizedBox(height: t.space16),
+                    FilledButton.tonal(
+                      onPressed: () => ref.invalidate(libraryMediaProvider),
+                      child: Text(l10n.retry),
+                    ),
+                  ],
                 ),
-                SizedBox(height: t.space16),
-                FilledButton.tonal(
-                  onPressed: () => ref.invalidate(libraryMediaProvider),
-                  child: Text(l10n.retry),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
       ),
     );
   }
@@ -216,13 +231,17 @@ class _AudioRow extends ConsumerWidget {
     final thumb = localThumbnailFile(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
-    final accent = paletteAsync.value?.accent;
+    final accent =
+        thumb == null
+            ? generativeAccentForSeed(media.coverSeed)
+            : paletteAsync.value?.accent;
 
     return MediaCardRow(
       title: media.title,
       subtitle: dur,
       badge: media.language,
       thumbnailFile: thumb,
+      coverSeed: media.coverSeed,
       isVideo: false,
       accentColor: accent,
       onTap: () => context.push('/player/${media.id}'),
@@ -249,7 +268,6 @@ class _VideoLibraryBody extends StatelessWidget {
         subtitle: l10n.libraryEmptyVideoHint,
       );
     }
-    
 
     return GridView.builder(
       padding: EdgeInsets.all(t.space16),
@@ -276,12 +294,16 @@ class _VideoTile extends ConsumerWidget {
     final thumb = localThumbnailFile(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
-    final accent = paletteAsync.value?.accent;
+    final accent =
+        thumb == null
+            ? generativeAccentForSeed(media.coverSeed)
+            : paletteAsync.value?.accent;
 
     return MediaCardTile(
       title: media.title,
       subtitle: '${l10n.miniPlayerMediaVideo} · $dur',
       thumbnailFile: thumb,
+      coverSeed: media.coverSeed,
       isVideo: true,
       accentColor: accent,
       onTap: () => context.push('/player/${media.id}'),

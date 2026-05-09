@@ -34,6 +34,7 @@ class Media {
     this.thumbnailPath,
     required this.durationMs,
     required this.language,
+
     /// SHA-256 content id (`vid` for video, `aid` for audio in weapp terms).
     required this.contentHash,
     required this.fileSize,
@@ -69,4 +70,13 @@ extension MediaSourceKind on Media {
 
   /// Local file playback (no `mediaUrl`); may still need relocation on this device.
   bool get isLocal => !isLink;
+}
+
+extension MediaCoverSeed on Media {
+  /// Whether a non-empty thumbnail path is stored (file may still be missing on disk).
+  bool get hasThumbnailPath =>
+      thumbnailPath != null && thumbnailPath!.trim().isNotEmpty;
+
+  /// Stable seed for deterministic generative artwork (aligned with web `GenerativeCover`).
+  String get coverSeed => contentHash.trim().isNotEmpty ? contentHash : id;
 }

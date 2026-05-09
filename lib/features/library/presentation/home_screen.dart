@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
+import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
@@ -69,7 +70,12 @@ class HomeScreen extends ConsumerWidget {
 
               // Recents section label
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, t.space12),
+                padding: EdgeInsets.fromLTRB(
+                  t.space24,
+                  0,
+                  t.space24,
+                  t.space12,
+                ),
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     l10n.homeRecentMedia,
@@ -91,13 +97,10 @@ class HomeScreen extends ConsumerWidget {
                     crossAxisSpacing: 12,
                     childAspectRatio: 16 / 14.5,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final m = recent[index];
-                      return _HomeMediaTile(media: m);
-                    },
-                    childCount: recent.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final m = recent[index];
+                    return _HomeMediaTile(media: m);
+                  }, childCount: recent.length),
                 ),
               ),
 
@@ -168,9 +171,7 @@ class _HomeInsightCards extends ConsumerWidget {
                   const Expanded(child: TodaysGoalCard()),
                   SizedBox(width: gap),
                   const Expanded(
-                    child: CommunityActivityCard(
-                      outerPadding: EdgeInsets.zero,
-                    ),
+                    child: CommunityActivityCard(outerPadding: EdgeInsets.zero),
                   ),
                 ],
               ),
@@ -203,13 +204,17 @@ class _HomeMediaTile extends ConsumerWidget {
     final thumb = localThumbnailFile(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
-    final accent = paletteAsync.value?.accent;
+    final accent =
+        thumb == null
+            ? generativeAccentForSeed(media.coverSeed)
+            : paletteAsync.value?.accent;
 
     return MediaCardTile(
       title: media.title,
       subtitle:
           '${isVideo ? l10n.miniPlayerMediaVideo : l10n.miniPlayerMediaAudio} · $dur',
       thumbnailFile: thumb,
+      coverSeed: media.coverSeed,
       isVideo: isVideo,
       accentColor: accent,
       onTap: () => context.push('/player/${media.id}'),
