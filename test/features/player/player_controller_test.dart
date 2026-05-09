@@ -104,6 +104,15 @@ void main() {
       expect(fake.openUris, contains('file:///a.mp3'));
     });
 
+    test('openMedia same id again does not reload uri', () async {
+      final id = await insertMedia(id: 'm1', uri: 'file:///a.mp3');
+      final n = container.read(playerControllerProvider.notifier);
+      await n.openMedia(id);
+      await n.openMedia(id);
+
+      expect(fake.openUris, ['file:///a.mp3']);
+    });
+
     test('openMedia ignores stale completion when superseded', () async {
       fake.openDelay = () => Future<void>.delayed(const Duration(milliseconds: 250));
       final idA = await insertMedia(id: 'a', uri: 'file:///a.mp3');

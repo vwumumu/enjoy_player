@@ -5,10 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'player_engine_provider.dart';
 
+Stream<T> _seedThenFollow<T>(T seed, Stream<T> rest) async* {
+  yield seed;
+  yield* rest;
+}
+
 final playerIsPlayingProvider = StreamProvider<bool>((ref) {
-  return ref.watch(playerEngineProvider).playing;
+  final engine = ref.watch(playerEngineProvider);
+  return _seedThenFollow(engine.player.state.playing, engine.playing);
 });
 
 final playerIsBufferingProvider = StreamProvider<bool>((ref) {
-  return ref.watch(playerEngineProvider).buffering;
+  final engine = ref.watch(playerEngineProvider);
+  return _seedThenFollow(engine.player.state.buffering, engine.buffering);
 });

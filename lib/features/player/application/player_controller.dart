@@ -63,6 +63,9 @@ class PlayerController extends _$PlayerController {
   }
 
   Future<void> openMedia(String mediaId) async {
+    // Re-entering `/player/:id` while this media is already active — skip reload.
+    if (state?.mediaId == mediaId) return;
+
     final gen = ++_openGeneration;
 
     final db = ref.read(appDatabaseProvider);
