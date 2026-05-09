@@ -21,7 +21,6 @@ class MediaCardTile extends StatefulWidget {
     this.thumbnailFile,
     this.subtitle,
     this.isVideo = false,
-    this.aspectRatio = 16 / 10,
     this.accentColor,
   });
 
@@ -30,7 +29,6 @@ class MediaCardTile extends StatefulWidget {
   final File? thumbnailFile;
   final String? subtitle;
   final bool isVideo;
-  final double aspectRatio;
   final Color? accentColor;
 
   @override
@@ -59,38 +57,83 @@ class _MediaCardTileState extends State<MediaCardTile> {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(t.radiusXl),
-            color: _hover
-                ? accent.withValues(alpha: 0.08)
-                : cs.surfaceContainerLow,
+            color:
+                _hover
+                    ? accent.withValues(alpha: 0.08)
+                    : cs.surfaceContainerLow,
             border: Border.all(
-              color: _hover
-                  ? accent.withValues(alpha: 0.6)
-                  : cs.outlineVariant.withValues(alpha: 0.25),
+              color:
+                  _hover
+                      ? accent.withValues(alpha: 0.6)
+                      : cs.outlineVariant.withValues(alpha: 0.25),
               width: _hover ? 1.5 : 1,
             ),
-            boxShadow: _hover
-                ? [
-                    BoxShadow(
-                      color: accent.withValues(alpha: 0.12),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : null,
+            boxShadow:
+                _hover
+                    ? [
+                      BoxShadow(
+                        color: accent.withValues(alpha: 0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                    : null,
           ),
+          // Grid cells fix total height; thumbnail must flex so title block never overflows.
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Thumbnail
-              AspectRatio(
-                aspectRatio: widget.aspectRatio,
-                child: _Thumbnail(
-                  file: widget.thumbnailFile,
-                  isVideo: widget.isVideo,
-                  cs: cs,
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(t.radiusXl - 1),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _Thumbnail(
+                        file: widget.thumbnailFile,
+                        isVideo: widget.isVideo,
+                        cs: cs,
+                      ),
+                      // Cinematic bottom scrim + play affordance for video
+                      if (widget.isVideo)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          height: 56,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withValues(alpha: 0.55),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (widget.isVideo)
+                        Positioned(
+                          right: t.space8,
+                          bottom: t.space8,
+                          child: Icon(
+                            Icons.play_circle_rounded,
+                            size: 36,
+                            color: Colors.white.withValues(alpha: 0.92),
+                            shadows: const [
+                              Shadow(blurRadius: 8, color: Colors.black54),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-              // Meta
+              // Meta — fixed vertical budget (ellipsis); never steals flex from overflow.
               Padding(
                 padding: EdgeInsets.fromLTRB(
                   t.space12,
@@ -100,23 +143,27 @@ class _MediaCardTileState extends State<MediaCardTile> {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       widget.title,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: tt.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
+                        height: 1.25,
                       ),
                     ),
                     if (widget.subtitle != null) ...[
-                      const SizedBox(height: 2),
+                      SizedBox(height: t.space4),
                       Text(
                         widget.subtitle!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
+                          height: 1.2,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ],
@@ -181,13 +228,15 @@ class _MediaCardRowState extends State<MediaCardRow> {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(t.radiusLg),
-            color: _hover
-                ? accent.withValues(alpha: 0.06)
-                : cs.surfaceContainerLow,
+            color:
+                _hover
+                    ? accent.withValues(alpha: 0.06)
+                    : cs.surfaceContainerLow,
             border: Border.all(
-              color: _hover
-                  ? accent.withValues(alpha: 0.45)
-                  : cs.outlineVariant.withValues(alpha: 0.2),
+              color:
+                  _hover
+                      ? accent.withValues(alpha: 0.45)
+                      : cs.outlineVariant.withValues(alpha: 0.2),
               width: _hover ? 1.5 : 1,
             ),
           ),
@@ -324,15 +373,13 @@ class _Badge extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: 0.4),
-        ),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.4)),
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: cs.onSurfaceVariant,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
       ),
     );
   }

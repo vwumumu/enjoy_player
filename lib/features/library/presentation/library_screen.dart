@@ -272,12 +272,15 @@ class _VideoTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final thumb = localThumbnailFile(media.thumbnailPath);
+    final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
     final accent = paletteAsync.value?.accent;
 
     return MediaCardTile(
       title: media.title,
+      subtitle: '${l10n.miniPlayerMediaVideo} · $dur',
       thumbnailFile: thumb,
       isVideo: true,
       accentColor: accent,
