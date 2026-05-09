@@ -37,6 +37,10 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
   /// Hit target for the invisible resize strip.
   static const double _kSplitterHitWidth = 12;
 
+  /// Stacked (narrow) layout: video stage matches TV-safe 16:9 frame width.
+  static const double _kMobileVideoAspectWidth = 16;
+  static const double _kMobileVideoAspectHeight = 9;
+
   /// User-chosen transcript width in pixels; `null` = use default fraction.
   double? _transcriptWidthPx;
 
@@ -122,11 +126,14 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
           );
         }
 
-        // Narrow layout: video stacked above the transcript.
+        // Narrow layout: 16:9 video (AppBar floats over it via extendBodyBehindAppBar),
+        // transcript fills the remaining space below.
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              flex: 2,
+            AspectRatio(
+              aspectRatio:
+                  _kMobileVideoAspectWidth / _kMobileVideoAspectHeight,
               child: ColoredBox(
                 color: Colors.black,
                 child: LayoutBuilder(
@@ -141,7 +148,6 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
               ),
             ),
             Expanded(
-              flex: 3,
               child: ColoredBox(
                 color: const Color(0xFF0F0F14),
                 child: widget.transcript,

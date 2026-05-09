@@ -98,6 +98,20 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
+        flexibleSpace: isVideo
+            ? DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.55),
+                      Colors.black.withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              )
+            : null,
         leading: IconButton(
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           icon: Icon(
@@ -120,7 +134,7 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
             color: isVideo ? Colors.white : cs.onSurface,
           ),
         ),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: PlayerAmbientBackdrop(
         accentColor: accent,
