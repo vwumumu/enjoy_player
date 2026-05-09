@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -75,10 +76,13 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                         color: cs.primaryContainer,
                         borderRadius: BorderRadius.circular(t.radiusSm),
                       ),
-                      child: Icon(
-                        Icons.play_arrow_rounded,
-                        color: cs.onPrimaryContainer,
-                        size: 20,
+                      clipBehavior: Clip.antiAlias,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: SvgPicture.asset(
+                          'assets/logo-light.svg',
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                     SizedBox(width: t.space12),

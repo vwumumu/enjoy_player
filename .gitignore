@@ -46,3 +46,7 @@ app.*.map.json
 
 # Optional Windows FFmpeg binary (see windows/ffmpeg/README.md)
 /windows/ffmpeg/ffmpeg.exe
+
+# Tooling (SVG→PNG helper)
+/tool/node_modules/
+.venv-svg/

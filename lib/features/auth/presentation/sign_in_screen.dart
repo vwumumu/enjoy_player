@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -156,10 +157,13 @@ class SignInScreen extends ConsumerWidget {
                         color: cs.primaryContainer,
                         borderRadius: BorderRadius.circular(t.radiusXl),
                       ),
-                      child: Icon(
-                        Icons.play_circle_rounded,
-                        size: 48,
-                        color: cs.onPrimaryContainer,
+                      clipBehavior: Clip.antiAlias,
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: SvgPicture.asset(
+                          'assets/logo-light.svg',
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                     SizedBox(height: t.space32),

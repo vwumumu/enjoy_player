@@ -14,6 +14,16 @@ flutter pub get
 dart run build_runner build   # after changing Drift / Riverpod annotations
 ```
 
+### App icon & logo assets
+
+The in-app logo uses [`assets/logo-light.svg`](assets/logo-light.svg). Launcher icons are generated from a raster export:
+
+```bash
+npm install --prefix tool
+node tool/svg_to_png.mjs           # writes assets/logo.png from the SVG
+dart run flutter_launcher_icons    # uses flutter_launcher_icons.yaml
+```
+
 ## Run
 
 ```bash
