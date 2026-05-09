@@ -83,10 +83,20 @@ class PlayerInteractions extends _$PlayerInteractions {
             startTimeSeconds: line.startSeconds,
             endTimeSeconds: line.endSeconds,
           );
+      await ref
+          .read(playerControllerProvider.notifier)
+          .seekToSeconds(
+            line.startSeconds,
+            echoWindowForSeekClamp: (
+              start: line.startSeconds,
+              end: line.endSeconds,
+            ),
+          );
+    } else {
+      await ref
+          .read(playerControllerProvider.notifier)
+          .seekToSeconds(line.startSeconds);
     }
-    await ref
-        .read(playerControllerProvider.notifier)
-        .seekToSeconds(line.startSeconds);
     await ref.read(playerControllerProvider.notifier).play();
   }
 

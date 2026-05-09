@@ -173,7 +173,6 @@ class PlayerController extends _$PlayerController {
           mediaId: mediaId,
           dexieTargetType: dexieTargetType,
           session: s,
-          echo: ref.read(echoModeProvider),
         );
       }
     });
@@ -229,15 +228,24 @@ class PlayerController extends _$PlayerController {
     }
   }
 
-  Future<void> seekTo(Duration target) async {
+  Future<void> seekTo(
+  Duration target, {
+  /// When set while echo is active, used for seek clamping instead of reading
+  /// [echoModeProvider] (avoids clamping to the previous segment on the same
+  /// stack as [EchoMode.activate]).
+  ({double start, double end})? echoWindowForSeekClamp,
+}) async {
     final echo = ref.read(echoModeProvider);
     var seconds = target.inMilliseconds / 1000.0;
     if (echo.active) {
       final dur = state?.durationSeconds;
+      final startT =
+          echoWindowForSeekClamp?.start ?? echo.startTimeSeconds;
+      final endT = echoWindowForSeekClamp?.end ?? echo.endTimeSeconds;
       final window = normalizeEchoWindow((
         active: true,
-        startTimeSeconds: echo.startTimeSeconds,
-        endTimeSeconds: echo.endTimeSeconds,
+        startTimeSeconds: startT,
+        endTimeSeconds: endT,
         durationSeconds: dur != null && dur > 0 ? dur : null,
       ));
       if (window != null) {
@@ -247,8 +255,14 @@ class PlayerController extends _$PlayerController {
     await engine.seek(Duration(milliseconds: (seconds * 1000).round()));
   }
 
-  Future<void> seekToSeconds(double seconds) async {
-    await seekTo(Duration(milliseconds: (seconds * 1000).round()));
+  Future<void> seekToSeconds(
+    double seconds, {
+    ({double start, double end})? echoWindowForSeekClamp,
+  }) async {
+    await seekTo(
+      Duration(milliseconds: (seconds * 1000).round()),
+      echoWindowForSeekClamp: echoWindowForSeekClamp,
+    );
   }
 
   Future<void> togglePlay() async {

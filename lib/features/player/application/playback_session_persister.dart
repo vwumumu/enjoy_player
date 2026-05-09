@@ -17,15 +17,17 @@ class PlaybackSessionPersister {
   final Ref _ref;
   Timer? _debounce;
 
-  /// Schedules a write using the latest [session] + [echo] snapshot.
+  /// Schedules a write using [session] for timing fields and **fresh** echo state
+  /// at flush time (avoids echo segment reverting in DB when debounce captures a
+  /// snapshot from before [EchoMode.activate], e.g. after tapping another cue).
   void schedule({
     required String mediaId,
     required String dexieTargetType,
     required PlaybackSession session,
-    required EchoState echo,
   }) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 450), () async {
+      final echo = _ref.read(echoModeProvider);
       final db = _ref.read(appDatabaseProvider);
       final existing = await db.echoSessionDao.getOrCreateLatestForTarget(
         dexieTargetType,

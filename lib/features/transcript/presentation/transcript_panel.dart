@@ -130,8 +130,10 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
       AsyncData(:final value) => value.inMilliseconds / 1000.0,
       _ => 0.0,
     };
+    final echo = ref.read(echoModeProvider);
     final active = transcriptActiveIndex(widget.lines, timeSec);
-    if (active < 0) return;
+    final activeForUi = transcriptActiveIndexForEchoUi(echo, active);
+    if (activeForUi < 0) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -162,6 +164,7 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
       _ => 0.0,
     };
     final active = transcriptActiveIndex(widget.lines, timeSec);
+    final activeForUi = transcriptActiveIndexForEchoUi(echo, active);
 
     ref.listen(displayPositionProvider, (_, _) {
       _scheduleScrollActiveLineIntoView();
@@ -183,7 +186,7 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
               mediaId: widget.mediaId,
               lines: lines,
               echo: echo,
-              activeCueIndex: active,
+              activeCueIndex: activeForUi,
               secondaryLines: secondaryLines,
               activeLineKey: _activeLineKey,
             ),
@@ -193,12 +196,16 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
         continue;
       }
 
-      final line = lines[i];
-      final isActive = i == active;
+      // Capture per-iteration values so the onTap closure does not bind
+      // `i` by reference (the surrounding while loop's `var i` is shared
+      // across iterations and otherwise leaks `lines.length` into taps).
+      final lineIndex = i;
+      final line = lines[lineIndex];
+      final isActive = lineIndex == activeForUi;
       final inEcho =
           echo.active &&
-          i >= echo.startLineIndex &&
-          i <= echo.endLineIndex;
+          lineIndex >= echo.startLineIndex &&
+          lineIndex <= echo.endLineIndex;
       final secondaryText = transcriptMatchSecondary(line, secondaryLines)?.text;
 
       Widget tile = _TranscriptLineTile(
@@ -210,7 +217,7 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
         onTap:
             () => ref
                 .read(playerInteractionsProvider.notifier)
-                .seekToLine(line, i),
+                .seekToLine(line, lineIndex),
       );
 
       if (isActive) {
@@ -373,6 +380,19 @@ int transcriptActiveIndex(List<TranscriptLine> lines, double t) {
   }
   for (var i = lines.length - 1; i >= 0; i--) {
     if (t >= lines[i].startSeconds) return i;
+  }
+  return -1;
+}
+
+/// When echo mode is on, only cues inside `[startLineIndex, endLineIndex]` may show
+/// the active highlight; otherwise [globalActive] is ignored for transcript UI (gaps
+/// can resolve to a cue outside the echo segment).
+int transcriptActiveIndexForEchoUi(EchoState echo, int globalActive) {
+  if (globalActive < 0) return -1;
+  if (!echo.active) return globalActive;
+  if (globalActive >= echo.startLineIndex &&
+      globalActive <= echo.endLineIndex) {
+    return globalActive;
   }
   return -1;
 }
