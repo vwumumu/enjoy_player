@@ -40,8 +40,9 @@ class AudioPlayerLayout extends ConsumerWidget {
         final wide = constraints.maxWidth >= 520;
         final artworkSize = wide ? 240.0 : 180.0;
 
-        // Add top padding for extendBodyBehindAppBar
-        final topPad = MediaQuery.of(context).padding.top + kToolbarHeight;
+        // Top padding: safe area + toolbar when AppBar visible (hidden while playing).
+        final topPad =
+            MediaQuery.of(context).padding.top + (isPlaying ? 0 : kToolbarHeight);
 
         return SingleChildScrollView(
           padding: EdgeInsets.only(top: topPad),

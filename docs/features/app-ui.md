@@ -43,7 +43,7 @@ Full `Brightness.light` `ThemeData` built alongside dark. Default `ThemeMode` is
 | `SignInScreen` | Editorial centered hero; no glass card |
 | `HomeScreen` | `EditorialHeader` + media grid via `MediaCardTile` |
 | `LibraryScreen` | `EditorialHeader` + `SegmentedButton` + `MediaCardRow` / `MediaCardTile` |
-| `ExpandedPlayerScreen` | `PlayerAmbientBackdrop` + transparent app bar |
+| `ExpandedPlayerScreen` | `PlayerAmbientBackdrop` + transparent app bar (hidden while playing, returns on pause) |
 | `AudioPlayerLayout` | `HeroArtwork` with dynamic rim light, "Now reading" editorial label |
 | `VideoPlayerLayout` | Warm-near-black `#0F0F14` transcript panel, 1px left border |
 | `GlobalTransportBar` | Glass kept; dynamic-accent play ring; tabular timestamps |
