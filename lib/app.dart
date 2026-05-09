@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
+import 'package:enjoy_player/core/layout/constrained_app_viewport.dart';
 import 'package:enjoy_player/core/routing/app_router.dart';
 import 'package:enjoy_player/core/theme/app_theme.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/app_hotkeys_keyboard_listener.dart';
@@ -39,25 +40,31 @@ class EnjoyApp extends ConsumerWidget {
           routerConfig: router,
           builder: (context, child) {
             return AppHotkeysKeyboardListener(
-              child: child ?? const SizedBox.shrink(),
+              child: ConstrainedAppViewport(
+                child: child ?? const SizedBox.shrink(),
+              ),
             );
           },
         );
       },
-      loading: () => MaterialApp(
-        theme: light,
-        darkTheme: dark,
-        themeMode: ThemeMode.system,
-        home: const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-      ),
-      error: (e, _) => MaterialApp(
-        theme: light,
-        darkTheme: dark,
-        themeMode: ThemeMode.system,
-        home: Scaffold(body: Center(child: Text('$e'))),
-      ),
+      loading:
+          () => MaterialApp(
+            theme: light,
+            darkTheme: dark,
+            themeMode: ThemeMode.system,
+            home: const ConstrainedAppViewport(
+              child: Scaffold(body: Center(child: CircularProgressIndicator())),
+            ),
+          ),
+      error:
+          (e, _) => MaterialApp(
+            theme: light,
+            darkTheme: dark,
+            themeMode: ThemeMode.system,
+            home: ConstrainedAppViewport(
+              child: Scaffold(body: Center(child: Text('$e'))),
+            ),
+          ),
     );
   }
 }

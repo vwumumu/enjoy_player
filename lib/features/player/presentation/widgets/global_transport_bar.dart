@@ -24,8 +24,8 @@ import '../../application/player_controller.dart';
 import '../../application/player_interactions.dart';
 import '../../application/player_preferences_provider.dart';
 import '../../application/player_state_providers.dart';
-import '../../application/player_ui_provider.dart';
 import '../../domain/playback_session.dart';
+
 final _log = logNamed('GlobalTransportBar');
 
 class GlobalTransportBar extends ConsumerStatefulWidget {
@@ -54,24 +54,37 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
     final playAccent = dynamicAccent ?? cs.primary;
     final path = GoRouterState.of(context).uri.path;
     final onPlayer = path.startsWith('/player/');
+    final narrowLayout =
+        MediaQuery.sizeOf(context).width <= t.breakpointTranscriptSideBySide;
+    final hideBottomMediaInfo = onPlayer && narrowLayout;
 
-    final ttPrev = hotkeyTooltipLabel(ref, 'player.prevLine', l10n.previousLine);
-    final ttNext = hotkeyTooltipLabel(ref, 'player.nextLine', l10n.nextLine);
-    final ttReplay = hotkeyTooltipLabel(ref, 'player.replayLine', l10n.replayLine);
-    final ttEcho = hotkeyTooltipLabel(ref, 'player.toggleEchoMode', l10n.echoMode);
-    final ttSpeed =
-        hotkeyTooltipPair(ref, 'player.slowDown', 'player.speedUp', l10n.speed);
-    final ttExpand = hotkeyTooltipLabel(
+    final ttPrev = hotkeyTooltipLabel(
       ref,
-      'player.toggleExpand',
-      onPlayer ? l10n.transportCollapse : l10n.transportExpand,
+      'player.prevLine',
+      l10n.previousLine,
     );
-    final ttPlayPause =
-        hotkeyTooltipLabel(
-          ref,
-          'player.togglePlay',
-          isPlaying ? l10n.pause : l10n.play,
-        );
+    final ttNext = hotkeyTooltipLabel(ref, 'player.nextLine', l10n.nextLine);
+    final ttReplay = hotkeyTooltipLabel(
+      ref,
+      'player.replayLine',
+      l10n.replayLine,
+    );
+    final ttEcho = hotkeyTooltipLabel(
+      ref,
+      'player.toggleEchoMode',
+      l10n.echoMode,
+    );
+    final ttSpeed = hotkeyTooltipPair(
+      ref,
+      'player.slowDown',
+      'player.speedUp',
+      l10n.speed,
+    );
+    final ttPlayPause = hotkeyTooltipLabel(
+      ref,
+      'player.togglePlay',
+      isPlaying ? l10n.pause : l10n.play,
+    );
 
     if (session == null) return const SizedBox.shrink();
 
@@ -87,191 +100,233 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
     final value =
         durationSec > 0 ? pos.inMilliseconds / 1000 / durationSec : 0.0;
 
-    final inner = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(t.space12, t.space8, t.space12, 0),
-          child: _TransportProgressStrip(
-            session: session,
-            position: pos,
-            fraction: value.clamp(0, 1),
-            hovered: _sliderHovered,
-            onHoverChanged: (v) => setState(() => _sliderHovered = v),
-          ),
+    final primaryTransport = <Widget>[
+      IconButton(
+        tooltip: ttPrev,
+        iconSize: 22,
+        onPressed:
+            isBuffering
+                ? null
+                : () =>
+                    ref.read(playerInteractionsProvider.notifier).prevLine(),
+        icon: const Icon(Icons.skip_previous_rounded),
+      ),
+      _PlayRingButton(
+        playing: isPlaying,
+        buffering: isBuffering,
+        tooltip: ttPlayPause,
+        accentColor: playAccent,
+        onPressed:
+            isBuffering
+                ? null
+                : () =>
+                    ref.read(playerControllerProvider.notifier).togglePlay(),
+      ),
+      IconButton(
+        tooltip: ttNext,
+        iconSize: 22,
+        onPressed:
+            isBuffering
+                ? null
+                : () =>
+                    ref.read(playerInteractionsProvider.notifier).nextLine(),
+        icon: const Icon(Icons.skip_next_rounded),
+      ),
+      IconButton(
+        tooltip: ttReplay,
+        iconSize: 22,
+        onPressed:
+            isBuffering
+                ? null
+                : () =>
+                    ref.read(playerInteractionsProvider.notifier).replayLine(),
+        icon: const Icon(Icons.replay_rounded),
+      ),
+    ];
+
+    final secondaryTransport = <Widget>[
+      IconButton(
+        tooltip: ttEcho,
+        color: echo.active ? t.echoActive : null,
+        style:
+            echo.active
+                ? IconButton.styleFrom(
+                  backgroundColor: t.echoActive.withValues(alpha: 0.18),
+                )
+                : null,
+        onPressed:
+            () => ref.read(playerInteractionsProvider.notifier).toggleEcho(),
+        icon: const Icon(Icons.mic_none_rounded),
+      ),
+      _CcButton(mediaId: session.mediaId),
+      PopupMenuButton<double>(
+        tooltip: ttSpeed,
+        onSelected:
+            (rate) => ref
+                .read(playerPreferencesCtrlProvider.notifier)
+                .setPlaybackRate(rate),
+        itemBuilder:
+            (ctx) => [
+              for (final r in [0.5, 0.75, 1.0, 1.25, 1.5, 2.0])
+                PopupMenuItem(value: r, child: Text('${r}x')),
+            ],
+        child: Padding(
+          padding: EdgeInsets.all(t.space8),
+          child: Icon(Icons.speed_rounded, color: cs.onSurfaceVariant),
         ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(t.space12, t.space4, t.space12, t.space12),
-          child: SizedBox(
-            height: 56,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (!onPlayer) ...[
-                          _TransportArtwork(session: session),
-                          SizedBox(width: t.space12),
-                        ],
-                        Flexible(
-                          child: Material(
-                            color: Colors.transparent,
-                            clipBehavior: Clip.antiAlias,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(t.radiusSm),
+      ),
+      const _TransportVolumeButton(),
+      IconButton(
+        tooltip: l10n.transportFullscreen,
+        icon: const Icon(Icons.fullscreen_rounded),
+        onPressed: () => _log.fine('fullscreen toggled (stub)'),
+      ),
+      if (!onPlayer)
+        IconButton(
+          tooltip: hotkeyTooltipLabel(
+            ref,
+            'player.toggleExpand',
+            l10n.transportExpand,
+          ),
+          icon: const Icon(Icons.open_in_full_rounded),
+          onPressed: () => context.push('/player/${session.mediaId}'),
+        ),
+    ];
+
+    final inner = Theme(
+      data: Theme.of(context).copyWith(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(visualDensity: VisualDensity.compact),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(t.space12, t.space8, t.space12, 0),
+            child: _TransportProgressStrip(
+              session: session,
+              position: pos,
+              fraction: value.clamp(0, 1),
+              hovered: _sliderHovered,
+              onHoverChanged: (v) => setState(() => _sliderHovered = v),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              t.space12,
+              t.space4,
+              t.space12,
+              t.space12,
+            ),
+            child: SizedBox(
+              height: 56,
+              child:
+                  hideBottomMediaInfo
+                      ? LayoutBuilder(
+                        builder: (context, constraints) {
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minWidth: constraints.maxWidth,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: primaryTransport,
+                                  ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: secondaryTransport,
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: InkWell(
-                              onTap: onPlayer
-                                  ? null
-                                  : () => context.push('/player/${session.mediaId}'),
-                              borderRadius: BorderRadius.circular(t.radiusSm),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: t.space4,
-                                  horizontal: t.space4,
-                                ),
-                                child: _TransportMeta(session: session),
+                          );
+                        },
+                      )
+                      : Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (!onPlayer) ...[
+                                    _TransportArtwork(session: session),
+                                    SizedBox(width: t.space12),
+                                  ],
+                                  Flexible(
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      clipBehavior: Clip.antiAlias,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          t.radiusSm,
+                                        ),
+                                      ),
+                                      child: InkWell(
+                                        onTap:
+                                            onPlayer
+                                                ? null
+                                                : () => context.push(
+                                                  '/player/${session.mediaId}',
+                                                ),
+                                        borderRadius: BorderRadius.circular(
+                                          t.radiusSm,
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: t.space4,
+                                            horizontal: t.space4,
+                                          ),
+                                          child: _TransportMeta(
+                                            session: session,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      tooltip: ttPrev,
-                      iconSize: 22,
-                      onPressed:
-                          isBuffering
-                              ? null
-                              : () => ref
-                                  .read(playerInteractionsProvider.notifier)
-                                  .prevLine(),
-                      icon: const Icon(Icons.skip_previous_rounded),
-                    ),
-                    _PlayRingButton(
-                      playing: isPlaying,
-                      buffering: isBuffering,
-                      tooltip: ttPlayPause,
-                      accentColor: playAccent,
-                      onPressed:
-                          isBuffering
-                              ? null
-                              : () => ref
-                                  .read(playerControllerProvider.notifier)
-                                  .togglePlay(),
-                    ),
-                    IconButton(
-                      tooltip: ttNext,
-                      iconSize: 22,
-                      onPressed:
-                          isBuffering
-                              ? null
-                              : () => ref
-                                  .read(playerInteractionsProvider.notifier)
-                                  .nextLine(),
-                      icon: const Icon(Icons.skip_next_rounded),
-                    ),
-                    IconButton(
-                      tooltip: ttReplay,
-                      iconSize: 22,
-                      onPressed:
-                          isBuffering
-                              ? null
-                              : () => ref
-                                  .read(playerInteractionsProvider.notifier)
-                                  .replayLine(),
-                      icon: const Icon(Icons.replay_rounded),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            tooltip: ttEcho,
-                            color: echo.active ? t.echoActive : null,
-                            style:
-                                echo.active
-                                    ? IconButton.styleFrom(
-                                      backgroundColor: t.echoActive.withValues(alpha: 0.18),
-                                    )
-                                    : null,
-                            onPressed:
-                                () => ref
-                                    .read(playerInteractionsProvider.notifier)
-                                    .toggleEcho(),
-                            icon: const Icon(Icons.mic_none_rounded),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: primaryTransport,
                           ),
-                          _CcButton(mediaId: session.mediaId),
-                          PopupMenuButton<double>(
-                            tooltip: ttSpeed,
-                            onSelected: (rate) => ref
-                                .read(playerPreferencesCtrlProvider.notifier)
-                                .setPlaybackRate(rate),
-                            itemBuilder:
-                                (ctx) => [
-                                  for (final r in [0.5, 0.75, 1.0, 1.25, 1.5, 2.0])
-                                    PopupMenuItem(value: r, child: Text('${r}x')),
-                                ],
-                            child: Padding(
-                              padding: EdgeInsets.all(t.space8),
-                              child: Icon(Icons.speed_rounded, color: cs.onSurfaceVariant),
+                          Expanded(
+                            flex: 2,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: secondaryTransport,
+                                ),
+                              ),
                             ),
-                          ),
-                          const _TransportVolumeButton(),
-                          IconButton(
-                            tooltip: l10n.transportFullscreen,
-                            icon: const Icon(Icons.fullscreen_rounded),
-                            onPressed: () => _log.fine('fullscreen toggled (stub)'),
-                          ),
-                          IconButton(
-                            tooltip: ttExpand,
-                            icon: Icon(
-                              onPlayer ? Icons.expand_more_rounded : Icons.open_in_full_rounded,
-                            ),
-                            onPressed: () {
-                              if (onPlayer) {
-                                ref.read(playerUiProvider.notifier).collapse();
-                                context.pop();
-                              } else {
-                                context.push('/player/${session.mediaId}');
-                              }
-                            },
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
 
     return GlassSurface(
       padding: EdgeInsets.zero,
-      child: Material(
-        color: Colors.transparent,
-        child: inner,
-      ),
+      child: Material(color: Colors.transparent, child: inner),
     );
   }
 }
@@ -284,7 +339,8 @@ class _TransportVolumeButton extends ConsumerStatefulWidget {
       _TransportVolumeButtonState();
 }
 
-class _TransportVolumeButtonState extends ConsumerState<_TransportVolumeButton> {
+class _TransportVolumeButtonState
+    extends ConsumerState<_TransportVolumeButton> {
   static const double _popupW = 44;
   static const double _popupH = 152;
   static const double _gap = 4;
@@ -363,7 +419,10 @@ class _TransportVolumeButtonState extends ConsumerState<_TransportVolumeButton> 
               color: cs.surfaceContainerHigh,
               clipBehavior: Clip.antiAlias,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 10,
+                ),
                 child: RotatedBox(
                   quarterTurns: 3,
                   child: SliderTheme(
@@ -578,10 +637,7 @@ class _TransportArtwork extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            cs.surfaceContainerHighest,
-            cs.surfaceContainer,
-          ],
+          colors: [cs.surfaceContainerHighest, cs.surfaceContainer],
         ),
       ),
       child: Center(
@@ -652,7 +708,9 @@ class _PlayRingButton extends StatelessWidget {
                           ),
                         )
                         : Icon(
-                          playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          playing
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
                           color: cs.onSurface,
                           size: 26,
                         ),
@@ -664,7 +722,6 @@ class _PlayRingButton extends StatelessWidget {
     );
   }
 }
-
 
 class _CcButton extends ConsumerWidget {
   const _CcButton({required this.mediaId});
