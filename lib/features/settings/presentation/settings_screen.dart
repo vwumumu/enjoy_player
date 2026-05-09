@@ -13,6 +13,7 @@ import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_settings_section.dart';
+import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -107,6 +108,112 @@ class SettingsScreen extends ConsumerWidget {
                       title: Text(l10n.loading),
                     ),
                     error: (Object e, StackTrace s) => const SizedBox.shrink(),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+
+          // ── Cloud sync ──────────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _SectionLabel(text: l10n.settingsSectionSync),
+          ),
+          SliverToBoxAdapter(
+            child: _SettingsCard(
+              padding: EdgeInsets.zero,
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final auth = ref.watch(authCtrlProvider);
+                  final snapAsync = ref.watch(syncQueueSnapshotProvider);
+                  return auth.when(
+                    data: (state) {
+                      if (state is AuthSignedIn) {
+                        return snapAsync.when(
+                          data: (snap) {
+                            final subtitle = snap.isFullyCaughtUp
+                                ? l10n.syncSettingsTileSubtitleUpToDate
+                                : l10n.syncSettingsTileSubtitleCounts(
+                                    snap.retryablePending,
+                                    snap.permanentlyFailed,
+                                  );
+                            return ListTile(
+                              leading: Icon(
+                                Icons.cloud_sync_outlined,
+                                color: cs.primary,
+                              ),
+                              title: Text(
+                                l10n.syncSettingsTileTitle,
+                                style: tt.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              subtitle: Text(
+                                subtitle,
+                                style: tt.bodyMedium?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                              trailing: const Icon(
+                                Icons.chevron_right_rounded,
+                              ),
+                              onTap: () => context.push('/settings/sync'),
+                            );
+                          },
+                          loading: () => ListTile(
+                            leading: Icon(
+                              Icons.cloud_sync_outlined,
+                              color: cs.primary,
+                            ),
+                            title: Text(l10n.syncSettingsTileTitle),
+                            subtitle: Text(l10n.loading),
+                          ),
+                          error: (Object e, StackTrace s) => ListTile(
+                            leading: Icon(
+                              Icons.cloud_sync_outlined,
+                              color: cs.error,
+                            ),
+                            title: Text(l10n.syncSettingsTileTitle),
+                            subtitle: Text('$e'),
+                            onTap: () => context.push('/settings/sync'),
+                          ),
+                        );
+                      }
+                      return ListTile(
+                        leading: Icon(
+                          Icons.cloud_off_outlined,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        title: Text(
+                          l10n.syncSettingsTileTitle,
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.syncSettingsTileSubtitleSignedOut,
+                          style: tt.bodyMedium?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => context.push('/settings/sync'),
+                      );
+                    },
+                    loading: () => ListTile(
+                      leading: SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: cs.primary,
+                        ),
+                      ),
+                      title: Text(l10n.syncSettingsTileTitle),
+                    ),
+                    error: (Object e, StackTrace s) =>
+                        const SizedBox.shrink(),
                   );
                 },
               ),

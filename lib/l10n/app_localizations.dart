@@ -1042,6 +1042,114 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get settingsSectionAccount;
 
+  /// No description provided for @settingsSectionSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync'**
+  String get settingsSectionSync;
+
+  /// No description provided for @syncSettingsTileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync status'**
+  String get syncSettingsTileTitle;
+
+  /// No description provided for @syncSettingsTileSubtitleSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to sync library and recordings'**
+  String get syncSettingsTileSubtitleSignedOut;
+
+  /// No description provided for @syncSettingsTileSubtitleUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get syncSettingsTileSubtitleUpToDate;
+
+  /// Subtitle on Settings → Sync status when there are queue items.
+  ///
+  /// In en, this message translates to:
+  /// **'{retryable} waiting · {failed} failed'**
+  String syncSettingsTileSubtitleCounts(int retryable, int failed);
+
+  /// No description provided for @syncScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync status'**
+  String get syncScreenTitle;
+
+  /// No description provided for @syncScreenLastSyncLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last successful sync'**
+  String get syncScreenLastSyncLabel;
+
+  /// No description provided for @syncScreenLastSyncNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get syncScreenLastSyncNever;
+
+  /// No description provided for @syncScreenStatRetryable.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to upload'**
+  String get syncScreenStatRetryable;
+
+  /// No description provided for @syncScreenStatFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed permanently'**
+  String get syncScreenStatFailed;
+
+  /// No description provided for @syncScreenSyncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncScreenSyncNow;
+
+  /// No description provided for @syncScreenRetryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry failed items'**
+  String get syncScreenRetryFailed;
+
+  /// No description provided for @syncScreenSignedOutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your Enjoy account to sync metadata across devices.'**
+  String get syncScreenSignedOutBody;
+
+  /// No description provided for @syncScreenGoSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get syncScreenGoSignIn;
+
+  /// No description provided for @syncSnackSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync finished successfully.'**
+  String get syncSnackSuccess;
+
+  /// No description provided for @syncSnackIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync finished: {synced} succeeded, {failed} failed.'**
+  String syncSnackIssues(int synced, int failed);
+
+  /// No description provided for @syncQueueDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue details'**
+  String get syncQueueDetails;
+
+  /// No description provided for @syncQueueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in the queue.'**
+  String get syncQueueEmpty;
+
   /// No description provided for @settingsSectionAdvanced.
   ///
   /// In en, this message translates to:

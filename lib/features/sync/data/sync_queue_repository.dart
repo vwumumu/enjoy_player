@@ -5,6 +5,27 @@ import 'package:drift/drift.dart';
 
 import 'package:enjoy_player/data/db/app_database.dart';
 
+/// Live counts + capped rows for sync status UI.
+final class SyncQueueSnapshot {
+  const SyncQueueSnapshot({
+    required this.retryablePending,
+    required this.permanentlyFailed,
+    required this.detailRows,
+  });
+
+  /// Rows still eligible for retry (`retryCount < 5`).
+  final int retryablePending;
+
+  /// Exhausted retries (`retryCount >= 5`).
+  final int permanentlyFailed;
+
+  /// Oldest-first subset for expandable UI (capped).
+  final List<SyncQueueRow> detailRows;
+
+  bool get isFullyCaughtUp =>
+      retryablePending == 0 && permanentlyFailed == 0;
+}
+
 class SyncQueueRepository {
   SyncQueueRepository(this._db);
 
@@ -58,6 +79,31 @@ class SyncQueueRepository {
           ..orderBy([(t) => OrderingTerm.asc(t.createdAt)])
           ..limit(limit))
         .get();
+  }
+
+  /// Watch queue for live status (counts + capped detail list).
+  Stream<SyncQueueSnapshot> watchSnapshot({int detailLimit = 50}) {
+    return _db.select(_db.syncQueue).watch().map((rows) {
+      var retryable = 0;
+      var failed = 0;
+      for (final r in rows) {
+        if (r.retryCount >= 5) {
+          failed++;
+        } else {
+          retryable++;
+        }
+      }
+      final sorted = [...rows]
+        ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      final detail = sorted.length <= detailLimit
+          ? sorted
+          : sorted.sublist(0, detailLimit);
+      return SyncQueueSnapshot(
+        retryablePending: retryable,
+        permanentlyFailed: failed,
+        detailRows: detail,
+      );
+    });
   }
 
   Future<void> removeById(int id) => _db.syncQueueDao.deleteId(id);

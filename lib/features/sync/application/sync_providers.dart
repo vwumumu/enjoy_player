@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
+import 'package:enjoy_player/data/db/settings_keys.dart';
 import 'package:enjoy_player/data/api/services/audio_api.dart';
 import 'package:enjoy_player/data/api/services/recording_api.dart';
 import 'package:enjoy_player/data/api/services/video_api.dart';
@@ -20,6 +21,16 @@ part 'sync_providers.g.dart';
 @Riverpod(keepAlive: true)
 SyncQueueRepository syncQueueRepository(Ref ref) =>
     SyncQueueRepository(ref.watch(appDatabaseProvider));
+
+@Riverpod(keepAlive: true)
+Future<String?> syncLastFullSyncAt(Ref ref) =>
+    ref.watch(appDatabaseProvider).settingsDao.getValue(
+          SettingsKeys.syncLastFullSyncAt,
+        );
+
+@Riverpod(keepAlive: true)
+Stream<SyncQueueSnapshot> syncQueueSnapshot(Ref ref) =>
+    ref.watch(syncQueueRepositoryProvider).watchSnapshot(detailLimit: 50);
 
 @Riverpod(keepAlive: true)
 SyncUploadService syncUploadService(Ref ref) => SyncUploadService(

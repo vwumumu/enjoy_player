@@ -57,6 +57,81 @@ final class SyncQueueRepositoryProvider
 String _$syncQueueRepositoryHash() =>
     r'13004c01d63849f75b9590e23f906e1432377d69';
 
+@ProviderFor(syncLastFullSyncAt)
+final syncLastFullSyncAtProvider = SyncLastFullSyncAtProvider._();
+
+final class SyncLastFullSyncAtProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
+    with $FutureModifier<String?>, $FutureProvider<String?> {
+  SyncLastFullSyncAtProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'syncLastFullSyncAtProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncLastFullSyncAtHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<String?> create(Ref ref) {
+    return syncLastFullSyncAt(ref);
+  }
+}
+
+String _$syncLastFullSyncAtHash() =>
+    r'75ffa58beec95c48c8729915ab4888a656f566eb';
+
+@ProviderFor(syncQueueSnapshot)
+final syncQueueSnapshotProvider = SyncQueueSnapshotProvider._();
+
+final class SyncQueueSnapshotProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<SyncQueueSnapshot>,
+          SyncQueueSnapshot,
+          Stream<SyncQueueSnapshot>
+        >
+    with
+        $FutureModifier<SyncQueueSnapshot>,
+        $StreamProvider<SyncQueueSnapshot> {
+  SyncQueueSnapshotProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'syncQueueSnapshotProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncQueueSnapshotHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<SyncQueueSnapshot> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<SyncQueueSnapshot> create(Ref ref) {
+    return syncQueueSnapshot(ref);
+  }
+}
+
+String _$syncQueueSnapshotHash() => r'f584b6e742df5204218c7e3306e22a500c637000';
+
 @ProviderFor(syncUploadService)
 final syncUploadServiceProvider = SyncUploadServiceProvider._();
 

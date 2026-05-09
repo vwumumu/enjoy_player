@@ -16,6 +16,7 @@ import 'package:enjoy_player/features/library/presentation/library_screen.dart';
 import 'package:enjoy_player/features/player/presentation/expanded_player_screen.dart';
 import 'package:enjoy_player/features/player/presentation/root_shell.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_screen.dart';
+import 'package:enjoy_player/features/settings/presentation/sync_status_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -77,6 +78,10 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: '/settings',
             builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: '/settings/sync',
+            builder: (context, state) => const SyncStatusScreen(),
           ),
           GoRoute(
             path: '/profile',

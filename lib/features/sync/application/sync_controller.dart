@@ -7,6 +7,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
+import 'package:enjoy_player/data/db/app_database_provider.dart';
+import 'package:enjoy_player/data/db/settings_keys.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
@@ -44,7 +46,9 @@ class SyncCtrl extends _$SyncCtrl {
 
   Future<void> _onSignedIn() async {
     try {
-      await ref.read(syncEngineProvider).fullSync(const SyncOptions());
+      final result =
+          await ref.read(syncEngineProvider).fullSync(const SyncOptions());
+      await _persistLastFullSyncTimestamp(result);
     } catch (e, st) {
       _log.warning('fullSync on sign-in failed', e, st);
     }
@@ -85,8 +89,23 @@ class SyncCtrl extends _$SyncCtrl {
         errors: ['Signed out'],
       );
     }
-    return ref
+    final result = await ref
         .read(syncEngineProvider)
         .fullSync(SyncOptions(resetFailed: resetFailed));
+    await _persistLastFullSyncTimestamp(result);
+    return result;
+  }
+
+  Future<void> _persistLastFullSyncTimestamp(SyncResult result) async {
+    if (!result.success) return;
+    try {
+      await ref.read(appDatabaseProvider).settingsDao.setValue(
+            SettingsKeys.syncLastFullSyncAt,
+            DateTime.now().toUtc().toIso8601String(),
+          );
+      ref.invalidate(syncLastFullSyncAtProvider);
+    } catch (e, st) {
+      _log.warning('persist sync.last_full_sync_at failed', e, st);
+    }
   }
 }

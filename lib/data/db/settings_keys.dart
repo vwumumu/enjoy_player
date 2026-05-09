@@ -13,6 +13,9 @@ abstract final class SettingsKeys {
   static const String syncCursorAudio = 'sync.cursor.audio';
   static const String syncCursorVideo = 'sync.cursor.video';
   static const String syncCursorRecording = 'sync.cursor.recording';
+
+  /// ISO-8601 UTC timestamp of last fully successful full sync (downloads + queue).
+  static const String syncLastFullSyncAt = 'sync.last_full_sync_at';
 }
 
 /// Default Enjoy API origin (no trailing slash).

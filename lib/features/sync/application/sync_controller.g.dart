@@ -40,7 +40,7 @@ final class SyncCtrlProvider extends $NotifierProvider<SyncCtrl, int> {
   }
 }
 
-String _$syncCtrlHash() => r'81fe5f5f92aa3454989347de75342b14f556c085';
+String _$syncCtrlHash() => r'ae268f36cd47e307a22f281cb3c10d856e850fce';
 
 abstract class _$SyncCtrl extends $Notifier<int> {
   int build();

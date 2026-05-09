@@ -174,6 +174,37 @@
     }
   },
   "settingsSectionAccount": "Account",
+  "settingsSectionSync": "Cloud sync",
+  "syncSettingsTileTitle": "Sync status",
+  "syncSettingsTileSubtitleSignedOut": "Sign in to sync library and recordings",
+  "syncSettingsTileSubtitleUpToDate": "Up to date",
+  "syncSettingsTileSubtitleCounts": "{retryable} waiting · {failed} failed",
+  "@syncSettingsTileSubtitleCounts": {
+    "description": "Subtitle on Settings → Sync status when there are queue items.",
+    "placeholders": {
+      "retryable": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "syncScreenTitle": "Sync status",
+  "syncScreenLastSyncLabel": "Last successful sync",
+  "syncScreenLastSyncNever": "Never",
+  "syncScreenStatRetryable": "Waiting to upload",
+  "syncScreenStatFailed": "Failed permanently",
+  "syncScreenSyncNow": "Sync now",
+  "syncScreenRetryFailed": "Retry failed items",
+  "syncScreenSignedOutBody": "Sign in with your Enjoy account to sync metadata across devices.",
+  "syncScreenGoSignIn": "Sign in",
+  "syncSnackSuccess": "Sync finished successfully.",
+  "syncSnackIssues": "Sync finished: {synced} succeeded, {failed} failed.",
+  "@syncSnackIssues": {
+    "placeholders": {
+      "synced": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "syncQueueDetails": "Queue details",
+  "syncQueueEmpty": "Nothing in the queue.",
   "settingsSectionAdvanced": "Advanced",
   "settingsApiBaseUrl": "API base URL",
   "settingsApiBaseUrlHint": "Example: https://enjoy.bot",

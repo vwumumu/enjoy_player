@@ -498,6 +498,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionAccount => 'Account';
 
   @override
+  String get settingsSectionSync => 'Cloud sync';
+
+  @override
+  String get syncSettingsTileTitle => 'Sync status';
+
+  @override
+  String get syncSettingsTileSubtitleSignedOut =>
+      'Sign in to sync library and recordings';
+
+  @override
+  String get syncSettingsTileSubtitleUpToDate => 'Up to date';
+
+  @override
+  String syncSettingsTileSubtitleCounts(int retryable, int failed) {
+    return '$retryable waiting · $failed failed';
+  }
+
+  @override
+  String get syncScreenTitle => 'Sync status';
+
+  @override
+  String get syncScreenLastSyncLabel => 'Last successful sync';
+
+  @override
+  String get syncScreenLastSyncNever => 'Never';
+
+  @override
+  String get syncScreenStatRetryable => 'Waiting to upload';
+
+  @override
+  String get syncScreenStatFailed => 'Failed permanently';
+
+  @override
+  String get syncScreenSyncNow => 'Sync now';
+
+  @override
+  String get syncScreenRetryFailed => 'Retry failed items';
+
+  @override
+  String get syncScreenSignedOutBody =>
+      'Sign in with your Enjoy account to sync metadata across devices.';
+
+  @override
+  String get syncScreenGoSignIn => 'Sign in';
+
+  @override
+  String get syncSnackSuccess => 'Sync finished successfully.';
+
+  @override
+  String syncSnackIssues(int synced, int failed) {
+    return 'Sync finished: $synced succeeded, $failed failed.';
+  }
+
+  @override
+  String get syncQueueDetails => 'Queue details';
+
+  @override
+  String get syncQueueEmpty => 'Nothing in the queue.';
+
+  @override
   String get settingsSectionAdvanced => 'Advanced';
 
   @override
