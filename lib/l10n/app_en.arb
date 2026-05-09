@@ -228,5 +228,14 @@
       }
     }
   },
-  "homeNoActiveUsers": "No active users"
+  "homeNoActiveUsers": "No active users",
+  "homeTodaysGoal": "Today's Goal",
+  "homeMinutes": "min",
+  "homeCompleted": "completed",
+  "homeGoalCompleted": "Goal completed! Great job!",
+  "homeGoalAlmostThere": "Almost there! Keep going!",
+  "homeGoalHalfway": "Halfway there! You can do it!",
+  "homeGoalGoodStart": "Good start! Keep practicing!",
+  "homeGoalJustStarted": "Just started! Every minute counts!",
+  "homeGoalStartNow": "Start your practice now!"
 }

@@ -2,15 +2,18 @@
 library;
 
 import 'package:enjoy_player/data/api/api_client.dart';
+import 'package:enjoy_player/data/api/recording_client_platform.dart';
 
 typedef JsonMap = Map<String, dynamic>;
 
 class RecordingApi {
-  RecordingApi(this._client, {this.clientPlatform = 'flutter'});
+  RecordingApi(this._client, {String? clientPlatform})
+      : clientPlatform = clientPlatform ?? recordingClientPlatformValue();
 
   final ApiClient _client;
 
-  /// Sent as `client_platform` (snake) on upload metadata.
+  /// Sent as `client_platform` (snake) on upload metadata (`windows`, `macos`,
+  /// `android`, `ios`, … — never a generic client name like `flutter`).
   final String clientPlatform;
 
   static const _path = '/api/v1/mine/recordings';

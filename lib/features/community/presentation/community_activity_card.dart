@@ -46,13 +46,17 @@ String _initials(String name) {
 }
 
 class CommunityActivityCard extends ConsumerWidget {
-  const CommunityActivityCard({super.key});
+  const CommunityActivityCard({super.key, this.outerPadding});
+
+  /// When null, applies default bottom spacing. Use [EdgeInsets.zero] when embedded in a grid.
+  final EdgeInsetsGeometry? outerPadding;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(activeUsersProvider);
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
+    final outer = outerPadding ?? EdgeInsets.only(bottom: t.space24);
 
     return async.when(
       skipLoadingOnReload: true,
@@ -64,7 +68,7 @@ class CommunityActivityCard extends ConsumerWidget {
             data.recordingsDurationToday != null;
 
         return Padding(
-          padding: EdgeInsets.only(bottom: t.space24),
+          padding: outer,
           child: Card(
             margin: EdgeInsets.zero,
             clipBehavior: Clip.antiAlias,
@@ -97,10 +101,11 @@ class CommunityActivityCard extends ConsumerWidget {
           ),
         );
       },
-      loading: () => _LoadingCard(t: t, cs: cs),
+      loading: () => _LoadingCard(t: t, cs: cs, outerPadding: outer),
       error: (e, _) => _ErrorCard(
         t: t,
         cs: cs,
+        outerPadding: outer,
         onRetry: () => ref.invalidate(activeUsersProvider),
       ),
     );
@@ -108,16 +113,21 @@ class CommunityActivityCard extends ConsumerWidget {
 }
 
 class _LoadingCard extends StatelessWidget {
-  const _LoadingCard({required this.t, required this.cs});
+  const _LoadingCard({
+    required this.t,
+    required this.cs,
+    required this.outerPadding,
+  });
 
   final EnjoyThemeTokens t;
   final ColorScheme cs;
+  final EdgeInsetsGeometry outerPadding;
 
   @override
   Widget build(BuildContext context) {
     final base = cs.surfaceContainerHighest.withValues(alpha: 0.6);
     return Padding(
-      padding: EdgeInsets.only(bottom: t.space24),
+      padding: outerPadding,
       child: Card(
         margin: EdgeInsets.zero,
         child: Padding(
@@ -175,18 +185,20 @@ class _ErrorCard extends StatelessWidget {
   const _ErrorCard({
     required this.t,
     required this.cs,
+    required this.outerPadding,
     required this.onRetry,
   });
 
   final EnjoyThemeTokens t;
   final ColorScheme cs;
+  final EdgeInsetsGeometry outerPadding;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Padding(
-      padding: EdgeInsets.only(bottom: t.space24),
+      padding: outerPadding,
       child: Card(
         margin: EdgeInsets.zero,
         child: Padding(

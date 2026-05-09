@@ -612,4 +612,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeNoActiveUsers => 'No active users';
+
+  @override
+  String get homeTodaysGoal => 'Today\'s Goal';
+
+  @override
+  String get homeMinutes => 'min';
+
+  @override
+  String get homeCompleted => 'completed';
+
+  @override
+  String get homeGoalCompleted => 'Goal completed! Great job!';
+
+  @override
+  String get homeGoalAlmostThere => 'Almost there! Keep going!';
+
+  @override
+  String get homeGoalHalfway => 'Halfway there! You can do it!';
+
+  @override
+  String get homeGoalGoodStart => 'Good start! Keep practicing!';
+
+  @override
+  String get homeGoalJustStarted => 'Just started! Every minute counts!';
+
+  @override
+  String get homeGoalStartNow => 'Start your practice now!';
 }

@@ -1245,6 +1245,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No active users'**
   String get homeNoActiveUsers;
+
+  /// No description provided for @homeTodaysGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Goal'**
+  String get homeTodaysGoal;
+
+  /// No description provided for @homeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get homeMinutes;
+
+  /// No description provided for @homeCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'completed'**
+  String get homeCompleted;
+
+  /// No description provided for @homeGoalCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal completed! Great job!'**
+  String get homeGoalCompleted;
+
+  /// No description provided for @homeGoalAlmostThere.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there! Keep going!'**
+  String get homeGoalAlmostThere;
+
+  /// No description provided for @homeGoalHalfway.
+  ///
+  /// In en, this message translates to:
+  /// **'Halfway there! You can do it!'**
+  String get homeGoalHalfway;
+
+  /// No description provided for @homeGoalGoodStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Good start! Keep practicing!'**
+  String get homeGoalGoodStart;
+
+  /// No description provided for @homeGoalJustStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Just started! Every minute counts!'**
+  String get homeGoalJustStarted;
+
+  /// No description provided for @homeGoalStartNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your practice now!'**
+  String get homeGoalStartNow;
 }
 
 class _AppLocalizationsDelegate

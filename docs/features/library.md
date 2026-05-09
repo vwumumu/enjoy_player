@@ -8,7 +8,8 @@
 
 ## Home
 
-- When **signed in**, the Home screen shows a **Community activity** card below recent media (or below the empty-state import button) that loads `GET /api/v1/users/active` with the device timezone. Signed-out users do not see the card.
+- When **signed in**, the Home screen shows a **Today's Goal** card (practice minutes vs. profile goal from `GET /api/v1/mine/stats` and `UserProfile.goal`, default 30) and a **Community activity** card in a **responsive two-column row** on wide viewports (≈720px+), or a **stacked column** on narrow screens. The block is **above** the recent media grid. Signed-out users do not see these cards.
+- **Community activity** loads `GET /api/v1/users/active` with the device timezone.
 
 ## Future
 

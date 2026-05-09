@@ -12,7 +12,10 @@ import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
 import 'package:enjoy_player/core/theme/widgets/media_card.dart';
 import 'package:enjoy_player/core/utils/local_thumbnail.dart';
 import 'package:enjoy_player/core/utils/time_format.dart';
+import 'package:enjoy_player/features/auth/application/auth_controller.dart';
+import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/community/presentation/community_activity_card.dart';
+import 'package:enjoy_player/features/library/presentation/todays_goal_card.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import '../application/library_media_provider.dart';
@@ -61,6 +64,9 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
 
+              // Today's goal + community (signed-in, responsive grid)
+              const SliverToBoxAdapter(child: _HomeInsightCards()),
+
               // Recents section label
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, t.space12),
@@ -95,13 +101,6 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
 
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(t.space24, t.space24, t.space24, 0),
-                sliver: const SliverToBoxAdapter(
-                  child: CommunityActivityCard(),
-                ),
-              ),
-
               SliverToBoxAdapter(child: SizedBox(height: t.space24)),
             ],
           );
@@ -130,6 +129,61 @@ class HomeScreen extends ConsumerWidget {
                 ],
               ),
             ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _HomeInsightCards extends ConsumerWidget {
+  const _HomeInsightCards();
+
+  static const double _kWideBreakpoint = 720;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authAsync = ref.watch(authCtrlProvider);
+    final t = EnjoyThemeTokens.of(context);
+
+    final isSignedIn = authAsync.maybeWhen(
+      data: (s) => s is AuthSignedIn,
+      orElse: () => false,
+    );
+
+    if (!isSignedIn) return const SizedBox.shrink();
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(t.space24, t.space24, t.space24, t.space24),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= _kWideBreakpoint;
+          final gap = t.space12;
+
+          if (wide) {
+            return IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Expanded(child: TodaysGoalCard()),
+                  SizedBox(width: gap),
+                  const Expanded(
+                    child: CommunityActivityCard(
+                      outerPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const TodaysGoalCard(),
+              SizedBox(height: gap),
+              const CommunityActivityCard(outerPadding: EdgeInsets.zero),
+            ],
           );
         },
       ),
