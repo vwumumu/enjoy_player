@@ -190,6 +190,12 @@ abstract class AppLocalizations {
   /// **'Fullscreen'**
   String get transportFullscreen;
 
+  /// No description provided for @transportExitFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit fullscreen'**
+  String get transportExitFullscreen;
+
   /// No description provided for @transportMore.
   ///
   /// In en, this message translates to:
@@ -783,6 +789,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Toggle player expand/collapse'**
   String get hotkeysDescToggleExpand;
+
+  /// No description provided for @hotkeysDescToggleFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle fullscreen'**
+  String get hotkeysDescToggleFullscreen;
 
   /// No description provided for @hotkeysDescPrevLine.
   ///

@@ -16,6 +16,8 @@ import 'package:enjoy_player/features/library/application/library_search_focus_p
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/application/player_ui_provider.dart';
 import 'package:enjoy_player/features/shadow_reading/application/shadow_reading_hotkey_bus.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -70,6 +72,15 @@ class _AppHotkeysKeyboardListenerState
 
     final ctrl = ref.read(hotkeysCtrlProvider.notifier);
     final goRouter = ref.read(appRouterProvider);
+
+    // On desktop: if the window is fullscreen, Escape exits fullscreen first
+    // so the user doesn't also pop a route on the same keypress.
+    if (isDesktop && ref.read(windowFullscreenProvider)) {
+      if (_matches(event, ctrl, 'modal.close')) {
+        unawaited(ref.read(windowFullscreenProvider.notifier).setFullscreen(false));
+        return true;
+      }
+    }
 
     // Modal: Escape closes nested routes (dialogs, sheets).
     if (_matches(event, ctrl, 'modal.close')) {
@@ -126,6 +137,13 @@ class _AppHotkeysKeyboardListenerState
         } else {
           goRouter.push('/player/${session.mediaId}');
         }
+        return true;
+      }
+
+      if (_matches(event, ctrl, 'player.toggleFullscreen') &&
+          isDesktop &&
+          session.mediaType == 'video') {
+        unawaited(ref.read(windowFullscreenProvider.notifier).toggle());
         return true;
       }
 

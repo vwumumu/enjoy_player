@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
 import 'package:enjoy_player/core/theme/widgets/app_background.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import '../application/embedded_tracks_notifier.dart';
@@ -104,9 +105,10 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
             color: isVideo ? Colors.white : cs.onSurface,
             size: 28,
           ),
-          onPressed: () {
+          onPressed: () async {
+            await ref.read(windowFullscreenProvider.notifier).setFullscreen(false);
             ref.read(playerUiProvider.notifier).collapse();
-            context.pop();
+            if (context.mounted) context.pop();
           },
         ),
         title: Text(

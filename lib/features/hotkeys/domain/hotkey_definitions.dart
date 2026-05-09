@@ -48,6 +48,14 @@ final List<HotkeyDefinition> hotkeyDefinitions = [
     customizable: true,
   ),
   const HotkeyDefinition(
+    id: 'player.toggleFullscreen',
+    defaultKeys: 'f11',
+    description: 'Toggle fullscreen',
+    descriptionKey: 'toggleFullscreen',
+    scope: HotkeyScope.player,
+    customizable: true,
+  ),
+  const HotkeyDefinition(
     id: 'player.prevLine',
     defaultKeys: 'a',
     description: 'Play previous line',

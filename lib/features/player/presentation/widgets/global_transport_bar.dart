@@ -7,12 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/glass_surface.dart';
 import 'package:enjoy_player/core/utils/local_thumbnail.dart';
 import 'package:enjoy_player/core/utils/time_format.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -25,8 +26,6 @@ import '../../application/player_interactions.dart';
 import '../../application/player_preferences_provider.dart';
 import '../../application/player_state_providers.dart';
 import '../../domain/playback_session.dart';
-
-final _log = logNamed('GlobalTransportBar');
 
 class GlobalTransportBar extends ConsumerStatefulWidget {
   const GlobalTransportBar({super.key});
@@ -176,11 +175,7 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
         ),
       ),
       const _TransportVolumeButton(),
-      IconButton(
-        tooltip: l10n.transportFullscreen,
-        icon: const Icon(Icons.fullscreen_rounded),
-        onPressed: () => _log.fine('fullscreen toggled (stub)'),
-      ),
+      _FullscreenButton(isVideo: session.mediaType == 'video'),
       if (!onPlayer)
         IconButton(
           tooltip: hotkeyTooltipLabel(
@@ -743,7 +738,7 @@ class _CcButton extends ConsumerWidget {
           icon: const Icon(Icons.closed_caption_outlined),
           onPressed: () => showSubtitleTrackPicker(context, ref, mediaId),
         ),
-        if (hasTrack)
+          if (hasTrack)
           Positioned(
             top: 8,
             right: 8,
@@ -757,6 +752,34 @@ class _CcButton extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _FullscreenButton extends ConsumerWidget {
+  const _FullscreenButton({required this.isVideo});
+
+  final bool isVideo;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Button is only enabled for video on desktop; hidden otherwise.
+    if (!isDesktop || !isVideo) return const SizedBox.shrink();
+
+    final isFullscreen = ref.watch(windowFullscreenProvider);
+    final tooltip =
+        isFullscreen ? l10n.transportExitFullscreen : l10n.transportFullscreen;
+    final icon = isFullscreen
+        ? const Icon(Icons.fullscreen_exit_rounded)
+        : const Icon(Icons.fullscreen_rounded);
+
+    return IconButton(
+      tooltip: tooltip,
+      icon: icon,
+      onPressed: () =>
+          ref.read(windowFullscreenProvider.notifier).toggle(),
     );
   }
 }

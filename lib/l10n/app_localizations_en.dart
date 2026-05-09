@@ -59,6 +59,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transportFullscreen => 'Fullscreen';
 
   @override
+  String get transportExitFullscreen => 'Exit fullscreen';
+
+  @override
   String get transportMore => 'More';
 
   @override
@@ -362,6 +365,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hotkeysDescToggleExpand => 'Toggle player expand/collapse';
+
+  @override
+  String get hotkeysDescToggleFullscreen => 'Toggle fullscreen';
 
   @override
   String get hotkeysDescPrevLine => 'Play previous line';

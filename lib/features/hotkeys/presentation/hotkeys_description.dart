@@ -16,6 +16,8 @@ String hotkeyDescription(AppLocalizations l10n, HotkeyDefinition d) {
       return l10n.hotkeysDescTogglePlay;
     case 'toggleExpand':
       return l10n.hotkeysDescToggleExpand;
+    case 'toggleFullscreen':
+      return l10n.hotkeysDescToggleFullscreen;
     case 'prevLine':
       return l10n.hotkeysDescPrevLine;
     case 'nextLine':
