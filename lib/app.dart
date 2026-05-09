@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/layout/constrained_app_viewport.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/routing/app_router.dart';
 import 'package:enjoy_player/core/theme/app_theme.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/app_hotkeys_keyboard_listener.dart';
@@ -39,11 +40,12 @@ class EnjoyApp extends ConsumerWidget {
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,
           builder: (context, child) {
-            return AppHotkeysKeyboardListener(
-              child: ConstrainedAppViewport(
-                child: child ?? const SizedBox.shrink(),
-              ),
+            final viewport = ConstrainedAppViewport(
+              child: child ?? const SizedBox.shrink(),
             );
+            return isDesktop
+                ? AppHotkeysKeyboardListener(child: viewport)
+                : viewport;
           },
         );
       },

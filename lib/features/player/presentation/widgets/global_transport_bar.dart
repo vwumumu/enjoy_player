@@ -55,7 +55,9 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
     final onPlayer = path.startsWith('/player/');
     final narrowLayout =
         MediaQuery.sizeOf(context).width <= t.breakpointTranscriptSideBySide;
-    final hideBottomMediaInfo = onPlayer && narrowLayout;
+    // On narrow screens both the collapsed mini-bar and the expanded player
+    // use the same compact spaceBetween controls layout.
+    final hideBottomMediaInfo = narrowLayout;
 
     final ttPrev = hotkeyTooltipLabel(
       ref,
@@ -100,16 +102,17 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
         durationSec > 0 ? pos.inMilliseconds / 1000 / durationSec : 0.0;
 
     final primaryTransport = <Widget>[
-      IconButton(
-        tooltip: ttPrev,
-        iconSize: 22,
-        onPressed:
-            isBuffering
-                ? null
-                : () =>
-                    ref.read(playerInteractionsProvider.notifier).prevLine(),
-        icon: const Icon(Icons.skip_previous_rounded),
-      ),
+      if (!narrowLayout)
+        IconButton(
+          tooltip: ttPrev,
+          iconSize: 22,
+          onPressed:
+              isBuffering
+                  ? null
+                  : () =>
+                      ref.read(playerInteractionsProvider.notifier).prevLine(),
+          icon: const Icon(Icons.skip_previous_rounded),
+        ),
       _PlayRingButton(
         playing: isPlaying,
         buffering: isBuffering,
@@ -121,16 +124,17 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                 : () =>
                     ref.read(playerControllerProvider.notifier).togglePlay(),
       ),
-      IconButton(
-        tooltip: ttNext,
-        iconSize: 22,
-        onPressed:
-            isBuffering
-                ? null
-                : () =>
-                    ref.read(playerInteractionsProvider.notifier).nextLine(),
-        icon: const Icon(Icons.skip_next_rounded),
-      ),
+      if (!narrowLayout)
+        IconButton(
+          tooltip: ttNext,
+          iconSize: 22,
+          onPressed:
+              isBuffering
+                  ? null
+                  : () =>
+                      ref.read(playerInteractionsProvider.notifier).nextLine(),
+          icon: const Icon(Icons.skip_next_rounded),
+        ),
       IconButton(
         tooltip: ttReplay,
         iconSize: 22,

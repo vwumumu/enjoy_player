@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/data/api/api_client_provider.dart';
@@ -181,17 +182,18 @@ class SettingsScreen extends ConsumerWidget {
 
           SliverToBoxAdapter(child: SizedBox(height: t.space8)),
 
-          // ── Keyboard shortcuts ─────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _SectionLabel(text: l10n.hotkeysSectionKeyboard),
-          ),
-          const SliverToBoxAdapter(
-            child: _SettingsCard(
-              child: HotkeysSettingsSection(),
+          // ── Keyboard shortcuts (desktop only) ─────────────────────────
+          if (isDesktop) ...[
+            SliverToBoxAdapter(
+              child: _SectionLabel(text: l10n.hotkeysSectionKeyboard),
             ),
-          ),
-
-          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+            const SliverToBoxAdapter(
+              child: _SettingsCard(
+                child: HotkeysSettingsSection(),
+              ),
+            ),
+            SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+          ],
 
           // ── Advanced ────────────────────────────────────────────────────
           SliverToBoxAdapter(
