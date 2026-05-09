@@ -27,6 +27,19 @@ import '../../application/player_preferences_provider.dart';
 import '../../application/player_state_providers.dart';
 import '../../domain/playback_session.dart';
 
+const _kPlaybackRatePresets = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+
+const _playbackRateEpsilon = 0.01;
+
+bool _playbackRatesEqual(double a, double b) =>
+    (a - b).abs() < _playbackRateEpsilon;
+
+String _formatPlaybackRateLabel(double rate) {
+  final x = (rate * 100).round() / 100;
+  final core = x.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
+  return '${core}x';
+}
+
 class GlobalTransportBar extends ConsumerStatefulWidget {
   const GlobalTransportBar({super.key});
 
@@ -50,6 +63,7 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
+    final playbackRate = ref.watch(playerPreferencesCtrlProvider).playbackRate;
     final playAccent = dynamicAccent ?? cs.primary;
     final path = GoRouterState.of(context).uri.path;
     final onPlayer = path.startsWith('/player/');
@@ -170,12 +184,36 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                 .setPlaybackRate(rate),
         itemBuilder:
             (ctx) => [
-              for (final r in [0.5, 0.75, 1.0, 1.25, 1.5, 2.0])
-                PopupMenuItem(value: r, child: Text('${r}x')),
+              for (final r in _kPlaybackRatePresets)
+                CheckedPopupMenuItem<double>(
+                  value: r,
+                  checked: _playbackRatesEqual(playbackRate, r),
+                  child: Text('${r}x'),
+                ),
             ],
         child: Padding(
           padding: EdgeInsets.all(t.space8),
-          child: Icon(Icons.speed_rounded, color: cs.onSurfaceVariant),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Icon(Icons.speed_rounded, color: cs.onSurfaceVariant),
+              if (!_playbackRatesEqual(playbackRate, 1.0))
+                Positioned(
+                  right: -2,
+                  bottom: -4,
+                  child: Text(
+                    _formatPlaybackRateLabel(playbackRate),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontSize: 9,
+                      height: 1,
+                      fontWeight: FontWeight.w600,
+                      color: cs.primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
       const _TransportVolumeButton(),
