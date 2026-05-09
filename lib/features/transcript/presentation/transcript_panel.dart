@@ -502,7 +502,9 @@ class _TranscriptLineTileState extends State<_TranscriptLineTile> {
     if (widget.groupedInEcho) {
       if (echoCurrent) {
         bg = tok.echoActive.withValues(alpha: 0.06);
-        railColor = tok.echoActive;
+        // Parent [_EchoRegionMergedCard] already paints an 8px echo rail; do not add
+        // a second inner rail or the active row reads as a wider orange stripe.
+        railColor = null;
       } else if (widget.inEcho) {
         bg = Colors.transparent;
       }
