@@ -146,7 +146,67 @@ class TranscriptRepository {
   }
 
   Future<void> deleteTranscript(String transcriptId) async {
+    final row = await _db.transcriptDao.getById(transcriptId);
+    if (row == null) return;
+
+    final targetType = row.targetType;
+    final targetId = row.targetId;
+    final session = await _db.echoSessionDao.getLatestForTarget(
+      targetType,
+      targetId,
+    );
+
     _linesCache.remove(transcriptId);
     await _db.transcriptDao.deleteId(transcriptId);
+
+    if (session == null) return;
+
+    var newPrimary = session.transcriptId;
+    var newSecondary = session.secondaryTranscriptId;
+
+    if (session.transcriptId == transcriptId) {
+      newPrimary = await _nextPrimaryAfterDelete(targetType, targetId);
+    }
+    if (session.secondaryTranscriptId == transcriptId) {
+      newSecondary = null;
+    }
+    if (newPrimary != null && newSecondary == newPrimary) {
+      newSecondary = null;
+    }
+
+    if (newPrimary != session.transcriptId) {
+      await _db.echoSessionDao.updatePrimaryTranscriptForTarget(
+        targetType,
+        targetId,
+        newPrimary,
+      );
+    }
+    if (newSecondary != session.secondaryTranscriptId) {
+      await _db.echoSessionDao.updateSecondaryTranscriptForTarget(
+        targetType,
+        targetId,
+        newSecondary,
+      );
+    }
+  }
+
+  /// Picks the next primary transcript for [targetId], matching
+  /// [TranscriptDao.watchAllForTarget] order (embedded first, then `createdAt`).
+  Future<String?> _nextPrimaryAfterDelete(
+    String targetType,
+    String targetId,
+  ) async {
+    final remaining = await _db.transcriptDao.listForTarget(
+      targetType,
+      targetId,
+    );
+    if (remaining.isEmpty) return null;
+    remaining.sort((a, b) {
+      if (a.isEmbedded != b.isEmbedded) {
+        return b.isEmbedded ? 1 : -1;
+      }
+      return a.createdAt.compareTo(b.createdAt);
+    });
+    return remaining.first.id;
   }
 }

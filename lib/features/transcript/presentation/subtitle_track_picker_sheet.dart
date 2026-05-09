@@ -14,6 +14,18 @@ import '../application/all_transcripts_provider.dart';
 import '../application/transcript_repository_provider.dart';
 import '../domain/transcript_track.dart';
 
+/// Horizontal inset aligned with section headers and list rows.
+double _sheetHorizontalPadding(EnjoyThemeTokens t) => t.space16 + t.space4;
+
+/// Shared padding for radio rows, import tile, and empty/error bodies.
+EdgeInsetsDirectional _sheetRowPadding(EnjoyThemeTokens t) =>
+    EdgeInsetsDirectional.fromSTEB(
+      _sheetHorizontalPadding(t),
+      t.space4,
+      t.space8,
+      t.space4,
+    );
+
 /// Shows a modal bottom sheet for picking primary + secondary subtitles.
 Future<void> showSubtitleTrackPicker(
   BuildContext context,
@@ -23,6 +35,8 @@ Future<void> showSubtitleTrackPicker(
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    // Theme sets [BottomSheetThemeData.showDragHandle]; we draw our own handle.
+    showDragHandle: false,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(EnjoyThemeTokens.of(context).radiusLg),
@@ -96,6 +110,103 @@ class _SubtitleTrackPickerSheetState
     await ref.read(transcriptRepositoryProvider).deleteTranscript(track.id);
   }
 
+  Widget _buildTrackList({
+    required BuildContext context,
+    required ScrollController scrollCtrl,
+    required EnjoyThemeTokens t,
+    required AppLocalizations l10n,
+    required List<TranscriptTrack> tracks,
+    required String? primaryId,
+    required String? secondaryId,
+  }) {
+    final theme = Theme.of(context);
+    VoidCallback? onDeleteFor(TranscriptTrack track) =>
+        track.isEmbedded ? null : () => _deleteTrack(track);
+
+    return ListView(
+      controller: scrollCtrl,
+      padding: EdgeInsets.only(bottom: t.space16),
+      children: [
+        _SectionHeader(l10n.subtitlesPrimary),
+        if (tracks.isEmpty)
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              _sheetHorizontalPadding(t),
+              t.space4,
+              _sheetHorizontalPadding(t),
+              t.space12,
+            ),
+            child: Text(
+              l10n.noTranscriptHint,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.45,
+              ),
+            ),
+          )
+        else
+          ...tracks.map(
+            (track) => _TrackTile(
+              track: track,
+              contentPadding: _sheetRowPadding(t),
+              groupValue: primaryId,
+              onTap:
+                  () => ref
+                      .read(transcriptRepositoryProvider)
+                      .setActiveTranscript(widget.mediaId, track.id),
+              onDelete: onDeleteFor(track),
+            ),
+          ),
+        SizedBox(height: t.space8),
+        _SectionHeader(l10n.subtitlesTranslation),
+        RadioListTile<String?>(
+          contentPadding: _sheetRowPadding(t),
+          value: null,
+          groupValue: secondaryId,
+          onChanged:
+              (_) => ref
+                  .read(transcriptRepositoryProvider)
+                  .setSecondaryTranscript(widget.mediaId, null),
+          title: Text(l10n.subtitlesNone),
+        ),
+        ...tracks.map(
+          (track) => _TrackTile(
+            track: track,
+            contentPadding: _sheetRowPadding(t),
+            groupValue: secondaryId,
+            onTap:
+                () => ref
+                    .read(transcriptRepositoryProvider)
+                    .setSecondaryTranscript(widget.mediaId, track.id),
+            onDelete: onDeleteFor(track),
+          ),
+        ),
+        const Divider(),
+        ListTile(
+          contentPadding: _sheetRowPadding(t),
+          leading:
+              _importing
+                  ? SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: theme.colorScheme.primary,
+                    ),
+                  )
+                  : Icon(
+                    Icons.upload_file_rounded,
+                    size: 24,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+          title: Text(l10n.subtitlesImportFile),
+          enabled: !_importing,
+          onTap: _importing ? null : _importFile,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -110,7 +221,6 @@ class _SubtitleTrackPickerSheetState
       secondaryTranscriptIdProvider(widget.mediaId),
     );
 
-    final tracks = tracksAsync.value ?? <TranscriptTrack>[];
     final primaryId = primaryIdAsync.value;
     final secondaryId = secondaryIdAsync.value;
 
@@ -120,103 +230,117 @@ class _SubtitleTrackPickerSheetState
         minChildSize: 0.4,
         maxChildSize: 0.92,
         expand: false,
-        builder:
-            (ctx, scrollCtrl) => Column(
-              children: [
-                // Drag handle
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: t.space12),
-                  child: const _DragHandle(),
+        builder: (ctx, scrollCtrl) {
+          return Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: t.space12),
+                child: const _DragHandle(),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: _sheetHorizontalPadding(t)),
+                child: Row(
+                  children: [
+                    Text(
+                      l10n.subtitles,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        fixedSize: const Size(48, 48),
+                      ),
+                      icon: const Icon(Icons.close_rounded),
+                      tooltip: MaterialLocalizations.of(context).closeButtonLabel,
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
                 ),
-                // Title
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: t.space16 + t.space4),
-                  child: Row(
-                    children: [
-                      Text(
-                        l10n.subtitles,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+              ),
+              const Divider(),
+              Expanded(
+                child: tracksAsync.when(
+                  data:
+                      (tracks) => _buildTrackList(
+                        context: context,
+                        scrollCtrl: scrollCtrl,
+                        t: t,
+                        l10n: l10n,
+                        tracks: tracks,
+                        primaryId: primaryId,
+                        secondaryId: secondaryId,
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded),
-                        tooltip: MaterialLocalizations.of(context).closeButtonLabel,
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(),
-                // Track list
-                Expanded(
-                  child: ListView(
-                    controller: scrollCtrl,
-                    padding: EdgeInsets.only(bottom: t.space16),
-                    children: [
-                      _SectionHeader(l10n.subtitlesPrimary),
-                      ...tracks.map(
-                        (track) => _TrackTile(
-                          track: track,
-                          selected: track.id == primaryId,
-                          isSecondary: false,
-                          onTap:
-                              () => ref
-                                  .read(transcriptRepositoryProvider)
-                                  .setActiveTranscript(widget.mediaId, track.id),
-                          onDelete:
-                              track.isEmbedded ? null : () => _deleteTrack(track),
-                        ),
-                      ),
-                      SizedBox(height: t.space8),
-                      _SectionHeader(l10n.subtitlesTranslation),
-                      // "None" option
-                      RadioListTile<String?>(
-                        value: null,
-                        groupValue: secondaryId,
-                        onChanged:
-                            (_) => ref
-                                .read(transcriptRepositoryProvider)
-                                .setSecondaryTranscript(widget.mediaId, null),
-                        title: Text(l10n.subtitlesNone),
-                      ),
-                      ...tracks.map(
-                        (track) => _TrackTile(
-                          track: track,
-                          selected: track.id == secondaryId,
-                          isSecondary: true,
-                          onTap:
-                              () => ref
-                                  .read(transcriptRepositoryProvider)
-                                  .setSecondaryTranscript(
-                                    widget.mediaId,
-                                    track.id,
+                  loading:
+                      () => ListView(
+                        controller: scrollCtrl,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: 200,
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const CircularProgressIndicator(),
+                                  SizedBox(height: t.space12),
+                                  Text(
+                                    l10n.loading,
+                                    style: Theme.of(context).textTheme.bodyMedium
+                                        ?.copyWith(
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                        ),
                                   ),
-                          onDelete: null, // delete only from primary section
-                        ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const Divider(),
-                      ListTile(
-                        leading:
-                            _importing
-                                ? SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                                )
-                                : const Icon(Icons.upload_file_rounded),
-                        title: Text(l10n.subtitlesImportFile),
-                        onTap: _importing ? null : _importFile,
+                  error:
+                      (error, _) => ListView(
+                        controller: scrollCtrl,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: EdgeInsets.all(_sheetHorizontalPadding(t)),
+                        children: [
+                          SizedBox(height: t.space24),
+                          Icon(
+                            Icons.error_outline_rounded,
+                            size: 40,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          SizedBox(height: t.space12),
+                          Text(
+                            l10n.error,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          SizedBox(height: t.space8),
+                          Text(
+                            error.toString(),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          SizedBox(height: t.space16),
+                          FilledButton.tonal(
+                            onPressed:
+                                () => ref.invalidate(
+                                  allTranscriptsForMediaProvider(widget.mediaId),
+                                ),
+                            child: Text(l10n.retry),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -250,7 +374,12 @@ class _SectionHeader extends StatelessWidget {
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: EdgeInsets.fromLTRB(t.space16 + t.space4, t.space12, t.space16 + t.space4, t.space4),
+      padding: EdgeInsets.fromLTRB(
+        _sheetHorizontalPadding(t),
+        t.space12,
+        _sheetHorizontalPadding(t),
+        t.space4,
+      ),
       child: Text(
         label.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -266,43 +395,52 @@ class _SectionHeader extends StatelessWidget {
 class _TrackTile extends StatelessWidget {
   const _TrackTile({
     required this.track,
-    required this.selected,
-    required this.isSecondary,
+    required this.contentPadding,
+    required this.groupValue,
     required this.onTap,
     required this.onDelete,
   });
 
   final TranscriptTrack track;
-  final bool selected;
-  final bool isSecondary;
+  final EdgeInsetsGeometry contentPadding;
+  final String? groupValue;
   final VoidCallback onTap;
   final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
     final sourceBadge =
         track.isEmbedded ? l10n.subtitlesEmbedded : l10n.subtitlesImported;
 
     final label = track.label.isNotEmpty ? track.label : track.language;
 
     return RadioListTile<String>(
+      contentPadding: contentPadding,
       value: track.id,
-      groupValue: selected ? track.id : null,
+      groupValue: groupValue,
       onChanged: (_) => onTap(),
       title: Text(label),
-      subtitle: Row(
-        children: [
-          _Badge(sourceBadge, isEmbedded: track.isEmbedded),
-          if (track.language.isNotEmpty && track.language != 'und') ...[
-            const SizedBox(width: 6),
-            _Badge(track.language.toUpperCase(), isEmbedded: false),
+      subtitle: Padding(
+        padding: EdgeInsets.only(top: t.space8),
+        child: Wrap(
+          spacing: t.space8,
+          runSpacing: t.space4,
+          children: [
+            _Badge(sourceBadge, isEmbedded: track.isEmbedded),
+            if (track.language.isNotEmpty && track.language != 'und')
+              _Badge(track.language.toUpperCase(), isEmbedded: false),
           ],
-        ],
+        ),
       ),
       secondary:
           onDelete != null
               ? IconButton(
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  fixedSize: const Size(48, 48),
+                ),
                 icon: const Icon(Icons.delete_outline),
                 tooltip: l10n.subtitlesDeleteTrack,
                 onPressed: onDelete,
@@ -323,7 +461,10 @@ class _Badge extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final t = EnjoyThemeTokens.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(
+        horizontal: t.space8,
+        vertical: t.space4,
+      ),
       decoration: BoxDecoration(
         color: isEmbedded ? cs.secondaryContainer : cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(t.space4),
@@ -332,6 +473,7 @@ class _Badge extends StatelessWidget {
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: isEmbedded ? cs.onSecondaryContainer : cs.onSurfaceVariant,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
