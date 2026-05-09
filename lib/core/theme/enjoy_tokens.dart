@@ -1,4 +1,4 @@
-/// Design tokens: spacing, radii, motion, breakpoints, and accents (ThemeExtension).
+/// Design tokens: spacing, radii, motion, elevation, breakpoints (ThemeExtension).
 library;
 
 import 'dart:ui' show lerpDouble;
@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'colors.dart';
 
-/// Premium modern-minimal tokens; use [EnjoyThemeTokens.of] from widgets.
+/// Premium cinematic-editorial tokens; use [EnjoyThemeTokens.of] from widgets.
 @immutable
 class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
   const EnjoyThemeTokens({
@@ -24,14 +24,25 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     required this.radiusLg,
     required this.radiusXl,
     required this.radiusFull,
+    required this.elevationNone,
+    required this.elevationCard,
+    required this.elevationSheet,
+    required this.elevationModal,
+    // ── Keep aliases for legacy call-sites ──────────────────────────
     required this.elevationBar,
     required this.elevationSurface,
+    // ── Breakpoints ────────────────────────────────────────────────
     required this.breakpointRail,
     required this.breakpointTranscriptSideBySide,
+    // ── Motion ─────────────────────────────────────────────────────
     required this.motionFast,
     required this.motionStandard,
+    required this.motionEnter,
+    required this.motionExit,
+    // ── Feature colors ─────────────────────────────────────────────
     required this.echoActive,
     required this.ccBadge,
+    // ── Layout ─────────────────────────────────────────────────────
     required this.transcriptLinePadding,
     required this.contentMaxWidth,
     required this.miniBarBlurSigma,
@@ -39,12 +50,16 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     required this.sidebarBrandHeight,
     required this.transportHeight,
     required this.heroTitleLetterSpacing,
+    // ── Glass & gradient ───────────────────────────────────────────
     required this.glassTint,
     required this.glassBorder,
     required this.gradientStart,
     required this.gradientEnd,
+    // ── Glass scope flag ───────────────────────────────────────────
+    required this.useGlassOnSidebar,
   });
 
+  // ── Spacing (4pt grid) ─────────────────────────────────────────────────
   final double space4;
   final double space8;
   final double space12;
@@ -54,60 +69,78 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
   final double space32;
   final double space40;
 
+  // ── Radii ──────────────────────────────────────────────────────────────
   final double radiusSm;
   final double radiusMd;
   final double radiusLg;
   final double radiusXl;
   final double radiusFull;
 
+  // ── Elevation scale (0 / 1 / 3 / 8) ───────────────────────────────────
+  final double elevationNone;
+  final double elevationCard;
+  final double elevationSheet;
+  final double elevationModal;
+
+  /// Legacy aliases kept for widgets that still call elevationBar/elevationSurface.
   final double elevationBar;
   final double elevationSurface;
 
-  /// Width at which shell shows extended sidebar (non-player routes).
+  // ── Breakpoints ────────────────────────────────────────────────────────
+  /// Width at which shell switches from bottom nav to extended sidebar.
   final double breakpointRail;
 
-  /// Width at which video + transcript use side-by-side layout.
+  /// Width at which player shows transcript side-by-side vs stacked.
   final double breakpointTranscriptSideBySide;
 
+  // ── Motion ─────────────────────────────────────────────────────────────
+  /// Micro-interactions: 180ms.
   final Duration motionFast;
+
+  /// Standard transitions: 260ms.
   final Duration motionStandard;
 
+  /// Screen enter: 240ms.
+  final Duration motionEnter;
+
+  /// Screen exit: 160ms (faster than enter for responsiveness).
+  final Duration motionExit;
+
+  // ── Feature colors ─────────────────────────────────────────────────────
   final Color echoActive;
   final Color ccBadge;
 
+  // ── Layout ─────────────────────────────────────────────────────────────
   final EdgeInsets transcriptLinePadding;
   final double contentMaxWidth;
 
-  /// Backdrop blur sigma for mini player / transport (0 = disabled).
+  /// Backdrop-filter blur for the transport glass bar.
   final double miniBarBlurSigma;
 
-  /// Primary navigation sidebar width (desktop).
   final double sidebarWidth;
-
-  /// Top brand row height inside sidebar.
   final double sidebarBrandHeight;
-
-  /// Bottom transport: slim slider + control row.
   final double transportHeight;
 
-  /// Negative tracking for hero display titles.
+  /// Letter-spacing for hero display titles (negative = tight).
   final double heroTitleLetterSpacing;
 
-  /// Tint over blurred glass surfaces.
+  // ── Glass & gradient ───────────────────────────────────────────────────
   final Color glassTint;
-
-  /// Hairline border on glass panels.
   final Color glassBorder;
-
   final Color gradientStart;
   final Color gradientEnd;
 
+  /// When false, sidebar uses flat tonal panel instead of frosted glass.
+  /// Transport bar always uses glass regardless of this flag.
+  final bool useGlassOnSidebar;
+
+  // ── Static accessor ────────────────────────────────────────────────────
   static EnjoyThemeTokens of(BuildContext context) {
     return Theme.of(context).extension<EnjoyThemeTokens>() ??
         EnjoyThemeTokens.light(Theme.of(context).colorScheme);
   }
 
-  /// Default light-token values aligned with [ColorScheme].
+  // ── Constructors ───────────────────────────────────────────────────────
   factory EnjoyThemeTokens.light(ColorScheme scheme) {
     return EnjoyThemeTokens(
       space4: 4,
@@ -123,38 +156,51 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       radiusLg: 16,
       radiusXl: 20,
       radiusFull: 999,
+      elevationNone: 0,
+      elevationCard: 1,
+      elevationSheet: 3,
+      elevationModal: 8,
       elevationBar: 2,
       elevationSurface: 1,
       breakpointRail: 900,
       breakpointTranscriptSideBySide: 720,
       motionFast: const Duration(milliseconds: 180),
       motionStandard: const Duration(milliseconds: 260),
+      motionEnter: const Duration(milliseconds: 240),
+      motionExit: const Duration(milliseconds: 160),
       echoActive: AppColors.echoActive,
       ccBadge: scheme.primary,
-      transcriptLinePadding: const EdgeInsets.all(12),
+      transcriptLinePadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 10,
+      ),
       contentMaxWidth: 720,
       miniBarBlurSigma: 12,
       sidebarWidth: 248,
       sidebarBrandHeight: 56,
       transportHeight: 88,
-      heroTitleLetterSpacing: -1,
-      glassTint: scheme.surface.withValues(alpha: 0.52),
-      glassBorder: scheme.outlineVariant.withValues(alpha: 0.22),
-      gradientStart: AppColors.gradientStart,
-      gradientEnd: AppColors.gradientEnd,
+      heroTitleLetterSpacing: -1.2,
+      glassTint: scheme.surface.withValues(alpha: 0.72),
+      glassBorder: scheme.outlineVariant.withValues(alpha: 0.18),
+      gradientStart: AppColors.gradientStartLight,
+      gradientEnd: AppColors.gradientEndLight,
+      useGlassOnSidebar: false,
     );
   }
 
-  /// Dark uses same rhythm; echo accent stays consistent for brand recognition.
   factory EnjoyThemeTokens.dark(ColorScheme scheme) {
     return EnjoyThemeTokens.light(scheme).copyWith(
       ccBadge: scheme.primary,
-      miniBarBlurSigma: 16,
-      glassTint: scheme.surface.withValues(alpha: 0.42),
-      glassBorder: scheme.outlineVariant.withValues(alpha: 0.28),
+      miniBarBlurSigma: 20,
+      glassTint: scheme.surface.withValues(alpha: 0.55),
+      glassBorder: scheme.outlineVariant.withValues(alpha: 0.22),
+      gradientStart: AppColors.gradientStartDark,
+      gradientEnd: AppColors.gradientEndDark,
+      useGlassOnSidebar: false,
     );
   }
 
+  // ── copyWith ───────────────────────────────────────────────────────────
   @override
   EnjoyThemeTokens copyWith({
     double? space4,
@@ -170,12 +216,18 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     double? radiusLg,
     double? radiusXl,
     double? radiusFull,
+    double? elevationNone,
+    double? elevationCard,
+    double? elevationSheet,
+    double? elevationModal,
     double? elevationBar,
     double? elevationSurface,
     double? breakpointRail,
     double? breakpointTranscriptSideBySide,
     Duration? motionFast,
     Duration? motionStandard,
+    Duration? motionEnter,
+    Duration? motionExit,
     Color? echoActive,
     Color? ccBadge,
     EdgeInsets? transcriptLinePadding,
@@ -189,6 +241,7 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     Color? glassBorder,
     Color? gradientStart,
     Color? gradientEnd,
+    bool? useGlassOnSidebar,
   }) {
     return EnjoyThemeTokens(
       space4: space4 ?? this.space4,
@@ -204,6 +257,10 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       radiusLg: radiusLg ?? this.radiusLg,
       radiusXl: radiusXl ?? this.radiusXl,
       radiusFull: radiusFull ?? this.radiusFull,
+      elevationNone: elevationNone ?? this.elevationNone,
+      elevationCard: elevationCard ?? this.elevationCard,
+      elevationSheet: elevationSheet ?? this.elevationSheet,
+      elevationModal: elevationModal ?? this.elevationModal,
       elevationBar: elevationBar ?? this.elevationBar,
       elevationSurface: elevationSurface ?? this.elevationSurface,
       breakpointRail: breakpointRail ?? this.breakpointRail,
@@ -211,6 +268,8 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
           breakpointTranscriptSideBySide ?? this.breakpointTranscriptSideBySide,
       motionFast: motionFast ?? this.motionFast,
       motionStandard: motionStandard ?? this.motionStandard,
+      motionEnter: motionEnter ?? this.motionEnter,
+      motionExit: motionExit ?? this.motionExit,
       echoActive: echoActive ?? this.echoActive,
       ccBadge: ccBadge ?? this.ccBadge,
       transcriptLinePadding: transcriptLinePadding ?? this.transcriptLinePadding,
@@ -225,9 +284,11 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       glassBorder: glassBorder ?? this.glassBorder,
       gradientStart: gradientStart ?? this.gradientStart,
       gradientEnd: gradientEnd ?? this.gradientEnd,
+      useGlassOnSidebar: useGlassOnSidebar ?? this.useGlassOnSidebar,
     );
   }
 
+  // ── lerp ──────────────────────────────────────────────────────────────
   @override
   ThemeExtension<EnjoyThemeTokens> lerp(
     covariant ThemeExtension<EnjoyThemeTokens>? other,
@@ -236,6 +297,11 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     if (other is! EnjoyThemeTokens) return this;
     if (t == 0) return this;
     if (t == 1) return other;
+
+    double ms(Duration a, Duration b) =>
+        lerpDouble(a.inMilliseconds.toDouble(), b.inMilliseconds.toDouble(), t)!
+            .roundToDouble();
+
     return EnjoyThemeTokens(
       space4: lerpDouble(space4, other.space4, t)!,
       space8: lerpDouble(space8, other.space8, t)!,
@@ -250,6 +316,10 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       radiusLg: lerpDouble(radiusLg, other.radiusLg, t)!,
       radiusXl: lerpDouble(radiusXl, other.radiusXl, t)!,
       radiusFull: lerpDouble(radiusFull, other.radiusFull, t)!,
+      elevationNone: lerpDouble(elevationNone, other.elevationNone, t)!,
+      elevationCard: lerpDouble(elevationCard, other.elevationCard, t)!,
+      elevationSheet: lerpDouble(elevationSheet, other.elevationSheet, t)!,
+      elevationModal: lerpDouble(elevationModal, other.elevationModal, t)!,
       elevationBar: lerpDouble(elevationBar, other.elevationBar, t)!,
       elevationSurface: lerpDouble(elevationSurface, other.elevationSurface, t)!,
       breakpointRail: lerpDouble(breakpointRail, other.breakpointRail, t)!,
@@ -258,33 +328,20 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
         other.breakpointTranscriptSideBySide,
         t,
       )!,
-      motionFast: Duration(
-        milliseconds: lerpDouble(
-          motionFast.inMilliseconds.toDouble(),
-          other.motionFast.inMilliseconds.toDouble(),
-          t,
-        )!.round(),
-      ),
-      motionStandard: Duration(
-        milliseconds: lerpDouble(
-          motionStandard.inMilliseconds.toDouble(),
-          other.motionStandard.inMilliseconds.toDouble(),
-          t,
-        )!.round(),
-      ),
+      motionFast: Duration(milliseconds: ms(motionFast, other.motionFast).round()),
+      motionStandard:
+          Duration(milliseconds: ms(motionStandard, other.motionStandard).round()),
+      motionEnter:
+          Duration(milliseconds: ms(motionEnter, other.motionEnter).round()),
+      motionExit:
+          Duration(milliseconds: ms(motionExit, other.motionExit).round()),
       echoActive: Color.lerp(echoActive, other.echoActive, t)!,
       ccBadge: Color.lerp(ccBadge, other.ccBadge, t)!,
-      transcriptLinePadding: EdgeInsets.lerp(
-        transcriptLinePadding,
-        other.transcriptLinePadding,
-        t,
-      )!,
+      transcriptLinePadding:
+          EdgeInsets.lerp(transcriptLinePadding, other.transcriptLinePadding, t)!,
       contentMaxWidth: lerpDouble(contentMaxWidth, other.contentMaxWidth, t)!,
-      miniBarBlurSigma: lerpDouble(
-        miniBarBlurSigma,
-        other.miniBarBlurSigma,
-        t,
-      )!,
+      miniBarBlurSigma:
+          lerpDouble(miniBarBlurSigma, other.miniBarBlurSigma, t)!,
       sidebarWidth: lerpDouble(sidebarWidth, other.sidebarWidth, t)!,
       sidebarBrandHeight:
           lerpDouble(sidebarBrandHeight, other.sidebarBrandHeight, t)!,
@@ -298,6 +355,7 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
       gradientStart: Color.lerp(gradientStart, other.gradientStart, t)!,
       gradientEnd: Color.lerp(gradientEnd, other.gradientEnd, t)!,
+      useGlassOnSidebar: t < 0.5 ? useGlassOnSidebar : other.useGlassOnSidebar,
     );
   }
 }

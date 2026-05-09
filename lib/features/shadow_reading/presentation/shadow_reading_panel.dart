@@ -346,6 +346,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
 
     final scheme = Theme.of(context).colorScheme;
     final tok = EnjoyThemeTokens.of(context);
+    final tt = Theme.of(context).textTheme;
 
     return FutureBuilder<String?>(
       future: _mediaPathFutureOnce(),
@@ -369,108 +370,197 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
 
             return Padding(
               padding: EdgeInsets.only(bottom: tok.space8),
-              child: Material(
-                color: Color.lerp(
-                  tok.echoActive.withValues(alpha: 0.22),
-                  scheme.surfaceContainerHighest,
-                  0.50,
-                ),
-                borderRadius: BorderRadius.circular(tok.radiusMd),
-                child: Padding(
-                  padding: EdgeInsets.all(tok.space16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.mic_none_rounded, color: scheme.tertiary),
-                          SizedBox(width: tok.space8),
-                          Expanded(
-                            child: Text(
-                              l10n.shadowReadingTitle,
-                              style: Theme.of(context).textTheme.titleSmall,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: tok.space12),
+                    child: Row(
+                      children: [
+                        AnimatedContainer(
+                          duration: tok.motionFast,
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: _recording
+                                ? tok.echoActive.withValues(alpha: 0.15)
+                                : scheme.surfaceContainerHigh,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _recording
+                                  ? tok.echoActive.withValues(alpha: 0.6)
+                                  : scheme.outlineVariant.withValues(alpha: 0.3),
                             ),
                           ),
-                        ],
-                      ),
-                      SizedBox(height: tok.space8),
-                      Text(
-                        l10n.shadowReadingHint,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                          height: 1.35,
+                          child: Icon(
+                            _recording ? Icons.graphic_eq_rounded : Icons.mic_none_rounded,
+                            size: 20,
+                            color: _recording ? tok.echoActive : scheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                      if (mediaPath != null && mediaPath.isNotEmpty) ...[
-                        SizedBox(height: tok.space12),
-                        PitchContourSection(
-                          mediaPath: mediaPath,
-                          startSec: widget.startSec,
-                          endSec: widget.endSec,
-                          currentTimeRelativeSec: _relativeSec,
-                          selectedRecordingPath: sel?.localPath,
-                          selectedRecordingDurationMs: sel?.durationMs,
+                        SizedBox(width: tok.space12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.shadowReadingTitle,
+                                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                              Text(
+                                l10n.shadowReadingHint,
+                                style: tt.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                  height: 1.35,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
-                      SizedBox(height: tok.space12),
-                      Text(
-                        l10n.shadowRecordingExisting,
-                        style: Theme.of(context).textTheme.labelMedium,
-                      ),
-                      SizedBox(height: tok.space8),
-                      if (list.isEmpty)
-                        Text(
-                          l10n.shadowRecordingEmpty,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        )
-                      else if (sel != null)
-                        _CompactTakeRow(
-                          row: sel,
-                          list: list,
-                          echoActive: widget.echoActive,
-                          scheme: scheme,
-                          tok: tok,
-                          l10n: l10n,
-                          ttPlayRecording: ttPlayRecording,
-                          ttPauseRecording: ttPauseRecording,
-                          onPlayOrPause: () {
-                            final path = sel.localPath;
-                            if (path != null && path.isNotEmpty) {
-                              unawaited(_playOrPauseTake(path));
-                            }
-                          },
-                          onDelete: () => unawaited(_deleteRecording(sel)),
-                          onChooseTake: (id) async {
-                            await ref.read(recordingPreviewPlayerProvider).stop();
-                            if (mounted) {
-                              setState(() => _selectedRecordingId = id);
-                            }
-                          },
-                        ),
-                      SizedBox(height: tok.space12),
-                      Tooltip(
-                        message: ttToggleRecording,
-                        child: FilledButton.icon(
-                          onPressed:
-                              widget.echoActive
-                              ? () => _toggleRecord(l10n)
-                              : null,
-                          icon: Icon(_recording ? Icons.stop : Icons.mic),
-                          label: Text(
-                            _recording ? l10n.shadowRecordingStop : l10n.shadowRecordingRecord,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+
+                  // Section: Pitch
+                  if (mediaPath != null && mediaPath.isNotEmpty) ...[
+                    _SectionLabel(
+                      label: l10n.pitchContourTitle,
+                      scheme: scheme,
+                      tt: tt,
+                    ),
+                    SizedBox(height: tok.space8),
+                    PitchContourSection(
+                      mediaPath: mediaPath,
+                      startSec: widget.startSec,
+                      endSec: widget.endSec,
+                      currentTimeRelativeSec: _relativeSec,
+                      selectedRecordingPath: sel?.localPath,
+                      selectedRecordingDurationMs: sel?.durationMs,
+                    ),
+                    SizedBox(height: tok.space16),
+                  ],
+
+                  // Section: Your takes
+                  _SectionLabel(
+                    label: l10n.shadowRecordingExisting,
+                    scheme: scheme,
+                    tt: tt,
+                  ),
+                  SizedBox(height: tok.space8),
+                  if (list.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: tok.space8),
+                      child: Text(
+                        l10n.shadowRecordingEmpty,
+                        style: tt.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    )
+                  else if (sel != null)
+                    _CompactTakeRow(
+                      row: sel,
+                      list: list,
+                      echoActive: widget.echoActive,
+                      scheme: scheme,
+                      tok: tok,
+                      l10n: l10n,
+                      ttPlayRecording: ttPlayRecording,
+                      ttPauseRecording: ttPauseRecording,
+                      onPlayOrPause: () {
+                        final path = sel.localPath;
+                        if (path != null && path.isNotEmpty) {
+                          unawaited(_playOrPauseTake(path));
+                        }
+                      },
+                      onDelete: () => unawaited(_deleteRecording(sel)),
+                      onChooseTake: (id) async {
+                        await ref.read(recordingPreviewPlayerProvider).stop();
+                        if (mounted) {
+                          setState(() => _selectedRecordingId = id);
+                        }
+                      },
+                    ),
+
+                  SizedBox(height: tok.space16),
+
+                  // Section: Record — FAB-style circular button
+                  _SectionLabel(
+                    label: l10n.shadowRecordingRecord,
+                    scheme: scheme,
+                    tt: tt,
+                  ),
+                  SizedBox(height: tok.space12),
+                  Center(
+                    child: Tooltip(
+                      message: ttToggleRecording,
+                      child: GestureDetector(
+                        onTap: widget.echoActive ? () => _toggleRecord(l10n) : null,
+                        child: AnimatedContainer(
+                          duration: tok.motionFast,
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _recording ? tok.echoActive : scheme.primary,
+                            boxShadow: [
+                              BoxShadow(
+                                color: (_recording ? tok.echoActive : scheme.primary)
+                                    .withValues(alpha: 0.35),
+                                blurRadius: _recording ? 24 : 14,
+                                spreadRadius: _recording ? 2 : 0,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            _recording ? Icons.stop_rounded : Icons.mic_rounded,
+                            color: _recording ? Colors.white : scheme.onPrimary,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: tok.space4),
+                  Center(
+                    child: Text(
+                      _recording ? l10n.shadowRecordingStop : l10n.shadowRecordingRecord,
+                      style: tt.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
+                  ),
+                  SizedBox(height: tok.space8),
+                ],
               ),
             );
           },
         );
       },
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({
+    required this.label,
+    required this.scheme,
+    required this.tt,
+  });
+
+  final String label;
+  final ColorScheme scheme;
+  final TextTheme tt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label.toUpperCase(),
+      style: tt.labelSmall?.copyWith(
+        letterSpacing: 0.8,
+        fontWeight: FontWeight.w600,
+        color: scheme.onSurfaceVariant,
+      ),
     );
   }
 }
@@ -518,9 +608,14 @@ class _CompactTakeRow extends ConsumerWidget {
         path.isNotEmpty &&
         !kIsWeb;
 
-    return Material(
-      color: scheme.primary.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(tok.radiusSm),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(tok.radiusMd),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.22),
+        ),
+      ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: tok.space8, vertical: tok.space4),
         child: Row(
@@ -612,6 +707,8 @@ class _CompactTakeRow extends ConsumerWidget {
     );
   }
 }
+
+// ── Take preview time ────────────────────────────────────────────────────────
 
 class _TakePreviewTime extends ConsumerWidget {
   const _TakePreviewTime({required this.row});

@@ -301,8 +301,26 @@ abstract class AppLocalizations {
   /// No description provided for @settingsThemeDarkLocked.
   ///
   /// In en, this message translates to:
-  /// **'Premium UI uses dark theme.'**
+  /// **'Follows your system appearance.'**
   String get settingsThemeDarkLocked;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
 
   /// No description provided for @play.
   ///
@@ -351,6 +369,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transcript'**
   String get transcript;
+
+  /// No description provided for @transcriptNowReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Now reading'**
+  String get transcriptNowReading;
 
   /// No description provided for @playerTranscriptResizeHint.
   ///

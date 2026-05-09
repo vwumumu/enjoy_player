@@ -24,7 +24,7 @@ class AppPreferencesState {
   final String? nativeLanguage;
 
   static const initial = AppPreferencesState(
-    themeMode: ThemeMode.dark,
+    themeMode: ThemeMode.system,
     locale: Locale('en'),
     learningLanguage: null,
     nativeLanguage: null,
@@ -118,7 +118,7 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
   }
 
   static ThemeMode _decodeTheme(String? raw) {
-    if (raw == null) return ThemeMode.dark;
+    if (raw == null) return ThemeMode.system;
     switch (raw) {
       case 'light':
         return ThemeMode.light;

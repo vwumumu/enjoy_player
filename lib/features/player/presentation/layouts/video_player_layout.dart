@@ -101,12 +101,20 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
                     AppLocalizations.of(context)!.playerTranscriptResizeHint,
                 onDragDelta: (dx) => _applyDragDelta(total, dx),
               ),
-              // Transcript panel — same black background as the video stage and
-              // navbar so the full window feels like one unified dark canvas.
+              // Transcript panel — warm near-black so reading isn't OLED-harsh;
+              // 1-pixel left rail painted by the parent Row's border decoration.
               SizedBox(
                 width: tw,
-                child: Material(
-                  color: Colors.black,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F0F14),
+                    border: Border(
+                      left: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.06),
+                        width: 1,
+                      ),
+                    ),
+                  ),
                   child: widget.transcript,
                 ),
               ),
@@ -134,8 +142,8 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
             ),
             Expanded(
               flex: 3,
-              child: Material(
-                color: Colors.black,
+              child: ColoredBox(
+                color: const Color(0xFF0F0F14),
                 child: widget.transcript,
               ),
             ),

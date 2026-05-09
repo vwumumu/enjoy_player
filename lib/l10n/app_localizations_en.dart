@@ -115,7 +115,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsThemeRowTitle => 'Theme';
 
   @override
-  String get settingsThemeDarkLocked => 'Premium UI uses dark theme.';
+  String get settingsThemeDarkLocked => 'Follows your system appearance.';
+
+  @override
+  String get settingsThemeSystem => 'System';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
 
   @override
   String get play => 'Play';
@@ -140,6 +149,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transcript => 'Transcript';
+
+  @override
+  String get transcriptNowReading => 'Now reading';
 
   @override
   String get playerTranscriptResizeHint =>

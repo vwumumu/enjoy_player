@@ -1,11 +1,15 @@
-/// Home: hero header + recent media grid (WMP-inspired).
+/// Home: editorial header + hero last-played card + recent media grid.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
+import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
+import 'package:enjoy_player/core/theme/widgets/media_card.dart';
 import 'package:enjoy_player/core/utils/local_thumbnail.dart';
 import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/features/community/presentation/community_activity_card.dart';
@@ -25,7 +29,6 @@ class HomeScreen extends ConsumerWidget {
     final mediaAsync = ref.watch(libraryMediaProvider);
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: mediaAsync.when(
@@ -35,96 +38,52 @@ class HomeScreen extends ConsumerWidget {
           final recent = sorted.take(_kRecentLimit).toList();
 
           if (recent.isEmpty) {
-            return Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: t.contentMaxWidth),
-                child: Padding(
-                  padding: EdgeInsets.all(t.space24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ShaderMask(
-                        shaderCallback: (bounds) => LinearGradient(
-                          colors: [
-                            cs.primary,
-                            cs.tertiary,
-                          ],
-                        ).createShader(bounds),
-                        child: const Icon(
-                          Icons.library_music_rounded,
-                          size: 96,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: t.space24),
-                      Text(
-                        l10n.homeEmptyTitle,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      SizedBox(height: t.space8),
-                      Text(
-                        l10n.homeEmptyHint,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          height: 1.45,
-                        ),
-                      ),
-                      SizedBox(height: t.space24),
-                      FilledButton.icon(
-                        onPressed: () => importMediaFromPicker(context, ref),
-                        icon: const Icon(Icons.folder_open_rounded),
-                        label: Text(l10n.actionOpenFiles),
-                      ),
-                      const CommunityActivityCard(),
-                    ],
-                  ),
-                ),
-              ),
+            return EmptyState(
+              icon: Icons.library_music_rounded,
+              title: l10n.homeEmptyTitle,
+              subtitle: l10n.homeEmptyHint,
+              action: () => importMediaFromPicker(context, ref),
+              actionLabel: l10n.actionOpenFiles,
             );
           }
 
           return CustomScrollView(
             slivers: [
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(t.space24, t.space24, t.space24, t.space16),
-                sliver: SliverToBoxAdapter(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l10n.homeTitle,
-                          style: Theme.of(context).textTheme.displayMedium,
-                        ),
-                      ),
-                      FilledButton.icon(
-                        onPressed: () => importMediaFromPicker(context, ref),
-                        icon: const Icon(Icons.folder_open_rounded),
-                        label: Text(l10n.actionOpenFiles),
-                      ),
-                    ],
+              // Editorial header
+              SliverToBoxAdapter(
+                child: EditorialHeader(
+                  title: l10n.homeTitle,
+                  trailing: FilledButton.icon(
+                    onPressed: () => importMediaFromPicker(context, ref),
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: Text(l10n.actionOpenFiles),
                   ),
                 ),
               ),
+
+              // Recents section label
               SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: t.space24),
+                padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, t.space12),
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     l10n.homeRecentMedia,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
+
+              // Media grid
               SliverPadding(
-                padding: EdgeInsets.all(t.space24),
+                padding: EdgeInsets.symmetric(horizontal: t.space24),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 220,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 16 / 12.5,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 16 / 14.5,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -135,145 +94,71 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, 0),
+                padding: EdgeInsets.fromLTRB(t.space24, t.space24, t.space24, 0),
                 sliver: const SliverToBoxAdapter(
                   child: CommunityActivityCard(),
                 ),
               ),
+
+              SliverToBoxAdapter(child: SizedBox(height: t.space24)),
             ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: EdgeInsets.all(t.space24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline_rounded, size: 48, color: cs.error),
-                SizedBox(height: t.space16),
-                Text(
-                  '${l10n.error}: $e',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                SizedBox(height: t.space16),
-                FilledButton.tonal(
-                  onPressed: () => ref.invalidate(libraryMediaProvider),
-                  child: Text(l10n.retry),
-                ),
-              ],
+        error: (e, _) {
+          final cs = Theme.of(context).colorScheme;
+          return Center(
+            child: Padding(
+              padding: EdgeInsets.all(t.space24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.error_outline_rounded, size: 48, color: cs.error),
+                  SizedBox(height: t.space16),
+                  Text(
+                    '${l10n.error}: $e',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  SizedBox(height: t.space16),
+                  FilledButton.tonal(
+                    onPressed: () => ref.invalidate(libraryMediaProvider),
+                    child: Text(l10n.retry),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 }
 
-class _HomeMediaTile extends StatefulWidget {
+class _HomeMediaTile extends ConsumerWidget {
   const _HomeMediaTile({required this.media});
 
   final Media media;
 
   @override
-  State<_HomeMediaTile> createState() => _HomeMediaTileState();
-}
-
-class _HomeMediaTileState extends State<_HomeMediaTile> {
-  bool _hover = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final isVideo = widget.media.kind == MediaKind.video;
-    final thumb = localThumbnailFile(widget.media.thumbnailPath);
-    final dur = formatDurationHms(Duration(milliseconds: widget.media.durationMs));
+    final isVideo = media.kind == MediaKind.video;
+    final thumb = localThumbnailFile(media.thumbnailPath);
+    final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
+    final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
+    final accent = paletteAsync.value?.accent;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => context.push('/player/${widget.media.id}'),
-        child: AnimatedContainer(
-          duration: t.motionFast,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(t.radiusMd),
-            color:
-                _hover
-                    ? cs.primary.withValues(alpha: 0.10)
-                    : Colors.transparent,
-            border: Border.all(
-              color:
-                  _hover
-                      ? cs.primary.withValues(alpha: 0.85)
-                      : cs.outlineVariant.withValues(alpha: 0.35),
-              width: _hover ? 1.5 : 1,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child:
-                    thumb != null
-                        ? Image.file(
-                          thumb,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          errorBuilder:
-                              (_, _, _) => _placeholder(cs, isVideo),
-                        )
-                        : _placeholder(cs, isVideo),
-              ),
-              SizedBox(height: t.space8),
-              Text(
-                widget.media.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: t.space4),
-              Text(
-                '${isVideo ? l10n.miniPlayerMediaVideo : l10n.miniPlayerMediaAudio} · $dur',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _placeholder(ColorScheme cs, bool isVideo) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            cs.surfaceContainerHighest,
-            cs.surfaceContainer,
-          ],
-        ),
-      ),
-      child: Center(
-        child: Icon(
-          isVideo ? Icons.movie_outlined : Icons.audiotrack_rounded,
-          size: 40,
-          color: cs.onSurfaceVariant,
-        ),
-      ),
+    return MediaCardTile(
+      title: media.title,
+      subtitle:
+          '${isVideo ? l10n.miniPlayerMediaVideo : l10n.miniPlayerMediaAudio} · $dur',
+      thumbnailFile: thumb,
+      isVideo: isVideo,
+      accentColor: accent,
+      onTap: () => context.push('/player/${media.id}'),
     );
   }
 }

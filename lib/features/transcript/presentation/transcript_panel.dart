@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/data/subtitle/subtitle_markup_parser.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -264,11 +265,8 @@ class _EchoRegionMergedCard extends ConsumerWidget {
     final tok = EnjoyThemeTokens.of(context);
     final session = ref.watch(playerControllerProvider);
 
-    final shell = Color.lerp(
-      tok.echoActive.withValues(alpha: 0.16),
-      scheme.surfaceContainerHigh,
-      0.55,
-    )!;
+    // Neutral surface — no colored background; left rail carries the echo accent.
+    final shell = scheme.surfaceContainerLow;
 
     final showShadow =
         echo.startTimeSeconds >= 0 && echo.endTimeSeconds >= 0;
@@ -282,7 +280,7 @@ class _EchoRegionMergedCard extends ConsumerWidget {
             thickness: 1,
             indent: tok.space12,
             endIndent: tok.space12,
-            color: scheme.outlineVariant.withValues(alpha: 0.28),
+            color: scheme.outlineVariant.withValues(alpha: 0.2),
           ),
         );
       }
@@ -327,19 +325,50 @@ class _EchoRegionMergedCard extends ConsumerWidget {
                   ref.read(echoModeProvider.notifier).shrinkEchoBackward(lines),
         ),
         SizedBox(height: tok.space8),
-        Material(
-          color: shell,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tok.radiusMd),
-            side: BorderSide(color: tok.echoActive.withValues(alpha: 0.40)),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: lineWidgets,
+        // Neutral card with 8px warm orange left rail
+        ClipRRect(
+          borderRadius: BorderRadius.circular(tok.radiusMd),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Orange rail
+                Container(
+                  width: 8,
+                  decoration: BoxDecoration(
+                    color: tok.echoActive,
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: shell,
+                      border: Border(
+                        top: BorderSide(
+                          color: scheme.outlineVariant.withValues(alpha: 0.18),
+                        ),
+                        right: BorderSide(
+                          color: scheme.outlineVariant.withValues(alpha: 0.18),
+                        ),
+                        bottom: BorderSide(
+                          color: scheme.outlineVariant.withValues(alpha: 0.18),
+                        ),
+                      ),
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: lineWidgets,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         SizedBox(height: tok.space8),
@@ -461,53 +490,44 @@ class _TranscriptLineTileState extends State<_TranscriptLineTile> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final tok = EnjoyThemeTokens.of(context);
-    final baseBody = Theme.of(context).textTheme.bodyLarge ?? const TextStyle();
+    final typography = TranscriptTypographyTokens.of(context);
+    final baseBody = typography.bodyStyle;
     final defaultFg = scheme.onSurface;
 
     final echoCurrent = widget.isActive && widget.inEcho;
 
+    // Editorial active-line: soft fill + left rail instead of heavy background.
     Color? bg;
+    Color? railColor;
     if (widget.groupedInEcho) {
       if (echoCurrent) {
-        bg = Color.lerp(
-          tok.echoActive.withValues(alpha: 0.38),
-          scheme.primary.withValues(alpha: 0.18),
-          0.42,
-        );
+        bg = tok.echoActive.withValues(alpha: 0.06);
+        railColor = tok.echoActive;
       } else if (widget.inEcho) {
         bg = Colors.transparent;
       }
     } else if (echoCurrent) {
-      bg = Color.lerp(
-        tok.echoActive.withValues(alpha: 0.42),
-        scheme.primary.withValues(alpha: 0.22),
-        0.4,
-      );
+      bg = tok.echoActive.withValues(alpha: 0.06);
+      railColor = tok.echoActive;
     } else if (widget.isActive) {
-      bg = scheme.primary.withValues(alpha: 0.18);
+      bg = scheme.primary.withValues(alpha: 0.06);
+      railColor = scheme.primary;
     } else if (widget.inEcho) {
-      bg = tok.echoActive.withValues(alpha: 0.22);
+      bg = tok.echoActive.withValues(alpha: 0.04);
     } else if (_hover) {
-      bg = scheme.onSurface.withValues(alpha: 0.06);
+      bg = scheme.onSurface.withValues(alpha: 0.04);
     }
 
-    final timestampStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-      color: scheme.onSurfaceVariant,
-      fontFeatures: const [FontFeature.tabularFigures()],
-    );
+    final timestampStyle = typography.timestampStyle;
 
-    final content = Padding(
+    final textBody = Padding(
       padding: tok.transcriptLinePadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                formatTranscriptTimestampMs(widget.line.startMs),
-                style: timestampStyle,
-              ),
-            ],
+          Text(
+            formatTranscriptTimestampMs(widget.line.startMs),
+            style: timestampStyle,
           ),
           SizedBox(height: tok.space4),
           Text.rich(
@@ -523,9 +543,7 @@ class _TranscriptLineTileState extends State<_TranscriptLineTile> {
             Text.rich(
               transcriptMarkupToTextSpan(
                 widget.secondaryText!,
-                (Theme.of(context).textTheme.bodySmall ??
-                        const TextStyle())
-                    .copyWith(fontStyle: FontStyle.italic),
+                typography.secondaryStyle,
                 defaultColor: scheme.onSurfaceVariant,
                 emphasize: false,
               ),
@@ -535,19 +553,33 @@ class _TranscriptLineTileState extends State<_TranscriptLineTile> {
       ),
     );
 
+    // Left rail for active lines
+    final content = railColor != null
+        ? IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AnimatedContainer(
+                  duration: tok.motionFast,
+                  width: 3,
+                  decoration: BoxDecoration(
+                    color: railColor,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+                Expanded(child: textBody),
+              ],
+            ),
+          )
+        : textBody;
+
     if (widget.groupedInEcho) {
       return Material(
         color: bg ?? Colors.transparent,
         child: InkWell(
           onTap: widget.onTap,
-          highlightColor:
-              echoCurrent
-                  ? tok.echoActive.withValues(alpha: 0.12)
-                  : scheme.onSurface.withValues(alpha: 0.05),
-          splashColor:
-              echoCurrent
-                  ? tok.echoActive.withValues(alpha: 0.16)
-                  : scheme.primary.withValues(alpha: 0.08),
+          highlightColor: scheme.onSurface.withValues(alpha: 0.04),
+          splashColor: scheme.primary.withValues(alpha: 0.06),
           child: content,
         ),
       );
@@ -566,14 +598,8 @@ class _TranscriptLineTileState extends State<_TranscriptLineTile> {
           borderRadius: BorderRadius.circular(tok.radiusSm),
           onTap: widget.onTap,
           hoverColor: Colors.transparent,
-          highlightColor:
-              echoCurrent
-                  ? tok.echoActive.withValues(alpha: 0.14)
-                  : scheme.primary.withValues(alpha: 0.08),
-          splashColor:
-              echoCurrent
-                  ? tok.echoActive.withValues(alpha: 0.18)
-                  : scheme.primary.withValues(alpha: 0.12),
+          highlightColor: scheme.primary.withValues(alpha: 0.06),
+          splashColor: scheme.primary.withValues(alpha: 0.10),
           child: content,
         ),
       ),

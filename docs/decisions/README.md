@@ -30,3 +30,6 @@ Trade-offs, follow-up work, risks.
 | [0004](0004-feature-first-architecture.md) | Feature-first directory layout |
 | [0005](0005-mvp-scope-local-only.md) | MVP scope — local files only |
 | [0006](0006-auth-and-profile-sync.md) | Auth, profile, settings sync (browser flow) |
+| [0007](0007-dynamic-color-from-artwork.md) | Dynamic color from media artwork |
+| [0008](0008-light-mode-parity.md) | Light mode parity |
+| [0009](0009-platform-adaptive-shell.md) | Platform-adaptive shell nuances |

@@ -45,17 +45,17 @@ class EnjoyApp extends ConsumerWidget {
         );
       },
       loading: () => MaterialApp(
-        theme: dark,
+        theme: light,
         darkTheme: dark,
-        themeMode: ThemeMode.dark,
+        themeMode: ThemeMode.system,
         home: const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
       ),
       error: (e, _) => MaterialApp(
-        theme: dark,
+        theme: light,
         darkTheme: dark,
-        themeMode: ThemeMode.dark,
+        themeMode: ThemeMode.system,
         home: Scaffold(body: Center(child: Text('$e'))),
       ),
     );

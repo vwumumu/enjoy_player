@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
+import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/glass_surface.dart';
 import 'package:enjoy_player/core/utils/local_thumbnail.dart';
@@ -45,9 +46,12 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
     final bufferingAsync = ref.watch(playerIsBufferingProvider);
     final isPlaying = playingAsync.value ?? false;
     final isBuffering = bufferingAsync.value ?? false;
+    final paletteAsync = ref.watch(currentArtworkPaletteProvider);
+    final dynamicAccent = paletteAsync.value?.accent;
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
+    final playAccent = dynamicAccent ?? cs.primary;
     final path = GoRouterState.of(context).uri.path;
     final onPlayer = path.startsWith('/player/');
 
@@ -158,6 +162,7 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                       playing: isPlaying,
                       buffering: isBuffering,
                       tooltip: ttPlayPause,
+                      accentColor: playAccent,
                       onPressed:
                           isBuffering
                               ? null
@@ -596,16 +601,19 @@ class _PlayRingButton extends StatelessWidget {
     required this.buffering,
     required this.tooltip,
     required this.onPressed,
+    this.accentColor,
   });
 
   final bool playing;
   final bool buffering;
   final String tooltip;
   final VoidCallback? onPressed;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final ringColor = accentColor ?? cs.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -623,10 +631,10 @@ class _PlayRingButton extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: cs.primary, width: 2),
+                border: Border.all(color: ringColor, width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: cs.primary.withValues(alpha: 0.28),
+                    color: ringColor.withValues(alpha: 0.28),
                     blurRadius: 14,
                     spreadRadius: 0,
                   ),
@@ -640,7 +648,7 @@ class _PlayRingButton extends StatelessWidget {
                           height: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: cs.primary,
+                            color: ringColor,
                           ),
                         )
                         : Icon(

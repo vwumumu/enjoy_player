@@ -1,11 +1,12 @@
-/// Full-screen player: transparent AppBar over black + video/transcript.
+/// Full-screen player: ambient artwork backdrop + transparent AppBar.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
+import 'package:enjoy_player/core/theme/widgets/app_background.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import '../application/embedded_tracks_notifier.dart';
@@ -40,7 +41,10 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
   Widget build(BuildContext context) {
     final open = ref.watch(openMediaActionProvider(widget.mediaId));
     final session = ref.watch(playerControllerProvider);
+    final paletteAsync = ref.watch(currentArtworkPaletteProvider);
+    final accent = paletteAsync.value?.dominant;
     final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     ref.listen(embeddedTracksProvider, (_, event) {
       if (event == null) return;
@@ -51,8 +55,7 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
           content: Text(l10n.subtitlesDetected),
           action: SnackBarAction(
             label: l10n.subtitlesChoose,
-            onPressed:
-                () => showSubtitleTrackPicker(context, ref, widget.mediaId),
+            onPressed: () => showSubtitleTrackPicker(context, ref, widget.mediaId),
           ),
         ),
       );
@@ -60,14 +63,13 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
 
     if (open.hasError) {
       return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: isDark ? const Color(0xFF0B0B10) : const Color(0xFFFAFAF7),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
               '${l10n.error}: ${open.error}',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white),
             ),
           ),
         ),
@@ -75,28 +77,33 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
     }
 
     if (session == null || session.mediaId != widget.mediaId) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: isDark ? const Color(0xFF0B0B10) : const Color(0xFFFAFAF7),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     final isVideo = session.mediaType == 'video';
     final videoController =
-        isVideo
-            ? ref.read(playerControllerProvider.notifier).videoController
-            : null;
-    final t = EnjoyThemeTokens.of(context);
+        isVideo ? ref.read(playerControllerProvider.notifier).videoController : null;
+
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: isDark ? const Color(0xFF0B0B10) : const Color(0xFFFAFAF7),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black.withValues(alpha: 0.72),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          icon: const Icon(Icons.expand_more_rounded, color: Colors.white),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: isVideo ? Colors.white : cs.onSurface,
+            size: 28,
+          ),
           onPressed: () {
             ref.read(playerUiProvider.notifier).collapse();
             context.pop();
@@ -108,31 +115,23 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: isVideo ? Colors.white : cs.onSurface,
           ),
         ),
         centerTitle: true,
-        actions: [
-          SizedBox(width: t.space4),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(
-            height: 1,
-            thickness: 1,
-            color: Colors.white.withValues(alpha: 0.08),
-          ),
-        ),
       ),
-      body:
-          isVideo
-              ? VideoPlayerLayout(
+      body: PlayerAmbientBackdrop(
+        accentColor: accent,
+        intensity: 0.08,
+        child: isVideo
+            ? VideoPlayerLayout(
                 controller: videoController!,
                 transcript: TranscriptPanel(mediaId: widget.mediaId),
               )
-              : AudioPlayerLayout(
+            : AudioPlayerLayout(
                 transcript: TranscriptPanel(mediaId: widget.mediaId),
               ),
+      ),
     );
   }
 }
