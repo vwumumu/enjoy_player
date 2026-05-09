@@ -111,6 +111,7 @@ class _TranscriptBody extends ConsumerStatefulWidget {
 class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _activeLineKey = GlobalKey();
+  int _lastScrolledIndex = -1;
 
   @override
   void dispose() {
@@ -118,7 +119,15 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
     super.dispose();
   }
 
-  void _scheduleScrollActiveLineIntoView() {
+  @override
+  void didUpdateWidget(_TranscriptBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.mediaId != widget.mediaId) {
+      _lastScrolledIndex = -1;
+    }
+  }
+
+  void _scheduleScrollActiveLineIntoView({bool force = false}) {
     final playingAsync = ref.read(playerIsPlayingProvider);
     final playing = switch (playingAsync) {
       AsyncData(:final value) => value,
@@ -136,17 +145,45 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
     final activeForUi = transcriptActiveIndexForEchoUi(echo, active);
     if (activeForUi < 0) return;
 
+    if (!force && activeForUi == _lastScrolledIndex) return;
+    _lastScrolledIndex = activeForUi;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final ctx = _activeLineKey.currentContext;
-      if (ctx == null) return;
-      final tok = EnjoyThemeTokens.of(context);
-      Scrollable.ensureVisible(
-        ctx,
-        alignment: 0.42,
-        duration: tok.motionStandard,
-        curve: Curves.easeOutCubic,
-      );
+      if (ctx != null) {
+        // Item is in the render tree — animate directly.
+        final tok = EnjoyThemeTokens.of(context);
+        Scrollable.ensureVisible(
+          ctx,
+          alignment: 0.42,
+          duration: tok.motionStandard,
+          curve: Curves.easeOutCubic,
+        );
+        return;
+      }
+
+      // Item is outside the viewport and not yet rendered (lazy ListView).
+      // Jump to an estimated offset so the item enters the render tree, then
+      // ensureVisible in the following frame for precise placement.
+      if (!_scrollController.hasClients) return;
+      final pos = _scrollController.position;
+      final estimated =
+          (activeForUi / widget.lines.length) * pos.maxScrollExtent;
+      _scrollController.jumpTo(estimated.clamp(0.0, pos.maxScrollExtent));
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final ctx2 = _activeLineKey.currentContext;
+        if (ctx2 == null) return;
+        final tok = EnjoyThemeTokens.of(context);
+        Scrollable.ensureVisible(
+          ctx2,
+          alignment: 0.42,
+          duration: tok.motionStandard,
+          curve: Curves.easeOutCubic,
+        );
+      });
     });
   }
 
@@ -171,7 +208,7 @@ class _TranscriptBodyState extends ConsumerState<_TranscriptBody> {
       _scheduleScrollActiveLineIntoView();
     });
     ref.listen(playerIsPlayingProvider, (_, _) {
-      _scheduleScrollActiveLineIntoView();
+      _scheduleScrollActiveLineIntoView(force: true);
     });
 
     final lines = widget.lines;
