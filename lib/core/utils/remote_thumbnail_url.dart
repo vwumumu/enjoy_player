@@ -8,3 +8,8 @@ bool isRemoteThumbnailUrl(String? url) {
       u.hasScheme &&
       (u.isScheme('http') || u.isScheme('https'));
 }
+
+/// When set, library/home cards should use [Image.network] instead of a local file.
+String? remoteThumbnailForCard(String? thumbnailPath) {
+  return isRemoteThumbnailUrl(thumbnailPath) ? thumbnailPath : null;
+}

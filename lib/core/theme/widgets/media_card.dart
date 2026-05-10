@@ -20,6 +20,7 @@ class MediaCardTile extends StatefulWidget {
     required this.title,
     required this.onTap,
     this.thumbnailFile,
+    this.thumbnailNetworkUrl,
     this.coverSeed,
     this.subtitle,
     this.isVideo = false,
@@ -31,6 +32,9 @@ class MediaCardTile extends StatefulWidget {
   final String title;
   final VoidCallback onTap;
   final File? thumbnailFile;
+
+  /// When [thumbnailFile] is null, optional `http(s)` artwork (e.g. cloud index).
+  final String? thumbnailNetworkUrl;
 
   /// When [thumbnailFile] is null or fails to load, used for [GenerativeMediaCover].
   final String? coverSeed;
@@ -106,6 +110,7 @@ class _MediaCardTileState extends State<MediaCardTile> {
                     children: [
                       _Thumbnail(
                         file: widget.thumbnailFile,
+                        networkUrl: widget.thumbnailNetworkUrl,
                         coverSeed: widget.coverSeed,
                         isVideo: widget.isVideo,
                         cs: cs,
@@ -235,6 +240,7 @@ class MediaCardRow extends StatefulWidget {
     required this.title,
     required this.onTap,
     this.thumbnailFile,
+    this.thumbnailNetworkUrl,
     this.coverSeed,
     this.subtitle,
     this.badge,
@@ -248,6 +254,7 @@ class MediaCardRow extends StatefulWidget {
   final String title;
   final VoidCallback onTap;
   final File? thumbnailFile;
+  final String? thumbnailNetworkUrl;
   final String? coverSeed;
   final String? subtitle;
   final String? badge;
@@ -349,6 +356,7 @@ class _MediaCardRowState extends State<MediaCardRow> {
                     height: 56,
                     child: _Thumbnail(
                       file: widget.thumbnailFile,
+                      networkUrl: widget.thumbnailNetworkUrl,
                       coverSeed: widget.coverSeed,
                       isVideo: widget.isVideo,
                       cs: cs,
@@ -409,12 +417,14 @@ class _MediaCardRowState extends State<MediaCardRow> {
 class _Thumbnail extends StatelessWidget {
   const _Thumbnail({
     required this.file,
+    this.networkUrl,
     required this.coverSeed,
     required this.isVideo,
     required this.cs,
   });
 
   final File? file;
+  final String? networkUrl;
   final String? coverSeed;
   final bool isVideo;
   final ColorScheme cs;
@@ -424,6 +434,16 @@ class _Thumbnail extends StatelessWidget {
     if (file != null) {
       return Image.file(
         file!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (_, _, _) => _fallback(),
+      );
+    }
+    final url = networkUrl;
+    if (url != null && url.isNotEmpty) {
+      return Image.network(
+        url,
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,

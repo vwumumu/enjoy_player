@@ -12,6 +12,7 @@ import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
 import 'package:enjoy_player/core/theme/widgets/media_card.dart';
 import 'package:enjoy_player/core/utils/local_thumbnail.dart';
+import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -230,18 +231,20 @@ class _AudioRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final thumb = localThumbnailFile(media.thumbnailPath);
+    final netThumb = remoteThumbnailForCard(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
     final accent =
-        thumb == null
-            ? generativeAccentForSeed(media.coverSeed)
-            : paletteAsync.value?.accent;
+        thumb != null
+            ? (paletteAsync.value?.accent ?? generativeAccentForSeed(media.coverSeed))
+            : generativeAccentForSeed(media.coverSeed);
 
     return MediaCardRow(
       title: media.title,
       subtitle: dur,
       badge: media.language,
       thumbnailFile: thumb,
+      thumbnailNetworkUrl: netThumb,
       coverSeed: media.coverSeed,
       isVideo: false,
       accentColor: accent,
@@ -295,17 +298,19 @@ class _VideoTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final thumb = localThumbnailFile(media.thumbnailPath);
+    final netThumb = remoteThumbnailForCard(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
     final accent =
-        thumb == null
-            ? generativeAccentForSeed(media.coverSeed)
-            : paletteAsync.value?.accent;
+        thumb != null
+            ? (paletteAsync.value?.accent ?? generativeAccentForSeed(media.coverSeed))
+            : generativeAccentForSeed(media.coverSeed);
 
     return MediaCardTile(
       title: media.title,
       subtitle: '${l10n.miniPlayerMediaVideo} · $dur',
       thumbnailFile: thumb,
+      thumbnailNetworkUrl: netThumb,
       coverSeed: media.coverSeed,
       isVideo: true,
       accentColor: accent,

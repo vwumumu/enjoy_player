@@ -12,6 +12,7 @@ import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
 import 'package:enjoy_player/core/theme/widgets/media_card.dart';
 import 'package:enjoy_player/core/utils/local_thumbnail.dart';
+import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
@@ -219,18 +220,20 @@ class _HomeMediaTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final isVideo = media.kind == MediaKind.video;
     final thumb = localThumbnailFile(media.thumbnailPath);
+    final netThumb = remoteThumbnailForCard(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
     final accent =
-        thumb == null
-            ? generativeAccentForSeed(media.coverSeed)
-            : paletteAsync.value?.accent;
+        thumb != null
+            ? (paletteAsync.value?.accent ?? generativeAccentForSeed(media.coverSeed))
+            : generativeAccentForSeed(media.coverSeed);
 
     return MediaCardTile(
       title: media.title,
       subtitle:
           '${isVideo ? l10n.miniPlayerMediaVideo : l10n.miniPlayerMediaAudio} · $dur',
       thumbnailFile: thumb,
+      thumbnailNetworkUrl: netThumb,
       coverSeed: media.coverSeed,
       isVideo: isVideo,
       accentColor: accent,

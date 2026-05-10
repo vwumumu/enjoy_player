@@ -13,6 +13,11 @@ import 'ffmpeg_media_probe.dart';
 
 final _log = logNamed('VideoPosterExtract');
 
+bool _isNetworkMediaInput(String path) {
+  final lower = path.toLowerCase();
+  return lower.startsWith('http://') || lower.startsWith('https://');
+}
+
 /// Max seconds to decode from the start when using **accurate** seek (`-i` then `-ss`).
 const _kAccurateSeekDecodeCap = 45;
 
@@ -77,6 +82,7 @@ Future<bool> writeVideoPosterJpeg({
   final seek = posterSeekSeconds(durationSeconds);
   final seekStr = seek.toStringAsFixed(3);
   final accurate = seek <= _kAccurateSeekDecodeCap;
+  final net = _isNetworkMediaInput(input);
 
   try {
     if (Platform.isWindows) {
@@ -90,6 +96,10 @@ Future<bool> writeVideoPosterJpeg({
         args = [
           '-y',
           '-hide_banner',
+          if (net) ...[
+            '-protocol_whitelist',
+            'file,http,https,tcp,tls,crypto',
+          ],
           '-i',
           input,
           '-ss',
@@ -104,6 +114,10 @@ Future<bool> writeVideoPosterJpeg({
         args = [
           '-y',
           '-hide_banner',
+          if (net) ...[
+            '-protocol_whitelist',
+            'file,http,https,tcp,tls,crypto',
+          ],
           '-ss',
           seekStr,
           '-i',
@@ -121,14 +135,20 @@ Future<bool> writeVideoPosterJpeg({
         return false;
       }
     } else {
+      final proto =
+          net
+              ? '-protocol_whitelist file,http,https,tcp,tls,crypto '
+              : '';
       final String cmd;
       if (accurate) {
         cmd =
-            '-y -hide_banner -i ${_shellEscape(input)} -ss $seekStr '
+            '-y -hide_banner $proto'
+            '-i ${_shellEscape(input)} -ss $seekStr '
             '-frames:v 1 -q:v 3 ${_shellEscape(outputJpegPath)}';
       } else {
         cmd =
-            '-y -hide_banner -ss $seekStr -i ${_shellEscape(input)} '
+            '-y -hide_banner $proto'
+            '-ss $seekStr -i ${_shellEscape(input)} '
             '-frames:v 1 -q:v 3 ${_shellEscape(outputJpegPath)}';
       }
       final session = await FFmpegKit.execute(cmd);

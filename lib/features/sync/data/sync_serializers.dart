@@ -7,7 +7,7 @@ import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 
 export 'package:enjoy_player/core/utils/remote_thumbnail_url.dart'
-    show isRemoteThumbnailUrl;
+    show isRemoteThumbnailUrl, remoteThumbnailForCard;
 
 DateTime? parseIsoDate(dynamic value) {
   if (value == null) return null;

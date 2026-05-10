@@ -2,8 +2,10 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' show File;
 
+import 'package:crypto/crypto.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:drift/drift.dart';
 
@@ -18,6 +20,20 @@ import 'package:enjoy_player/data/files/media_resolver.dart';
 import 'package:enjoy_player/data/files/video_poster_extract.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/sync/domain/sync_types.dart';
+
+String _posterStorageKeyHex(VideoRow row) {
+  final m = row.md5;
+  if (m != null && m.isNotEmpty) return m;
+  return sha256.convert(utf8.encode(row.id)).toString();
+}
+
+String? _videoMediaSourceUri(VideoRow row) {
+  final l = row.localUri;
+  if (l != null && l.isNotEmpty) return l;
+  final u = row.mediaUrl;
+  if (u != null && u.isNotEmpty) return u;
+  return null;
+}
 
 Media _mediaFromVideo(VideoRow row) {
   return Media(
@@ -153,10 +169,10 @@ class MediaLibraryRepository {
         await _db.videoDao.insertRow(row);
         unawaited(_probeAndPatchDuration(id, result.fileUri, video: true));
         unawaited(
-          _writeLocalVideoThumbnailIfNeeded(
+          _writeLocalVideoPoster(
             mediaId: id,
-            fileUri: result.fileUri,
-            contentHashHex: contentHash,
+            mediaSourceUri: result.fileUri,
+            storageKeyHex: contentHash,
           ),
         );
         if (signedIn) {
@@ -215,36 +231,36 @@ class MediaLibraryRepository {
     }
   }
 
-  /// One-time migration: generate JPEG thumbnails for videos that predate poster extraction.
+  /// One-time migration: generate JPEG thumbnails for videos missing a usable local poster.
   ///
-  /// Skips rows without [VideoRow.localUri] / [VideoRow.md5], rows with only a remote
-  /// [VideoRow.thumbnailUrl], and rows whose local thumbnail file already exists.
+  /// Uses [VideoRow.localUri] when set, otherwise [VideoRow.mediaUrl] (remote MP4, etc.).
+  /// Skips rows that already use a remote `http(s)` [VideoRow.thumbnailUrl] for the card,
+  /// and rows whose [VideoRow.thumbnailUrl] already resolves to a local file.
   Future<void> backfillMissingVideoThumbnails() async {
     final rows = await _db.videoDao.listAll();
     for (final row in rows) {
-      final uri = row.localUri;
-      if (uri == null || uri.isEmpty) continue;
-      final md5 = row.md5;
-      if (md5 == null || md5.isEmpty) continue;
       if (isRemoteThumbnailUrl(row.thumbnailUrl)) continue;
       if (localThumbnailFile(row.thumbnailUrl) != null) continue;
 
-      await _writeLocalVideoThumbnailIfNeeded(
+      final source = _videoMediaSourceUri(row);
+      if (source == null || source.isEmpty) continue;
+
+      await _writeLocalVideoPoster(
         mediaId: row.id,
-        fileUri: uri,
-        contentHashHex: md5,
+        mediaSourceUri: source,
+        storageKeyHex: _posterStorageKeyHex(row),
         hintDurationSeconds: row.durationSeconds,
       );
     }
   }
 
   /// Parses container duration from ffmpeg stderr (same probe as [_probeAndPatchDuration]).
-  Future<int?> _probeMediaDurationSeconds(String fileUri) async {
+  Future<int?> _probeMediaDurationSeconds(String mediaSourceUri) async {
     final ffmpeg = await FfmpegMediaProbe.resolveFfmpegExecutable();
     if (ffmpeg == null) return null;
     final stderr = await FfmpegMediaProbe.loadIdentifyStderr(
       ffmpeg,
-      FfmpegMediaProbe.mediaInputForFfmpeg(fileUri),
+      FfmpegMediaProbe.mediaInputForFfmpeg(mediaSourceUri),
     );
     if (stderr == null || stderr.isEmpty) return null;
     return FfmpegMediaProbe.parseDurationSeconds(stderr);
@@ -279,11 +295,13 @@ class MediaLibraryRepository {
     }
   }
 
-  /// Writes `media_thumbs/<md5>.jpg` and patches [VideoRow.thumbnailUrl] with its absolute path.
-  Future<void> _writeLocalVideoThumbnailIfNeeded({
+  /// Writes `media_thumbs/<storageKeyHex>.jpg` and patches [VideoRow.thumbnailUrl].
+  ///
+  /// [mediaSourceUri] may be `file:` or `https:` (cloud-only rows).
+  Future<void> _writeLocalVideoPoster({
     required String mediaId,
-    required String fileUri,
-    required String contentHashHex,
+    required String mediaSourceUri,
+    required String storageKeyHex,
     int? hintDurationSeconds,
   }) async {
     final row = await _db.videoDao.getById(mediaId);
@@ -291,13 +309,13 @@ class MediaLibraryRepository {
 
     var sec = hintDurationSeconds ?? row.durationSeconds;
     if (sec <= 0) {
-      sec = await _probeMediaDurationSeconds(fileUri) ?? 0;
+      sec = await _probeMediaDurationSeconds(mediaSourceUri) ?? 0;
     }
     final durationForPoster = sec > 0 ? sec : null;
 
-    final outPath = await videoThumbnailPathForContentHash(contentHashHex);
+    final outPath = await videoThumbnailPathForContentHash(storageKeyHex);
     final ok = await writeVideoPosterJpeg(
-      mediaSourceUri: fileUri,
+      mediaSourceUri: mediaSourceUri,
       outputJpegPath: outPath,
       durationSeconds: durationForPoster,
     );
@@ -305,6 +323,19 @@ class MediaLibraryRepository {
 
     final absoluteThumb = File(outPath).absolute.path;
     await _db.videoDao.updateLocalThumbnail(mediaId, absoluteThumb);
+  }
+
+  /// After cloud metadata insert: local JPEG from [VideoRow.mediaUrl] when there is no http(s) artwork URL.
+  Future<void> ensureVideoPosterAfterMetadataInsert(VideoRow row) async {
+    if (isRemoteThumbnailUrl(row.thumbnailUrl)) return;
+    final source = _videoMediaSourceUri(row);
+    if (source == null || source.isEmpty) return;
+    await _writeLocalVideoPoster(
+      mediaId: row.id,
+      mediaSourceUri: source,
+      storageKeyHex: _posterStorageKeyHex(row),
+      hintDurationSeconds: row.durationSeconds,
+    );
   }
 
   Future<void> deleteMedia(String id) async {

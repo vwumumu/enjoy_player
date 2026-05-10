@@ -11,6 +11,7 @@ import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
 import 'package:enjoy_player/core/theme/widgets/media_card.dart';
+import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
@@ -448,6 +449,7 @@ class _CloudAudioRowState extends ConsumerState<_CloudAudioRow> {
       subtitle: dur,
       badge: item.language,
       thumbnailFile: null,
+      thumbnailNetworkUrl: remoteThumbnailForCard(item.thumbnailUrl),
       coverSeed: seed,
       isVideo: false,
       accentColor: accent,
@@ -658,6 +660,7 @@ class _CloudVideoTileState extends ConsumerState<_CloudVideoTile> {
           title: item.title,
           subtitle: '${l10n.miniPlayerMediaVideo} · $dur',
           thumbnailFile: null,
+          thumbnailNetworkUrl: remoteThumbnailForCard(item.thumbnailUrl),
           coverSeed: seed,
           isVideo: true,
           accentColor: accent,

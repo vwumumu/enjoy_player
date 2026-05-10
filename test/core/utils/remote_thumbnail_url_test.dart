@@ -15,4 +15,12 @@ void main() {
       expect(isRemoteThumbnailUrl('https://cdn/x.png'), isTrue);
     });
   });
+
+  group('remoteThumbnailForCard', () {
+    test('returns url only for http(s)', () {
+      expect(remoteThumbnailForCard('https://x/a.jpg'), 'https://x/a.jpg');
+      expect(remoteThumbnailForCard(r'C:\a.jpg'), isNull);
+      expect(remoteThumbnailForCard(null), isNull);
+    });
+  });
 }
