@@ -228,6 +228,7 @@ class _AudioRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final thumb = localThumbnailFile(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
@@ -244,6 +245,8 @@ class _AudioRow extends ConsumerWidget {
       coverSeed: media.coverSeed,
       isVideo: false,
       accentColor: accent,
+      deleteTooltip: l10n.libraryDeleteMediaTooltip,
+      onDelete: () => confirmAndDeleteMedia(context, ref, media),
       onTap: () => context.push('/player/${media.id}'),
     );
   }
@@ -306,6 +309,8 @@ class _VideoTile extends ConsumerWidget {
       coverSeed: media.coverSeed,
       isVideo: true,
       accentColor: accent,
+      deleteTooltip: l10n.libraryDeleteMediaTooltip,
+      onDelete: () => confirmAndDeleteMedia(context, ref, media),
       onTap: () => context.push('/player/${media.id}'),
     );
   }

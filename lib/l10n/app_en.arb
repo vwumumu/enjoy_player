@@ -292,5 +292,17 @@
   "settingsMigrationTitle": "Migrate local data",
   "settingsMigrationSubtitle": "Move your guest media and history to this account",
   "migrationSuccess": "Data moved successfully",
-  "migrationMigrationFailed": "Could not move data. Try again later."
+  "migrationMigrationFailed": "Could not move data. Try again later.",
+  "libraryDeleteMediaTitle": "Delete from library?",
+  "libraryDeleteMediaMessage": "Remove \"{title}\" from this device. This cannot be undone.",
+  "@libraryDeleteMediaMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryDeleteMediaTooltip": "Delete from library",
+  "libraryMediaDeleted": "Removed from library.",
+  "libraryDeleteMediaFailed": "Could not remove this item."
 }

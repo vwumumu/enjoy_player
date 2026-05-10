@@ -14,6 +14,7 @@ import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/library_repository_provider.dart';
+import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
@@ -77,6 +78,51 @@ Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
       Navigator.of(context, rootNavigator: true).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.importMediaFailed)),
+      );
+    }
+  }
+}
+
+Future<void> confirmAndDeleteMedia(
+  BuildContext context,
+  WidgetRef ref,
+  Media media,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder:
+        (ctx) => AlertDialog(
+          title: Text(l10n.libraryDeleteMediaTitle),
+          content: Text(l10n.libraryDeleteMediaMessage(media.title)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(MaterialLocalizations.of(ctx).deleteButtonTooltip),
+            ),
+          ],
+        ),
+  );
+  if (confirmed != true || !context.mounted) return;
+  try {
+    await ref.read(mediaLibraryRepositoryProvider).deleteMedia(media.id);
+    if (!context.mounted) return;
+    final openId = GoRouterState.of(context).pathParameters['mediaId'];
+    if (openId == media.id) {
+      context.pop();
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.libraryMediaDeleted)),
+    );
+  } catch (_) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.libraryDeleteMediaFailed)),
       );
     }
   }

@@ -234,6 +234,8 @@ class _HomeMediaTile extends ConsumerWidget {
       coverSeed: media.coverSeed,
       isVideo: isVideo,
       accentColor: accent,
+      deleteTooltip: l10n.libraryDeleteMediaTooltip,
+      onDelete: () => confirmAndDeleteMedia(context, ref, media),
       onTap: () => context.push('/player/${media.id}'),
     );
   }

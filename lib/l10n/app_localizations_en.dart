@@ -778,4 +778,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get migrationMigrationFailed =>
       'Could not move data. Try again later.';
+
+  @override
+  String get libraryDeleteMediaTitle => 'Delete from library?';
+
+  @override
+  String libraryDeleteMediaMessage(String title) {
+    return 'Remove \"$title\" from this device. This cannot be undone.';
+  }
+
+  @override
+  String get libraryDeleteMediaTooltip => 'Delete from library';
+
+  @override
+  String get libraryMediaDeleted => 'Removed from library.';
+
+  @override
+  String get libraryDeleteMediaFailed => 'Could not remove this item.';
 }

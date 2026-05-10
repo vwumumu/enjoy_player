@@ -24,6 +24,8 @@ class MediaCardTile extends StatefulWidget {
     this.subtitle,
     this.isVideo = false,
     this.accentColor,
+    this.onDelete,
+    this.deleteTooltip,
   });
 
   final String title;
@@ -35,6 +37,12 @@ class MediaCardTile extends StatefulWidget {
   final String? subtitle;
   final bool isVideo;
   final Color? accentColor;
+
+  /// When non-null, a corner delete control is shown on the thumbnail area on pointer hover.
+  final VoidCallback? onDelete;
+
+  /// Tooltip for [onDelete]; ignored when [onDelete] is null.
+  final String? deleteTooltip;
 
   @override
   State<MediaCardTile> createState() => _MediaCardTileState();
@@ -135,6 +143,41 @@ class _MediaCardTileState extends State<MediaCardTile> {
                             ],
                           ),
                         ),
+                      if (widget.onDelete != null)
+                        Positioned(
+                          top: t.space8,
+                          right: t.space8,
+                          child: AnimatedOpacity(
+                            opacity: _hover ? 1 : 0,
+                            duration: t.motionFast,
+                            curve: Curves.easeOut,
+                            child: IgnorePointer(
+                              ignoring: !_hover,
+                              child: IconButton(
+                                visualDensity: VisualDensity.compact,
+                                iconSize: 20,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                  minWidth: 36,
+                                  minHeight: 36,
+                                ),
+                                tooltip:
+                                    (widget.deleteTooltip != null &&
+                                            widget.deleteTooltip!.isNotEmpty)
+                                        ? widget.deleteTooltip
+                                        : null,
+                                style: IconButton.styleFrom(
+                                  backgroundColor: cs.surfaceContainerHighest
+                                      .withValues(alpha: 0.92),
+                                  foregroundColor: cs.onSurfaceVariant,
+                                  shape: const CircleBorder(),
+                                ),
+                                icon: const Icon(Icons.delete_outline_rounded),
+                                onPressed: widget.onDelete,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -198,6 +241,8 @@ class MediaCardRow extends StatefulWidget {
     this.isVideo = false,
     this.accentColor,
     this.trailing,
+    this.onDelete,
+    this.deleteTooltip,
   });
 
   final String title;
@@ -210,12 +255,53 @@ class MediaCardRow extends StatefulWidget {
   final Color? accentColor;
   final Widget? trailing;
 
+  /// When non-null (and [trailing] is null), a delete control appears beside the chevron on hover.
+  final VoidCallback? onDelete;
+
+  /// Tooltip for [onDelete].
+  final String? deleteTooltip;
+
   @override
   State<MediaCardRow> createState() => _MediaCardRowState();
 }
 
 class _MediaCardRowState extends State<MediaCardRow> {
   bool _hover = false;
+
+  Widget _buildTrailing(ColorScheme cs, EnjoyThemeTokens t) {
+    if (widget.trailing != null) return widget.trailing!;
+    if (widget.onDelete != null) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedOpacity(
+            opacity: _hover ? 1 : 0,
+            duration: t.motionFast,
+            curve: Curves.easeOut,
+            child: IgnorePointer(
+              ignoring: !_hover,
+              child: IconButton(
+                visualDensity: VisualDensity.compact,
+                iconSize: 22,
+                tooltip:
+                    (widget.deleteTooltip != null &&
+                            widget.deleteTooltip!.isNotEmpty)
+                        ? widget.deleteTooltip
+                        : null,
+                onPressed: widget.onDelete,
+                icon: Icon(
+                  Icons.delete_outline_rounded,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+        ],
+      );
+    }
+    return Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -308,11 +394,7 @@ class _MediaCardRowState extends State<MediaCardRow> {
                   ),
                 ),
                 // Trailing
-                widget.trailing ??
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: cs.onSurfaceVariant,
-                    ),
+                _buildTrailing(cs, t),
               ],
             ),
           ),

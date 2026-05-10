@@ -1545,6 +1545,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not move data. Try again later.'**
   String get migrationMigrationFailed;
+
+  /// No description provided for @libraryDeleteMediaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete from library?'**
+  String get libraryDeleteMediaTitle;
+
+  /// No description provided for @libraryDeleteMediaMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{title}\" from this device. This cannot be undone.'**
+  String libraryDeleteMediaMessage(String title);
+
+  /// No description provided for @libraryDeleteMediaTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete from library'**
+  String get libraryDeleteMediaTooltip;
+
+  /// No description provided for @libraryMediaDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from library.'**
+  String get libraryMediaDeleted;
+
+  /// No description provided for @libraryDeleteMediaFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not remove this item.'**
+  String get libraryDeleteMediaFailed;
 }
 
 class _AppLocalizationsDelegate
