@@ -3,7 +3,11 @@ library;
 
 import 'package:drift/drift.dart';
 
+import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
+
+export 'package:enjoy_player/core/utils/remote_thumbnail_url.dart'
+    show isRemoteThumbnailUrl;
 
 DateTime? parseIsoDate(dynamic value) {
   if (value == null) return null;
@@ -13,15 +17,6 @@ DateTime? parseIsoDate(dynamic value) {
 
 DateTime requireIsoDate(dynamic value, DateTime fallback) =>
     parseIsoDate(value) ?? fallback;
-
-/// Whether [url] should be sent to the API as `thumbnailUrl` (remote only).
-bool isRemoteThumbnailUrl(String? url) {
-  if (url == null || url.isEmpty) return false;
-  final u = Uri.tryParse(url);
-  return u != null &&
-      u.hasScheme &&
-      (u.isScheme('http') || u.isScheme('https'));
-}
 
 int durationSecondsFromJson(Map<String, dynamic> json) {
   final v = json['durationSeconds'] ?? json['duration'];

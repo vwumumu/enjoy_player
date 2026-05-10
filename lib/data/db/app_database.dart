@@ -88,6 +88,8 @@ class VideoDao extends DatabaseAccessor<AppDatabase> with _$VideoDaoMixin {
   Future<VideoRow?> getById(String id) =>
       (select(videos)..where((t) => t.id.equals(id))).getSingleOrNull();
 
+  Future<List<VideoRow>> listAll() => select(videos).get();
+
   Future<void> insertRow(VideoRow row) =>
       into(videos).insert(row, mode: InsertMode.insertOrReplace);
 

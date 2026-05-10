@@ -1,12 +1,15 @@
 /// Application shell: adaptive navigation + page stack + global transport.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/app_background.dart';
+import 'package:enjoy_player/features/library/application/library_repository_provider.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -14,10 +17,29 @@ import '../application/player_controller.dart';
 import 'widgets/app_sidebar.dart';
 import 'widgets/global_transport_bar.dart';
 
-class RootShell extends ConsumerWidget {
+bool _videoThumbnailBackfillScheduled = false;
+
+class RootShell extends ConsumerStatefulWidget {
   const RootShell({required this.child, super.key});
 
   final Widget child;
+
+  @override
+  ConsumerState<RootShell> createState() => _RootShellState();
+}
+
+class _RootShellState extends ConsumerState<RootShell> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_videoThumbnailBackfillScheduled) return;
+      _videoThumbnailBackfillScheduled = true;
+      final repo = ref.read(mediaLibraryRepositoryProvider);
+      unawaited(repo.backfillMissingVideoThumbnails());
+    });
+  }
 
   int _navIndexForPath(String path) {
     if (path.startsWith('/settings')) return 3;
@@ -46,7 +68,7 @@ class RootShell extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     ref.watch(syncCtrlProvider);
     final sessionActive =
         ref.watch(playerControllerProvider.select((s) => s != null));
@@ -63,7 +85,7 @@ class RootShell extends ConsumerWidget {
 
           final pageColumn = Column(
             children: [
-              Expanded(child: child),
+              Expanded(child: widget.child),
               if (sessionActive) const GlobalTransportBar(),
               if (!useSidebar && !onPlayer)
                 NavigationBar(

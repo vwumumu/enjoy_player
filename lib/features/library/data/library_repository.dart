@@ -9,6 +9,8 @@ import 'package:drift/drift.dart';
 
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/ids/enjoy_ids.dart';
+import 'package:enjoy_player/core/utils/local_thumbnail.dart';
+import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/files/ffmpeg_media_probe.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
@@ -213,6 +215,41 @@ class MediaLibraryRepository {
     }
   }
 
+  /// One-time migration: generate JPEG thumbnails for videos that predate poster extraction.
+  ///
+  /// Skips rows without [VideoRow.localUri] / [VideoRow.md5], rows with only a remote
+  /// [VideoRow.thumbnailUrl], and rows whose local thumbnail file already exists.
+  Future<void> backfillMissingVideoThumbnails() async {
+    final rows = await _db.videoDao.listAll();
+    for (final row in rows) {
+      final uri = row.localUri;
+      if (uri == null || uri.isEmpty) continue;
+      final md5 = row.md5;
+      if (md5 == null || md5.isEmpty) continue;
+      if (isRemoteThumbnailUrl(row.thumbnailUrl)) continue;
+      if (localThumbnailFile(row.thumbnailUrl) != null) continue;
+
+      await _writeLocalVideoThumbnailIfNeeded(
+        mediaId: row.id,
+        fileUri: uri,
+        contentHashHex: md5,
+        hintDurationSeconds: row.durationSeconds,
+      );
+    }
+  }
+
+  /// Parses container duration from ffmpeg stderr (same probe as [_probeAndPatchDuration]).
+  Future<int?> _probeMediaDurationSeconds(String fileUri) async {
+    final ffmpeg = await FfmpegMediaProbe.resolveFfmpegExecutable();
+    if (ffmpeg == null) return null;
+    final stderr = await FfmpegMediaProbe.loadIdentifyStderr(
+      ffmpeg,
+      FfmpegMediaProbe.mediaInputForFfmpeg(fileUri),
+    );
+    if (stderr == null || stderr.isEmpty) return null;
+    return FfmpegMediaProbe.parseDurationSeconds(stderr);
+  }
+
   /// Fills `duration_seconds` when still zero after import, using `ffmpeg -i`.
   Future<void> _probeAndPatchDuration(
     String mediaId,
@@ -247,11 +284,22 @@ class MediaLibraryRepository {
     required String mediaId,
     required String fileUri,
     required String contentHashHex,
+    int? hintDurationSeconds,
   }) async {
+    final row = await _db.videoDao.getById(mediaId);
+    if (row == null) return;
+
+    var sec = hintDurationSeconds ?? row.durationSeconds;
+    if (sec <= 0) {
+      sec = await _probeMediaDurationSeconds(fileUri) ?? 0;
+    }
+    final durationForPoster = sec > 0 ? sec : null;
+
     final outPath = await videoThumbnailPathForContentHash(contentHashHex);
     final ok = await writeVideoPosterJpeg(
       mediaSourceUri: fileUri,
       outputJpegPath: outPath,
+      durationSeconds: durationForPoster,
     );
     if (!ok) return;
 

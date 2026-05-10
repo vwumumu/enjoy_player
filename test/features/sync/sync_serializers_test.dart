@@ -143,20 +143,6 @@ void main() {
     });
   });
 
-  group('isRemoteThumbnailUrl', () {
-    test('false for null, empty, file path, file scheme', () {
-      expect(isRemoteThumbnailUrl(null), isFalse);
-      expect(isRemoteThumbnailUrl(''), isFalse);
-      expect(isRemoteThumbnailUrl(r'C:\x\y.jpg'), isFalse);
-      expect(isRemoteThumbnailUrl('file:///x/y.jpg'), isFalse);
-    });
-
-    test('true for http and https', () {
-      expect(isRemoteThumbnailUrl('http://a/b.jpg'), isTrue);
-      expect(isRemoteThumbnailUrl('https://cdn/x.png'), isTrue);
-    });
-  });
-
   group('recordingRowFromServerJson', () {
     test('parses duration and reference fields as milliseconds', () {
       final t = DateTime.utc(2025, 6, 1);

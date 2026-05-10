@@ -13,6 +13,9 @@ import 'ffmpeg_media_probe.dart';
 
 final _log = logNamed('VideoPosterExtract');
 
+/// Max seconds to decode from the start when using **accurate** seek (`-i` then `-ss`).
+const _kAccurateSeekDecodeCap = 45;
+
 /// Ensures `media_thumbs/` under app documents exists and returns
 /// `…/media_thumbs/<contentHashHex>.jpg`.
 Future<String> videoThumbnailPathForContentHash(String contentHashHex) async {
@@ -24,7 +27,32 @@ Future<String> videoThumbnailPathForContentHash(String contentHashHex) async {
   return p.join(dir.path, '$contentHashHex.jpg');
 }
 
-/// Writes one JPEG frame (~1s) from [mediaSourceUri] (`file:` or path) to [outputJpegPath].
+/// Chooses a timestamp (seconds) to sample for a poster — avoids t≈0 and t≈1
+/// where many encodes are black, logos, or keyframe-snapped to black.
+///
+/// When [durationSeconds] is null/unknown, uses a fixed ~6s past typical fades.
+double posterSeekSeconds(int? durationSeconds) {
+  if (durationSeconds != null && durationSeconds > 0) {
+    final d = durationSeconds.toDouble();
+    if (d <= 2) {
+      return (d * 0.45).clamp(0.1, d - 0.05);
+    }
+    // ~12% into the clip, at least 2.5s from start, before end.
+    final fromPercent = d * 0.12;
+    final bounded = fromPercent.clamp(2.5, d - 0.25);
+    // Fast input-seek beyond ~90s can miss badly on some files; cap there.
+    return bounded > 90 ? 90.0 : bounded;
+  }
+  return 6.0;
+}
+
+/// Writes one JPEG frame from [mediaSourceUri] (`file:` or path) to [outputJpegPath].
+///
+/// [durationSeconds] when known selects **~12%** into the clip (not second 1).
+/// Unknown duration uses **~6s** (see [posterSeekSeconds]).
+///
+/// Uses **accurate** seek (`-i` then `-ss`) when the target time is small enough
+/// that decode cost is bounded; otherwise **fast** seek (`-ss` before `-i`).
 ///
 /// Windows: subprocess via [FfmpegMediaProbe.resolveFfmpegExecutable].
 /// Other platforms: [FFmpegKit.execute] (bundled libs on mobile).
@@ -33,6 +61,7 @@ Future<String> videoThumbnailPathForContentHash(String contentHashHex) async {
 Future<bool> writeVideoPosterJpeg({
   required String mediaSourceUri,
   required String outputJpegPath,
+  int? durationSeconds,
 }) async {
   final input = FfmpegMediaProbe.mediaInputForFfmpeg(mediaSourceUri);
   if (input.isEmpty) {
@@ -45,6 +74,10 @@ Future<bool> writeVideoPosterJpeg({
     await parent.create(recursive: true);
   }
 
+  final seek = posterSeekSeconds(durationSeconds);
+  final seekStr = seek.toStringAsFixed(3);
+  final accurate = seek <= _kAccurateSeekDecodeCap;
+
   try {
     if (Platform.isWindows) {
       final exe = await FfmpegMediaProbe.resolveFfmpegExecutable();
@@ -52,27 +85,52 @@ Future<bool> writeVideoPosterJpeg({
         _log.fine('video poster: no ffmpeg on Windows');
         return false;
       }
-      final r = await Process.run(exe, [
-        '-y',
-        '-hide_banner',
-        '-ss',
-        '1',
-        '-i',
-        input,
-        '-frames:v',
-        '1',
-        '-q:v',
-        '3',
-        outputJpegPath,
-      ]);
+      final List<String> args;
+      if (accurate) {
+        args = [
+          '-y',
+          '-hide_banner',
+          '-i',
+          input,
+          '-ss',
+          seekStr,
+          '-frames:v',
+          '1',
+          '-q:v',
+          '3',
+          outputJpegPath,
+        ];
+      } else {
+        args = [
+          '-y',
+          '-hide_banner',
+          '-ss',
+          seekStr,
+          '-i',
+          input,
+          '-frames:v',
+          '1',
+          '-q:v',
+          '3',
+          outputJpegPath,
+        ];
+      }
+      final r = await Process.run(exe, args);
       if (r.exitCode != 0) {
         _log.fine('video poster ffmpeg failed: ${r.stderr}');
         return false;
       }
     } else {
-      final cmd =
-          '-y -hide_banner -ss 1 -i ${_shellEscape(input)} '
-          '-frames:v 1 -q:v 3 ${_shellEscape(outputJpegPath)}';
+      final String cmd;
+      if (accurate) {
+        cmd =
+            '-y -hide_banner -i ${_shellEscape(input)} -ss $seekStr '
+            '-frames:v 1 -q:v 3 ${_shellEscape(outputJpegPath)}';
+      } else {
+        cmd =
+            '-y -hide_banner -ss $seekStr -i ${_shellEscape(input)} '
+            '-frames:v 1 -q:v 3 ${_shellEscape(outputJpegPath)}';
+      }
       final session = await FFmpegKit.execute(cmd);
       final code = await session.getReturnCode();
       if (!ReturnCode.isSuccess(code)) {

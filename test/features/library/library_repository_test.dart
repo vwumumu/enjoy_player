@@ -208,5 +208,9 @@ void main() {
       final row = await db.audioDao.getById(id);
       expect(row!.localUri, isNull);
     });
+
+    test('backfillMissingVideoThumbnails does not throw on empty library', () async {
+      await repo.backfillMissingVideoThumbnails();
+    });
   });
 }
