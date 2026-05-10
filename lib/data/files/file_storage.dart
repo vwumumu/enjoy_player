@@ -10,7 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../core/errors/app_failure.dart';
+import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'chunked_file_hash.dart';
 
 class FileImportResult {
@@ -22,6 +22,7 @@ class FileImportResult {
   });
 
   final String localPath;
+
   /// Web-aligned partial SHA-256 fingerprint (see [chunkedContentSha256HexFromFileSync]).
   final String contentHashHex;
   final int fileSize;
@@ -31,22 +32,20 @@ class FileImportResult {
 }
 
 /// Arguments for [_importMediaFileInIsolate]; only plain data for [Isolate.run].
-typedef _ImportIsolateArgs = ({
-  String sourcePath,
-  String mediaDirPath,
-  String tempFileName,
-  String ext,
-  String title,
-  /// When set, import fails with [FileFailure] if chunked hash hex does not match.
-  String? expectedHashHex,
-});
+typedef _ImportIsolateArgs =
+    ({
+      String sourcePath,
+      String mediaDirPath,
+      String tempFileName,
+      String ext,
+      String title,
 
-typedef _ImportIsolateResult = ({
-  String localPath,
-  String contentHashHex,
-  int fileSize,
-  String title,
-});
+      /// When set, import fails with [FileFailure] if chunked hash hex does not match.
+      String? expectedHashHex,
+    });
+
+typedef _ImportIsolateResult =
+    ({String localPath, String contentHashHex, int fileSize, String title});
 
 /// Copy bytes from source to temp; no hashing (hash computed separately).
 Future<void> _streamCopyFile(String sourcePath, String destPath) async {
@@ -60,7 +59,9 @@ Future<void> _streamCopyFile(String sourcePath, String destPath) async {
   await sink.close();
 }
 
-Future<_ImportIsolateResult> _importMediaFileInIsolate(_ImportIsolateArgs args) async {
+Future<_ImportIsolateResult> _importMediaFileInIsolate(
+  _ImportIsolateArgs args,
+) async {
   final tempPath = p.join(args.mediaDirPath, args.tempFileName);
   final tempFile = File(tempPath);
 
@@ -144,16 +145,11 @@ class FileStorage {
       }
       if (e == 'HASH_MISMATCH') {
         Error.throwWithStackTrace(
-          const FileFailure(
-            'Hash mismatch: file does not match synced media.',
-          ),
+          const FileFailure('Hash mismatch: file does not match synced media.'),
           st,
         );
       }
-      Error.throwWithStackTrace(
-        FileFailure('Import failed: $e'),
-        st,
-      );
+      Error.throwWithStackTrace(FileFailure('Import failed: $e'), st);
     }
   }
 
@@ -203,16 +199,11 @@ class FileStorage {
       }
       if (e == 'HASH_MISMATCH') {
         Error.throwWithStackTrace(
-          const FileFailure(
-            'Hash mismatch: file does not match synced media.',
-          ),
+          const FileFailure('Hash mismatch: file does not match synced media.'),
           st,
         );
       }
-      Error.throwWithStackTrace(
-        FileFailure('Import failed: $e'),
-        st,
-      );
+      Error.throwWithStackTrace(FileFailure('Import failed: $e'), st);
     }
   }
 }
