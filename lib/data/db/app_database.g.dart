@@ -4660,22 +4660,23 @@ class $RecordingsTable extends Recordings
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _referenceStartMsMeta = const VerificationMeta(
-    'referenceStartMs',
+  static const VerificationMeta _referenceStartMeta = const VerificationMeta(
+    'referenceStart',
   );
   @override
-  late final GeneratedColumn<int> referenceStartMs = GeneratedColumn<int>(
-    'reference_start_ms',
+  late final GeneratedColumn<int> referenceStart = GeneratedColumn<int>(
+    'reference_start',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _referenceDurationMsMeta =
-      const VerificationMeta('referenceDurationMs');
+  static const VerificationMeta _referenceDurationMeta = const VerificationMeta(
+    'referenceDuration',
+  );
   @override
-  late final GeneratedColumn<int> referenceDurationMs = GeneratedColumn<int>(
-    'reference_duration_ms',
+  late final GeneratedColumn<int> referenceDuration = GeneratedColumn<int>(
+    'reference_duration',
     aliasedName,
     false,
     type: DriftSqlType.int,
@@ -4703,12 +4704,12 @@ class $RecordingsTable extends Recordings
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _durationMsMeta = const VerificationMeta(
-    'durationMs',
+  static const VerificationMeta _durationMeta = const VerificationMeta(
+    'duration',
   );
   @override
-  late final GeneratedColumn<int> durationMs = GeneratedColumn<int>(
-    'duration_ms',
+  late final GeneratedColumn<int> duration = GeneratedColumn<int>(
+    'duration',
     aliasedName,
     false,
     type: DriftSqlType.int,
@@ -4816,11 +4817,11 @@ class $RecordingsTable extends Recordings
     id,
     targetType,
     targetId,
-    referenceStartMs,
-    referenceDurationMs,
+    referenceStart,
+    referenceDuration,
     referenceText,
     language,
-    durationMs,
+    duration,
     md5,
     audioUrl,
     pronunciationScore,
@@ -4864,27 +4865,27 @@ class $RecordingsTable extends Recordings
     } else if (isInserting) {
       context.missing(_targetIdMeta);
     }
-    if (data.containsKey('reference_start_ms')) {
+    if (data.containsKey('reference_start')) {
       context.handle(
-        _referenceStartMsMeta,
-        referenceStartMs.isAcceptableOrUnknown(
-          data['reference_start_ms']!,
-          _referenceStartMsMeta,
+        _referenceStartMeta,
+        referenceStart.isAcceptableOrUnknown(
+          data['reference_start']!,
+          _referenceStartMeta,
         ),
       );
     } else if (isInserting) {
-      context.missing(_referenceStartMsMeta);
+      context.missing(_referenceStartMeta);
     }
-    if (data.containsKey('reference_duration_ms')) {
+    if (data.containsKey('reference_duration')) {
       context.handle(
-        _referenceDurationMsMeta,
-        referenceDurationMs.isAcceptableOrUnknown(
-          data['reference_duration_ms']!,
-          _referenceDurationMsMeta,
+        _referenceDurationMeta,
+        referenceDuration.isAcceptableOrUnknown(
+          data['reference_duration']!,
+          _referenceDurationMeta,
         ),
       );
     } else if (isInserting) {
-      context.missing(_referenceDurationMsMeta);
+      context.missing(_referenceDurationMeta);
     }
     if (data.containsKey('reference_text')) {
       context.handle(
@@ -4905,13 +4906,13 @@ class $RecordingsTable extends Recordings
     } else if (isInserting) {
       context.missing(_languageMeta);
     }
-    if (data.containsKey('duration_ms')) {
+    if (data.containsKey('duration')) {
       context.handle(
-        _durationMsMeta,
-        durationMs.isAcceptableOrUnknown(data['duration_ms']!, _durationMsMeta),
+        _durationMeta,
+        duration.isAcceptableOrUnknown(data['duration']!, _durationMeta),
       );
     } else if (isInserting) {
-      context.missing(_durationMsMeta);
+      context.missing(_durationMeta);
     }
     if (data.containsKey('md5')) {
       context.handle(
@@ -5004,15 +5005,15 @@ class $RecordingsTable extends Recordings
             DriftSqlType.string,
             data['${effectivePrefix}target_id'],
           )!,
-      referenceStartMs:
+      referenceStart:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
-            data['${effectivePrefix}reference_start_ms'],
+            data['${effectivePrefix}reference_start'],
           )!,
-      referenceDurationMs:
+      referenceDuration:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
-            data['${effectivePrefix}reference_duration_ms'],
+            data['${effectivePrefix}reference_duration'],
           )!,
       referenceText:
           attachedDatabase.typeMapping.read(
@@ -5024,10 +5025,10 @@ class $RecordingsTable extends Recordings
             DriftSqlType.string,
             data['${effectivePrefix}language'],
           )!,
-      durationMs:
+      duration:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
-            data['${effectivePrefix}duration_ms'],
+            data['${effectivePrefix}duration'],
           )!,
       md5: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -5080,11 +5081,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
   final String id;
   final String targetType;
   final String targetId;
-  final int referenceStartMs;
-  final int referenceDurationMs;
+  final int referenceStart;
+  final int referenceDuration;
   final String referenceText;
   final String language;
-  final int durationMs;
+  final int duration;
   final String? md5;
   final String? audioUrl;
   final int? pronunciationScore;
@@ -5098,11 +5099,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
     required this.id,
     required this.targetType,
     required this.targetId,
-    required this.referenceStartMs,
-    required this.referenceDurationMs,
+    required this.referenceStart,
+    required this.referenceDuration,
     required this.referenceText,
     required this.language,
-    required this.durationMs,
+    required this.duration,
     this.md5,
     this.audioUrl,
     this.pronunciationScore,
@@ -5119,11 +5120,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
     map['id'] = Variable<String>(id);
     map['target_type'] = Variable<String>(targetType);
     map['target_id'] = Variable<String>(targetId);
-    map['reference_start_ms'] = Variable<int>(referenceStartMs);
-    map['reference_duration_ms'] = Variable<int>(referenceDurationMs);
+    map['reference_start'] = Variable<int>(referenceStart);
+    map['reference_duration'] = Variable<int>(referenceDuration);
     map['reference_text'] = Variable<String>(referenceText);
     map['language'] = Variable<String>(language);
-    map['duration_ms'] = Variable<int>(durationMs);
+    map['duration'] = Variable<int>(duration);
     if (!nullToAbsent || md5 != null) {
       map['md5'] = Variable<String>(md5);
     }
@@ -5155,11 +5156,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
       id: Value(id),
       targetType: Value(targetType),
       targetId: Value(targetId),
-      referenceStartMs: Value(referenceStartMs),
-      referenceDurationMs: Value(referenceDurationMs),
+      referenceStart: Value(referenceStart),
+      referenceDuration: Value(referenceDuration),
       referenceText: Value(referenceText),
       language: Value(language),
-      durationMs: Value(durationMs),
+      duration: Value(duration),
       md5: md5 == null && nullToAbsent ? const Value.absent() : Value(md5),
       audioUrl:
           audioUrl == null && nullToAbsent
@@ -5199,13 +5200,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
       id: serializer.fromJson<String>(json['id']),
       targetType: serializer.fromJson<String>(json['targetType']),
       targetId: serializer.fromJson<String>(json['targetId']),
-      referenceStartMs: serializer.fromJson<int>(json['referenceStartMs']),
-      referenceDurationMs: serializer.fromJson<int>(
-        json['referenceDurationMs'],
-      ),
+      referenceStart: serializer.fromJson<int>(json['referenceStart']),
+      referenceDuration: serializer.fromJson<int>(json['referenceDuration']),
       referenceText: serializer.fromJson<String>(json['referenceText']),
       language: serializer.fromJson<String>(json['language']),
-      durationMs: serializer.fromJson<int>(json['durationMs']),
+      duration: serializer.fromJson<int>(json['duration']),
       md5: serializer.fromJson<String?>(json['md5']),
       audioUrl: serializer.fromJson<String?>(json['audioUrl']),
       pronunciationScore: serializer.fromJson<int?>(json['pronunciationScore']),
@@ -5224,11 +5223,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
       'id': serializer.toJson<String>(id),
       'targetType': serializer.toJson<String>(targetType),
       'targetId': serializer.toJson<String>(targetId),
-      'referenceStartMs': serializer.toJson<int>(referenceStartMs),
-      'referenceDurationMs': serializer.toJson<int>(referenceDurationMs),
+      'referenceStart': serializer.toJson<int>(referenceStart),
+      'referenceDuration': serializer.toJson<int>(referenceDuration),
       'referenceText': serializer.toJson<String>(referenceText),
       'language': serializer.toJson<String>(language),
-      'durationMs': serializer.toJson<int>(durationMs),
+      'duration': serializer.toJson<int>(duration),
       'md5': serializer.toJson<String?>(md5),
       'audioUrl': serializer.toJson<String?>(audioUrl),
       'pronunciationScore': serializer.toJson<int?>(pronunciationScore),
@@ -5245,11 +5244,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
     String? id,
     String? targetType,
     String? targetId,
-    int? referenceStartMs,
-    int? referenceDurationMs,
+    int? referenceStart,
+    int? referenceDuration,
     String? referenceText,
     String? language,
-    int? durationMs,
+    int? duration,
     Value<String?> md5 = const Value.absent(),
     Value<String?> audioUrl = const Value.absent(),
     Value<int?> pronunciationScore = const Value.absent(),
@@ -5263,11 +5262,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
     id: id ?? this.id,
     targetType: targetType ?? this.targetType,
     targetId: targetId ?? this.targetId,
-    referenceStartMs: referenceStartMs ?? this.referenceStartMs,
-    referenceDurationMs: referenceDurationMs ?? this.referenceDurationMs,
+    referenceStart: referenceStart ?? this.referenceStart,
+    referenceDuration: referenceDuration ?? this.referenceDuration,
     referenceText: referenceText ?? this.referenceText,
     language: language ?? this.language,
-    durationMs: durationMs ?? this.durationMs,
+    duration: duration ?? this.duration,
     md5: md5.present ? md5.value : this.md5,
     audioUrl: audioUrl.present ? audioUrl.value : this.audioUrl,
     pronunciationScore:
@@ -5289,21 +5288,20 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
       targetType:
           data.targetType.present ? data.targetType.value : this.targetType,
       targetId: data.targetId.present ? data.targetId.value : this.targetId,
-      referenceStartMs:
-          data.referenceStartMs.present
-              ? data.referenceStartMs.value
-              : this.referenceStartMs,
-      referenceDurationMs:
-          data.referenceDurationMs.present
-              ? data.referenceDurationMs.value
-              : this.referenceDurationMs,
+      referenceStart:
+          data.referenceStart.present
+              ? data.referenceStart.value
+              : this.referenceStart,
+      referenceDuration:
+          data.referenceDuration.present
+              ? data.referenceDuration.value
+              : this.referenceDuration,
       referenceText:
           data.referenceText.present
               ? data.referenceText.value
               : this.referenceText,
       language: data.language.present ? data.language.value : this.language,
-      durationMs:
-          data.durationMs.present ? data.durationMs.value : this.durationMs,
+      duration: data.duration.present ? data.duration.value : this.duration,
       md5: data.md5.present ? data.md5.value : this.md5,
       audioUrl: data.audioUrl.present ? data.audioUrl.value : this.audioUrl,
       pronunciationScore:
@@ -5332,11 +5330,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
           ..write('id: $id, ')
           ..write('targetType: $targetType, ')
           ..write('targetId: $targetId, ')
-          ..write('referenceStartMs: $referenceStartMs, ')
-          ..write('referenceDurationMs: $referenceDurationMs, ')
+          ..write('referenceStart: $referenceStart, ')
+          ..write('referenceDuration: $referenceDuration, ')
           ..write('referenceText: $referenceText, ')
           ..write('language: $language, ')
-          ..write('durationMs: $durationMs, ')
+          ..write('duration: $duration, ')
           ..write('md5: $md5, ')
           ..write('audioUrl: $audioUrl, ')
           ..write('pronunciationScore: $pronunciationScore, ')
@@ -5355,11 +5353,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
     id,
     targetType,
     targetId,
-    referenceStartMs,
-    referenceDurationMs,
+    referenceStart,
+    referenceDuration,
     referenceText,
     language,
-    durationMs,
+    duration,
     md5,
     audioUrl,
     pronunciationScore,
@@ -5377,11 +5375,11 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
           other.id == this.id &&
           other.targetType == this.targetType &&
           other.targetId == this.targetId &&
-          other.referenceStartMs == this.referenceStartMs &&
-          other.referenceDurationMs == this.referenceDurationMs &&
+          other.referenceStart == this.referenceStart &&
+          other.referenceDuration == this.referenceDuration &&
           other.referenceText == this.referenceText &&
           other.language == this.language &&
-          other.durationMs == this.durationMs &&
+          other.duration == this.duration &&
           other.md5 == this.md5 &&
           other.audioUrl == this.audioUrl &&
           other.pronunciationScore == this.pronunciationScore &&
@@ -5397,11 +5395,11 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
   final Value<String> id;
   final Value<String> targetType;
   final Value<String> targetId;
-  final Value<int> referenceStartMs;
-  final Value<int> referenceDurationMs;
+  final Value<int> referenceStart;
+  final Value<int> referenceDuration;
   final Value<String> referenceText;
   final Value<String> language;
-  final Value<int> durationMs;
+  final Value<int> duration;
   final Value<String?> md5;
   final Value<String?> audioUrl;
   final Value<int?> pronunciationScore;
@@ -5416,11 +5414,11 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
     this.id = const Value.absent(),
     this.targetType = const Value.absent(),
     this.targetId = const Value.absent(),
-    this.referenceStartMs = const Value.absent(),
-    this.referenceDurationMs = const Value.absent(),
+    this.referenceStart = const Value.absent(),
+    this.referenceDuration = const Value.absent(),
     this.referenceText = const Value.absent(),
     this.language = const Value.absent(),
-    this.durationMs = const Value.absent(),
+    this.duration = const Value.absent(),
     this.md5 = const Value.absent(),
     this.audioUrl = const Value.absent(),
     this.pronunciationScore = const Value.absent(),
@@ -5436,11 +5434,11 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
     required String id,
     required String targetType,
     required String targetId,
-    required int referenceStartMs,
-    required int referenceDurationMs,
+    required int referenceStart,
+    required int referenceDuration,
     required String referenceText,
     required String language,
-    required int durationMs,
+    required int duration,
     this.md5 = const Value.absent(),
     this.audioUrl = const Value.absent(),
     this.pronunciationScore = const Value.absent(),
@@ -5454,22 +5452,22 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
   }) : id = Value(id),
        targetType = Value(targetType),
        targetId = Value(targetId),
-       referenceStartMs = Value(referenceStartMs),
-       referenceDurationMs = Value(referenceDurationMs),
+       referenceStart = Value(referenceStart),
+       referenceDuration = Value(referenceDuration),
        referenceText = Value(referenceText),
        language = Value(language),
-       durationMs = Value(durationMs),
+       duration = Value(duration),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<RecordingRow> custom({
     Expression<String>? id,
     Expression<String>? targetType,
     Expression<String>? targetId,
-    Expression<int>? referenceStartMs,
-    Expression<int>? referenceDurationMs,
+    Expression<int>? referenceStart,
+    Expression<int>? referenceDuration,
     Expression<String>? referenceText,
     Expression<String>? language,
-    Expression<int>? durationMs,
+    Expression<int>? duration,
     Expression<String>? md5,
     Expression<String>? audioUrl,
     Expression<int>? pronunciationScore,
@@ -5485,12 +5483,11 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
       if (id != null) 'id': id,
       if (targetType != null) 'target_type': targetType,
       if (targetId != null) 'target_id': targetId,
-      if (referenceStartMs != null) 'reference_start_ms': referenceStartMs,
-      if (referenceDurationMs != null)
-        'reference_duration_ms': referenceDurationMs,
+      if (referenceStart != null) 'reference_start': referenceStart,
+      if (referenceDuration != null) 'reference_duration': referenceDuration,
       if (referenceText != null) 'reference_text': referenceText,
       if (language != null) 'language': language,
-      if (durationMs != null) 'duration_ms': durationMs,
+      if (duration != null) 'duration': duration,
       if (md5 != null) 'md5': md5,
       if (audioUrl != null) 'audio_url': audioUrl,
       if (pronunciationScore != null) 'pronunciation_score': pronunciationScore,
@@ -5508,11 +5505,11 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
     Value<String>? id,
     Value<String>? targetType,
     Value<String>? targetId,
-    Value<int>? referenceStartMs,
-    Value<int>? referenceDurationMs,
+    Value<int>? referenceStart,
+    Value<int>? referenceDuration,
     Value<String>? referenceText,
     Value<String>? language,
-    Value<int>? durationMs,
+    Value<int>? duration,
     Value<String?>? md5,
     Value<String?>? audioUrl,
     Value<int?>? pronunciationScore,
@@ -5528,11 +5525,11 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
       id: id ?? this.id,
       targetType: targetType ?? this.targetType,
       targetId: targetId ?? this.targetId,
-      referenceStartMs: referenceStartMs ?? this.referenceStartMs,
-      referenceDurationMs: referenceDurationMs ?? this.referenceDurationMs,
+      referenceStart: referenceStart ?? this.referenceStart,
+      referenceDuration: referenceDuration ?? this.referenceDuration,
       referenceText: referenceText ?? this.referenceText,
       language: language ?? this.language,
-      durationMs: durationMs ?? this.durationMs,
+      duration: duration ?? this.duration,
       md5: md5 ?? this.md5,
       audioUrl: audioUrl ?? this.audioUrl,
       pronunciationScore: pronunciationScore ?? this.pronunciationScore,
@@ -5558,11 +5555,11 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
     if (targetId.present) {
       map['target_id'] = Variable<String>(targetId.value);
     }
-    if (referenceStartMs.present) {
-      map['reference_start_ms'] = Variable<int>(referenceStartMs.value);
+    if (referenceStart.present) {
+      map['reference_start'] = Variable<int>(referenceStart.value);
     }
-    if (referenceDurationMs.present) {
-      map['reference_duration_ms'] = Variable<int>(referenceDurationMs.value);
+    if (referenceDuration.present) {
+      map['reference_duration'] = Variable<int>(referenceDuration.value);
     }
     if (referenceText.present) {
       map['reference_text'] = Variable<String>(referenceText.value);
@@ -5570,8 +5567,8 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
     if (language.present) {
       map['language'] = Variable<String>(language.value);
     }
-    if (durationMs.present) {
-      map['duration_ms'] = Variable<int>(durationMs.value);
+    if (duration.present) {
+      map['duration'] = Variable<int>(duration.value);
     }
     if (md5.present) {
       map['md5'] = Variable<String>(md5.value);
@@ -5612,11 +5609,11 @@ class RecordingsCompanion extends UpdateCompanion<RecordingRow> {
           ..write('id: $id, ')
           ..write('targetType: $targetType, ')
           ..write('targetId: $targetId, ')
-          ..write('referenceStartMs: $referenceStartMs, ')
-          ..write('referenceDurationMs: $referenceDurationMs, ')
+          ..write('referenceStart: $referenceStart, ')
+          ..write('referenceDuration: $referenceDuration, ')
           ..write('referenceText: $referenceText, ')
           ..write('language: $language, ')
-          ..write('durationMs: $durationMs, ')
+          ..write('duration: $duration, ')
           ..write('md5: $md5, ')
           ..write('audioUrl: $audioUrl, ')
           ..write('pronunciationScore: $pronunciationScore, ')
@@ -9533,11 +9530,11 @@ typedef $$RecordingsTableCreateCompanionBuilder =
       required String id,
       required String targetType,
       required String targetId,
-      required int referenceStartMs,
-      required int referenceDurationMs,
+      required int referenceStart,
+      required int referenceDuration,
       required String referenceText,
       required String language,
-      required int durationMs,
+      required int duration,
       Value<String?> md5,
       Value<String?> audioUrl,
       Value<int?> pronunciationScore,
@@ -9554,11 +9551,11 @@ typedef $$RecordingsTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> targetType,
       Value<String> targetId,
-      Value<int> referenceStartMs,
-      Value<int> referenceDurationMs,
+      Value<int> referenceStart,
+      Value<int> referenceDuration,
       Value<String> referenceText,
       Value<String> language,
-      Value<int> durationMs,
+      Value<int> duration,
       Value<String?> md5,
       Value<String?> audioUrl,
       Value<int?> pronunciationScore,
@@ -9595,13 +9592,13 @@ class $$RecordingsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get referenceStartMs => $composableBuilder(
-    column: $table.referenceStartMs,
+  ColumnFilters<int> get referenceStart => $composableBuilder(
+    column: $table.referenceStart,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get referenceDurationMs => $composableBuilder(
-    column: $table.referenceDurationMs,
+  ColumnFilters<int> get referenceDuration => $composableBuilder(
+    column: $table.referenceDuration,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9615,8 +9612,8 @@ class $$RecordingsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get durationMs => $composableBuilder(
-    column: $table.durationMs,
+  ColumnFilters<int> get duration => $composableBuilder(
+    column: $table.duration,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9690,13 +9687,13 @@ class $$RecordingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get referenceStartMs => $composableBuilder(
-    column: $table.referenceStartMs,
+  ColumnOrderings<int> get referenceStart => $composableBuilder(
+    column: $table.referenceStart,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get referenceDurationMs => $composableBuilder(
-    column: $table.referenceDurationMs,
+  ColumnOrderings<int> get referenceDuration => $composableBuilder(
+    column: $table.referenceDuration,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -9710,8 +9707,8 @@ class $$RecordingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get durationMs => $composableBuilder(
-    column: $table.durationMs,
+  ColumnOrderings<int> get duration => $composableBuilder(
+    column: $table.duration,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -9781,13 +9778,13 @@ class $$RecordingsTableAnnotationComposer
   GeneratedColumn<String> get targetId =>
       $composableBuilder(column: $table.targetId, builder: (column) => column);
 
-  GeneratedColumn<int> get referenceStartMs => $composableBuilder(
-    column: $table.referenceStartMs,
+  GeneratedColumn<int> get referenceStart => $composableBuilder(
+    column: $table.referenceStart,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get referenceDurationMs => $composableBuilder(
-    column: $table.referenceDurationMs,
+  GeneratedColumn<int> get referenceDuration => $composableBuilder(
+    column: $table.referenceDuration,
     builder: (column) => column,
   );
 
@@ -9799,10 +9796,8 @@ class $$RecordingsTableAnnotationComposer
   GeneratedColumn<String> get language =>
       $composableBuilder(column: $table.language, builder: (column) => column);
 
-  GeneratedColumn<int> get durationMs => $composableBuilder(
-    column: $table.durationMs,
-    builder: (column) => column,
-  );
+  GeneratedColumn<int> get duration =>
+      $composableBuilder(column: $table.duration, builder: (column) => column);
 
   GeneratedColumn<String> get md5 =>
       $composableBuilder(column: $table.md5, builder: (column) => column);
@@ -9874,11 +9869,11 @@ class $$RecordingsTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> targetType = const Value.absent(),
                 Value<String> targetId = const Value.absent(),
-                Value<int> referenceStartMs = const Value.absent(),
-                Value<int> referenceDurationMs = const Value.absent(),
+                Value<int> referenceStart = const Value.absent(),
+                Value<int> referenceDuration = const Value.absent(),
                 Value<String> referenceText = const Value.absent(),
                 Value<String> language = const Value.absent(),
-                Value<int> durationMs = const Value.absent(),
+                Value<int> duration = const Value.absent(),
                 Value<String?> md5 = const Value.absent(),
                 Value<String?> audioUrl = const Value.absent(),
                 Value<int?> pronunciationScore = const Value.absent(),
@@ -9893,11 +9888,11 @@ class $$RecordingsTableTableManager
                 id: id,
                 targetType: targetType,
                 targetId: targetId,
-                referenceStartMs: referenceStartMs,
-                referenceDurationMs: referenceDurationMs,
+                referenceStart: referenceStart,
+                referenceDuration: referenceDuration,
                 referenceText: referenceText,
                 language: language,
-                durationMs: durationMs,
+                duration: duration,
                 md5: md5,
                 audioUrl: audioUrl,
                 pronunciationScore: pronunciationScore,
@@ -9914,11 +9909,11 @@ class $$RecordingsTableTableManager
                 required String id,
                 required String targetType,
                 required String targetId,
-                required int referenceStartMs,
-                required int referenceDurationMs,
+                required int referenceStart,
+                required int referenceDuration,
                 required String referenceText,
                 required String language,
-                required int durationMs,
+                required int duration,
                 Value<String?> md5 = const Value.absent(),
                 Value<String?> audioUrl = const Value.absent(),
                 Value<int?> pronunciationScore = const Value.absent(),
@@ -9933,11 +9928,11 @@ class $$RecordingsTableTableManager
                 id: id,
                 targetType: targetType,
                 targetId: targetId,
-                referenceStartMs: referenceStartMs,
-                referenceDurationMs: referenceDurationMs,
+                referenceStart: referenceStart,
+                referenceDuration: referenceDuration,
                 referenceText: referenceText,
                 language: language,
-                durationMs: durationMs,
+                duration: duration,
                 md5: md5,
                 audioUrl: audioUrl,
                 pronunciationScore: pronunciationScore,

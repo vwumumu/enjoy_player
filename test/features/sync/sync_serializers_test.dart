@@ -33,6 +33,54 @@ void main() {
       expect(m.containsKey('syncStatus'), isFalse);
       expect(m['duration'], 10);
     });
+
+    test('recording map uses milliseconds for duration and reference times', () {
+      final now = DateTime.utc(2025, 5, 9);
+      final row = RecordingRow(
+        id: 'rec-1',
+        targetType: 'Audio',
+        targetId: 'audio-1',
+        referenceStart: 5000,
+        referenceDuration: 12_000,
+        referenceText: 'hello',
+        language: 'en',
+        duration: 11_234,
+        md5: 'abc',
+        audioUrl: null,
+        pronunciationScore: null,
+        assessmentJson: null,
+        localPath: '/tmp/t.wav',
+        syncStatus: 'local',
+        serverUpdatedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final m = prepareForSyncRecordingMap(row);
+      expect(m['duration'], 11_234);
+      expect(m['referenceStart'], 5000);
+      expect(m['referenceDuration'], 12_000);
+    });
+  });
+
+  group('recordingRowFromServerJson', () {
+    test('parses duration and reference fields as milliseconds', () {
+      final t = DateTime.utc(2025, 6, 1);
+      final row = recordingRowFromServerJson({
+        'id': 'r1',
+        'targetType': 'Video',
+        'targetId': 'vid-9',
+        'referenceStart': 1500,
+        'referenceDuration': 3200.7,
+        'referenceText': 'cue',
+        'language': 'zh',
+        'duration': 4100.4,
+        'createdAt': t.toIso8601String(),
+        'updatedAt': t.toIso8601String(),
+      });
+      expect(row.referenceStart, 1500);
+      expect(row.referenceDuration, 3201);
+      expect(row.duration, 4100);
+    });
   });
 
   group('mergeAudioLastWriteWins', () {

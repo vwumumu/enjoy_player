@@ -49,7 +49,7 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: name));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -397,10 +397,10 @@ class RecordingDao extends DatabaseAccessor<AppDatabase> with _$RecordingDaoMixi
       (delete(recordings)..where((t) => t.id.equals(id))).go();
 }
 
-/// Recording `[referenceStartMs, referenceStartMs + referenceDurationMs)` vs echo `[echoStartMs, echoEndMs)`.
+/// Recording `[referenceStart, referenceStart + referenceDuration)` vs echo `[echoStartMs, echoEndMs)` (ms).
 bool recordingOverlapsEchoRegion(RecordingRow r, int echoStartMs, int echoEndMs) {
-  final recordingStart = r.referenceStartMs;
-  final recordingEnd = r.referenceStartMs + r.referenceDurationMs;
+  final recordingStart = r.referenceStart;
+  final recordingEnd = r.referenceStart + r.referenceDuration;
   final overlapStart = recordingStart > echoStartMs ? recordingStart : echoStartMs;
   final overlapEnd = recordingEnd < echoEndMs ? recordingEnd : echoEndMs;
   return overlapStart < overlapEnd;

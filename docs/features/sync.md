@@ -8,6 +8,8 @@ Offline-first sync for **audio**, **video**, and **recording** rows:
 - **Download**: paginated `GET` with `updatedAfter` + `limit`, cursors in `settings_kv` (`sync.cursor.*`).
 - **Outbound queue**: Drift table `sync_queue` (`entityType`, `entityId`, `action`, optional `payloadJson`, retries).
 
+**Recording metadata** on the wire (`duration`, `referenceStart`, `referenceDuration`) uses **milliseconds**, matching the enjoy web/extension `Recording` type. The local Drift `recordings` row uses the same Dart field names (`duration`, `referenceStart`, `referenceDuration`); SQLite columns are `duration`, `reference_start`, `reference_duration`. Audio and video rows still use **seconds** for `duration` in their payloads.
+
 ## Sync status (Settings)
 
 **Settings → Cloud sync → Sync status** opens a screen that:

@@ -46,7 +46,7 @@ sequenceDiagram
 | `audios` | Local audio URI, `aid` hash, duration, optional TTS fields, sync metadata |
 | `transcripts` | `targetType` + `targetId` (weapp-style), JSON `timeline`, sync metadata |
 | `echo_sessions` | Playback + echo window + primary/secondary transcript ids per target |
-| `recordings` | Pronunciation recordings (sync-ready) |
+| `recordings` | Pronunciation recordings (sync-ready); time fields `duration`, `referenceStart`, `referenceDuration` in ms, aligned with API |
 | `dictations` | Dictation attempts (sync-ready) |
 | `sync_queue` | Offline-first outbound sync queue (`SyncCtrl` + [`features/sync.md`](features/sync.md)) |
 | `settings` | Key/value JSON blobs (player prefs, hotkeys, **API base URL**, **auth profile cache**, app locale prefs) |

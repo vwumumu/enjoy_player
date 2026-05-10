@@ -21,6 +21,13 @@ int durationSecondsFromJson(Map<String, dynamic> json) {
   return 0;
 }
 
+/// Recording API `duration` / `referenceStart` / `referenceDuration` are ms (web/extension contract).
+int _recordingWireMsFromJson(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.round();
+  return 0;
+}
+
 /// Payload for [AudioApi.uploadAudio] body (`audio` key added by API).
 Map<String, dynamic> prepareForSyncAudioMap(AudioRow row) {
   return <String, dynamic>{
@@ -68,11 +75,11 @@ Map<String, dynamic> prepareForSyncRecordingMap(RecordingRow row) {
     'id': row.id,
     'targetId': row.targetId,
     'targetType': row.targetType,
-    'duration': row.durationMs / 1000.0,
+    'duration': row.duration,
     if (row.md5 != null) 'md5': row.md5,
     'referenceText': row.referenceText,
-    'referenceStart': row.referenceStartMs / 1000.0,
-    'referenceDuration': row.referenceDurationMs / 1000.0,
+    'referenceStart': row.referenceStart,
+    'referenceDuration': row.referenceDuration,
     'language': row.language,
     if (row.audioUrl != null) 'audioUrl': row.audioUrl,
     if (row.pronunciationScore != null) 'pronunciationScore': row.pronunciationScore,
@@ -140,27 +147,15 @@ RecordingRow recordingRowFromServerJson(Map<String, dynamic> json) {
   final updatedAt = requireIsoDate(json['updatedAt'], now);
   final createdAt = requireIsoDate(json['createdAt'], updatedAt);
 
-  double refStartSec = 0;
-  final rs = json['referenceStart'];
-  if (rs is num) refStartSec = rs.toDouble();
-
-  double refDurSec = 0;
-  final rd = json['referenceDuration'];
-  if (rd is num) refDurSec = rd.toDouble();
-
-  double durSec = 0;
-  final d = json['duration'];
-  if (d is num) durSec = d.toDouble();
-
   return RecordingRow(
     id: json['id'] as String,
     targetType: json['targetType'] as String? ?? 'Audio',
     targetId: json['targetId'] as String? ?? '',
-    referenceStartMs: (refStartSec * 1000).round(),
-    referenceDurationMs: (refDurSec * 1000).round(),
+    referenceStart: _recordingWireMsFromJson(json['referenceStart']),
+    referenceDuration: _recordingWireMsFromJson(json['referenceDuration']),
     referenceText: json['referenceText'] as String? ?? '',
     language: json['language'] as String? ?? 'und',
-    durationMs: (durSec * 1000).round(),
+    duration: _recordingWireMsFromJson(json['duration']),
     md5: json['md5'] as String?,
     audioUrl: json['audioUrl'] as String?,
     pronunciationScore: json['pronunciationScore'] as int?,

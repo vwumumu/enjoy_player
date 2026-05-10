@@ -11,11 +11,11 @@ class Recordings extends Table {
   TextColumn get id => text()();
   TextColumn get targetType => text()();
   TextColumn get targetId => text()();
-  IntColumn get referenceStartMs => integer()();
-  IntColumn get referenceDurationMs => integer()();
+  IntColumn get referenceStart => integer()();
+  IntColumn get referenceDuration => integer()();
   TextColumn get referenceText => text()();
   TextColumn get language => text()();
-  IntColumn get durationMs => integer()();
+  IntColumn get duration => integer()();
   TextColumn get md5 => text().nullable()();
   TextColumn get audioUrl => text().nullable()();
   IntColumn get pronunciationScore => integer().nullable()();

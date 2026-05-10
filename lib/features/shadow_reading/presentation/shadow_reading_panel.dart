@@ -219,11 +219,11 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
         id: id,
         targetType: widget.targetType,
         targetId: widget.mediaId,
-        referenceStartMs: startMs,
-        referenceDurationMs: durMs,
+        referenceStart: startMs,
+        referenceDuration: durMs,
         referenceText: widget.referenceText,
         language: widget.language,
-        durationMs: durationMs,
+        duration: durationMs,
         md5: hash,
         audioUrl: null,
         pronunciationScore: null,
@@ -444,7 +444,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
                       endSec: widget.endSec,
                       currentTimeRelativeSec: _relativeSec,
                       selectedRecordingPath: sel?.localPath,
-                      selectedRecordingDurationMs: sel?.durationMs,
+                      selectedRecordingDurationMs: sel?.duration,
                     ),
                     SizedBox(height: tok.space16),
                   ],
@@ -694,7 +694,7 @@ class _CompactTakeRow extends ConsumerWidget {
                             Expanded(
                               child: Text(
                                 '${l10n.shadowRecordingTake} ${list.length - i} · '
-                                '${(list[i].durationMs / 1000).toStringAsFixed(1)} s',
+                                '${(list[i].duration / 1000).toStringAsFixed(1)} s',
                               ),
                             ),
                           ],
@@ -731,7 +731,7 @@ class _TakePreviewTime extends ConsumerWidget {
     final lp = row.localPath;
     if (lp == null || lp.isEmpty) {
       return Text(
-        '${(row.durationMs / 1000).toStringAsFixed(1)} s',
+        '${(row.duration / 1000).toStringAsFixed(1)} s',
         style: style,
       );
     }
@@ -747,8 +747,8 @@ class _TakePreviewTime extends ConsumerWidget {
             final loaded = preview.loadedPath == abs;
             final pos = posSnap.data ?? Duration.zero;
             var total = durSnap.data ?? Duration.zero;
-            if (total <= Duration.zero && row.durationMs > 0) {
-              total = Duration(milliseconds: row.durationMs);
+            if (total <= Duration.zero && row.duration > 0) {
+              total = Duration(milliseconds: row.duration);
             }
             final text = loaded
                 ? '${formatDurationHms(pos)} / ${formatDurationHms(total)}'
