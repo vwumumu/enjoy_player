@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import 'dart:io' show File;
 
 import 'package:cross_file/cross_file.dart';
 import 'package:drift/drift.dart';
@@ -12,6 +13,7 @@ import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/files/ffmpeg_media_probe.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/data/files/media_resolver.dart';
+import 'package:enjoy_player/data/files/video_poster_extract.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 
@@ -148,6 +150,13 @@ class MediaLibraryRepository {
         );
         await _db.videoDao.insertRow(row);
         unawaited(_probeAndPatchDuration(id, result.fileUri, video: true));
+        unawaited(
+          _writeLocalVideoThumbnailIfNeeded(
+            mediaId: id,
+            fileUri: result.fileUri,
+            contentHashHex: contentHash,
+          ),
+        );
         if (signedIn) {
           await _enqueueSync?.call(SyncEntityType.video, id, SyncAction.create);
         }
@@ -231,6 +240,23 @@ class MediaLibraryRepository {
         row.copyWith(durationSeconds: sec, updatedAt: DateTime.now()),
       );
     }
+  }
+
+  /// Writes `media_thumbs/<md5>.jpg` and patches [VideoRow.thumbnailUrl] with its absolute path.
+  Future<void> _writeLocalVideoThumbnailIfNeeded({
+    required String mediaId,
+    required String fileUri,
+    required String contentHashHex,
+  }) async {
+    final outPath = await videoThumbnailPathForContentHash(contentHashHex);
+    final ok = await writeVideoPosterJpeg(
+      mediaSourceUri: fileUri,
+      outputJpegPath: outPath,
+    );
+    if (!ok) return;
+
+    final absoluteThumb = File(outPath).absolute.path;
+    await _db.videoDao.updateLocalThumbnail(mediaId, absoluteThumb);
   }
 
   Future<void> deleteMedia(String id) async {

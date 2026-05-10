@@ -2,8 +2,8 @@
 
 ## MVP behavior
 
-- List media from Drift `media` table (newest first).
-- Items **without a local thumbnail** show a deterministic **generative cover** (gradient + pattern) seeded by content hash, matching the web library’s `GenerativeCover` behavior.
+- List media from Drift `videos` / `audios` tables (newest first).
+- **Local video thumbnails**: after import, a JPEG poster (~1s) is written under app documents `media_thumbs/<content-hash>.jpg` and the absolute path is stored in `thumbnail_url`. Extraction uses FFmpeg subprocess on Windows (bundled `ffmpeg.exe` or PATH) and FFmpegKit elsewhere. If extraction fails or FFmpeg is unavailable, items **without a local thumbnail** show a deterministic **generative cover** (gradient + pattern) seeded by content hash, matching the web library’s `GenerativeCover` behavior.
 - Import: pick a file (`FileType.media`), show a non-dismissible **Importing media…** dialog, copy and hash the file in a **background isolate** via `FileStorage` (UI stays responsive), insert row, dismiss the dialog, then navigate to `/player/:id`. On failure, the dialog closes and a **SnackBar** explains the error. Entry point is the **toolbar +** action on Library and the empty-state primary button.
 - **Navigation**: Library and Settings are reached from the persistent shell (`NavigationBar` on compact widths, `NavigationRail` from ~900px when not on the player route).
 
@@ -14,4 +14,4 @@
 
 ## Future
 
-- Thumbnails, metadata editing, delete swipe, search filters.
+- Metadata editing, delete swipe, search filters.

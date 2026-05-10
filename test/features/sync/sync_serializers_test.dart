@@ -34,6 +34,87 @@ void main() {
       expect(m['duration'], 10);
     });
 
+    test('audio map omits local filesystem thumbnailUrl', () {
+      final now = DateTime.utc(2025, 5, 9);
+      final row = AudioRow(
+        id: 'i',
+        aid: 'a',
+        provider: 'user',
+        title: 'T',
+        description: null,
+        thumbnailUrl: r'C:\media_thumbs\abc.jpg',
+        durationSeconds: 10,
+        language: 'en',
+        translationKey: null,
+        sourceText: null,
+        voice: null,
+        source: null,
+        localUri: 'file:///local.mp3',
+        md5: 'm',
+        size: 99,
+        mediaUrl: null,
+        syncStatus: 'local',
+        serverUpdatedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final m = prepareForSyncAudioMap(row);
+      expect(m.containsKey('thumbnailUrl'), isFalse);
+    });
+
+    test('audio map includes https thumbnailUrl', () {
+      final now = DateTime.utc(2025, 5, 9);
+      final row = AudioRow(
+        id: 'i',
+        aid: 'a',
+        provider: 'user',
+        title: 'T',
+        description: null,
+        thumbnailUrl: 'https://cdn.example/thumb.jpg',
+        durationSeconds: 10,
+        language: 'en',
+        translationKey: null,
+        sourceText: null,
+        voice: null,
+        source: null,
+        localUri: null,
+        md5: 'm',
+        size: 99,
+        mediaUrl: null,
+        syncStatus: 'synced',
+        serverUpdatedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final m = prepareForSyncAudioMap(row);
+      expect(m['thumbnailUrl'], 'https://cdn.example/thumb.jpg');
+    });
+
+    test('video map omits local filesystem thumbnailUrl', () {
+      final now = DateTime.utc(2025, 5, 9);
+      final row = VideoRow(
+        id: 'v1',
+        vid: 'vid',
+        provider: 'user',
+        title: 'T',
+        description: null,
+        thumbnailUrl: r'C:\media_thumbs\abc.jpg',
+        durationSeconds: 5,
+        language: 'en',
+        source: null,
+        localUri: 'file:///v.mp4',
+        md5: 'h',
+        size: 1,
+        mediaUrl: null,
+        syncStatus: 'pending',
+        serverUpdatedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final m = prepareForSyncVideoMap(row);
+      expect(m.containsKey('thumbnailUrl'), isFalse);
+    });
+
     test('recording map uses milliseconds for duration and reference times', () {
       final now = DateTime.utc(2025, 5, 9);
       final row = RecordingRow(
@@ -59,6 +140,20 @@ void main() {
       expect(m['duration'], 11_234);
       expect(m['referenceStart'], 5000);
       expect(m['referenceDuration'], 12_000);
+    });
+  });
+
+  group('isRemoteThumbnailUrl', () {
+    test('false for null, empty, file path, file scheme', () {
+      expect(isRemoteThumbnailUrl(null), isFalse);
+      expect(isRemoteThumbnailUrl(''), isFalse);
+      expect(isRemoteThumbnailUrl(r'C:\x\y.jpg'), isFalse);
+      expect(isRemoteThumbnailUrl('file:///x/y.jpg'), isFalse);
+    });
+
+    test('true for http and https', () {
+      expect(isRemoteThumbnailUrl('http://a/b.jpg'), isTrue);
+      expect(isRemoteThumbnailUrl('https://cdn/x.png'), isTrue);
     });
   });
 

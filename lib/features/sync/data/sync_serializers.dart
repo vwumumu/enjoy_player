@@ -14,6 +14,15 @@ DateTime? parseIsoDate(dynamic value) {
 DateTime requireIsoDate(dynamic value, DateTime fallback) =>
     parseIsoDate(value) ?? fallback;
 
+/// Whether [url] should be sent to the API as `thumbnailUrl` (remote only).
+bool isRemoteThumbnailUrl(String? url) {
+  if (url == null || url.isEmpty) return false;
+  final u = Uri.tryParse(url);
+  return u != null &&
+      u.hasScheme &&
+      (u.isScheme('http') || u.isScheme('https'));
+}
+
 int durationSecondsFromJson(Map<String, dynamic> json) {
   final v = json['durationSeconds'] ?? json['duration'];
   if (v is int) return v;
@@ -36,7 +45,7 @@ Map<String, dynamic> prepareForSyncAudioMap(AudioRow row) {
     'provider': row.provider,
     'title': row.title,
     if (row.description != null) 'description': row.description,
-    if (row.thumbnailUrl != null) 'thumbnailUrl': row.thumbnailUrl,
+    if (isRemoteThumbnailUrl(row.thumbnailUrl)) 'thumbnailUrl': row.thumbnailUrl!,
     'duration': row.durationSeconds,
     'language': row.language,
     if (row.translationKey != null) 'translationKey': row.translationKey,
@@ -58,7 +67,7 @@ Map<String, dynamic> prepareForSyncVideoMap(VideoRow row) {
     'provider': row.provider,
     'title': row.title,
     if (row.description != null) 'description': row.description,
-    if (row.thumbnailUrl != null) 'thumbnailUrl': row.thumbnailUrl,
+    if (isRemoteThumbnailUrl(row.thumbnailUrl)) 'thumbnailUrl': row.thumbnailUrl!,
     'duration': row.durationSeconds,
     'language': row.language,
     if (row.source != null) 'source': row.source,

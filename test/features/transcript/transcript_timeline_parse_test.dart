@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:enjoy_player/data/api/case_conversion.dart';
-import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_timeline_parse.dart';
 import 'package:flutter_test/flutter_test.dart';
 

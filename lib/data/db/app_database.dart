@@ -91,6 +91,16 @@ class VideoDao extends DatabaseAccessor<AppDatabase> with _$VideoDaoMixin {
   Future<void> insertRow(VideoRow row) =>
       into(videos).insert(row, mode: InsertMode.insertOrReplace);
 
+  /// Partial update so concurrent duration/thumbnail jobs do not clobber columns.
+  Future<void> updateLocalThumbnail(String id, String absoluteThumbPath) async {
+    await (update(videos)..where((t) => t.id.equals(id))).write(
+      VideosCompanion(
+        thumbnailUrl: Value(absoluteThumbPath),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> deleteId(String id) =>
       (delete(videos)..where((t) => t.id.equals(id))).go();
 }
