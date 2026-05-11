@@ -27,11 +27,20 @@ Future<ActiveUsersResponse?> activeUsers(Ref ref) async {
   final sw = Stopwatch()..start();
   _activeUsersLog.info('community: activeUsers request start');
   try {
-    final json = await api.activeUsers(timezone: DateTime.now().timeZoneName);
+    final json = await api
+        .activeUsers(timezone: DateTime.now().timeZoneName)
+        .timeout(const Duration(seconds: 8));
     _activeUsersLog.info(
       'community: activeUsers done in ${sw.elapsedMilliseconds}ms',
     );
     return ActiveUsersResponse.fromJson(json);
+  } on TimeoutException catch (e, st) {
+    _activeUsersLog.warning(
+      'community: activeUsers timed out after ${sw.elapsedMilliseconds}ms',
+      e,
+      st,
+    );
+    return null;
   } catch (e, st) {
     _activeUsersLog.warning(
       'community: activeUsers failed after ${sw.elapsedMilliseconds}ms',

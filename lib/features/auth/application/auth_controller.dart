@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/features/auth/data/auth_repository.dart';
@@ -94,9 +93,9 @@ class AuthCtrl extends _$AuthCtrl {
           final profile = await repo.fetchProfile();
           if (gen != _pollGeneration) return;
           state = AsyncData(AuthSignedIn(profile: profile));
-          await ref
-              .read(appPreferencesCtrlProvider.notifier)
-              .applyFromUserProfile(profile);
+          // AppPreferencesCtrl listens to AuthCtrl and applies the profile
+          // itself — calling its notifier from here would create a Riverpod
+          // cycle (appPreferencesCtrl depends on appDatabase depends on auth).
         }
       } catch (e, st) {
         _log.warning('poll auth failed', e, st);
@@ -133,9 +132,7 @@ class AuthCtrl extends _$AuthCtrl {
     if (cur is! AuthSignedIn) return;
     final profile = await ref.read(authRepositoryProvider).fetchProfile();
     state = AsyncData(AuthSignedIn(profile: profile));
-    await ref
-        .read(appPreferencesCtrlProvider.notifier)
-        .applyFromUserProfile(profile);
+    // AppPreferencesCtrl picks up the new profile via its auth listener.
   }
 
   Future<void> updateProfile(UpdateProfileRequest request) async {
@@ -144,9 +141,7 @@ class AuthCtrl extends _$AuthCtrl {
     final profile =
         await ref.read(authRepositoryProvider).updateProfile(request);
     state = AsyncData(AuthSignedIn(profile: profile));
-    await ref
-        .read(appPreferencesCtrlProvider.notifier)
-        .applyFromUserProfile(profile);
+    // AppPreferencesCtrl picks up the new profile via its auth listener.
   }
 
   /// When the user changes UI locale while signed in, keep server profile in sync.

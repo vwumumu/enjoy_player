@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/routing/player_navigation.dart';
-import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
 import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
@@ -61,8 +60,8 @@ class HomeScreen extends ConsumerWidget {
                     icon: Icons.collections_bookmark_rounded,
                     title: l10n.homeEmptyTitle,
                     subtitle: l10n.homeEmptyHint,
-                      action: () => showImportChooser(context, ref),
-                      actionLabel: l10n.actionImport,
+                    action: () => showImportChooser(context, ref),
+                    actionLabel: l10n.actionImport,
                   );
                 }
 
@@ -160,8 +159,9 @@ class HomeScreen extends ConsumerWidget {
 }
 
 /// Home layout while [libraryMediaProvider] has not emitted yet — mirrors the
-/// loaded scroll view so insight cards (Today's Goal skeleton, community) mount
-/// and network work can overlap with the first DB query.
+/// loaded scroll view except insight cards (Today's Goal / community), which
+/// mount only after the first media emission to avoid competing with the
+/// initial DB query.
 class _HomeLoadingScrollView extends ConsumerWidget {
   const _HomeLoadingScrollView();
 
@@ -184,14 +184,8 @@ class _HomeLoadingScrollView extends ConsumerWidget {
             ),
           ),
         ),
-        const SliverToBoxAdapter(child: _HomeInsightCards()),
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(
-            t.space24,
-            0,
-            t.space24,
-            t.space12,
-          ),
+          padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, t.space12),
           sliver: SliverToBoxAdapter(
             child: Text(
               l10n.homeRecentMedia,
@@ -224,10 +218,9 @@ class _HomeRecentGridSkeletonTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
-    final base =
-        Theme.of(context).colorScheme.surfaceContainerHighest.withValues(
-          alpha: 0.6,
-        );
+    final base = Theme.of(
+      context,
+    ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(t.radiusXl),
@@ -268,21 +261,13 @@ class _HomeRecentGridSkeletonTile extends StatelessWidget {
   }
 }
 
-class _HomeInsightCards extends ConsumerStatefulWidget {
+class _HomeInsightCards extends ConsumerWidget {
   const _HomeInsightCards();
 
-  @override
-  ConsumerState<_HomeInsightCards> createState() => _HomeInsightCardsState();
-}
-
-class _HomeInsightCardsState extends ConsumerState<_HomeInsightCards> {
   static const double _kWideBreakpoint = 720;
 
-  bool _postFrameScheduled = false;
-  bool _insightsReady = false;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final authAsync = ref.watch(authCtrlProvider);
     final t = EnjoyThemeTokens.of(context);
 
@@ -291,51 +276,7 @@ class _HomeInsightCardsState extends ConsumerState<_HomeInsightCards> {
       orElse: () => false,
     );
 
-    if (!isSignedIn) {
-      _postFrameScheduled = false;
-      _insightsReady = false;
-      return const SizedBox.shrink();
-    }
-
-    if (!_insightsReady) {
-      if (!_postFrameScheduled) {
-        _postFrameScheduled = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          setState(() {
-            _insightsReady = true;
-            _postFrameScheduled = false;
-          });
-        });
-      }
-      return Padding(
-        padding: EdgeInsets.fromLTRB(t.space24, t.space24, t.space24, t.space24),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final wide = constraints.maxWidth >= _kWideBreakpoint;
-            final gap = t.space12;
-            if (wide) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: _HomeInsightSkeletonCard(t: t)),
-                  SizedBox(width: gap),
-                  Expanded(child: _HomeInsightSkeletonCard(t: t)),
-                ],
-              );
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _HomeInsightSkeletonCard(t: t),
-                SizedBox(height: gap),
-                _HomeInsightSkeletonCard(t: t),
-              ],
-            );
-          },
-        ),
-      );
-    }
+    if (!isSignedIn) return const SizedBox.shrink();
 
     return Padding(
       padding: EdgeInsets.fromLTRB(t.space24, t.space24, t.space24, t.space24),
@@ -371,69 +312,6 @@ class _HomeInsightCardsState extends ConsumerState<_HomeInsightCards> {
   }
 }
 
-/// Lightweight placeholders shown for one frame before insight API providers mount.
-class _HomeInsightSkeletonCard extends StatelessWidget {
-  const _HomeInsightSkeletonCard({required this.t});
-
-  final EnjoyThemeTokens t;
-
-  @override
-  Widget build(BuildContext context) {
-    final base =
-        Theme.of(context).colorScheme.surfaceContainerHighest.withValues(
-          alpha: 0.6,
-        );
-    return Card(
-      margin: EdgeInsets.zero,
-      child: SizedBox(
-        height: 240,
-        child: Padding(
-          padding: EdgeInsets.all(t.space16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: base,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  SizedBox(width: t.space8),
-                  Expanded(
-                    child: Container(
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: base,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Center(
-                child: Container(
-                  width: 112,
-                  height: 112,
-                  decoration: BoxDecoration(
-                    color: base,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              const Spacer(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _HomeMediaTile extends ConsumerWidget {
   const _HomeMediaTile({required this.media});
 
@@ -446,19 +324,20 @@ class _HomeMediaTile extends ConsumerWidget {
     final thumb = localThumbnailFileForCard(media.thumbnailPath);
     final netThumb = remoteThumbnailForCard(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
-    final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
-    final accent =
-        thumb != null
-            ? (paletteAsync.value?.accent ?? generativeAccentForSeed(media.coverSeed))
-            : generativeAccentForSeed(media.coverSeed);
+    // Grid tiles use the deterministic generative accent — running
+    // `PaletteGenerator.fromImageProvider` per tile decodes + analyses pixels
+    // on the main isolate (palette_generator 0.3.x predates isolate
+    // support), and with 15+ tiles the parallel completions serialize into
+    // multi-second UI freezes on Windows debug builds. The artwork-derived
+    // palette is still used for the active player (hero artwork).
+    final accent = generativeAccentForSeed(media.coverSeed);
 
     return MediaCardTile(
       title: media.title,
       subtitle:
           '${isVideo ? l10n.miniPlayerMediaVideo : l10n.miniPlayerMediaAudio} · $dur',
       thumbnailFile: thumb,
-      providerBadge:
-          media.provider == 'youtube' ? l10n.youtubeBadge : null,
+      providerBadge: media.provider == 'youtube' ? l10n.youtubeBadge : null,
       thumbnailNetworkUrl: netThumb,
       coverSeed: media.coverSeed,
       isVideo: isVideo,

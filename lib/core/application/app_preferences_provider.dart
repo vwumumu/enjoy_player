@@ -6,8 +6,11 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
+import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
+import 'package:enjoy_player/features/auth/application/auth_controller.dart';
+import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 
 part 'app_preferences_provider.g.dart';
@@ -46,6 +49,8 @@ class AppPreferencesState {
 
 @Riverpod(keepAlive: true)
 class AppPreferencesCtrl extends _$AppPreferencesCtrl {
+  String? _lastAppliedProfileSignature;
+
   @override
   Future<AppPreferencesState> build() async {
     final sw = Stopwatch()..start();
@@ -62,9 +67,28 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
       learningLanguage: learnRaw?.isEmpty ?? true ? null : learnRaw,
       nativeLanguage: nativeRaw?.isEmpty ?? true ? null : nativeRaw,
     );
+
+    // Apply server-side prefs on sign-in / profile refresh (was previously
+    // pushed from AuthCtrl, which created a Riverpod cycle).
+    ref.listen(authCtrlProvider, (previous, next) {
+      final v = next.valueOrNull;
+      if (v is! AuthSignedIn) {
+        _lastAppliedProfileSignature = null;
+        return;
+      }
+      final sig = _profileSignature(v.profile);
+      if (sig == _lastAppliedProfileSignature) return;
+      _lastAppliedProfileSignature = sig;
+      // Defer so we don't mutate state mid-listener.
+      Future<void>.microtask(() => applyFromUserProfile(v.profile));
+    }, fireImmediately: true);
+
     _prefsLog.info('prefs: build done in ${sw.elapsedMilliseconds}ms');
     return out;
   }
+
+  static String _profileSignature(UserProfile p) =>
+      '${p.id}|${p.locale ?? ''}|${p.learningLanguage ?? ''}|${p.nativeLanguage ?? ''}';
 
   Future<void> setLocale(Locale? locale) async {
     final next = (await future).copyWith(locale: locale);

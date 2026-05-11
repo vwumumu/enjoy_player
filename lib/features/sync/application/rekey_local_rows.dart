@@ -21,24 +21,29 @@ Future<void> rekeyLocalMediaRowsOnSignIn({
   final videos = await (db.select(db.videos)
         ..where((t) => t.syncStatus.equals('local-pending-rekey')))
       .get();
-  for (final row in videos) {
-    try {
-      await _rekeyOneVideo(db, row, userId, enqueue);
-    } catch (e, st) {
-      _log.warning('rekey video ${row.id} failed', e, st);
-    }
-  }
-
   final audios = await (db.select(db.audios)
         ..where((t) => t.syncStatus.equals('local-pending-rekey')))
       .get();
-  for (final row in audios) {
-    try {
-      await _rekeyOneAudio(db, row, userId, enqueue);
-    } catch (e, st) {
-      _log.warning('rekey audio ${row.id} failed', e, st);
+  if (videos.isEmpty && audios.isEmpty) return;
+
+  // Single transaction → one Drift change notification batch vs N per-row txns.
+  await db.transaction(() async {
+    for (final row in videos) {
+      try {
+        await _rekeyOneVideo(db, row, userId, enqueue);
+      } catch (e, st) {
+        _log.warning('rekey video ${row.id} failed', e, st);
+      }
     }
-  }
+
+    for (final row in audios) {
+      try {
+        await _rekeyOneAudio(db, row, userId, enqueue);
+      } catch (e, st) {
+        _log.warning('rekey audio ${row.id} failed', e, st);
+      }
+    }
+  });
 }
 
 Future<void> _rekeyOneVideo(
@@ -69,46 +74,44 @@ Future<void> _rekeyOneVideo(
   }
 
   final canonical = await db.videoDao.getById(newId);
-  await db.transaction(() async {
-    await _retargetMediaForeignKeys(
-      db,
-      oldTargetId: row.id,
-      newTargetId: newId,
-      dexieTargetType: dexieType,
-      syncQueueEntityType: 'video',
-    );
+  await _retargetMediaForeignKeys(
+    db,
+    oldTargetId: row.id,
+    newTargetId: newId,
+    dexieTargetType: dexieType,
+    syncQueueEntityType: 'video',
+  );
 
-    if (canonical != null) {
-      final mergedLocal =
-          (canonical.localUri != null && canonical.localUri!.isNotEmpty)
-              ? canonical.localUri
-              : row.localUri;
-      final mergedSize = canonical.size ?? row.size;
-      await db.videoDao.insertRow(
-        canonical.copyWith(
-          localUri: Value(mergedLocal),
-          size: Value(mergedSize),
-          syncStatus: Value(
-            mergedLocal != null && mergedLocal.isNotEmpty
-                ? 'pending'
-                : canonical.syncStatus,
-          ),
-          updatedAt: DateTime.now(),
+  if (canonical != null) {
+    final mergedLocal =
+        (canonical.localUri != null && canonical.localUri!.isNotEmpty)
+            ? canonical.localUri
+            : row.localUri;
+    final mergedSize = canonical.size ?? row.size;
+    await db.videoDao.insertRow(
+      canonical.copyWith(
+        localUri: Value(mergedLocal),
+        size: Value(mergedSize),
+        syncStatus: Value(
+          mergedLocal != null && mergedLocal.isNotEmpty
+              ? 'pending'
+              : canonical.syncStatus,
         ),
-      );
-      await db.videoDao.deleteId(row.id);
-    } else {
-      await db.videoDao.deleteId(row.id);
-      await db.videoDao.insertRow(
-        row.copyWith(
-          id: newId,
-          vid: newVid,
-          syncStatus: const Value('pending'),
-          updatedAt: DateTime.now(),
-        ),
-      );
-    }
-  });
+        updatedAt: DateTime.now(),
+      ),
+    );
+    await db.videoDao.deleteId(row.id);
+  } else {
+    await db.videoDao.deleteId(row.id);
+    await db.videoDao.insertRow(
+      row.copyWith(
+        id: newId,
+        vid: newVid,
+        syncStatus: const Value('pending'),
+        updatedAt: DateTime.now(),
+      ),
+    );
+  }
 
   if (canonical != null) {
     final after = await db.videoDao.getById(newId);
@@ -152,46 +155,44 @@ Future<void> _rekeyOneAudio(
   }
 
   final canonical = await db.audioDao.getById(newId);
-  await db.transaction(() async {
-    await _retargetMediaForeignKeys(
-      db,
-      oldTargetId: row.id,
-      newTargetId: newId,
-      dexieTargetType: dexieType,
-      syncQueueEntityType: 'audio',
-    );
+  await _retargetMediaForeignKeys(
+    db,
+    oldTargetId: row.id,
+    newTargetId: newId,
+    dexieTargetType: dexieType,
+    syncQueueEntityType: 'audio',
+  );
 
-    if (canonical != null) {
-      final mergedLocal =
-          (canonical.localUri != null && canonical.localUri!.isNotEmpty)
-              ? canonical.localUri
-              : row.localUri;
-      final mergedSize = canonical.size ?? row.size;
-      await db.audioDao.insertRow(
-        canonical.copyWith(
-          localUri: Value(mergedLocal),
-          size: Value(mergedSize),
-          syncStatus: Value(
-            mergedLocal != null && mergedLocal.isNotEmpty
-                ? 'pending'
-                : canonical.syncStatus,
-          ),
-          updatedAt: DateTime.now(),
+  if (canonical != null) {
+    final mergedLocal =
+        (canonical.localUri != null && canonical.localUri!.isNotEmpty)
+            ? canonical.localUri
+            : row.localUri;
+    final mergedSize = canonical.size ?? row.size;
+    await db.audioDao.insertRow(
+      canonical.copyWith(
+        localUri: Value(mergedLocal),
+        size: Value(mergedSize),
+        syncStatus: Value(
+          mergedLocal != null && mergedLocal.isNotEmpty
+              ? 'pending'
+              : canonical.syncStatus,
         ),
-      );
-      await db.audioDao.deleteId(row.id);
-    } else {
-      await db.audioDao.deleteId(row.id);
-      await db.audioDao.insertRow(
-        row.copyWith(
-          id: newId,
-          aid: newAid,
-          syncStatus: const Value('pending'),
-          updatedAt: DateTime.now(),
-        ),
-      );
-    }
-  });
+        updatedAt: DateTime.now(),
+      ),
+    );
+    await db.audioDao.deleteId(row.id);
+  } else {
+    await db.audioDao.deleteId(row.id);
+    await db.audioDao.insertRow(
+      row.copyWith(
+        id: newId,
+        aid: newAid,
+        syncStatus: const Value('pending'),
+        updatedAt: DateTime.now(),
+      ),
+    );
+  }
 
   if (canonical != null) {
     final after = await db.audioDao.getById(newId);

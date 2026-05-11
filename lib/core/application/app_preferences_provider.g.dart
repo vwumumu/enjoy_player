@@ -34,7 +34,7 @@ final class AppPreferencesCtrlProvider
 }
 
 String _$appPreferencesCtrlHash() =>
-    r'c71aa7b904642935c53149a00301f1da9a6c57e2';
+    r'b27b61475107e745fac0e0a2e220c7b502aaff4b';
 
 abstract class _$AppPreferencesCtrl
     extends $AsyncNotifier<AppPreferencesState> {

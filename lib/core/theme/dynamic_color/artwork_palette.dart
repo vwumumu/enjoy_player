@@ -49,7 +49,7 @@ Future<ArtworkPalette?> extractArtworkPalette(String? thumbnailPath) async {
   if (_cache.containsKey(thumbnailPath)) return _cache[thumbnailPath];
 
   final file = File(thumbnailPath);
-  if (!file.existsSync()) return null;
+  if (!await file.exists()) return null;
 
   try {
     final generator = await PaletteGenerator.fromImageProvider(

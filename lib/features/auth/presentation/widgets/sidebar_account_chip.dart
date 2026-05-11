@@ -1,6 +1,7 @@
 /// Sidebar account entry: sign-in or profile shortcut.
 library;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -46,14 +47,15 @@ class SidebarAccountChip extends ConsumerWidget {
           }
           if (state is AuthSignedIn) {
             final p = state.profile;
+            final avatarUrl = p.avatarUrl;
             return ListTile(
               dense: true,
               leading: CircleAvatar(
                 radius: 16,
-                backgroundImage: p.avatarUrl != null && p.avatarUrl!.isNotEmpty
-                    ? NetworkImage(p.avatarUrl!)
+                backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                    ? CachedNetworkImageProvider(avatarUrl)
                     : null,
-                child: p.avatarUrl == null || p.avatarUrl!.isEmpty
+                child: avatarUrl == null || avatarUrl.isEmpty
                     ? Icon(Icons.person_rounded, size: 18, color: cs.primary)
                     : null,
               ),

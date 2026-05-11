@@ -65,3 +65,7 @@ sequenceDiagram
 ## Manual providers
 
 [`libraryMediaProvider`](../lib/features/library/application/library_media_provider.dart) is a hand-written `StreamProvider` because `riverpod_generator` + Drift row types hit an `InvalidTypeException` in codegen — keep this pattern documented if more stream providers need the same workaround.
+
+## Main-isolate performance (Windows)
+
+- **Do not** run `palette_generator` / heavy image analysis per item in large `GridView` / `ListView` builders on the UI isolate — see [features/library.md](features/library.md) § *Performance (signed-in cold start, Windows)*. Use Flutter DevTools **CPU profiler** on the UI thread when investigating jank or “Not responding” during scroll or startup.

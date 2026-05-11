@@ -33,7 +33,8 @@ When signed out, the sync screen explains that sign-in is required and links to 
 
 ## Triggers
 
-- Signing in runs **re-key** (if needed) then [`SyncEngine.fullSync`](../../lib/features/sync/application/sync_engine.dart) (queue drain only) via [`SyncCtrl`](../../lib/features/sync/application/sync_controller.dart).
+- Signing in schedules **re-key** (if needed) then [`SyncEngine.fullSync`](../../lib/features/sync/application/sync_engine.dart) via [`SyncCtrl`](../../lib/features/sync/application/sync_controller.dart) on the **first frame after** auth transitions to signed-in (`addPostFrameCallback`).
+- **Re-key** runs pending `local-pending-rekey` video/audio rows inside a **single Drift transaction** so dependent tables update in one batch (fewer `watchAll` emissions than per-row transactions).
 - While signed in, queue drain repeats on a **5-minute** timer.
 - Library import/delete and shadow-reading recording save/delete call [`syncEnqueueProvider`](../../lib/features/sync/application/sync_providers.dart).
 

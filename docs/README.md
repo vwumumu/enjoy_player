@@ -17,6 +17,7 @@ Maintainers and agents should keep these files **accurate** when behavior or arc
 | [features/auth.md](features/auth.md) | Product + dev | Sign-in, profile, API base URL, or settings sync behavior changes |
 | [features/ai.md](features/ai.md) | Product + dev | AI worker capabilities, playground, or provider matrix behavior changes |
 | [features/sync.md](features/sync.md) | Product + dev | Cloud metadata sync (library + recordings + queue) behavior changes |
+| [features/library.md](features/library.md) | Product + dev | Home / Library media UI, thumbnails, cold-start perf notes |
 | [features/cloud.md](features/cloud.md) | Product + dev | Remote media index (add-to-library) behavior changes |
 | [features/youtube.md](features/youtube.md) | Product + dev | YouTube import, WebView playback, login, transcripts behavior changes |
 

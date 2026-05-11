@@ -35,8 +35,6 @@ class SyncCtrl extends _$SyncCtrl {
       final prevIn = previous?.valueOrNull is AuthSignedIn;
       final nextIn = next.valueOrNull is AuthSignedIn;
       if (nextIn && !prevIn) {
-        // Run after first frame so Home / prefs / insight HTTP can schedule work
-        // without contending with rekey + queue drain on the same Drift isolate.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           unawaited(_onSignedIn());
         });
@@ -61,7 +59,7 @@ class SyncCtrl extends _$SyncCtrl {
         enqueue: ref.read(syncEnqueueProvider),
       );
 
-      // Let other microtasks (e.g. home insight GETs) run before queue drain.
+      // Let other microtasks run before queue drain.
       await Future<void>.delayed(Duration.zero);
 
       final result =

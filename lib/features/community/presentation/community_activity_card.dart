@@ -1,6 +1,7 @@
 /// Community activity / active learners card (signed-in only).
 library;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -532,12 +533,12 @@ class _UserAvatar extends StatelessWidget {
     }
 
     return ClipOval(
-      child: Image.network(
-        url,
+      child: CachedNetworkImage(
+        imageUrl: url,
         width: size,
         height: size,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => fallback(),
+        errorWidget: (context, url, error) => fallback(),
       ),
     );
   }

@@ -11,6 +11,10 @@ import 'app_database.dart';
 
 part 'app_database_provider.g.dart';
 
+/// One [AppDatabase] per signed-in session name — avoids constructing a new
+/// [AppDatabase] on every [appDatabase] rebuild (Drift multiple-instances warning).
+final Map<String, AppDatabase> _userSessionDatabases = <String, AppDatabase>{};
+
 /// Drift file base name for the current auth session (guest vs per-user).
 ///
 /// Used with [AuthCtrl] `.select` so [appDatabase] does not rebuild on every
@@ -53,9 +57,13 @@ AppDatabase appDatabase(Ref ref) {
     return ref.watch(guestAppDatabaseProvider);
   }
 
-  final db = AppDatabase(name: sessionName);
-  ref.onDispose(db.close);
-  return db;
+  return _userSessionDatabases.putIfAbsent(sessionName, () {
+    final db = AppDatabase(name: sessionName);
+    ref.onDispose(() {
+      _userSessionDatabases.remove(sessionName)?.close();
+    });
+    return db;
+  });
 }
 
 String _sanitizeUserIdForDbName(String id) =>

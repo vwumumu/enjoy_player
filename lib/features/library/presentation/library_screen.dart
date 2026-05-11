@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/routing/player_navigation.dart';
-import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
 import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
@@ -232,11 +231,9 @@ class _AudioRow extends ConsumerWidget {
     final thumb = localThumbnailFileForCard(media.thumbnailPath);
     final netThumb = remoteThumbnailForCard(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
-    final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
-    final accent =
-        thumb != null
-            ? (paletteAsync.value?.accent ?? generativeAccentForSeed(media.coverSeed))
-            : generativeAccentForSeed(media.coverSeed);
+    // See `_HomeMediaTile` for rationale: per-tile palette extraction stalls
+    // the main isolate when many cards mount at once.
+    final accent = generativeAccentForSeed(media.coverSeed);
 
     return MediaCardRow(
       title: media.title,
@@ -301,11 +298,9 @@ class _VideoTile extends ConsumerWidget {
     final thumb = localThumbnailFileForCard(media.thumbnailPath);
     final netThumb = remoteThumbnailForCard(media.thumbnailPath);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
-    final paletteAsync = ref.watch(artworkPaletteProvider(media.thumbnailPath));
-    final accent =
-        thumb != null
-            ? (paletteAsync.value?.accent ?? generativeAccentForSeed(media.coverSeed))
-            : generativeAccentForSeed(media.coverSeed);
+    // See `_HomeMediaTile` for rationale: per-tile palette extraction stalls
+    // the main isolate when many cards mount at once.
+    final accent = generativeAccentForSeed(media.coverSeed);
 
     return MediaCardTile(
       title: media.title,
