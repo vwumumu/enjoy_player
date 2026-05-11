@@ -16,19 +16,17 @@ final class AsrResult {
 
   factory AsrResult.fromJson(Map<String, dynamic> json) {
     final segs = json['segments'] as List<dynamic>?;
+    final transcriptionInfo = _jsonMap(json['transcriptionInfo']);
     return AsrResult(
       text: json['text'] as String? ?? '',
       segments:
           segs
-              ?.map((e) => AsrSegment.fromJson(Map<String, dynamic>.from(e as Map)))
+              ?.map((e) => AsrSegment.fromJson(_jsonMap(e) ?? const {}))
               .toList(),
       language:
-          (json['transcriptionInfo'] as Map<String, dynamic>?)?['language']
-              as String? ??
+          transcriptionInfo?['language'] as String? ??
           json['language'] as String?,
-      duration:
-          (json['transcriptionInfo'] as Map<String, dynamic>?)?['duration']
-              as double?,
+      duration: (transcriptionInfo?['duration'] as num?)?.toDouble(),
       wordCount: json['wordCount'] as int? ?? json['word_count'] as int?,
     );
   }
@@ -55,10 +53,18 @@ final class AsrSegment {
       text: json['text'] as String? ?? '',
       words:
           w
-              ?.map((e) => AsrWord.fromJson(Map<String, dynamic>.from(e as Map)))
+              ?.map((e) => AsrWord.fromJson(_jsonMap(e) ?? const {}))
               .toList(),
     );
   }
+}
+
+/// JSON nested objects decode as [Map<dynamic, dynamic>]; normalize for casts.
+Map<String, dynamic>? _jsonMap(dynamic value) {
+  if (value == null) return null;
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return null;
 }
 
 final class AsrWord {
