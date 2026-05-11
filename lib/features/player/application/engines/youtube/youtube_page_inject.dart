@@ -5,6 +5,17 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 const String kYoutubeMobileWatchInjectScript = r'''
 (function(){
+  // [onLoadStop] can run more than once (OAuth return, soft reloads). A second
+  // inject stacks intervals + duplicate media listeners → spurious pause/sync.
+  if(window.__enjoyYtMwc){return;}
+  window.__enjoyYtMwc=1;
+
+  function mainVideo(){
+    var p=document.querySelector('.html5-video-player');
+    if(!p) return document.querySelector('video');
+    return p.querySelector('video')||document.querySelector('video');
+  }
+
   var v=null;       // current hooked <video>
   var player=null;  // .html5-video-player container
   var mids=[];      // elements between player and <video>
@@ -89,7 +100,7 @@ const String kYoutubeMobileWatchInjectScript = r'''
       return;
     }
 
-    var currentV=document.querySelector('video');
+    var currentV=mainVideo();
     if(currentV && currentV!==v){
       v=currentV;
       hookVideo(v);
@@ -174,7 +185,7 @@ const String kYoutubeMobileWatchInjectScript = r'''
   }
 
   function setup(){
-    v=document.querySelector('video');
+    v=mainVideo();
     if(!v){setTimeout(setup,300);return;}
 
     player=v.closest('.html5-video-player')||v.parentElement;

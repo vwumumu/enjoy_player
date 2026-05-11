@@ -10,9 +10,9 @@ class YoutubeStatePoller {
 
   static const String _pollScript = '''
           (function(){
-            var v=document.querySelector('video');
+            var p=document.querySelector('.html5-video-player');
+            var v=p?p.querySelector('video'):document.querySelector('video');
             if(!v) return null;
-            var p=v.closest('.html5-video-player');
             if(p && p.classList.contains('ad-showing')) return null;
             var s=v.paused?0:(v.ended?2:1);
             return JSON.stringify({

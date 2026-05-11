@@ -13,7 +13,9 @@ class YoutubeWebViewBridge {
     await web?.evaluateJavascript(
       source: '''
         (function(){
-          var v=document.querySelector('video');
+          var p=document.querySelector('.html5-video-player');
+          var v=p?p.querySelector('video'):null;
+          if(!v) v=document.querySelector('video');
           if(v) v.play();
         })();
       ''',
@@ -24,7 +26,9 @@ class YoutubeWebViewBridge {
     await web?.evaluateJavascript(
       source: '''
         (function(){
-          var v=document.querySelector('video');
+          var p=document.querySelector('.html5-video-player');
+          var v=p?p.querySelector('video'):null;
+          if(!v) v=document.querySelector('video');
           if(v) v.pause();
         })();
       ''',
@@ -35,7 +39,9 @@ class YoutubeWebViewBridge {
     await web?.evaluateJavascript(
       source: '''
         (function(){
-          var v=document.querySelector('video');
+          var p=document.querySelector('.html5-video-player');
+          var v=p?p.querySelector('video'):null;
+          if(!v) v=document.querySelector('video');
           if(v) v.pause();
         })();
       ''',
@@ -50,7 +56,9 @@ class YoutubeWebViewBridge {
       source:
           '''
         (function(){
-          var v=document.querySelector('video');
+          var p=document.querySelector('.html5-video-player');
+          var v=p?p.querySelector('video'):null;
+          if(!v) v=document.querySelector('video');
           if(v) v.currentTime=$seconds;
         })();
       ''',
@@ -61,7 +69,9 @@ class YoutubeWebViewBridge {
     await web?.evaluateJavascript(
       source: '''
         (function(){
-          var v=document.querySelector('video');
+          var p=document.querySelector('.html5-video-player');
+          var v=p?p.querySelector('video'):null;
+          if(!v) v=document.querySelector('video');
           if(v){v.pause();v.currentTime=0;}
         })();
       ''',
@@ -76,7 +86,9 @@ class YoutubeWebViewBridge {
       source:
           '''
         (function(){
-          var v=document.querySelector('video');
+          var p=document.querySelector('.html5-video-player');
+          var v=p?p.querySelector('video'):null;
+          if(!v) v=document.querySelector('video');
           if(v) v.playbackRate=$speed;
         })();
       ''',
@@ -91,7 +103,9 @@ class YoutubeWebViewBridge {
       source:
           '''
         (function(){
-          var v=document.querySelector('video');
+          var p=document.querySelector('.html5-video-player');
+          var v=p?p.querySelector('video'):null;
+          if(!v) v=document.querySelector('video');
           if(v) v.volume=$volume;
         })();
       ''',

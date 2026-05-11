@@ -42,6 +42,15 @@ class YoutubePlayerEngine implements PlayerEngine {
   Timer? _pollTimer;
   double? _pendingSeekSeconds;
 
+  /// Poll interval is 250ms; 3 ticks ≈ 750ms of stable `paused` before we trust
+  /// the poller over transient DOM noise.
+  static const int _kPauseConfirmPollTicks = 3;
+
+  /// [YoutubeStatePoller] can see a transient `paused` sample during DOM
+  /// swaps (e.g. after OAuth). Require several ticks before treating it as
+  /// user-visible pause so we do not stop polling / flip transport early.
+  int _pausedPollStreak = 0;
+
   bool _playing = false;
   bool _buffering = true;
 
@@ -222,6 +231,7 @@ class YoutubePlayerEngine implements PlayerEngine {
         switch (event) {
           case 'play':
           case 'playing':
+            _pausedPollStreak = 0;
             _playbackCompleted = false;
             _emitPlaying(true);
             _emitBuffering(false);
@@ -229,10 +239,12 @@ class YoutubePlayerEngine implements PlayerEngine {
             _applyPendingSeek();
             break;
           case 'pause':
+            _pausedPollStreak = 0;
             _emitPlaying(false);
             _stopPolling();
             break;
           case 'ended':
+            _pausedPollStreak = 0;
             _playbackCompleted = true;
             _stopPolling();
             _emitPlaying(false);
@@ -308,6 +320,7 @@ class YoutubePlayerEngine implements PlayerEngine {
 
   void _startPolling() {
     if (_pollTimer != null) return;
+    _pausedPollStreak = 0;
     _pollTimer = Timer.periodic(
       const Duration(milliseconds: 250),
       (_) => _pollTick(),
@@ -338,12 +351,19 @@ class YoutubePlayerEngine implements PlayerEngine {
               _emitDuration(newDuration);
             }
             if (jsEnded && !_playbackCompleted) {
+              _pausedPollStreak = 0;
               _playbackCompleted = true;
               _stopPolling();
               _emitPlaying(false);
             } else if (jsPaused && _playing && !jsEnded) {
-              _emitPlaying(false);
-              _stopPolling();
+              _pausedPollStreak++;
+              if (_pausedPollStreak >= _kPauseConfirmPollTicks) {
+                _pausedPollStreak = 0;
+                _emitPlaying(false);
+                _stopPolling();
+              }
+            } else {
+              _pausedPollStreak = 0;
             }
           },
     );
