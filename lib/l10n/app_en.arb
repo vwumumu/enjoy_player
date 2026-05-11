@@ -122,6 +122,16 @@
     }
   },
   "shadowRecordingPlaybackFailed": "Couldn't play this take.",
+  "shadowRecordingOverTarget": "+{seconds}s over target",
+  "@shadowRecordingOverTarget": {
+    "description": "Shown while recording after elapsed time exceeds the reference segment duration.",
+    "placeholders": {
+      "seconds": {
+        "type": "String",
+        "example": "0.3"
+      }
+    }
+  },
   "hotkeysTitle": "Keyboard shortcuts",
   "hotkeysHintFooter": "Press Shift+/ (?) to open this list.",
   "hotkeysCustomizedBadge": "Custom",

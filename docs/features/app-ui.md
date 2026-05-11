@@ -48,7 +48,7 @@ Single dark `ThemeData` only (`buildAppTheme()`). No light theme and no Settings
 | `VideoPlayerLayout` | Dark zinc transcript panel, 1px left border |
 | `GlobalTransportBar` | Glass kept; dynamic-accent play ring; tabular timestamps |
 | `TranscriptPanel` | Source Serif 4 body; editorial left-rail active line; neutral echo card with 8px orange rail |
-| `ShadowReadingPanel` | Sectioned with editorial labels; FAB-style 56pt circular record button |
+| `ShadowReadingPanel` | Compact: collapsible pitch, saved takes row only when needed, 64pt record FAB + segment countdown ring |
 | `SettingsScreen` | iOS-style grouped `_SettingsCard` |
 
 ## Design token reference (`EnjoyThemeTokens`)

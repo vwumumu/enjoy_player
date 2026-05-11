@@ -3,10 +3,12 @@ library;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -17,7 +19,6 @@ import 'package:enjoy_player/core/audio/recording_preview_player_provider.dart';
 import 'package:enjoy_player/core/audio/wav_duration_ms.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
@@ -46,6 +47,10 @@ RecordingRow? _resolvedSelectedRow(List<RecordingRow> list, String? selectedId) 
   return list.first;
 }
 
+String _formatSecsOneDecimal(double seconds) {
+  return seconds.toStringAsFixed(1);
+}
+
 class ShadowReadingPanel extends ConsumerStatefulWidget {
   const ShadowReadingPanel({
     required this.mediaId,
@@ -72,12 +77,19 @@ class ShadowReadingPanel extends ConsumerStatefulWidget {
   ConsumerState<ShadowReadingPanel> createState() => _ShadowReadingPanelState();
 }
 
-class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
+class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
+    with SingleTickerProviderStateMixin {
   final AudioRecorder _recorder = AudioRecorder();
   bool _recording = false;
   String? _selectedRecordingId;
   String? _mediaPath;
   Future<String?>? _mediaPathFuture;
+
+  DateTime? _recordingStartedAt;
+  Duration _elapsed = Duration.zero;
+  Ticker? _elapsedTicker;
+  Timer? _overPulseTimer;
+  bool _overPulseHigh = false;
 
   Future<String?> _mediaPathFutureOnce() {
     return _mediaPathFuture ??= () async {
@@ -102,8 +114,50 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
     }
   }
 
+  void _stopElapsedTicker() {
+    _elapsedTicker?.dispose();
+    _elapsedTicker = null;
+  }
+
+  void _stopOverPulse() {
+    _overPulseTimer?.cancel();
+    _overPulseTimer = null;
+    _overPulseHigh = false;
+  }
+
+  void _onElapsedTick(Duration _) {
+    if (!mounted || !_recording || _recordingStartedAt == null) return;
+    final elapsed = DateTime.now().difference(_recordingStartedAt!);
+    final targetSec = widget.endSec - widget.startSec;
+    final over = targetSec > 0 && elapsed.inMilliseconds / 1000.0 > targetSec;
+    setState(() {
+      _elapsed = elapsed;
+    });
+    if (over && _overPulseTimer == null) {
+      _overPulseTimer = Timer.periodic(const Duration(milliseconds: 600), (_) {
+        if (!mounted) return;
+        setState(() => _overPulseHigh = !_overPulseHigh);
+      });
+    } else if (!over) {
+      _stopOverPulse();
+    }
+  }
+
+  void _startElapsedTicker() {
+    _stopElapsedTicker();
+    _elapsedTicker = createTicker(_onElapsedTick)..start();
+  }
+
+  void _clearRecordingTiming() {
+    _stopElapsedTicker();
+    _stopOverPulse();
+    _recordingStartedAt = null;
+    _elapsed = Duration.zero;
+  }
+
   @override
   void dispose() {
+    _clearRecordingTiming();
     unawaited(_recorder.dispose());
     super.dispose();
   }
@@ -136,6 +190,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
       } catch (e, st) {
         _log.warning('microphone stop failed', e, st);
         _recording = false;
+        _clearRecordingTiming();
         if (mounted) setState(() {});
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -149,6 +204,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
         return;
       }
       _recording = false;
+      _clearRecordingTiming();
       setState(() {});
       if (path == null || path.isEmpty) {
         _log.warning('recorder.stop returned no path');
@@ -180,6 +236,9 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
       path: outPath,
     );
     _recording = true;
+    _recordingStartedAt = DateTime.now();
+    _elapsed = Duration.zero;
+    _startElapsedTicker();
     setState(() {});
   }
 
@@ -354,6 +413,14 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
     final tok = EnjoyThemeTokens.of(context);
     final tt = Theme.of(context).textTheme;
 
+    final targetSec = (widget.endSec - widget.startSec).clamp(0.0, double.infinity);
+    final elapsedSec = _elapsed.inMicroseconds / 1e6;
+    final ringProgress =
+        targetSec > 0 ? (elapsedSec / targetSec).clamp(0.0, 1.0) : 0.0;
+    final overTarget =
+        _recording && targetSec > 0 && elapsedSec > targetSec;
+    final overBySec = overTarget ? elapsedSec - targetSec : 0.0;
+
     return FutureBuilder<String?>(
       future: _mediaPathFutureOnce(),
       builder: (context, snap) {
@@ -375,69 +442,11 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
             final sel = _resolvedSelectedRow(list, _selectedRecordingId);
 
             return Padding(
-              padding: EdgeInsets.only(bottom: tok.space8),
+              padding: EdgeInsets.only(bottom: tok.space4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Header
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: tok.space12),
-                    child: Row(
-                      children: [
-                        AnimatedContainer(
-                          duration: tok.motionFast,
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: _recording
-                                ? tok.echoActive.withValues(alpha: 0.15)
-                                : scheme.surfaceContainerHigh,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: _recording
-                                  ? tok.echoActive.withValues(alpha: 0.6)
-                                  : scheme.outlineVariant.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Icon(
-                            _recording ? Icons.graphic_eq_rounded : Icons.mic_none_rounded,
-                            size: 20,
-                            color: _recording ? tok.echoActive : scheme.onSurfaceVariant,
-                          ),
-                        ),
-                        SizedBox(width: tok.space12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.shadowReadingTitle,
-                                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              Text(
-                                l10n.shadowReadingHint,
-                                style: tt.bodySmall?.copyWith(
-                                  color: scheme.onSurfaceVariant,
-                                  height: 1.35,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Section: Pitch
                   if (mediaPath != null && mediaPath.isNotEmpty) ...[
-                    _SectionLabel(
-                      label: l10n.pitchContourTitle,
-                      scheme: scheme,
-                      tt: tt,
-                    ),
-                    SizedBox(height: tok.space8),
                     PitchContourSection(
                       mediaPath: mediaPath,
                       startSec: widget.startSec,
@@ -446,25 +455,10 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
                       selectedRecordingPath: sel?.localPath,
                       selectedRecordingDurationMs: sel?.duration,
                     ),
-                    SizedBox(height: tok.space16),
+                    SizedBox(height: tok.space8),
                   ],
 
-                  // Section: Your takes
-                  _SectionLabel(
-                    label: l10n.shadowRecordingExisting,
-                    scheme: scheme,
-                    tt: tt,
-                  ),
-                  SizedBox(height: tok.space8),
-                  if (list.isEmpty)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: tok.space8),
-                      child: Text(
-                        l10n.shadowRecordingEmpty,
-                        style: tt.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
-                      ),
-                    )
-                  else if (sel != null)
+                  if (list.isNotEmpty && sel != null) ...[
                     _CompactTakeRow(
                       row: sel,
                       list: list,
@@ -488,55 +482,39 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
                         }
                       },
                     ),
+                    SizedBox(height: tok.space8),
+                  ],
 
-                  SizedBox(height: tok.space16),
-
-                  // Section: Record — FAB-style circular button
-                  _SectionLabel(
-                    label: l10n.shadowRecordingRecord,
-                    scheme: scheme,
-                    tt: tt,
-                  ),
-                  SizedBox(height: tok.space12),
                   Center(
                     child: Tooltip(
                       message: ttToggleRecording,
-                      child: GestureDetector(
-                        onTap: widget.echoActive ? () => _toggleRecord(l10n) : null,
-                        child: AnimatedContainer(
-                          duration: tok.motionFast,
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _recording ? tok.echoActive : scheme.primary,
-                            boxShadow: [
-                              BoxShadow(
-                                color: (_recording ? tok.echoActive : scheme.primary)
-                                    .withValues(alpha: 0.35),
-                                blurRadius: _recording ? 24 : 14,
-                                spreadRadius: _recording ? 2 : 0,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            _recording ? Icons.stop_rounded : Icons.mic_rounded,
-                            color: _recording ? Colors.white : scheme.onPrimary,
-                            size: 28,
-                          ),
-                        ),
+                      child: _RecordFabWithRing(
+                        recording: _recording,
+                        echoActive: widget.echoActive,
+                        ringProgress: ringProgress,
+                        overTarget: overTarget,
+                        overPulseHigh: _overPulseHigh,
+                        onTap: () => _toggleRecord(l10n),
+                        scheme: scheme,
+                        tok: tok,
                       ),
                     ),
                   ),
                   SizedBox(height: tok.space4),
-                  Center(
-                    child: Text(
-                      _recording ? l10n.shadowRecordingStop : l10n.shadowRecordingRecord,
-                      style: tt.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
-                    ),
+                  _RecordingCaptionRow(
+                    recording: _recording,
+                    echoActive: widget.echoActive,
+                    elapsedSec: elapsedSec,
+                    targetSec: targetSec,
+                    overTarget: overTarget,
+                    overBySec: overBySec,
+                    l10n: l10n,
+                    tt: tt,
+                    scheme: scheme,
+                    tok: tok,
+                    ttToggleRecording: ttToggleRecording,
                   ),
-                  SizedBox(height: tok.space8),
+                  SizedBox(height: tok.space4),
                 ],
               ),
             );
@@ -547,26 +525,261 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel> {
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({
-    required this.label,
-    required this.scheme,
-    required this.tt,
+// ── Countdown ring + FAB ─────────────────────────────────────────────────────
+
+class _CountdownRingPainter extends CustomPainter {
+  _CountdownRingPainter({
+    required this.progress,
+    required this.overTarget,
+    required this.trackColor,
+    required this.fillColor,
   });
 
-  final String label;
+  final double progress;
+  final bool overTarget;
+  final Color trackColor;
+  final Color fillColor;
+
+  static const double _strokeWidth = 4;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - _strokeWidth / 2;
+
+    final trackPaint = Paint()
+      ..color = trackColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, trackPaint);
+
+    final arcPaint = Paint()
+      ..color = fillColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    if (overTarget) {
+      canvas.drawArc(rect, -math.pi / 2, 2 * math.pi, false, arcPaint);
+    } else {
+      final remaining = (1.0 - progress.clamp(0.0, 1.0));
+      final sweep = 2 * math.pi * remaining;
+      canvas.drawArc(rect, -math.pi / 2, sweep, false, arcPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _CountdownRingPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.overTarget != overTarget ||
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.fillColor != fillColor;
+  }
+}
+
+class _RecordFabWithRing extends StatelessWidget {
+  const _RecordFabWithRing({
+    required this.recording,
+    required this.echoActive,
+    required this.ringProgress,
+    required this.overTarget,
+    required this.overPulseHigh,
+    required this.onTap,
+    required this.scheme,
+    required this.tok,
+  });
+
+  final bool recording;
+  final bool echoActive;
+  final double ringProgress;
+  final bool overTarget;
+  final bool overPulseHigh;
+  final VoidCallback onTap;
   final ColorScheme scheme;
-  final TextTheme tt;
+  final EnjoyThemeTokens tok;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label.toUpperCase(),
-      style: tt.labelSmall?.copyWith(
-        letterSpacing: 0.8,
-        fontWeight: FontWeight.w600,
-        color: scheme.onSurfaceVariant,
+    final scale = overTarget ? (overPulseHigh ? 1.04 : 1.0) : 1.0;
+    return AnimatedScale(
+      scale: scale,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+      child: SizedBox(
+        width: 80,
+        height: 80,
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            CustomPaint(
+              size: const Size(80, 80),
+              painter: _CountdownRingPainter(
+                progress: ringProgress,
+                overTarget: overTarget,
+                trackColor: scheme.outlineVariant.withValues(alpha: 0.38),
+                fillColor: overTarget ? scheme.error : scheme.primary,
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: echoActive ? onTap : null,
+                child: AnimatedContainer(
+                  duration: tok.motionFast,
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: recording ? tok.echoActive : scheme.primary,
+                    boxShadow: [
+                      BoxShadow(
+                        color: (recording ? tok.echoActive : scheme.primary)
+                            .withValues(alpha: 0.35),
+                        blurRadius: recording ? 24 : 14,
+                        spreadRadius: recording ? 2 : 0,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    recording ? Icons.stop_rounded : Icons.mic_rounded,
+                    color: recording ? Colors.white : scheme.onPrimary,
+                    size: 28,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _RecordingCaptionRow extends StatelessWidget {
+  const _RecordingCaptionRow({
+    required this.recording,
+    required this.echoActive,
+    required this.elapsedSec,
+    required this.targetSec,
+    required this.overTarget,
+    required this.overBySec,
+    required this.l10n,
+    required this.tt,
+    required this.scheme,
+    required this.tok,
+    required this.ttToggleRecording,
+  });
+
+  final bool recording;
+  final bool echoActive;
+  final double elapsedSec;
+  final double targetSec;
+  final bool overTarget;
+  final double overBySec;
+  final AppLocalizations l10n;
+  final TextTheme tt;
+  final ColorScheme scheme;
+  final EnjoyThemeTokens tok;
+  final String ttToggleRecording;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelStyle = tt.labelSmall?.copyWith(color: scheme.onSurfaceVariant);
+
+    if (recording && targetSec > 0) {
+      return Semantics(
+        label:
+            '${_formatSecsOneDecimal(elapsedSec)} seconds elapsed of '
+            '${_formatSecsOneDecimal(targetSec)} seconds target',
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: tok.space8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${_formatSecsOneDecimal(elapsedSec)} s / '
+                    '${_formatSecsOneDecimal(targetSec)} s',
+                    style: tt.labelMedium?.copyWith(
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  if (overTarget) ...[
+                    SizedBox(width: tok.space8),
+                    Icon(Icons.circle, size: 8, color: scheme.error),
+                    SizedBox(width: tok.space4),
+                    Flexible(
+                      child: Text(
+                        l10n.shadowRecordingOverTarget(
+                          _formatSecsOneDecimal(overBySec),
+                        ),
+                        style: tt.labelSmall?.copyWith(color: scheme.error),
+                        maxLines: 2,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (recording && targetSec <= 0) {
+      return Center(
+        child: Text(
+          '${_formatSecsOneDecimal(elapsedSec)} s',
+          style: tt.labelMedium?.copyWith(
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Tooltip(
+          message: ttToggleRecording,
+          child: Text(
+            recording ? l10n.shadowRecordingStop : l10n.shadowRecordingRecord,
+            style: labelStyle?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: echoActive ? scheme.onSurfaceVariant : scheme.outline,
+            ),
+          ),
+        ),
+        SizedBox(width: tok.space4),
+        Tooltip(
+          message: l10n.shadowReadingHint,
+          child: IconButton(
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              Icons.info_outline,
+              size: 20,
+              color: scheme.onSurfaceVariant,
+            ),
+            tooltip: l10n.shadowReadingHint,
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.shadowReadingHint)),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -627,16 +840,12 @@ class _CompactTakeRow extends ConsumerWidget {
         child: Row(
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${l10n.shadowRecordingTake} ${_takeNumber(row)}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  SizedBox(height: tok.space4),
-                  _TakePreviewTime(row: row),
-                ],
+              child: Text(
+                '${l10n.shadowRecordingTake} ${_takeNumber(row)} · '
+                '${(row.duration / 1000).toStringAsFixed(1)} s',
+                style: Theme.of(context).textTheme.bodySmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (path != null && path.isNotEmpty)
@@ -710,53 +919,6 @@ class _CompactTakeRow extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-// ── Take preview time ────────────────────────────────────────────────────────
-
-class _TakePreviewTime extends ConsumerWidget {
-  const _TakePreviewTime({required this.row});
-
-  final RecordingRow row;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final preview = ref.watch(recordingPreviewPlayerProvider);
-    final scheme = Theme.of(context).colorScheme;
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: scheme.onSurfaceVariant,
-    );
-    final lp = row.localPath;
-    if (lp == null || lp.isEmpty) {
-      return Text(
-        '${(row.duration / 1000).toStringAsFixed(1)} s',
-        style: style,
-      );
-    }
-    final abs = File(lp).absolute.path;
-    return StreamBuilder<Duration>(
-      stream: preview.position,
-      initialData: Duration.zero,
-      builder: (context, posSnap) {
-        return StreamBuilder<Duration>(
-          stream: preview.duration,
-          initialData: Duration.zero,
-          builder: (context, durSnap) {
-            final loaded = preview.loadedPath == abs;
-            final pos = posSnap.data ?? Duration.zero;
-            var total = durSnap.data ?? Duration.zero;
-            if (total <= Duration.zero && row.duration > 0) {
-              total = Duration(milliseconds: row.duration);
-            }
-            final text = loaded
-                ? '${formatDurationHms(pos)} / ${formatDurationHms(total)}'
-                : '${formatDurationHms(Duration.zero)} / ${formatDurationHms(total)}';
-            return Text(text, style: style);
-          },
-        );
-      },
     );
   }
 }

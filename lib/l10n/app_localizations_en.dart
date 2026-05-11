@@ -341,6 +341,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shadowRecordingPlaybackFailed => 'Couldn\'t play this take.';
 
   @override
+  String shadowRecordingOverTarget(String seconds) {
+    return '+${seconds}s over target';
+  }
+
+  @override
   String get hotkeysTitle => 'Keyboard shortcuts';
 
   @override

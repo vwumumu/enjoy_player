@@ -730,6 +730,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t play this take.'**
   String get shadowRecordingPlaybackFailed;
 
+  /// Shown while recording after elapsed time exceeds the reference segment duration.
+  ///
+  /// In en, this message translates to:
+  /// **'+{seconds}s over target'**
+  String shadowRecordingOverTarget(String seconds);
+
   /// No description provided for @hotkeysTitle.
   ///
   /// In en, this message translates to:
