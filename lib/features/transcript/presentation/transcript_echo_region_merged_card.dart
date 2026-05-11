@@ -23,7 +23,6 @@ class EchoRegionMergedCard extends ConsumerWidget {
     required this.echo,
     required this.activeCueIndex,
     required this.secondaryLines,
-    required this.activeLineKey,
     super.key,
   });
 
@@ -32,7 +31,6 @@ class EchoRegionMergedCard extends ConsumerWidget {
   final EchoState echo;
   final int activeCueIndex;
   final List<TranscriptLine> secondaryLines;
-  final GlobalKey activeLineKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,7 +67,7 @@ class EchoRegionMergedCard extends ConsumerWidget {
       final isActive = i == activeCueIndex;
       final secondaryText = transcriptMatchSecondary(line, secondaryLines)?.text;
 
-      Widget tile = TranscriptLineTile(
+      final tile = TranscriptLineTile(
         line: line,
         secondaryText: secondaryText,
         isActive: isActive,
@@ -79,10 +77,6 @@ class EchoRegionMergedCard extends ConsumerWidget {
             .read(playerInteractionsProvider.notifier)
             .seekToLine(line, i),
       );
-
-      if (isActive) {
-        tile = KeyedSubtree(key: activeLineKey, child: tile);
-      }
 
       lineWidgets.add(tile);
     }
