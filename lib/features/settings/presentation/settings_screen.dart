@@ -356,8 +356,17 @@ class SettingsScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: _SectionLabel(text: l10n.settingsSectionAdvanced),
           ),
-          const SliverToBoxAdapter(
-            child: _SettingsCard(child: _ApiBaseUrlEditor()),
+          SliverToBoxAdapter(
+            child: _SettingsCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const _ApiBaseUrlEditor(),
+                  SizedBox(height: t.space24),
+                  const _AiApiBaseUrlEditor(),
+                ],
+              ),
+            ),
           ),
 
           SliverToBoxAdapter(child: SizedBox(height: t.space8)),
@@ -581,6 +590,98 @@ class _ApiBaseUrlEditorState extends ConsumerState<_ApiBaseUrlEditor> {
         SizedBox(height: t.space4),
         Text(
           l10n.settingsApiBaseUrlHint,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+}
+
+class _AiApiBaseUrlEditor extends ConsumerStatefulWidget {
+  const _AiApiBaseUrlEditor();
+
+  @override
+  ConsumerState<_AiApiBaseUrlEditor> createState() =>
+      _AiApiBaseUrlEditorState();
+}
+
+class _AiApiBaseUrlEditorState extends ConsumerState<_AiApiBaseUrlEditor> {
+  late final TextEditingController _controller;
+  bool _loaded = false;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final url = await ref.read(aiApiBaseUrlProvider.future);
+      if (mounted) {
+        _controller.text = url;
+        setState(() => _loaded = true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: _controller,
+          enabled: _loaded && !_saving,
+          decoration: InputDecoration(
+            labelText: l10n.settingsAiApiBaseUrl,
+            hintText: l10n.settingsAiApiBaseUrlHint,
+          ),
+          keyboardType: TextInputType.url,
+          autocorrect: false,
+        ),
+        SizedBox(height: t.space12),
+        FilledButton(
+          onPressed:
+              (!_loaded || _saving)
+                  ? null
+                  : () async {
+                    setState(() => _saving = true);
+                    try {
+                      await ref
+                          .read(aiApiBaseUrlProvider.notifier)
+                          .setBaseUrl(_controller.text);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.settingsAiApiBaseUrlSave)),
+                        );
+                      }
+                    } finally {
+                      if (mounted) setState(() => _saving = false);
+                    }
+                  },
+          child:
+              _saving
+                  ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : Text(l10n.settingsAiApiBaseUrlSave),
+        ),
+        SizedBox(height: t.space4),
+        Text(
+          l10n.settingsAiApiBaseUrlHint,
           style: Theme.of(
             context,
           ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),

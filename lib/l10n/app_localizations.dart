@@ -1354,6 +1354,24 @@ abstract class AppLocalizations {
   /// **'Save API URL'**
   String get settingsApiBaseUrlSave;
 
+  /// No description provided for @settingsAiApiBaseUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'AI API base URL'**
+  String get settingsAiApiBaseUrl;
+
+  /// No description provided for @settingsAiApiBaseUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: https://worker.enjoy.bot'**
+  String get settingsAiApiBaseUrlHint;
+
+  /// No description provided for @settingsAiApiBaseUrlSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save AI API URL'**
+  String get settingsAiApiBaseUrlSave;
+
   /// No description provided for @settingsAccountSignedOut.
   ///
   /// In en, this message translates to:

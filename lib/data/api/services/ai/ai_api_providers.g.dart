@@ -47,7 +47,7 @@ final class AsrApiProvider extends $FunctionalProvider<AsrApi, AsrApi, AsrApi>
   }
 }
 
-String _$asrApiHash() => r'ba6ebed62744e506ac614009913c576e0cb9b3bf';
+String _$asrApiHash() => r'145c374a536cfeac6731ed9226c5ed5eec260a4e';
 
 @ProviderFor(chatApi)
 final chatApiProvider = ChatApiProvider._();
@@ -88,7 +88,7 @@ final class ChatApiProvider
   }
 }
 
-String _$chatApiHash() => r'244db666dd43ccb3eda9a42901762684b0b9ad78';
+String _$chatApiHash() => r'd0842958db5ee5abf39de2fa65b0a8d60eac7950';
 
 @ProviderFor(translationApi)
 final translationApiProvider = TranslationApiProvider._();
@@ -129,7 +129,7 @@ final class TranslationApiProvider
   }
 }
 
-String _$translationApiHash() => r'54f33012f495b3817f273c60c26bb5de5201b01a';
+String _$translationApiHash() => r'a7bde872c0549cebe4b3d2632164ad7657930a05';
 
 @ProviderFor(dictionaryApi)
 final dictionaryApiProvider = DictionaryApiProvider._();
@@ -170,7 +170,7 @@ final class DictionaryApiProvider
   }
 }
 
-String _$dictionaryApiHash() => r'23e81a8977f125bd5287333b40e82729baa15d13';
+String _$dictionaryApiHash() => r'056b887a54ea630e793c66a8d23f52cdbcbe91c7';
 
 @ProviderFor(azureTokenApi)
 final azureTokenApiProvider = AzureTokenApiProvider._();
@@ -211,4 +211,4 @@ final class AzureTokenApiProvider
   }
 }
 
-String _$azureTokenApiHash() => r'c01ebdcdc810a79efd95ebdbf3e6db5316343119';
+String _$azureTokenApiHash() => r'ebaf3ff19fa0ea2ca31dec25c094786212f86d60';

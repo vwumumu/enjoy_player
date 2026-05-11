@@ -3,6 +3,9 @@ library;
 
 abstract final class SettingsKeys {
   static const String apiBaseUrl = 'api.base_url';
+
+  /// Worker-hosted AI routes (OpenAI-compatible chat, ASR, translation, etc.).
+  static const String apiAiBaseUrl = 'api.ai_base_url';
   static const String prefsLocale = 'prefs.locale';
   static const String prefsLearningLanguage = 'prefs.learning_language';
   static const String prefsNativeLanguage = 'prefs.native_language';
@@ -25,3 +28,6 @@ abstract final class SettingsKeys {
 
 /// Default Enjoy API origin (no trailing slash).
 const String kDefaultApiBaseUrl = 'https://enjoy.bot';
+
+/// Default Enjoy Worker origin for AI endpoints (no trailing slash).
+const String kDefaultAiApiBaseUrl = 'https://worker.enjoy.bot';

@@ -13,19 +13,19 @@ import 'package:enjoy_player/data/api/services/ai/translation_api.dart';
 part 'ai_api_providers.g.dart';
 
 @Riverpod(keepAlive: true)
-AsrApi asrApi(Ref ref) => AsrApi(ref.watch(apiClientProvider));
+AsrApi asrApi(Ref ref) => AsrApi(ref.watch(aiApiClientProvider));
 
 @Riverpod(keepAlive: true)
-ChatApi chatApi(Ref ref) => ChatApi(ref.watch(apiClientProvider));
+ChatApi chatApi(Ref ref) => ChatApi(ref.watch(aiApiClientProvider));
 
 @Riverpod(keepAlive: true)
 TranslationApi translationApi(Ref ref) =>
-    TranslationApi(ref.watch(apiClientProvider));
+    TranslationApi(ref.watch(aiApiClientProvider));
 
 @Riverpod(keepAlive: true)
 DictionaryApi dictionaryApi(Ref ref) =>
-    DictionaryApi(ref.watch(apiClientProvider));
+    DictionaryApi(ref.watch(aiApiClientProvider));
 
 @Riverpod(keepAlive: true)
 AzureTokenApi azureTokenApi(Ref ref) =>
-    AzureTokenApi(ref.watch(apiClientProvider));
+    AzureTokenApi(ref.watch(aiApiClientProvider));

@@ -74,9 +74,53 @@ final class ApiBaseUrlProvider
   ApiBaseUrl create() => ApiBaseUrl();
 }
 
-String _$apiBaseUrlHash() => r'5e023e662a469b54c1894f21bcf61aafe3b275a9';
+String _$apiBaseUrlHash() => r'a67260babe30c21f72f8e70633c6d9887bff32c1';
 
 abstract class _$ApiBaseUrl extends $AsyncNotifier<String> {
+  FutureOr<String> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<String>, String>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<String>, String>,
+              AsyncValue<String>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(AiApiBaseUrl)
+final aiApiBaseUrlProvider = AiApiBaseUrlProvider._();
+
+final class AiApiBaseUrlProvider
+    extends $AsyncNotifierProvider<AiApiBaseUrl, String> {
+  AiApiBaseUrlProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'aiApiBaseUrlProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$aiApiBaseUrlHash();
+
+  @$internal
+  @override
+  AiApiBaseUrl create() => AiApiBaseUrl();
+}
+
+String _$aiApiBaseUrlHash() => r'142df964a9af15107535ea71f37ec0ba2e3a2b01';
+
+abstract class _$AiApiBaseUrl extends $AsyncNotifier<String> {
   FutureOr<String> build();
   @$mustCallSuper
   @override
@@ -134,3 +178,44 @@ final class ApiClientProvider
 }
 
 String _$apiClientHash() => r'1e513f1ce9c39f3dead123e74003b1272063199e';
+
+@ProviderFor(aiApiClient)
+final aiApiClientProvider = AiApiClientProvider._();
+
+final class AiApiClientProvider
+    extends $FunctionalProvider<ApiClient, ApiClient, ApiClient>
+    with $Provider<ApiClient> {
+  AiApiClientProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'aiApiClientProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$aiApiClientHash();
+
+  @$internal
+  @override
+  $ProviderElement<ApiClient> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ApiClient create(Ref ref) {
+    return aiApiClient(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ApiClient value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ApiClient>(value),
+    );
+  }
+}
+
+String _$aiApiClientHash() => r'd10fd97a8380e7ac300798f36710f8979b61f1fa';

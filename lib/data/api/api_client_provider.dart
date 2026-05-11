@@ -11,6 +11,21 @@ import 'package:enjoy_player/data/db/settings_keys.dart';
 
 part 'api_client_provider.g.dart';
 
+/// Normalizes a user-entered origin; [defaultWhenEmpty] is used when [raw] is blank.
+String normalizeApiBaseUrl(String raw, String defaultWhenEmpty) {
+  var s = raw.trim();
+  if (s.isEmpty) {
+    s = defaultWhenEmpty;
+  }
+  while (s.endsWith('/')) {
+    s = s.substring(0, s.length - 1);
+  }
+  if (!s.startsWith('http://') && !s.startsWith('https://')) {
+    s = 'https://$s';
+  }
+  return s;
+}
+
 @Riverpod(keepAlive: true)
 http.Client httpClient(Ref ref) {
   final c = http.Client();
@@ -24,12 +39,12 @@ class ApiBaseUrl extends _$ApiBaseUrl {
   Future<String> build() async {
     final db = ref.watch(guestAppDatabaseProvider);
     final raw = await db.settingsDao.getValue(SettingsKeys.apiBaseUrl);
-    return _normalize(raw ?? kDefaultApiBaseUrl);
+    return normalizeApiBaseUrl(raw ?? kDefaultApiBaseUrl, kDefaultApiBaseUrl);
   }
 
   /// Persists and refreshes [apiClientProvider].
   Future<void> setBaseUrl(String input) async {
-    final normalized = _normalize(input);
+    final normalized = normalizeApiBaseUrl(input, kDefaultApiBaseUrl);
     await ref.read(guestAppDatabaseProvider).settingsDao.setValue(
           SettingsKeys.apiBaseUrl,
           normalized,
@@ -37,19 +52,26 @@ class ApiBaseUrl extends _$ApiBaseUrl {
     state = AsyncData(normalized);
     ref.invalidate(apiClientProvider);
   }
+}
 
-  static String _normalize(String raw) {
-    var s = raw.trim();
-    if (s.isEmpty) {
-      s = kDefaultApiBaseUrl;
-    }
-    while (s.endsWith('/')) {
-      s = s.substring(0, s.length - 1);
-    }
-    if (!s.startsWith('http://') && !s.startsWith('https://')) {
-      s = 'https://$s';
-    }
-    return s;
+@Riverpod(keepAlive: true)
+class AiApiBaseUrl extends _$AiApiBaseUrl {
+  @override
+  Future<String> build() async {
+    final db = ref.watch(guestAppDatabaseProvider);
+    final raw = await db.settingsDao.getValue(SettingsKeys.apiAiBaseUrl);
+    return normalizeApiBaseUrl(raw ?? kDefaultAiApiBaseUrl, kDefaultAiApiBaseUrl);
+  }
+
+  /// Persists and refreshes [aiApiClientProvider].
+  Future<void> setBaseUrl(String input) async {
+    final normalized = normalizeApiBaseUrl(input, kDefaultAiApiBaseUrl);
+    await ref.read(guestAppDatabaseProvider).settingsDao.setValue(
+          SettingsKeys.apiAiBaseUrl,
+          normalized,
+        );
+    state = AsyncData(normalized);
+    ref.invalidate(aiApiClientProvider);
   }
 }
 
@@ -60,6 +82,17 @@ ApiClient apiClient(Ref ref) {
   return ApiClient(
     httpClient: httpClient,
     getBaseUrl: () => ref.read(apiBaseUrlProvider.future),
+    getAccessToken: tokens.readAccessToken,
+  );
+}
+
+@Riverpod(keepAlive: true)
+ApiClient aiApiClient(Ref ref) {
+  final httpClient = ref.watch(httpClientProvider);
+  final tokens = ref.watch(secureTokenStoreProvider);
+  return ApiClient(
+    httpClient: httpClient,
+    getBaseUrl: () => ref.read(aiApiBaseUrlProvider.future),
     getAccessToken: tokens.readAccessToken,
   );
 }

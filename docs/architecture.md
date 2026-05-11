@@ -49,7 +49,7 @@ sequenceDiagram
 | `recordings` | Pronunciation recordings (sync-ready); time fields `duration`, `referenceStart`, `referenceDuration` in ms, aligned with API |
 | `dictations` | Dictation attempts (sync-ready) |
 | `sync_queue` | Offline-first outbound sync queue (`SyncCtrl` + [`features/sync.md`](features/sync.md)) |
-| `settings` | Key/value JSON blobs (player prefs, hotkeys, **API base URL**, **auth profile cache**, app locale prefs) |
+| `settings` | Key/value JSON blobs (player prefs, hotkeys, **main API base URL**, **AI/Worker API base URL**, **auth profile cache**, app locale prefs) |
 
 ## Optional Enjoy account (auth)
 
