@@ -127,7 +127,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeEmptyHint.
   ///
   /// In en, this message translates to:
-  /// **'Open a file or drop one here to start.'**
+  /// **'Import media or drop a file here to start.'**
   String get homeEmptyHint;
 
   /// No description provided for @libraryTabAudio.
@@ -171,6 +171,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open file(s)'**
   String get actionOpenFiles;
+
+  /// No description provided for @actionImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get actionImport;
+
+  /// No description provided for @importFromFile.
+  ///
+  /// In en, this message translates to:
+  /// **'From file…'**
+  String get importFromFile;
+
+  /// No description provided for @importFromYoutube.
+  ///
+  /// In en, this message translates to:
+  /// **'From YouTube URL…'**
+  String get importFromYoutube;
+
+  /// No description provided for @youtubeImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import YouTube video'**
+  String get youtubeImportTitle;
+
+  /// No description provided for @youtubeImportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a YouTube link or video ID'**
+  String get youtubeImportHint;
+
+  /// No description provided for @youtubeImportInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read a valid YouTube video ID.'**
+  String get youtubeImportInvalid;
+
+  /// No description provided for @youtubeImporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding video…'**
+  String get youtubeImporting;
+
+  /// No description provided for @youtubeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube'**
+  String get youtubeBadge;
+
+  /// No description provided for @youtubeLoginTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube account'**
+  String get youtubeLoginTooltip;
+
+  /// No description provided for @youtubeLoginClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get youtubeLoginClose;
+
+  /// No description provided for @youtubeLoginScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube sign-in'**
+  String get youtubeLoginScreenTitle;
+
+  /// No description provided for @youtubeLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out (clear cookies)'**
+  String get youtubeLogout;
 
   /// No description provided for @searchHint.
   ///
@@ -1773,6 +1845,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TTS / Assessment'**
   String get aiPlaygroundSectionTtsAssessment;
+
+  /// No description provided for @youtubePasteFromClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get youtubePasteFromClipboard;
 }
 
 class _AppLocalizationsDelegate

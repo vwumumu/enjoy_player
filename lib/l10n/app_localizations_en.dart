@@ -24,7 +24,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeEmptyTitle => 'No recent media';
 
   @override
-  String get homeEmptyHint => 'Open a file or drop one here to start.';
+  String get homeEmptyHint => 'Import media or drop a file here to start.';
 
   @override
   String get libraryTabAudio => 'Audio';
@@ -48,6 +48,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get actionOpenFiles => 'Open file(s)';
+
+  @override
+  String get actionImport => 'Import';
+
+  @override
+  String get importFromFile => 'From file…';
+
+  @override
+  String get importFromYoutube => 'From YouTube URL…';
+
+  @override
+  String get youtubeImportTitle => 'Import YouTube video';
+
+  @override
+  String get youtubeImportHint => 'Paste a YouTube link or video ID';
+
+  @override
+  String get youtubeImportInvalid => 'Could not read a valid YouTube video ID.';
+
+  @override
+  String get youtubeImporting => 'Adding video…';
+
+  @override
+  String get youtubeBadge => 'YouTube';
+
+  @override
+  String get youtubeLoginTooltip => 'YouTube account';
+
+  @override
+  String get youtubeLoginClose => 'Close';
+
+  @override
+  String get youtubeLoginScreenTitle => 'YouTube sign-in';
+
+  @override
+  String get youtubeLogout => 'Sign out (clear cookies)';
 
   @override
   String get searchHint => 'Search';
@@ -902,4 +938,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiPlaygroundSectionTtsAssessment => 'TTS / Assessment';
+
+  @override
+  String get youtubePasteFromClipboard => 'Paste';
 }

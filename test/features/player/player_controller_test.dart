@@ -6,7 +6,7 @@ import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
-import 'package:enjoy_player/features/player/application/player_engine_provider.dart';
+import 'package:enjoy_player/features/player/application/player_engine_test_double_provider.dart';
 import 'package:enjoy_player/features/player/domain/media_relocate_exception.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_repository_provider.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_repository.dart';
@@ -114,7 +114,7 @@ void main() {
       container = ProviderContainer(
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
-          playerEngineProvider.overrideWithValue(fake),
+          playerEngineTestDoubleProvider.overrideWithValue(fake),
           transcriptRepositoryProvider.overrideWithValue(TranscriptRepository(db)),
         ],
       );

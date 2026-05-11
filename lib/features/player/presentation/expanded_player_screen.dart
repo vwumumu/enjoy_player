@@ -10,6 +10,8 @@ import 'package:enjoy_player/core/theme/widgets/app_background.dart';
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/domain/media_relocate_exception.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
+import 'package:enjoy_player/features/player/application/engines/youtube/youtube_player_engine.dart';
+import 'package:enjoy_player/features/player/application/youtube_auth_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import '../application/open_media_provider.dart';
@@ -97,8 +99,8 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
     required ColorScheme cs,
   }) {
     final isVideo = chrome.mediaType == 'video';
-    final videoController =
-        isVideo ? ref.read(playerControllerProvider.notifier).videoController : null;
+    final engine = ref.read(playerControllerProvider.notifier).engine;
+    final ytSignedIn = ref.watch(youtubeLoginStateProvider).value ?? false;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -147,13 +149,28 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
                 ),
               ),
               centerTitle: false,
+              actions:
+                  isVideo && engine is YoutubePlayerEngine
+                      ? [
+                          IconButton(
+                            tooltip: l10n.youtubeLoginTooltip,
+                            icon: Icon(
+                              ytSignedIn
+                                  ? Icons.person_rounded
+                                  : Icons.person_outline_rounded,
+                              color: isVideo ? Colors.white : cs.onSurface,
+                            ),
+                            onPressed: () => context.push('/youtube/login'),
+                          ),
+                        ]
+                      : null,
             ),
       body: PlayerAmbientBackdrop(
         accentColor: accent,
         intensity: 0.08,
         child: isVideo
             ? VideoPlayerLayout(
-                controller: videoController!,
+                engine: engine,
                 transcript: TranscriptPanel(mediaId: widget.mediaId),
               )
             : AudioPlayerLayout(

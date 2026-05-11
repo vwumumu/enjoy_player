@@ -17,6 +17,7 @@ import 'package:enjoy_player/features/library/presentation/home_screen.dart';
 import 'package:enjoy_player/features/library/presentation/library_screen.dart';
 import 'package:enjoy_player/features/player/presentation/expanded_player_screen.dart';
 import 'package:enjoy_player/features/player/presentation/root_shell.dart';
+import 'package:enjoy_player/features/player/presentation/youtube_login_screen.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_screen.dart';
 import 'package:enjoy_player/features/settings/presentation/sync_status_screen.dart';
 
@@ -80,6 +81,10 @@ GoRouter appRouter(Ref ref) {
                 reverseTransitionDuration: const Duration(milliseconds: 180),
               );
             },
+          ),
+          GoRoute(
+            path: '/youtube/login',
+            builder: (context, state) => const YoutubeLoginScreen(),
           ),
           GoRoute(
             path: '/settings',

@@ -1,24 +1,45 @@
-/// Abstraction over the playback backend (default: media_kit) for testability.
+/// Abstraction over playback backends: [MediaKitPlayerEngine] (default) and [YouTubePlayerEngine].
 library;
 
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart' as mk;
+import 'package:media_kit_video/media_kit_video.dart';
 
-/// Contract implemented by [MediaKitPlayerEngine] in production and fakes in tests.
+import 'package:enjoy_player/features/player/domain/playable_source.dart';
+
+/// Contract implemented by [MediaKitPlayerEngine] / [YouTubePlayerEngine]; fakes in tests.
 abstract class PlayerEngine {
-  /// Underlying native player (needed for [VideoController] binding).
-  mk.Player get player;
-
   Stream<Duration> get position;
+
   Stream<Duration> get duration;
+
   Stream<bool> get playing;
+
   Stream<bool> get buffering;
-  Stream<mk.Tracks> get tracks;
 
-  Future<void> openUri(String uri);
+  /// libmpv / media_kit subtitle tracks; `null` when unsupported (e.g. WebView).
+  Stream<mk.Tracks>? get mkTracksStream;
 
-  /// Turns off libmpv / player subtitle output; transcripts use in-app UI only.
+  /// Whether [screenshot] can produce stored video thumbnails (false for WebView).
+  bool get supportsVideoPosterCapture;
+
+  /// Current transport flags for seeding [StreamProvider]s.
+  ({bool playing, bool buffering}) get transportSnapshot;
+
+  /// Display aspect ratio for letterboxing (width / height).
+  Stream<double> get videoAspectRatioStream;
+
+  Widget buildVideoStage({
+    required BuildContext context,
+    required double maxWidth,
+    required double maxHeight,
+  });
+
+  Future<void> open(PlayableSource source);
+
   Future<void> disableRenderedSubtitles();
 
   Future<void> seek(Duration target);
@@ -39,17 +60,42 @@ abstract class PlayerEngine {
   /// Encoded frame capture (`image/jpeg`, `image/png`, or raw when [format] is null).
   Future<Uint8List?> screenshot({String? format});
 
+  /// Ensures video texture binding before decode on Windows (media_kit only).
+  void warmVideoSurface();
+
   Future<void> dispose();
 }
 
-/// Single [mk.Player] instance — ADR-0003.
+double aspectRatioFromVideoParams(mk.VideoParams vp, mk.PlayerState state) {
+  if (vp.aspect != null && vp.aspect! > 0) {
+    return vp.aspect!;
+  }
+  final ww = vp.dw ?? vp.w ?? state.width;
+  final hh = vp.dh ?? vp.h ?? state.height;
+  if (ww != null && hh != null && ww > 0 && hh > 0) {
+    return ww / hh;
+  }
+  return 16 / 9;
+}
+
+/// Single [mk.Player] instance — ADR-0003 / ADR-0015.
 class MediaKitPlayerEngine implements PlayerEngine {
   MediaKitPlayerEngine() : _player = mk.Player();
 
   final mk.Player _player;
+  VideoController? _videoController;
 
-  @override
   mk.Player get player => _player;
+
+  VideoController get videoController {
+    return _videoController ??= VideoController(
+      _player,
+      configuration:
+          Platform.isWindows
+              ? const VideoControllerConfiguration(width: 1920, height: 1080)
+              : const VideoControllerConfiguration(),
+    );
+  }
 
   @override
   Stream<Duration> get position => _player.stream.position;
@@ -64,10 +110,79 @@ class MediaKitPlayerEngine implements PlayerEngine {
   Stream<bool> get buffering => _player.stream.buffering;
 
   @override
-  Stream<mk.Tracks> get tracks => _player.stream.tracks;
+  Stream<mk.Tracks>? get mkTracksStream => _player.stream.tracks;
 
   @override
-  Future<void> openUri(String uri) => _player.open(mk.Media(uri));
+  bool get supportsVideoPosterCapture => true;
+
+  @override
+  ({bool playing, bool buffering}) get transportSnapshot =>
+      (playing: _player.state.playing, buffering: _player.state.buffering);
+
+  @override
+  Stream<double> get videoAspectRatioStream =>
+      _player.stream.videoParams
+          .map((vp) => aspectRatioFromVideoParams(vp, _player.state))
+          .distinct((a, b) => (a - b).abs() < 0.0001);
+
+  @override
+  Widget buildVideoStage({
+    required BuildContext context,
+    required double maxWidth,
+    required double maxHeight,
+  }) {
+    final controller = videoController;
+    if (maxWidth <= 0 || maxHeight <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    return StreamBuilder<double>(
+      stream: videoAspectRatioStream,
+      initialData: aspectRatioFromVideoParams(
+        _player.state.videoParams,
+        _player.state,
+      ),
+      builder: (context, snapshot) {
+        final ar = (snapshot.data ?? (16 / 9)).clamp(0.001, 1000.0);
+        final w = maxWidth;
+        final h = w / ar;
+
+        return ClipRect(
+          child: Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: w,
+              height: h,
+              child: ExcludeSemantics(
+                child: Video(
+                  controller: controller,
+                  controls: null,
+                  width: w,
+                  height: h,
+                  fit: BoxFit.contain,
+                  fill: Colors.black,
+                  subtitleViewConfiguration: const SubtitleViewConfiguration(
+                    visible: false,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> open(PlayableSource source) async {
+    final uri = switch (source) {
+      LocalFilePlayableSource(:final uri) => uri,
+      RemoteUrlPlayableSource(:final uri) => uri,
+      YoutubePlayableSource() =>
+        throw UnsupportedError('MediaKitPlayerEngine cannot open YouTube'),
+    };
+    await _player.open(mk.Media(uri));
+  }
 
   @override
   Future<void> disableRenderedSubtitles() =>
@@ -100,5 +215,14 @@ class MediaKitPlayerEngine implements PlayerEngine {
       _player.screenshot(format: format);
 
   @override
-  Future<void> dispose() => _player.dispose();
+  void warmVideoSurface() {
+    if (Platform.isWindows) {
+      videoController;
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _player.dispose();
+  }
 }

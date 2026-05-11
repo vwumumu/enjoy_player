@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/l10n/app_localizations.dart';
+
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
+import 'package:enjoy_player/features/transcript/application/video_row_for_media_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_repository_provider.dart';
 import 'package:enjoy_player/features/transcript/presentation/import_subtitle_language_dialog.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_empty_state.dart';
@@ -57,6 +59,12 @@ class TranscriptPanel extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final linesAsync = ref.watch(transcriptLinesForMediaProvider(mediaId));
 
+    final videoRowAsync = ref.watch(videoRowForMediaProvider(mediaId));
+    final hideLocalImport = videoRowAsync.maybeWhen(
+      data: (row) => row?.provider == 'youtube',
+      orElse: () => false,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -66,6 +74,7 @@ class TranscriptPanel extends ConsumerWidget {
               if (lines.isEmpty) {
                 return TranscriptEmptyState(
                   onImport: () => _import(context, ref),
+                  showImportButton: !hideLocalImport,
                 );
               }
               return TranscriptScrollableList(mediaId: mediaId, lines: lines);

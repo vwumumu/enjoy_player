@@ -76,9 +76,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               EditorialHeader(
                 title: l10n.libraryTitle,
                 trailing: FilledButton.icon(
-                  onPressed: () => importMediaFromPicker(context, ref),
+                  onPressed: () => showImportChooser(context, ref),
                   icon: const Icon(Icons.add_rounded, size: 18),
-                  label: Text(l10n.actionOpenFiles),
+                  label: Text(l10n.actionImport),
                 ),
               ),
 
@@ -242,6 +242,8 @@ class _AudioRow extends ConsumerWidget {
       title: media.title,
       subtitle: dur,
       badge: media.language,
+      providerBadge:
+          media.provider == 'youtube' ? l10n.youtubeBadge : null,
       thumbnailFile: thumb,
       thumbnailNetworkUrl: netThumb,
       coverSeed: media.coverSeed,
@@ -309,6 +311,8 @@ class _VideoTile extends ConsumerWidget {
       title: media.title,
       subtitle: '${l10n.miniPlayerMediaVideo} · $dur',
       thumbnailFile: thumb,
+      providerBadge:
+          media.provider == 'youtube' ? l10n.youtubeBadge : null,
       thumbnailNetworkUrl: netThumb,
       coverSeed: media.coverSeed,
       isVideo: true,

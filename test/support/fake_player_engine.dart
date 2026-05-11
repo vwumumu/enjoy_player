@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart' as mk;
 
+import 'package:enjoy_player/features/player/domain/playable_source.dart';
 import 'package:enjoy_player/features/player/application/player_engine.dart';
 
-/// Test double with controllable streams (tracks never emits — avoids embedded extract).
+/// Test double with controllable streams ([mkTracksStream] is null — no embedded extract).
 class FakePlayerEngine implements PlayerEngine {
   FakePlayerEngine();
-
-  mk.Player? _playerInstance;
 
   final StreamController<Duration> _position =
       StreamController<Duration>.broadcast();
@@ -24,10 +24,8 @@ class FakePlayerEngine implements PlayerEngine {
   final List<Duration> seekCalls = <Duration>[];
   int screenshotCalls = 0;
 
-  /// Returned by [screenshot]; defaults to null (simulate failure / no frame).
   Uint8List? screenshotReturnValue;
 
-  /// Optional hook to stall [openUri] (re-entrancy tests).
   Future<void> Function()? openDelay;
 
   double lastVolume = -1;
@@ -42,9 +40,6 @@ class FakePlayerEngine implements PlayerEngine {
   }
 
   @override
-  mk.Player get player => _playerInstance ??= mk.Player();
-
-  @override
   Stream<Duration> get position => _position.stream;
 
   @override
@@ -57,13 +52,40 @@ class FakePlayerEngine implements PlayerEngine {
   Stream<bool> get buffering => _buffering.stream;
 
   @override
-  Stream<mk.Tracks> get tracks async* {
-    // Intentionally never emits so [EmbeddedTrackSync] stays idle in unit tests.
+  Stream<mk.Tracks>? get mkTracksStream => null;
+
+  @override
+  bool get supportsVideoPosterCapture => true;
+
+  @override
+  ({bool playing, bool buffering}) get transportSnapshot =>
+      (playing: false, buffering: false);
+
+  @override
+  Stream<double> get videoAspectRatioStream => Stream<double>.value(16 / 9);
+
+  @override
+  Widget buildVideoStage({
+    required BuildContext context,
+    required double maxWidth,
+    required double maxHeight,
+  }) =>
+      const SizedBox.shrink();
+
+  void _recordUriFromSource(PlayableSource source) {
+    switch (source) {
+      case LocalFilePlayableSource(:final uri):
+        openUris.add(uri);
+      case RemoteUrlPlayableSource(:final uri):
+        openUris.add(uri);
+      case YoutubePlayableSource(:final videoId):
+        openUris.add('youtube:$videoId');
+    }
   }
 
   @override
-  Future<void> openUri(String uri) async {
-    openUris.add(uri);
+  Future<void> open(PlayableSource source) async {
+    _recordUriFromSource(source);
     final delay = openDelay;
     if (delay != null) await delay();
   }
@@ -105,12 +127,13 @@ class FakePlayerEngine implements PlayerEngine {
   }
 
   @override
+  void warmVideoSurface() {}
+
+  @override
   Future<void> dispose() async {
     await _position.close();
     await _duration.close();
     await _playing.close();
     await _buffering.close();
-    await _playerInstance?.dispose();
-    _playerInstance = null;
   }
 }

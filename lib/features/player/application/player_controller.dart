@@ -5,7 +5,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cross_file/cross_file.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
@@ -14,6 +13,7 @@ import 'package:enjoy_player/core/utils/local_thumbnail.dart';
 import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
+import 'package:enjoy_player/data/db/media_target_resolver.dart';
 import 'package:enjoy_player/data/files/video_poster_extract.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
@@ -22,13 +22,16 @@ import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/player/domain/echo_window.dart';
 import 'package:enjoy_player/features/player/domain/media_relocate_exception.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
+import 'package:enjoy_player/features/player/domain/playable_source.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
+import 'package:enjoy_player/features/player/application/engines/youtube/youtube_player_engine.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_repository_provider.dart';
 import 'open_media_provider.dart';
 import 'playback_session_persister.dart';
 import 'player_engine.dart';
-import 'player_engine_provider.dart';
+import 'player_engine_rev.dart';
+import 'player_engine_test_double_provider.dart';
 import 'player_preferences_provider.dart';
 
 part 'player_controller.g.dart';
@@ -37,7 +40,17 @@ final _logPosterCapture = logNamed('VideoPosterCapture');
 
 @Riverpod(keepAlive: true)
 class PlayerController extends _$PlayerController {
-  VideoController? _videoController;
+  /// Real engine (null until first open, or [PlayerEngine] tests override).
+  PlayerEngine? _ownedEngine;
+
+  /// Active playback backend: test double, or lazily created [MediaKitPlayerEngine] / [YoutubePlayerEngine].
+  PlayerEngine get _activeEngine {
+    final testDouble = ref.read(playerEngineTestDoubleProvider);
+    if (testDouble != null) return testDouble;
+    _ownedEngine ??= MediaKitPlayerEngine();
+    return _ownedEngine!;
+  }
+
   StreamSubscription<Duration>? _positionSub;
   StreamSubscription<Duration>? _durationSub;
 
@@ -47,24 +60,10 @@ class PlayerController extends _$PlayerController {
   /// Incremented on each [openMedia] call; stale async work bails out.
   int _openGeneration = 0;
 
-  PlayerEngine get engine => ref.read(playerEngineProvider);
-
-  /// Bound to [engine.player]; created once (ADR-0003).
-  VideoController get videoController {
-    final e = engine;
-    return _videoController ??= VideoController(
-      e.player,
-      configuration:
-          Platform.isWindows
-              ? const VideoControllerConfiguration(width: 1920, height: 1080)
-              : const VideoControllerConfiguration(),
-    );
-  }
+  PlayerEngine get engine => _activeEngine;
 
   @override
   PlaybackSession? build() {
-    ref.watch(playerEngineProvider);
-
     final persister = ref.read(playbackSessionPersisterProvider);
 
     ref.onDispose(() async {
@@ -73,16 +72,25 @@ class PlayerController extends _$PlayerController {
       await _durationSub?.cancel();
       _positionSub = null;
       _durationSub = null;
+      await _ownedEngine?.dispose();
     });
     return null;
   }
 
-  bool _localUriPlayable(String? uri) {
-    if (uri == null || uri.isEmpty) return false;
-    try {
-      return File.fromUri(Uri.parse(uri)).existsSync();
-    } on Object {
-      return false;
+  Future<void> _ensureEngineForSource(PlayableSource source) async {
+    if (ref.read(playerEngineTestDoubleProvider) != null) return;
+    final wantYt = source is YoutubePlayableSource;
+    final haveYt = _ownedEngine is YoutubePlayerEngine;
+    if (wantYt && !haveYt) {
+      await _ownedEngine?.dispose();
+      _ownedEngine = YoutubePlayerEngine();
+      ref.read(playerEngineRevProvider.notifier).bump();
+      return;
+    }
+    if (!wantYt && haveYt) {
+      await _ownedEngine?.dispose();
+      _ownedEngine = MediaKitPlayerEngine();
+      ref.read(playerEngineRevProvider.notifier).bump();
     }
   }
 
@@ -109,28 +117,23 @@ class PlayerController extends _$PlayerController {
     final dexie = kind.dexieTargetType;
     final title = video?.title ?? audio!.title;
 
-    final netUri = video?.mediaUrl ?? audio?.mediaUrl;
-    final String sourceUri;
-    if (netUri != null && netUri.isNotEmpty) {
-      sourceUri = netUri;
-    } else {
-      final local = video?.localUri ?? audio?.localUri;
-      if (_localUriPlayable(local)) {
-        sourceUri = local!;
-      } else {
-        final fingerprint = video?.md5 ?? audio?.md5;
-        if (fingerprint != null && fingerprint.isNotEmpty) {
-          throw MediaNeedsRelocateException(
-            mediaId: mediaId,
-            kind: kind,
-            title: title,
-            expectedHash: fingerprint,
-            expectedSize: video?.size ?? audio?.size,
-          );
-        }
-        sourceUri = '';
+    final playable = await resolvePlayableSource(db, mediaId);
+    if (playable == null) {
+      final fingerprint = video?.md5 ?? audio?.md5;
+      if (fingerprint != null && fingerprint.isNotEmpty) {
+        throw MediaNeedsRelocateException(
+          mediaId: mediaId,
+          kind: kind,
+          title: title,
+          expectedHash: fingerprint,
+          expectedSize: video?.size ?? audio?.size,
+        );
       }
+      return;
     }
+
+    await _ensureEngineForSource(playable);
+
     final thumb = video?.thumbnailUrl ?? audio?.thumbnailUrl;
     final language = video?.language ?? audio!.language;
     final durationSec = video?.durationSeconds ?? audio!.durationSeconds;
@@ -138,9 +141,9 @@ class PlayerController extends _$PlayerController {
     // Bind video output before first decode on Windows (see media_kit_video notes).
     // Audio-only paths skip this so unit tests and headless runs avoid native libmpv.
     if (kind == MediaKind.video &&
-        engine is MediaKitPlayerEngine &&
+        _activeEngine is MediaKitPlayerEngine &&
         Platform.isWindows) {
-      videoController;
+      (_activeEngine as MediaKitPlayerEngine).warmVideoSurface();
     }
 
     await _positionSub?.cancel();
@@ -148,10 +151,10 @@ class PlayerController extends _$PlayerController {
     _positionSub = null;
     _durationSub = null;
 
-    await engine.openUri(sourceUri);
+    await _activeEngine.open(playable);
     if (gen != _openGeneration) return;
 
-    await engine.disableRenderedSubtitles();
+    await _activeEngine.disableRenderedSubtitles();
     if (gen != _openGeneration) return;
 
     unawaited(
@@ -174,7 +177,7 @@ class PlayerController extends _$PlayerController {
     final persisted = await db.echoSessionDao.getLatestForTarget(dexie, mediaId);
     final posMs = persisted?.currentTimeMs ?? 0;
     if (posMs > 0) {
-      await engine.seek(Duration(milliseconds: posMs));
+      await _activeEngine.seek(Duration(milliseconds: posMs));
     }
     if (gen != _openGeneration) return;
 
@@ -215,7 +218,9 @@ class PlayerController extends _$PlayerController {
       gen: gen,
     );
 
-    if (kind == MediaKind.video && video != null) {
+    if (kind == MediaKind.video &&
+        video != null &&
+        _activeEngine.supportsVideoPosterCapture) {
       _scheduleVideoPosterCapture(
         mediaId: mediaId,
         video: video,
@@ -270,13 +275,13 @@ class PlayerController extends _$PlayerController {
       final needSeekToPoster = restoredPositionMs == 0 && posterMs > 0;
       if (needSeekToPoster) {
         soughtForPoster = true;
-        await engine.seek(Duration(milliseconds: posterMs));
+        await _activeEngine.seek(Duration(milliseconds: posterMs));
         await Future<void>.delayed(const Duration(milliseconds: 350));
         if (gen != _openGeneration) return;
         if (state?.mediaId != mediaId) return;
       }
 
-      final bytes = await engine.screenshot(format: 'image/jpeg');
+      final bytes = await _activeEngine.screenshot(format: 'image/jpeg');
       if (bytes == null || bytes.isEmpty) return;
       if (gen != _openGeneration) return;
 
@@ -302,7 +307,7 @@ class PlayerController extends _$PlayerController {
     } finally {
       if (soughtForPoster && gen == _openGeneration) {
         try {
-          await engine.seek(Duration.zero);
+          await _activeEngine.seek(Duration.zero);
         } on Object {
           // Best-effort restore start position after poster sampling seek.
         }
@@ -324,7 +329,7 @@ class PlayerController extends _$PlayerController {
     // listeners and can overwhelm the Windows semantics bridge — same motivation
     // as [displayPositionProvider]'s 200ms quantization.
     const positionBucketMs = 400;
-    _positionSub = engine.position.listen((pos) {
+    _positionSub = _activeEngine.position.listen((pos) {
       if (gen != _openGeneration) return;
       final seconds = pos.inMilliseconds / 1000.0;
       unawaited(_applyEcho(seconds));
@@ -352,7 +357,7 @@ class PlayerController extends _$PlayerController {
       }
     });
 
-    _durationSub = engine.duration.listen((d) async {
+    _durationSub = _activeEngine.duration.listen((d) async {
       if (gen != _openGeneration) return;
       if (d <= Duration.zero) return;
       final newSec = d.inMilliseconds / 1000.0;
@@ -397,12 +402,12 @@ class PlayerController extends _$PlayerController {
       case EchoOk():
         return;
       case EchoClamp(:final timeSeconds):
-        await engine.seek(
+        await _activeEngine.seek(
           Duration(milliseconds: (timeSeconds * 1000).round()),
         );
       case EchoPauseAndRewind(:final timeSeconds):
-        await engine.pause();
-        await engine.seek(
+        await _activeEngine.pause();
+        await _activeEngine.seek(
           Duration(milliseconds: (timeSeconds * 1000).round()),
         );
     }
@@ -432,7 +437,7 @@ class PlayerController extends _$PlayerController {
         seconds = clampSeekTimeToEchoWindow(seconds, window);
       }
     }
-    await engine.seek(Duration(milliseconds: (seconds * 1000).round()));
+    await _activeEngine.seek(Duration(milliseconds: (seconds * 1000).round()));
   }
 
   Future<void> seekToSeconds(
@@ -446,11 +451,11 @@ class PlayerController extends _$PlayerController {
   }
 
   Future<void> togglePlay() async {
-    await engine.playOrPause();
+    await _activeEngine.playOrPause();
   }
 
   Future<void> play() async {
-    await engine.play();
+    await _activeEngine.play();
   }
 
   Future<void> clear() async {
@@ -460,7 +465,7 @@ class PlayerController extends _$PlayerController {
     _positionSub = null;
     _durationSub = null;
     _lastPositionEmitBucket = null;
-    await engine.stop();
+    await _activeEngine.stop();
     ref.read(echoModeProvider.notifier).deactivate();
     state = null;
   }

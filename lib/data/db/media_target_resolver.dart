@@ -3,6 +3,8 @@ library;
 
 import 'dart:io';
 
+import 'package:enjoy_player/features/player/domain/playable_source.dart';
+
 import 'app_database.dart';
 
 Future<String?> dexieTargetTypeForId(AppDatabase db, String id) async {
@@ -20,11 +22,36 @@ bool _localUriPlayable(String? uri) {
   }
 }
 
+/// Same resolution as [PlayerController.openMedia] — returns structured source.
+Future<PlayableSource?> resolvePlayableSource(AppDatabase db, String mediaId) async {
+  final video = await db.videoDao.getById(mediaId);
+  final audio = video == null ? await db.audioDao.getById(mediaId) : null;
+  if (video == null && audio == null) return null;
+
+  if (video != null && video.provider == 'youtube') {
+    return YoutubePlayableSource(video.vid);
+  }
+
+  final netUri = video?.mediaUrl ?? audio?.mediaUrl;
+  if (netUri != null && netUri.isNotEmpty) {
+    return RemoteUrlPlayableSource(netUri);
+  }
+  final local = video?.localUri ?? audio?.localUri;
+  if (_localUriPlayable(local)) {
+    return LocalFilePlayableSource(local!);
+  }
+  return null;
+}
+
 /// Same resolution as [PlayerController.openMedia] — for subtitle extraction, etc.
 Future<String?> resolvePlayableSourceUri(AppDatabase db, String mediaId) async {
   final video = await db.videoDao.getById(mediaId);
   final audio = video == null ? await db.audioDao.getById(mediaId) : null;
   if (video == null && audio == null) return null;
+
+  if (video?.provider == 'youtube') {
+    return null;
+  }
 
   final netUri = video?.mediaUrl ?? audio?.mediaUrl;
   if (netUri != null && netUri.isNotEmpty) {

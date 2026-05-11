@@ -52,8 +52,8 @@ class HomeScreen extends ConsumerWidget {
                     icon: Icons.collections_bookmark_rounded,
                     title: l10n.homeEmptyTitle,
                     subtitle: l10n.homeEmptyHint,
-                    action: () => importMediaFromPicker(context, ref),
-                    actionLabel: l10n.actionOpenFiles,
+                      action: () => showImportChooser(context, ref),
+                      actionLabel: l10n.actionImport,
                   );
                 }
 
@@ -64,9 +64,9 @@ class HomeScreen extends ConsumerWidget {
                       child: EditorialHeader(
                         title: l10n.homeTitle,
                         trailing: FilledButton.icon(
-                          onPressed: () => importMediaFromPicker(context, ref),
+                          onPressed: () => showImportChooser(context, ref),
                           icon: const Icon(Icons.add_rounded, size: 18),
-                          label: Text(l10n.actionOpenFiles),
+                          label: Text(l10n.actionImport),
                         ),
                       ),
                     ),
@@ -232,6 +232,8 @@ class _HomeMediaTile extends ConsumerWidget {
       subtitle:
           '${isVideo ? l10n.miniPlayerMediaVideo : l10n.miniPlayerMediaAudio} · $dur',
       thumbnailFile: thumb,
+      providerBadge:
+          media.provider == 'youtube' ? l10n.youtubeBadge : null,
       thumbnailNetworkUrl: netThumb,
       coverSeed: media.coverSeed,
       isVideo: isVideo,

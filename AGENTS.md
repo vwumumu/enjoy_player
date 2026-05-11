@@ -11,14 +11,14 @@ Guidance for humans and AI coding agents working in this repository.
 
 ## Hard rules
 
-- **Single playback engine**: Only [`PlayerController`](lib/features/player/application/player_controller.dart) may own a `media_kit` `Player`. Never instantiate `Player()` elsewhere (ADR-0003).
+- **Single `media_kit` player**: Only [`MediaKitPlayerEngine`](lib/features/player/application/player_engine.dart) / [`PlayerController`](lib/features/player/application/player_controller.dart) may own a `media_kit` `Player`. Never instantiate `Player()` elsewhere (ADR-0003, ADR-0015). YouTube uses `flutter_inappwebview`, not `media_kit`.
 - **No `print()`**: Use [`Log.named`](lib/core/logging/log.dart) or `package:logging`.
 - **Persistence**: All SQLite access goes through Drift [`AppDatabase`](lib/data/db/app_database.dart) DAOs — no raw SQL in UI/feature widgets (ADR-0002).
 - **Documentation hygiene**: Architectural decisions → new ADR in [`docs/decisions/`](docs/decisions/). Feature behavior changes → update [`docs/features/<feature>.md`](docs/features/).
 
 ## MVP scope
 
-Local audio/video files only, transcripts via `.srt`/`.vtt`, echo (shadow-reading) mode. **Metadata sync** (local-first queue + optional Cloud index + per-target recording pulls) when signed in ([ADR-0010](docs/decisions/0010-cloud-sync-mvp.md), [ADR-0013](docs/decisions/0013-local-first-sync.md)). YouTube / URL streaming / **media file uploads** are **out of scope** until ADR supersession (see ADR-0005 / ADR-0010).
+Local audio/video files, **YouTube imports** (watch page WebView; transcripts via Enjoy API after sync), transcripts via `.srt`/`.vtt` for local files, echo (shadow-reading) mode. **Metadata sync** (local-first queue + optional Cloud index + per-target recording pulls) when signed in ([ADR-0010](docs/decisions/0010-cloud-sync-mvp.md), [ADR-0013](docs/decisions/0013-local-first-sync.md)). Arbitrary URL streaming beyond `mediaUrl` / YouTube and **media file uploads** remain out of scope unless superseded ([ADR-0005](docs/decisions/0005-mvp-scope-local-only.md), [ADR-0015](docs/decisions/0015-youtube-playback.md)).
 
 ## Codegen
 

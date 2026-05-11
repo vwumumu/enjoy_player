@@ -40,6 +40,7 @@ class Media {
     required this.fileSize,
     this.mediaUrl,
     this.source,
+    this.provider = 'user',
     required this.createdAt,
     required this.updatedAt,
   });
@@ -55,6 +56,9 @@ class Media {
   final int fileSize;
   final String? mediaUrl;
   final String? source;
+
+  /// Row `provider` — e.g. `user`, `youtube`.
+  final String provider;
   final DateTime createdAt;
   final DateTime updatedAt;
 

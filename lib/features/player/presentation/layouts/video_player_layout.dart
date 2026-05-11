@@ -4,20 +4,19 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/features/player/application/player_engine.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class VideoPlayerLayout extends StatefulWidget {
   const VideoPlayerLayout({
-    required this.controller,
+    required this.engine,
     required this.transcript,
     super.key,
   });
 
-  final VideoController controller;
+  final PlayerEngine engine;
   final Widget transcript;
 
   @override
@@ -82,15 +81,14 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Pure black video stage — cinema-standard letterboxing.
               SizedBox(
                 width: vw,
                 child: ColoredBox(
                   color: Colors.black,
                   child: LayoutBuilder(
                     builder: (context, c) {
-                      return _VideoWidthAspectViewport(
-                        controller: widget.controller,
+                      return widget.engine.buildVideoStage(
+                        context: context,
                         maxWidth: c.maxWidth,
                         maxHeight: c.maxHeight,
                       );
@@ -106,7 +104,6 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
                     AppLocalizations.of(context)!.playerTranscriptResizeHint,
                 onDragDelta: (dx) => _applyDragDelta(total, dx),
               ),
-              // Transcript panel — theme surface (ADR-0008); hairline vs video stage.
               SizedBox(
                 width: tw,
                 child: DecoratedBox(
@@ -126,8 +123,6 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
           );
         }
 
-        // Narrow layout: 16:9 video (AppBar floats over it via extendBodyBehindAppBar),
-        // transcript fills the remaining space below.
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -138,8 +133,8 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
                 color: Colors.black,
                 child: LayoutBuilder(
                   builder: (context, c) {
-                    return _VideoWidthAspectViewport(
-                      controller: widget.controller,
+                    return widget.engine.buildVideoStage(
+                      context: context,
                       maxWidth: c.maxWidth,
                       maxHeight: c.maxHeight,
                     );
@@ -154,79 +149,6 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
               ),
             ),
           ],
-        );
-      },
-    );
-  }
-}
-
-/// Full zone width, native display aspect ratio, [BoxFit.contain] — no stretch.
-/// Taller-than-zone frames are letterboxed with pure black.
-class _VideoWidthAspectViewport extends StatelessWidget {
-  const _VideoWidthAspectViewport({
-    required this.controller,
-    required this.maxWidth,
-    required this.maxHeight,
-  });
-
-  final VideoController controller;
-  final double maxWidth;
-  final double maxHeight;
-
-  static double _aspectRatio(VideoParams vp, PlayerState state) {
-    if (vp.aspect != null && vp.aspect! > 0) {
-      return vp.aspect!;
-    }
-    final ww = vp.dw ?? vp.w ?? state.width;
-    final hh = vp.dh ?? vp.h ?? state.height;
-    if (ww != null && hh != null && ww > 0 && hh > 0) {
-      return ww / hh;
-    }
-    return 16 / 9;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (maxWidth <= 0 || maxHeight <= 0) {
-      return const SizedBox.shrink();
-    }
-
-    return StreamBuilder<double>(
-      // Avoid rebuilding this subtree for every raw videoParams tick.
-      // On Windows this can overwhelm the accessibility bridge.
-      stream: controller.player.stream.videoParams
-          .map((vp) => _aspectRatio(vp, controller.player.state))
-          .distinct((a, b) => (a - b).abs() < 0.0001),
-      initialData: _aspectRatio(
-        controller.player.state.videoParams,
-        controller.player.state,
-      ),
-      builder: (context, snapshot) {
-        final ar = (snapshot.data ?? (16 / 9)).clamp(0.001, 1000.0);
-        final w = maxWidth;
-        final h = w / ar;
-
-        return ClipRect(
-          child: Align(
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: w,
-              height: h,
-              child: ExcludeSemantics(
-                child: Video(
-                  controller: controller,
-                  controls: null,
-                  width: w,
-                  height: h,
-                  fit: BoxFit.contain,
-                  fill: Colors.black,
-                  subtitleViewConfiguration: const SubtitleViewConfiguration(
-                    visible: false,
-                  ),
-                ),
-              ),
-            ),
-          ),
         );
       },
     );

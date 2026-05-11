@@ -27,6 +27,7 @@ class MediaCardTile extends StatefulWidget {
     this.accentColor,
     this.onDelete,
     this.deleteTooltip,
+    this.providerBadge,
   });
 
   final String title;
@@ -47,6 +48,9 @@ class MediaCardTile extends StatefulWidget {
 
   /// Tooltip for [onDelete]; ignored when [onDelete] is null.
   final String? deleteTooltip;
+
+  /// e.g. "YouTube" — top-left on artwork.
+  final String? providerBadge;
 
   @override
   State<MediaCardTile> createState() => _MediaCardTileState();
@@ -115,6 +119,15 @@ class _MediaCardTileState extends State<MediaCardTile> {
                         isVideo: widget.isVideo,
                         cs: cs,
                       ),
+                      if (widget.providerBadge != null &&
+                          widget.providerBadge!.isNotEmpty)
+                        Positioned(
+                          top: t.space8,
+                          left: t.space8,
+                          child: _ProviderBadgePill(
+                            label: widget.providerBadge!,
+                          ),
+                        ),
                       // Cinematic bottom scrim + play affordance for video
                       if (widget.isVideo)
                         Positioned(
@@ -244,6 +257,7 @@ class MediaCardRow extends StatefulWidget {
     this.coverSeed,
     this.subtitle,
     this.badge,
+    this.providerBadge,
     this.isVideo = false,
     this.accentColor,
     this.trailing,
@@ -258,6 +272,9 @@ class MediaCardRow extends StatefulWidget {
   final String? coverSeed;
   final String? subtitle;
   final String? badge;
+
+  /// Source label on thumbnail (e.g. YouTube).
+  final String? providerBadge;
   final bool isVideo;
   final Color? accentColor;
   final Widget? trailing;
@@ -354,12 +371,27 @@ class _MediaCardRowState extends State<MediaCardRow> {
                   child: SizedBox(
                     width: 56,
                     height: 56,
-                    child: _Thumbnail(
-                      file: widget.thumbnailFile,
-                      networkUrl: widget.thumbnailNetworkUrl,
-                      coverSeed: widget.coverSeed,
-                      isVideo: widget.isVideo,
-                      cs: cs,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        _Thumbnail(
+                          file: widget.thumbnailFile,
+                          networkUrl: widget.thumbnailNetworkUrl,
+                          coverSeed: widget.coverSeed,
+                          isVideo: widget.isVideo,
+                          cs: cs,
+                        ),
+                        if (widget.providerBadge != null &&
+                            widget.providerBadge!.isNotEmpty)
+                          Positioned(
+                            top: 4,
+                            left: 4,
+                            child: _ProviderBadgePill(
+                              label: widget.providerBadge!,
+                              compact: true,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -500,6 +532,38 @@ class _Badge extends StatelessWidget {
         style: Theme.of(
           context,
         ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+      ),
+    );
+  }
+}
+
+class _ProviderBadgePill extends StatelessWidget {
+  const _ProviderBadgePill({
+    required this.label,
+    this.compact = false,
+  });
+
+  final String label;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 5 : 8,
+        vertical: compact ? 2 : 3,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE62117).withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: compact ? 9 : 11,
+        ),
       ),
     );
   }

@@ -20,6 +20,7 @@ import '../../player/application/player_engine_provider.dart';
 import '../application/active_transcript_provider.dart';
 import '../application/all_transcripts_provider.dart';
 import '../application/transcript_repository_provider.dart';
+import '../application/video_row_for_media_provider.dart';
 import '../domain/transcript_track.dart';
 
 /// Horizontal inset aligned with section headers and list rows.
@@ -153,16 +154,18 @@ class _SubtitleTrackPickerSheetState
         return;
       }
 
-      final engine = ref.read(playerEngineProvider);
+      final tracksStream = ref.read(playerEngineProvider).mkTracksStream;
       var playerSubs = <mk.SubtitleTrack>[];
-      try {
-        final t = await engine.tracks
-            .firstWhere((e) => e.subtitle.isNotEmpty)
-            .timeout(const Duration(seconds: 2));
-        playerSubs = t.subtitle;
-      } on TimeoutException {
-        // media_kit may not list subtitles until metadata is ready — ffmpeg probe
-        // in [TranscriptRepository.extractEmbeddedTracks] still runs.
+      if (tracksStream != null) {
+        try {
+          final t = await tracksStream
+              .firstWhere((e) => e.subtitle.isNotEmpty)
+              .timeout(const Duration(seconds: 2));
+          playerSubs = t.subtitle;
+        } on TimeoutException {
+          // media_kit may not list subtitles until metadata is ready — ffmpeg probe
+          // in [TranscriptRepository.extractEmbeddedTracks] still runs.
+        }
       }
 
       final count = await ref.read(transcriptRepositoryProvider).extractEmbeddedTracks(
@@ -236,6 +239,7 @@ class _SubtitleTrackPickerSheetState
     required String? primaryId,
     required String? secondaryId,
     required bool showExtractEmbedded,
+    required bool showImportFile,
   }) {
     final theme = Theme.of(context);
 
@@ -341,27 +345,28 @@ class _SubtitleTrackPickerSheetState
           enabled: !_refreshingCloud,
           onTap: _refreshingCloud ? null : _refreshCloud,
         ),
-        ListTile(
-          contentPadding: _sheetRowPadding(t),
-          leading:
-              _importing
-                  ? SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: theme.colorScheme.primary,
+        if (showImportFile)
+          ListTile(
+            contentPadding: _sheetRowPadding(t),
+            leading:
+                _importing
+                    ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.primary,
+                      ),
+                    )
+                    : Icon(
+                      Icons.upload_file_rounded,
+                      size: 24,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                  )
-                  : Icon(
-                    Icons.upload_file_rounded,
-                    size: 24,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-          title: Text(l10n.subtitlesImportFile),
-          enabled: !_importing,
-          onTap: _importing ? null : _importFile,
-        ),
+            title: Text(l10n.subtitlesImportFile),
+            enabled: !_importing,
+            onTap: _importing ? null : _importFile,
+          ),
       ],
     );
   }
@@ -383,8 +388,15 @@ class _SubtitleTrackPickerSheetState
     final primaryId = primaryIdAsync.value;
     final secondaryId = secondaryIdAsync.value;
     final session = ref.watch(playerControllerProvider);
+    final videoRowAsync = ref.watch(videoRowForMediaProvider(widget.mediaId));
+    final isYoutube = videoRowAsync.maybeWhen(
+      data: (row) => row?.provider == 'youtube',
+      orElse: () => false,
+    );
     final showExtractEmbedded =
-        session != null && session.dexieTargetType == 'Video';
+        session != null &&
+        session.dexieTargetType == 'Video' &&
+        !isYoutube;
 
     return SafeArea(
       child: DraggableScrollableSheet(
@@ -435,6 +447,7 @@ class _SubtitleTrackPickerSheetState
                         primaryId: primaryId,
                         secondaryId: secondaryId,
                         showExtractEmbedded: showExtractEmbedded,
+                        showImportFile: !isYoutube,
                       ),
                   loading:
                       () => ListView(

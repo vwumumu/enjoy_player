@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -121,8 +122,154 @@ Future<void> confirmAndDeleteMedia(
     );
   } catch (_) {
     if (context.mounted) {
+    }
+  }
+}
+
+/// Bottom sheet: choose file import vs YouTube URL.
+Future<void> showImportChooser(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  await showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.folder_open_rounded),
+              title: Text(l10n.importFromFile),
+              onTap: () {
+                Navigator.pop(ctx);
+                unawaited(importMediaFromPicker(context, ref));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.video_library_outlined),
+              title: Text(l10n.importFromYoutube),
+              onTap: () {
+                Navigator.pop(ctx);
+                unawaited(importYoutubeFromDialog(context, ref));
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future<void> importYoutubeFromDialog(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  final controller = TextEditingController();
+
+  final submitted = await showDialog<String>(
+    context: context,
+    builder: (ctx) {
+      final d = AppLocalizations.of(ctx)!;
+      return AlertDialog(
+        title: Text(d.youtubeImportTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  hintText: d.youtubeImportHint,
+                ),
+                autofocus: true,
+                maxLines: 3,
+                minLines: 1,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () async {
+                    final clip = await Clipboard.getData('text/plain');
+                    final t = clip?.text;
+                    if (t != null && t.isNotEmpty) {
+                      controller.text = t;
+                    }
+                  },
+                  icon: const Icon(Icons.paste_rounded, size: 18),
+                  label: Text(d.youtubePasteFromClipboard),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: Text(d.actionImport),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (submitted == null || submitted.isEmpty) return;
+  if (!context.mounted) return;
+
+  unawaited(
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        final d = AppLocalizations.of(dialogContext)!;
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: Row(
+              children: [
+                const SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
+                const SizedBox(width: 24),
+                Expanded(child: Text(d.youtubeImporting)),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+  await Future<void>.delayed(Duration.zero);
+
+  try {
+    final auth = ref.read(authCtrlProvider).valueOrNull;
+    final userId = auth is AuthSignedIn ? auth.profile.id : null;
+    final id = await ref.read(mediaLibraryRepositoryProvider).importYoutubeVideo(
+          submitted,
+          signedInUserId: userId,
+        );
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+    if (context.mounted) {
+      context.push('/player/$id');
+    }
+  } on AppFailure catch (e) {
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.libraryDeleteMediaFailed)),
+        SnackBar(content: Text(e.message)),
+      );
+    }
+  } catch (_) {
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.youtubeImportInvalid)),
       );
     }
   }

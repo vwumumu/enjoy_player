@@ -9,10 +9,14 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 class TranscriptEmptyState extends StatelessWidget {
   const TranscriptEmptyState({
     required this.onImport,
+    this.showImportButton = true,
     super.key,
   });
 
   final VoidCallback onImport;
+
+  /// When false, only cloud/hint copy (e.g. YouTube — no local file to import).
+  final bool showImportButton;
 
   @override
   Widget build(BuildContext context) {
@@ -69,11 +73,13 @@ class TranscriptEmptyState extends StatelessWidget {
                             ),
                       ),
                       SizedBox(height: t.space24),
-                      FilledButton.icon(
-                        onPressed: onImport,
-                        icon: const Icon(Icons.upload_file_rounded),
-                        label: Text(l10n.importSubtitle),
-                      ),
+                      if (showImportButton) ...[
+                        FilledButton.icon(
+                          onPressed: onImport,
+                          icon: const Icon(Icons.upload_file_rounded),
+                          label: Text(l10n.importSubtitle),
+                        ),
+                      ],
                     ],
                   ),
                 ),

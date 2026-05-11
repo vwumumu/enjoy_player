@@ -13,6 +13,8 @@ import 'package:enjoy_player/data/files/ffmpeg_media_probe.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/data/files/media_resolver.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
+import 'package:enjoy_player/features/library/data/youtube_oembed_api.dart';
+import 'package:enjoy_player/features/library/data/youtube_url_parser.dart';
 import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 
 Media _mediaFromVideo(VideoRow row) {
@@ -28,6 +30,7 @@ Media _mediaFromVideo(VideoRow row) {
     fileSize: row.size ?? 0,
     mediaUrl: row.mediaUrl,
     source: row.source,
+    provider: row.provider,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   );
@@ -46,6 +49,7 @@ Media _mediaFromAudio(AudioRow row) {
     fileSize: row.size ?? 0,
     mediaUrl: row.mediaUrl,
     source: row.source,
+    provider: row.provider,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   );
@@ -202,6 +206,53 @@ class MediaLibraryRepository {
     } catch (e, st) {
       Error.throwWithStackTrace(FileFailure('Import failed: $e'), st);
     }
+  }
+
+  /// Imports a YouTube video by pasted URL or bare video id.
+  Future<String> importYoutubeVideo(
+    String rawInput, {
+    String? signedInUserId,
+  }) async {
+    final id = parseYoutubeVideoId(rawInput);
+    if (id == null) {
+      throw const FileFailure('Invalid YouTube URL or video ID.');
+    }
+    final dup = await _db.videoDao.getYoutubeByVid(id);
+    if (dup != null) return dup.id;
+
+    final meta = await fetchYoutubeOembed(id);
+    final title = meta?.title ?? 'YouTube video $id';
+    final thumb = meta?.thumbnailUrl;
+
+    final rowId = enjoyVideoId(provider: 'youtube', vid: id);
+    final now = DateTime.now();
+    final signedIn =
+        signedInUserId != null && signedInUserId.isNotEmpty;
+
+    final row = VideoRow(
+      id: rowId,
+      vid: id,
+      provider: 'youtube',
+      title: title,
+      description: null,
+      thumbnailUrl: thumb,
+      durationSeconds: 0,
+      language: 'und',
+      source: 'youtube',
+      localUri: null,
+      md5: null,
+      size: null,
+      mediaUrl: 'https://www.youtube.com/watch?v=$id',
+      syncStatus: signedIn ? 'pending' : 'local-pending-rekey',
+      serverUpdatedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    );
+    await _db.videoDao.insertRow(row);
+    if (signedIn) {
+      await _enqueueSync?.call(SyncEntityType.video, rowId, SyncAction.create);
+    }
+    return rowId;
   }
 
   /// Fills `duration_seconds` when still zero after import, using `ffmpeg -i`.

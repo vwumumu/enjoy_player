@@ -18,6 +18,7 @@ Maintainers and agents should keep these files **accurate** when behavior or arc
 | [features/ai.md](features/ai.md) | Product + dev | AI worker capabilities, playground, or provider matrix behavior changes |
 | [features/sync.md](features/sync.md) | Product + dev | Cloud metadata sync (library + recordings + queue) behavior changes |
 | [features/cloud.md](features/cloud.md) | Product + dev | Remote media index (add-to-library) behavior changes |
+| [features/youtube.md](features/youtube.md) | Product + dev | YouTube import, WebView playback, login, transcripts behavior changes |
 
 ## How to add an ADR
 

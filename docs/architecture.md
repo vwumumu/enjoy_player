@@ -3,7 +3,7 @@
 ## Goals
 
 - **Feature-first** folders under `lib/features/*` with shared `lib/core` and `lib/data`.
-- **One `media_kit` `Player`** owned by [`PlayerController`](../lib/features/player/application/player_controller.dart) (ADR-0003).
+- **One `media_kit` `Player`** owned by [`MediaKitPlayerEngine`](../lib/features/player/application/player_engine.dart) for local/URL decode paths; **YouTube** uses a separate WebView engine (ADR-0003, ADR-0015).
 - **Drift** as single local SQLite source of truth (ADR-0002).
 - **Riverpod 3** for app state; codegen via `riverpod_annotation` where practical (ADR-0001).
 
@@ -28,13 +28,13 @@ sequenceDiagram
   participant Repo as MediaLibraryRepository
   participant DB as AppDatabase
   participant PC as PlayerController
-  participant MK as media_kit Player
+  participant PE as PlayerEngine (media_kit or WebView)
 
-  Lib->>Repo: importMedia XFile
+  Lib->>Repo: importMedia XFile / YouTube import
   Repo->>DB: insert VideoRow / AudioRow
   Lib->>PC: openMedia id
-  PC->>MK: open Media uri
-  MK-->>PC: position stream
+  PC->>PE: open playable source
+  PE-->>PC: position stream
   PC->>DB: upsert EchoSessionRow debounced
 ```
 
