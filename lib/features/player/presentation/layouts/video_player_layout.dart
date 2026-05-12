@@ -25,7 +25,7 @@ class VideoPlayerLayout extends StatefulWidget {
 
 class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
   /// Minimum transcript column width when layout allows it.
-  static const double _kMinTranscriptWidth = 240;
+  static const double _kMinTranscriptWidth = 360;
 
   /// Transcript may use at most this fraction of total width (video keeps ≥50%).
   static const double _kMaxTranscriptFraction = 0.5;
@@ -70,10 +70,11 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
     final cs = Theme.of(context).colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final wide =
-            constraints.maxWidth > t.breakpointTranscriptSideBySide;
+        final useSideBySide =
+            constraints.maxWidth > t.breakpointTranscriptSideBySide &&
+                MediaQuery.orientationOf(context) == Orientation.landscape;
 
-        if (wide) {
+        if (useSideBySide) {
           final total = constraints.maxWidth;
           final tw = _transcriptWidthForTotal(total);
           final vw = math.max(0.0, total - tw - _kSplitterHitWidth);

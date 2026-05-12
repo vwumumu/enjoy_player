@@ -45,7 +45,7 @@ Single dark `ThemeData` only (`buildAppTheme()`). No light theme and no Settings
 | `LibraryScreen` | `EditorialHeader` + `SegmentedButton` + `MediaCardRow` / `MediaCardTile` |
 | `ExpandedPlayerScreen` | `PlayerAmbientBackdrop` + transparent app bar (hidden while playing, returns on pause) |
 | `AudioPlayerLayout` | `HeroArtwork` with dynamic rim light, "Now reading" editorial label |
-| `VideoPlayerLayout` | Dark zinc transcript panel, 1px left border |
+| `VideoPlayerLayout` | Side-by-side video + transcript only in **landscape** when width > `breakpointTranscriptSideBySide` (720); portrait uses stacked video over transcript. Split mode: draggable transcript column, **≥360** logical px minimum (capped by 50% width), dark zinc panel, 1px left border |
 | `GlobalTransportBar` | Glass kept; dynamic-accent play ring; tabular timestamps |
 | `TranscriptPanel` | Source Serif 4 body; editorial left-rail active line; neutral echo card with 8px orange rail |
 | `ShadowReadingPanel` | Idle: three-zone bar (pitch icon, centered 56pt FAB, play + more; delete in menu); recording: centered FAB + countdown |
