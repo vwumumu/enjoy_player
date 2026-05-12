@@ -1,0 +1,62 @@
+name: Codegen drift
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter_version
+        run: echo "version=$(tr -d ' \n\r' < .github/flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_version.outputs.version }}
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Codegen (root)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Codegen (path packages)
+        run: |
+          set -euo pipefail
+          for pkg in packages/*/; do
+            [ -f "${pkg}pubspec.yaml" ] || continue
+            if grep -qE '^[[:space:]]*build_runner:' "${pkg}pubspec.yaml"; then
+              (cd "$pkg" && flutter pub get && dart run build_runner build --delete-conflicting-outputs)
+            fi
+          done
+
+      - name: Verify no codegen drift
+        run: |
+          set -euo pipefail
+          if ! git diff --exit-code HEAD; then
+            echo "::error::Working tree differs from HEAD after build_runner (regenerate and commit)."
+            git --no-pager diff --stat HEAD
+            git --no-pager diff HEAD
+            exit 1
+          fi
+          untracked=$(git ls-files --others --exclude-standard)
+          if [ -n "$untracked" ]; then
+            echo "::error::Unexpected untracked files after codegen:"
+            echo "$untracked"
+            exit 1
+          fi
