@@ -4,17 +4,50 @@ library;
 import 'package:azure_speech/azure_speech.dart';
 import 'package:flutter/material.dart';
 
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import 'score_level.dart';
 
+/// Shows pronunciation assessment: [Dialog] when wide, modal bottom sheet when narrow.
 Future<void> showAssessmentResultDialog({
   required BuildContext context,
   required AzurePronunciationAssessmentResult assessment,
 }) {
-  return showDialog<void>(
+  final l10n = AppLocalizations.of(context)!;
+  final nBest = assessment.nBest.isEmpty ? null : assessment.nBest.first;
+  if (nBest == null) {
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.assessmentTitle),
+        content: const Text('—'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  final tokens = EnjoyThemeTokens.of(context);
+  final wide =
+      MediaQuery.sizeOf(context).width >= tokens.breakpointTranscriptSideBySide;
+  if (wide) {
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AssessmentResultDialog(assessment: assessment),
+    );
+  }
+  return showModalBottomSheet<void>(
     context: context,
-    builder: (ctx) => AssessmentResultDialog(assessment: assessment),
+    isScrollControlled: true,
+    useSafeArea: true,
+    showDragHandle: false,
+    builder: (ctx) => AssessmentResultSheet(assessment: assessment),
   );
 }
 
@@ -47,15 +80,6 @@ class _AssessmentResultDialogState extends State<AssessmentResultDialog> {
       );
     }
 
-    final scores = nBest.pronunciationAssessment;
-    final words = nBest.words;
-
-    final overall = scores.pronScore.round();
-    final accuracy = scores.accuracyScore.round();
-    final completeness = scores.completenessScore.round();
-    final fluency = scores.fluencyScore.round();
-    final prosody = scores.prosodyScore?.round();
-
     return Dialog(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 560, maxHeight: 640),
@@ -80,6 +104,7 @@ class _AssessmentResultDialogState extends State<AssessmentResultDialog> {
                     ),
                   ),
                   IconButton(
+                    tooltip: MaterialLocalizations.of(context).closeButtonLabel,
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close),
                   ),
@@ -89,91 +114,233 @@ class _AssessmentResultDialogState extends State<AssessmentResultDialog> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _OverallScoreRing(
-                          score: overall,
-                          label: l10n.assessmentOverallScore,
-                          scheme: scheme,
-                          tt: tt,
-                        ),
-                        const SizedBox(width: 24),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              _ScoreBar(
-                                label: l10n.assessmentAccuracy,
-                                value: accuracy,
-                                scheme: scheme,
-                              ),
-                              const SizedBox(height: 12),
-                              _ScoreBar(
-                                label: l10n.assessmentCompleteness,
-                                value: completeness,
-                                scheme: scheme,
-                              ),
-                              const SizedBox(height: 12),
-                              _ScoreBar(
-                                label: l10n.assessmentFluency,
-                                value: fluency,
-                                scheme: scheme,
-                              ),
-                              if (prosody != null) ...[
-                                const SizedBox(height: 12),
-                                _ScoreBar(
-                                  label: l10n.assessmentProsody,
-                                  value: prosody,
-                                  scheme: scheme,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      l10n.assessmentPronunciationAnalysis,
-                      style: tt.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final w in words)
-                          _WordChip(
-                            word: w,
-                            selected: identical(_selected, w),
-                            scheme: scheme,
-                            onTap: () {
-                              setState(() {
-                                _selected = identical(_selected, w) ? null : w;
-                              });
-                            },
-                          ),
-                      ],
-                    ),
-                    if (_selected != null) ...[
-                      const SizedBox(height: 16),
-                      _SelectedWordPanel(
-                        word: _selected!,
-                        l10n: l10n,
-                        scheme: scheme,
-                        tt: tt,
-                      ),
-                    ],
-                  ],
+                child: _AssessmentResultInner(
+                  nBest: nBest,
+                  layoutCompact: false,
+                  selected: _selected,
+                  onToggleWord: (w) {
+                    setState(() {
+                      _selected = identical(_selected, w) ? null : w;
+                    });
+                  },
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class AssessmentResultSheet extends StatefulWidget {
+  const AssessmentResultSheet({required this.assessment, super.key});
+
+  final AzurePronunciationAssessmentResult assessment;
+
+  @override
+  State<AssessmentResultSheet> createState() => _AssessmentResultSheetState();
+}
+
+class _AssessmentResultSheetState extends State<AssessmentResultSheet> {
+  AzureWordAssessment? _selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final t = EnjoyThemeTokens.of(context);
+    final nBest = widget.assessment.nBest.first;
+    final padH = t.space16 + t.space4;
+    final bottomInset = MediaQuery.paddingOf(context).bottom + t.space24;
+
+    return SafeArea(
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.58,
+        minChildSize: 0.35,
+        maxChildSize: 0.92,
+        expand: false,
+        builder: (ctx, scrollCtrl) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const PaddedSheetDragHandle(),
+              Padding(
+                padding: EdgeInsets.fromLTRB(padH, t.space8, 8, 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.assessmentTitle, style: tt.titleLarge),
+                          SizedBox(height: t.space4),
+                          Text(
+                            l10n.assessmentDescription,
+                            style: tt.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: MaterialLocalizations.of(context).closeButtonLabel,
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        fixedSize: const Size(48, 48),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView(
+                  controller: scrollCtrl,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(padH, t.space16, padH, bottomInset),
+                  children: [
+                    _AssessmentResultInner(
+                      nBest: nBest,
+                      layoutCompact: true,
+                      selected: _selected,
+                      onToggleWord: (w) {
+                        setState(() {
+                          _selected = identical(_selected, w) ? null : w;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AssessmentResultInner extends StatelessWidget {
+  const _AssessmentResultInner({
+    required this.nBest,
+    required this.layoutCompact,
+    required this.selected,
+    required this.onToggleWord,
+  });
+
+  final AzureNBestResult nBest;
+  final bool layoutCompact;
+  final AzureWordAssessment? selected;
+  final ValueChanged<AzureWordAssessment> onToggleWord;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    final scores = nBest.pronunciationAssessment;
+    final words = nBest.words;
+
+    final overall = scores.pronScore.round();
+    final accuracy = scores.accuracyScore.round();
+    final completeness = scores.completenessScore.round();
+    final fluency = scores.fluencyScore.round();
+    final prosody = scores.prosodyScore?.round();
+
+    final scoreBars = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _ScoreBar(
+          label: l10n.assessmentAccuracy,
+          value: accuracy,
+          scheme: scheme,
+        ),
+        const SizedBox(height: 12),
+        _ScoreBar(
+          label: l10n.assessmentCompleteness,
+          value: completeness,
+          scheme: scheme,
+        ),
+        const SizedBox(height: 12),
+        _ScoreBar(
+          label: l10n.assessmentFluency,
+          value: fluency,
+          scheme: scheme,
+        ),
+        if (prosody != null) ...[
+          const SizedBox(height: 12),
+          _ScoreBar(
+            label: l10n.assessmentProsody,
+            value: prosody,
+            scheme: scheme,
+          ),
+        ],
+      ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (layoutCompact) ...[
+          Center(
+            child: _OverallScoreRing(
+              score: overall,
+              label: l10n.assessmentOverallScore,
+              scheme: scheme,
+              tt: tt,
+            ),
+          ),
+          const SizedBox(height: 24),
+          scoreBars,
+        ] else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _OverallScoreRing(
+                score: overall,
+                label: l10n.assessmentOverallScore,
+                scheme: scheme,
+                tt: tt,
+              ),
+              const SizedBox(width: 24),
+              Expanded(child: scoreBars),
+            ],
+          ),
+        const SizedBox(height: 24),
+        Text(
+          l10n.assessmentPronunciationAnalysis,
+          style: tt.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final w in words)
+              _WordChip(
+                word: w,
+                selected: identical(selected, w),
+                scheme: scheme,
+                onTap: () => onToggleWord(w),
+              ),
+          ],
+        ),
+        if (selected != null) ...[
+          const SizedBox(height: 16),
+          _SelectedWordPanel(
+            word: selected!,
+            l10n: l10n,
+            scheme: scheme,
+            tt: tt,
+          ),
+        ],
+      ],
     );
   }
 }

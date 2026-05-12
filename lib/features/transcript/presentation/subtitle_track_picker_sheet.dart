@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'import_subtitle_language_dialog.dart';
@@ -364,10 +365,7 @@ class _SubtitleTrackPickerSheetState
         builder: (ctx, scrollCtrl) {
           return Column(
             children: [
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: t.space12),
-                child: const _DragHandle(),
-              ),
+              const PaddedSheetDragHandle(),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: _sheetHorizontalPadding(t)),
                 child: Row(
@@ -449,24 +447,6 @@ class _SubtitleTrackPickerSheetState
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _DragHandle extends StatelessWidget {
-  const _DragHandle();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 4,
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(2),
       ),
     );
   }
