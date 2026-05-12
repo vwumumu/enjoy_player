@@ -1,3 +1,7 @@
+import org.gradle.api.tasks.compile.JavaCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 allprojects {
     repositories {
         maven { url = uri("https://maven.aliyun.com/repository/google") }
@@ -36,4 +40,18 @@ subprojects {
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
+}
+
+// Flutter plugins often default to Java 8; JDK 21+ warns that -source/-target 8 are obsolete.
+// Tune JavaCompile tasks directly (--release is forbidden by AGP for Android bootclasspath).
+subprojects {
+    tasks.withType<JavaCompile>().configureEach {
+        sourceCompatibility = JavaVersion.VERSION_17.toString()
+        targetCompatibility = JavaVersion.VERSION_17.toString()
+    }
+    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+        tasks.withType<KotlinCompile>().configureEach {
+            compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
 }
