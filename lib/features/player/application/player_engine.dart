@@ -100,8 +100,24 @@ class MediaKitPlayerEngine implements PlayerEngine {
   @override
   Stream<Duration> get position => _player.stream.position;
 
+  /// [_player.stream.duration] is a broadcast stream that does not replay.
+  /// [PlayerController] subscribes after `open` + other awaits, so the first
+  /// duration event can be missed on Android. Seed from [_player.state.duration].
   @override
-  Stream<Duration> get duration => _player.stream.duration;
+  Stream<Duration> get duration {
+    return Stream.multi((controller) {
+      final current = _player.state.duration;
+      if (current > Duration.zero) {
+        controller.add(current);
+      }
+      final sub = _player.stream.duration.listen(
+        controller.add,
+        onError: controller.addError,
+        onDone: controller.close,
+      );
+      controller.onCancel = sub.cancel;
+    });
+  }
 
   @override
   Stream<bool> get playing => _player.stream.playing;

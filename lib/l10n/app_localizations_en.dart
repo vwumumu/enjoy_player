@@ -294,7 +294,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subtitlesProviderUser => 'User';
 
   @override
-  String get subtitlesExtractNoTracks => 'No embedded subtitle tracks found.';
+  String get subtitlesExtractNoTracks =>
+      'No embedded subtitle tracks in this file (only video and audio). If you have a separate .srt or .vtt, use Import file.';
 
   @override
   String subtitlesExtractedCount(int count) {

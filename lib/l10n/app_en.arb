@@ -99,7 +99,7 @@
   "subtitlesProviderAuto": "Auto",
   "subtitlesProviderAi": "AI",
   "subtitlesProviderUser": "User",
-  "subtitlesExtractNoTracks": "No embedded subtitle tracks found.",
+  "subtitlesExtractNoTracks": "No embedded subtitle tracks in this file (only video and audio). If you have a separate .srt or .vtt, use Import file.",
   "subtitlesExtractedCount": "Extracted {count} subtitle track(s).",
   "@subtitlesExtractedCount": {
     "placeholders": {

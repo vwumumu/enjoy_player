@@ -649,7 +649,7 @@ abstract class AppLocalizations {
   /// No description provided for @subtitlesExtractNoTracks.
   ///
   /// In en, this message translates to:
-  /// **'No embedded subtitle tracks found.'**
+  /// **'No embedded subtitle tracks in this file (only video and audio). If you have a separate .srt or .vtt, use Import file.'**
   String get subtitlesExtractNoTracks;
 
   /// No description provided for @subtitlesExtractedCount.
