@@ -184,10 +184,59 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
     _elapsed = Duration.zero;
   }
 
+  void _setRecordingActiveOnBus(bool active) {
+    ref.read(shadowReadingHotkeyBusProvider.notifier).setRecordingActive(active);
+  }
+
+  /// Discard in-progress capture (Escape); does not persist to the library.
+  Future<void> _cancelRecording() async {
+    if (!_recording) return;
+    String? path;
+    try {
+      path = await _recorder.stop();
+    } catch (e, st) {
+      _log.warning('microphone stop (cancel recording) failed', e, st);
+    }
+    _recording = false;
+    _clearRecordingTiming();
+    _setRecordingActiveOnBus(false);
+    await _resetRecorderInstance();
+    if (path != null && path.isNotEmpty) {
+      try {
+        final f = File(path);
+        if (await f.exists()) await f.delete();
+      } catch (e, st) {
+        _log.fine('delete cancelled recording wav failed', e, st);
+      }
+    }
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    final wasRecording = _recording;
     _clearRecordingTiming();
-    unawaited(_recorder.dispose());
+    if (wasRecording) {
+      _recording = false;
+      _setRecordingActiveOnBus(false);
+    }
+    unawaited(() async {
+      if (wasRecording) {
+        try {
+          final path = await _recorder.stop();
+          if (path != null && path.isNotEmpty) {
+            try {
+              await File(path).delete();
+            } catch (_) {}
+          }
+        } catch (e, st) {
+          _log.fine('recorder stop on dispose', e, st);
+        }
+      }
+      try {
+        await _recorder.dispose();
+      } catch (_) {}
+    }());
     super.dispose();
   }
 
@@ -229,6 +278,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       } catch (e, st) {
         _log.warning('microphone stop failed', e, st);
         _recording = false;
+        _setRecordingActiveOnBus(false);
         _clearRecordingTiming();
         await _resetRecorderInstance();
         if (mounted) setState(() {});
@@ -241,6 +291,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
         return;
       }
       _recording = false;
+      _setRecordingActiveOnBus(false);
       _clearRecordingTiming();
       await _resetRecorderInstance();
       setState(() {});
@@ -293,6 +344,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
     } catch (e, st) {
       _log.warning('recorder.start failed at $outPath', e, st);
       _recording = false;
+      _setRecordingActiveOnBus(false);
       _clearRecordingTiming();
       await _resetRecorderInstance();
       if (mounted) setState(() {});
@@ -315,6 +367,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
     _recordingStartedAt = DateTime.now();
     _elapsed = Duration.zero;
     _startElapsedTicker();
+    _setRecordingActiveOnBus(true);
     setState(() {});
   }
 
@@ -516,6 +569,14 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       (prev, next) {
         if (prev == next) return;
         unawaited(_onHotkeyRecordingPulse(l10n));
+      },
+    );
+    ref.listen<int>(
+      shadowReadingHotkeyBusProvider.select((s) => s.recordingCancel),
+      (prev, next) {
+        if (prev == next) return;
+        if (!widget.echoActive) return;
+        unawaited(_cancelRecording());
       },
     );
     ref.listen<int>(

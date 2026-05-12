@@ -5,12 +5,12 @@ Keyboard shortcuts mirror the Enjoy web app defaults (`stores/hotkeys.ts`). Cust
 ## Behavior
 
 - **Global** shortcuts are evaluated whenever no editable field has focus (`EditableText`).
-- **Modal**: `Escape` pops the top GoRouter route when possible; if the router stack is empty, the root `Navigator` is popped so overlays such as the shortcuts cheatsheet close.
-- **Help / cheatsheet**: `global.help` (default `Shift+/` → `?`) opens `HotkeysHelpDialog`; pressing the same chord again closes it. Open state is tracked via `hotkeysCheatsheetOpen` (`lib/features/hotkeys/presentation/hotkeys_cheatsheet_open.dart`) so the hotkey and Settings “Open shortcuts cheatsheet” stay in sync. The cheatsheet handles `Escape` itself as well.
+- **Modal / Escape**: When the shortcuts cheatsheet is open, `Escape` dismisses it via the root `Navigator` before any `GoRouter.pop()`, so the player route is not popped under the dialog. On desktop, if the window is fullscreen, `Escape` exits fullscreen next. While a shadow-reading take is actively recording, `Escape` cancels that recording (discard temp WAV) instead of collapsing the player. Otherwise `Escape` pops the top GoRouter route when possible; if the router stack is empty, the root `Navigator` is popped for other overlays.
+- **Help / cheatsheet**: `global.help` (default `Shift+/` → `?`) opens `HotkeysHelpDialog`; pressing the same chord again closes it. Open state is tracked via `hotkeysCheatsheetOpen` (`lib/features/hotkeys/presentation/hotkeys_cheatsheet_open.dart`) so the hotkey and Settings “Open shortcuts cheatsheet” stay in sync. The cheatsheet also handles `Escape` in its focus scope.
 - **Library** `/`: focuses the sidebar search field when the wide layout with sidebar is visible. Narrow layouts without the sidebar have no search focus target yet.
 - **Player** shortcuts apply when a playback session exists (`playerControllerProvider`).
 - **Echo brackets**: expand/shrink apply only when Echo mode is active (handled inside `PlayerInteractions`).
-- **Shadow reading**: `R` / `G` / `P` / `V` pulse a Riverpod bus consumed by `ShadowReadingPanel` / `PitchContourSection`. Assessment (`V`) runs the same flow as the shadow-reading **assess** control (view result if already assessed, otherwise run). Dictation (`H`) is reserved (no UI yet).
+- **Shadow reading**: `R` / `G` / `P` / `V` pulse a Riverpod bus consumed by `ShadowReadingPanel` / `PitchContourSection`. `Escape` during an active recording cancels via the same bus (`recordingCancel` / `isRecordingActive`). Assessment (`V`) runs the same flow as the shadow-reading **assess** control (view result if already assessed, otherwise run). Dictation (`H`) is reserved (no UI yet).
 
 ## Customization
 

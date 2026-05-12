@@ -43,7 +43,7 @@ final class ShadowReadingHotkeyBusProvider
 }
 
 String _$shadowReadingHotkeyBusHash() =>
-    r'bb980c25a9565c32ff38f2237b96af84b9b95cdd';
+    r'da601ccfcfc74886f955c5f2a1740c40f10f340f';
 
 abstract class _$ShadowReadingHotkeyBus
     extends $Notifier<ShadowReadingHotkeyTicks> {

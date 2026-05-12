@@ -71,6 +71,7 @@ class _HotkeysHelpDialogState extends ConsumerState<HotkeysHelpDialog> {
           if (event is KeyDownEvent &&
               event.logicalKey == LogicalKeyboardKey.escape) {
             Navigator.of(context).pop();
+            hotkeysCheatsheetOpen.value = false;
             return KeyEventResult.handled;
           }
           return KeyEventResult.ignored;

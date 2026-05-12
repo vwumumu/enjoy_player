@@ -82,17 +82,24 @@ class _AppHotkeysKeyboardListenerState
     final goRouter = ref.read(appRouterProvider);
     final navCtx = _routerNavigatorContext();
 
-    // On desktop: if the window is fullscreen, Escape exits fullscreen first
-    // so the user doesn't also pop a route on the same keypress.
-    if (isDesktop && ref.read(windowFullscreenProvider)) {
-      if (_matches(event, ctrl, 'modal.close')) {
+    // Modal.close (Escape): cheatsheet and fullscreen before route pops so we
+    // never pop GoRouter under an open dialog; shadow recording cancels before
+    // collapsing the player.
+    if (_matches(event, ctrl, 'modal.close')) {
+      if (hotkeysCheatsheetOpen.value && navCtx != null) {
+        Navigator.of(navCtx, rootNavigator: true).maybePop();
+        return true;
+      }
+      if (isDesktop && ref.read(windowFullscreenProvider)) {
         unawaited(ref.read(windowFullscreenProvider.notifier).setFullscreen(false));
         return true;
       }
-    }
-
-    // Modal: Escape closes nested routes (dialogs, sheets).
-    if (_matches(event, ctrl, 'modal.close')) {
+      final session = ref.read(playerControllerProvider);
+      if (session != null &&
+          ref.read(shadowReadingHotkeyBusProvider).isRecordingActive) {
+        ref.read(shadowReadingHotkeyBusProvider.notifier).pulseRecordingCancel();
+        return true;
+      }
       if (goRouter.canPop()) {
         goRouter.pop();
         return true;
