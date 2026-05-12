@@ -22,6 +22,7 @@ import 'package:enjoy_player/features/player/application/player_ui_provider.dart
 import 'package:enjoy_player/features/shadow_reading/application/shadow_reading_hotkey_bus.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
+import 'hotkeys_cheatsheet_open.dart';
 import 'hotkeys_help_dialog.dart';
 
 final _log = logNamed('AppHotkeys');
@@ -65,6 +66,12 @@ class _AppHotkeysKeyboardListenerState
     return hotkeyMatchesBinding(event, binding);
   }
 
+  /// [AppHotkeysKeyboardListener] is built in [MaterialApp.router]'s `builder`
+  /// above the [Navigator], so [context] here does not include a [Navigator].
+  /// Use GoRouter's root key for overlays, dialogs, and imperative pops.
+  BuildContext? _routerNavigatorContext() =>
+      ref.read(appRouterProvider).configuration.navigatorKey.currentContext;
+
   bool _onKey(KeyEvent event) {
     if (!mounted) return false;
     if (event is! KeyDownEvent) return false;
@@ -72,6 +79,7 @@ class _AppHotkeysKeyboardListenerState
 
     final ctrl = ref.read(hotkeysCtrlProvider.notifier);
     final goRouter = ref.read(appRouterProvider);
+    final navCtx = _routerNavigatorContext();
 
     // On desktop: if the window is fullscreen, Escape exits fullscreen first
     // so the user doesn't also pop a route on the same keypress.
@@ -88,15 +96,22 @@ class _AppHotkeysKeyboardListenerState
         goRouter.pop();
         return true;
       }
+      if (navCtx != null) {
+        final rootNav = Navigator.of(navCtx, rootNavigator: true);
+        if (rootNav.canPop()) {
+          rootNav.pop();
+          return true;
+        }
+      }
     }
 
     if (_matches(event, ctrl, 'global.help')) {
-      unawaited(
-        showDialog<void>(
-          context: context,
-          builder: (ctx) => const HotkeysHelpDialog(),
-        ),
-      );
+      if (navCtx == null) return false;
+      if (hotkeysCheatsheetOpen.value) {
+        Navigator.of(navCtx, rootNavigator: true).maybePop();
+        return true;
+      }
+      unawaited(showHotkeysHelpDialog(navCtx));
       return true;
     }
 
@@ -106,11 +121,13 @@ class _AppHotkeysKeyboardListenerState
     }
 
     if (_matches(event, ctrl, 'global.search')) {
-      final l10n = AppLocalizations.of(context);
-      if (l10n != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.hotkeysStubSearch)),
-        );
+      if (navCtx != null) {
+        final l10n = AppLocalizations.of(navCtx);
+        if (l10n != null) {
+          ScaffoldMessenger.of(navCtx).showSnackBar(
+            SnackBar(content: Text(l10n.hotkeysStubSearch)),
+          );
+        }
       }
       _log.fine('global search hotkey (stub)');
       return true;

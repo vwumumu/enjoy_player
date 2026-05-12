@@ -376,5 +376,40 @@
   "aiPlaygroundSectionTranslation": "Translation",
   "aiPlaygroundSectionDictionary": "Dictionary",
   "aiPlaygroundSectionTtsAssessment": "TTS / Assessment",
-  "youtubePasteFromClipboard": "Paste"
+  "youtubePasteFromClipboard": "Paste",
+  "settingsSubtitle": "Tune Enjoy to fit how you study.",
+  "settingsSectionAppearanceLanguage": "Appearance & Language",
+  "settingsAppearanceTheme": "Theme",
+  "settingsAppearanceThemeValue": "Dark · Cinematic",
+  "settingsAppearanceDisplayLanguage": "Display language",
+  "settingsAppearanceLearningLanguage": "Learning language",
+  "settingsAppearanceNativeLanguage": "Native language",
+  "settingsAppearanceSyncedFromProfile": "Synced from your account profile",
+  "settingsKeyboardOpenCheatsheet": "Open shortcuts cheatsheet",
+  "settingsKeyboardOpenCheatsheetSubtitle": "Browse and customize every shortcut",
+  "hotkeysHelpSubtitle": "Press {key} anytime to open this list.",
+  "@hotkeysHelpSubtitle": {
+    "placeholders": {
+      "key": {
+        "type": "String",
+        "example": "?"
+      }
+    }
+  },
+  "hotkeysHelpSearchHint": "Search shortcuts",
+  "hotkeysHelpEmpty": "No matching shortcuts",
+  "hotkeysHelpCustomize": "Customize in Settings",
+  "hotkeysSettingsSubtitle": "Tap a row to change. Press {key} anytime.",
+  "@hotkeysSettingsSubtitle": {
+    "placeholders": {
+      "key": {
+        "type": "String",
+        "example": "?"
+      }
+    }
+  },
+  "hotkeysFilterHint": "Filter shortcuts",
+  "hotkeysResetTooltip": "Reset this shortcut",
+  "hotkeysEditTooltip": "Change shortcut",
+  "settingsAboutMadeWithCare": "Made with care for language learners."
 }

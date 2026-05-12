@@ -1,110 +1,299 @@
-/// Read-only list of shortcuts (web `HotkeysHelpModal` parity).
+/// Read-only list of shortcuts (web `HotkeysHelpModal` parity) — premium cheatsheet.
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/hotkeys/domain/hotkey_definition.dart';
 import 'package:enjoy_player/features/hotkeys/domain/hotkey_definitions.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_format.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_description.dart';
+import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_filter.dart';
+import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_cheatsheet_open.dart';
+import 'package:enjoy_player/features/hotkeys/presentation/widgets/kbd_chip.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-class HotkeysHelpDialog extends ConsumerWidget {
+class HotkeysHelpDialog extends ConsumerStatefulWidget {
   const HotkeysHelpDialog({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HotkeysHelpDialog> createState() => _HotkeysHelpDialogState();
+}
+
+List<HotkeyDefinition> _hotkeyDefinitionsForScope(HotkeyScope scope) =>
+    hotkeyDefinitions.where((d) => d.scope == scope).toList();
+
+class _HotkeysHelpDialogState extends ConsumerState<HotkeysHelpDialog> {
+  final _search = TextEditingController();
+  final _focus = FocusNode(debugLabel: 'hotkeys-help');
+
+  @override
+  void dispose() {
+    _search.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     ref.watch(hotkeysCtrlProvider);
     final ctrl = ref.read(hotkeysCtrlProvider.notifier);
+    final helpKeyLabel = formatHotkeyForDisplay(ctrl.effectiveKeys('global.help'));
 
-    return AlertDialog(
-      title: Row(
-        children: [
-          Icon(Icons.keyboard_outlined, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 12),
-          Expanded(child: Text(l10n.hotkeysTitle)),
-        ],
+    String effective(String id) => ctrl.effectiveKeys(id);
+
+    bool matches(HotkeyDefinition d) => hotkeyDefinitionMatchesQuery(
+          d,
+          _search.text,
+          l10n,
+          effective,
+        );
+
+    return Dialog(
+      backgroundColor: cs.surfaceContainerHigh,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(t.radiusXl),
       ),
-      content: SizedBox(
-        width: 420,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final scope in HotkeyScope.values) ...[
-                if (_definitionsFor(scope).isNotEmpty) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12, bottom: 8),
-                    child: Text(
-                      hotkeysScopeLabel(l10n, scope),
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+      child: Focus(
+        focusNode: _focus,
+        autofocus: true,
+        onKeyEvent: (node, event) {
+          if (event is KeyDownEvent &&
+              event.logicalKey == LogicalKeyboardKey.escape) {
+            Navigator.of(context).pop();
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 560,
+            maxHeight: MediaQuery.sizeOf(context).height * 0.72,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(t.space24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: cs.primaryContainer,
+                        borderRadius: BorderRadius.circular(t.radiusMd),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(t.space12),
+                        child: Icon(
+                          Icons.keyboard_outlined,
+                          color: cs.onPrimaryContainer,
+                          size: 24,
+                        ),
+                      ),
                     ),
-                  ),
-                  for (final def in _definitionsFor(scope))
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
+                    SizedBox(width: t.space16),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              hotkeyDescription(l10n, def),
-                              style: Theme.of(context).textTheme.bodyMedium,
+                          Text(
+                            l10n.hotkeysTitle,
+                            style: tt.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Wrap(
-                            spacing: 6,
-                            crossAxisAlignment: WrapCrossAlignment.center,
+                          SizedBox(height: t.space4),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              if (ctrl.hasCustomBinding(def.id))
-                                Chip(
-                                  label: Text(
-                                    l10n.hotkeysCustomizedBadge,
-                                    style: Theme.of(context).textTheme.labelSmall,
+                              Expanded(
+                                child: Text(
+                                  l10n.hotkeysHelpSubtitle(helpKeyLabel),
+                                  style: tt.bodySmall?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                    height: 1.35,
                                   ),
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                  labelPadding: const EdgeInsets.symmetric(horizontal: 6),
                                 ),
-                              Text(
-                                formatHotkeyForDisplay(ctrl.effectiveKeys(def.id)),
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      fontFamily: 'monospace',
-                                    ),
+                              ),
+                              KbdChordRow(
+                                binding: ctrl.effectiveKeys('global.help'),
+                                compact: true,
                               ),
                             ],
                           ),
                         ],
                       ),
                     ),
-                ],
-              ],
-              const SizedBox(height: 12),
-              Text(
-                l10n.hotkeysHintFooter,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    IconButton(
+                      tooltip: MaterialLocalizations.of(context)
+                          .closeButtonLabel,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close_rounded),
                     ),
-              ),
-            ],
+                  ],
+                ),
+                SizedBox(height: t.space16),
+                TextField(
+                  controller: _search,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    hintText: l10n.hotkeysHelpSearchHint,
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    filled: true,
+                    fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.65),
+                  ),
+                ),
+                SizedBox(height: t.space16),
+                Expanded(
+                  child: _HotkeysHelpList(
+                    matches: matches,
+                    ctrl: ctrl,
+                    l10n: l10n,
+                  ),
+                ),
+                SizedBox(height: t.space12),
+                Text(
+                  l10n.hotkeysHintFooter,
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      context.go('/settings?section=keyboard');
+                    },
+                    child: Text(l10n.hotkeysHelpCustomize),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
-        ),
-      ],
     );
   }
+}
 
-  static List<HotkeyDefinition> _definitionsFor(HotkeyScope scope) =>
-      hotkeyDefinitions.where((d) => d.scope == scope).toList();
+class _HotkeysHelpList extends StatelessWidget {
+  const _HotkeysHelpList({
+    required this.matches,
+    required this.ctrl,
+    required this.l10n,
+  });
+
+  final bool Function(HotkeyDefinition def) matches;
+  final HotkeysCtrl ctrl;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    final children = <Widget>[];
+    var any = false;
+    for (final scope in HotkeyScope.values) {
+      final defs = _hotkeyDefinitionsForScope(scope)
+          .where(matches)
+          .toList();
+      if (defs.isEmpty) continue;
+      any = true;
+      children.add(
+        Padding(
+          padding: EdgeInsets.only(bottom: t.space8),
+          child: Text(
+            hotkeysScopeLabel(l10n, scope).toUpperCase(),
+            style: tt.labelSmall?.copyWith(
+              letterSpacing: 1.0,
+              fontWeight: FontWeight.w600,
+              color: cs.primary,
+            ),
+          ),
+        ),
+      );
+      for (final def in defs) {
+        children.add(
+          Padding(
+            padding: EdgeInsets.only(bottom: t.space8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Wrap(
+                    spacing: t.space8,
+                    runSpacing: t.space4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        hotkeyDescription(l10n, def),
+                        style: tt.bodyMedium,
+                      ),
+                      if (ctrl.hasCustomBinding(def.id))
+                        Chip(
+                          label: Text(
+                            l10n.hotkeysCustomizedBadge,
+                            style: tt.labelSmall,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          labelPadding: EdgeInsets.symmetric(
+                            horizontal: t.space8,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: t.space12),
+                KbdChordRow(binding: ctrl.effectiveKeys(def.id)),
+              ],
+            ),
+          ),
+        );
+      }
+      children.add(SizedBox(height: t.space8));
+    }
+
+    if (!any) {
+      return Center(
+        child: Text(
+          l10n.hotkeysHelpEmpty,
+          style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      ),
+    );
+  }
+}
+
+/// Opens the cheatsheet and keeps [hotkeysCheatsheetOpen] in sync for `?` toggle.
+Future<void> showHotkeysHelpDialog(BuildContext context) {
+  hotkeysCheatsheetOpen.value = true;
+  return showDialog<void>(
+    context: context,
+    builder: (ctx) => const HotkeysHelpDialog(),
+  ).whenComplete(() {
+    hotkeysCheatsheetOpen.value = false;
+  });
 }

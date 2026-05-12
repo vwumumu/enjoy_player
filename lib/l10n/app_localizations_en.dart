@@ -949,4 +949,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get youtubePasteFromClipboard => 'Paste';
+
+  @override
+  String get settingsSubtitle => 'Tune Enjoy to fit how you study.';
+
+  @override
+  String get settingsSectionAppearanceLanguage => 'Appearance & Language';
+
+  @override
+  String get settingsAppearanceTheme => 'Theme';
+
+  @override
+  String get settingsAppearanceThemeValue => 'Dark · Cinematic';
+
+  @override
+  String get settingsAppearanceDisplayLanguage => 'Display language';
+
+  @override
+  String get settingsAppearanceLearningLanguage => 'Learning language';
+
+  @override
+  String get settingsAppearanceNativeLanguage => 'Native language';
+
+  @override
+  String get settingsAppearanceSyncedFromProfile =>
+      'Synced from your account profile';
+
+  @override
+  String get settingsKeyboardOpenCheatsheet => 'Open shortcuts cheatsheet';
+
+  @override
+  String get settingsKeyboardOpenCheatsheetSubtitle =>
+      'Browse and customize every shortcut';
+
+  @override
+  String hotkeysHelpSubtitle(String key) {
+    return 'Press $key anytime to open this list.';
+  }
+
+  @override
+  String get hotkeysHelpSearchHint => 'Search shortcuts';
+
+  @override
+  String get hotkeysHelpEmpty => 'No matching shortcuts';
+
+  @override
+  String get hotkeysHelpCustomize => 'Customize in Settings';
+
+  @override
+  String hotkeysSettingsSubtitle(String key) {
+    return 'Tap a row to change. Press $key anytime.';
+  }
+
+  @override
+  String get hotkeysFilterHint => 'Filter shortcuts';
+
+  @override
+  String get hotkeysResetTooltip => 'Reset this shortcut';
+
+  @override
+  String get hotkeysEditTooltip => 'Change shortcut';
+
+  @override
+  String get settingsAboutMadeWithCare =>
+      'Made with care for language learners.';
 }

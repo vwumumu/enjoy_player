@@ -1,13 +1,14 @@
 /// Display-only formatting for hotkey strings (subset of web `format-hotkey`).
 library;
 
-/// Turns `shift+slash` into `?`, formats modifiers for UI labels.
-String formatHotkeyForDisplay(String binding) {
+/// Tokens for UI key-cap rows (same rules as [formatHotkeyForDisplay]).
+List<String> hotkeyDisplayTokens(String binding) {
   final s = binding.trim().toLowerCase();
-  if (s == 'shift+slash') return '?';
+  if (s == 'shift+slash') return const ['?'];
 
-  final parts = s.split('+').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-  if (parts.isEmpty) return binding;
+  final parts =
+      s.split('+').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  if (parts.isEmpty) return [binding];
 
   final out = <String>[];
   for (final p in parts) {
@@ -86,5 +87,9 @@ String formatHotkeyForDisplay(String binding) {
         }
     }
   }
-  return out.join('+');
+  return out;
 }
+
+/// Turns `shift+slash` into `?`, formats modifiers for UI labels.
+String formatHotkeyForDisplay(String binding) =>
+    hotkeyDisplayTokens(binding).join('+');

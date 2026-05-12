@@ -1863,6 +1863,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paste'**
   String get youtubePasteFromClipboard;
+
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tune Enjoy to fit how you study.'**
+  String get settingsSubtitle;
+
+  /// No description provided for @settingsSectionAppearanceLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance & Language'**
+  String get settingsSectionAppearanceLanguage;
+
+  /// No description provided for @settingsAppearanceTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsAppearanceTheme;
+
+  /// No description provided for @settingsAppearanceThemeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark · Cinematic'**
+  String get settingsAppearanceThemeValue;
+
+  /// No description provided for @settingsAppearanceDisplayLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Display language'**
+  String get settingsAppearanceDisplayLanguage;
+
+  /// No description provided for @settingsAppearanceLearningLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning language'**
+  String get settingsAppearanceLearningLanguage;
+
+  /// No description provided for @settingsAppearanceNativeLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Native language'**
+  String get settingsAppearanceNativeLanguage;
+
+  /// No description provided for @settingsAppearanceSyncedFromProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced from your account profile'**
+  String get settingsAppearanceSyncedFromProfile;
+
+  /// No description provided for @settingsKeyboardOpenCheatsheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Open shortcuts cheatsheet'**
+  String get settingsKeyboardOpenCheatsheet;
+
+  /// No description provided for @settingsKeyboardOpenCheatsheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse and customize every shortcut'**
+  String get settingsKeyboardOpenCheatsheetSubtitle;
+
+  /// No description provided for @hotkeysHelpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Press {key} anytime to open this list.'**
+  String hotkeysHelpSubtitle(String key);
+
+  /// No description provided for @hotkeysHelpSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search shortcuts'**
+  String get hotkeysHelpSearchHint;
+
+  /// No description provided for @hotkeysHelpEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching shortcuts'**
+  String get hotkeysHelpEmpty;
+
+  /// No description provided for @hotkeysHelpCustomize.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize in Settings'**
+  String get hotkeysHelpCustomize;
+
+  /// No description provided for @hotkeysSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a row to change. Press {key} anytime.'**
+  String hotkeysSettingsSubtitle(String key);
+
+  /// No description provided for @hotkeysFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter shortcuts'**
+  String get hotkeysFilterHint;
+
+  /// No description provided for @hotkeysResetTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset this shortcut'**
+  String get hotkeysResetTooltip;
+
+  /// No description provided for @hotkeysEditTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Change shortcut'**
+  String get hotkeysEditTooltip;
+
+  /// No description provided for @settingsAboutMadeWithCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Made with care for language learners.'**
+  String get settingsAboutMadeWithCare;
 }
 
 class _AppLocalizationsDelegate
