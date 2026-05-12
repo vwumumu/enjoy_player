@@ -14,11 +14,12 @@ class Videos extends Table {
   TextColumn get title => text()();
   TextColumn get description => text().nullable()();
   TextColumn get thumbnailUrl => text().nullable()();
+
   /// Duration in whole seconds (weapp `Video.duration`).
-  IntColumn get durationSeconds =>
-      integer().withDefault(const Constant(0))();
+  IntColumn get durationSeconds => integer().withDefault(const Constant(0))();
   TextColumn get language => text().withDefault(const Constant('und'))();
   TextColumn get source => text().nullable()();
+
   /// Local file URI (replaces web `fileHandle` / `blob`).
   TextColumn get localUri => text().nullable()();
   TextColumn get md5 => text().nullable()();

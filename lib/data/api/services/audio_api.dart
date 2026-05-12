@@ -21,18 +21,13 @@ class AudioApi {
     if (provider != null) q['provider'] = provider;
     if (limit != null) q['limit'] = '$limit';
     if (updatedAfter != null) q['updatedAfter'] = updatedAfter;
-    return _client.getJsonList(
-      _path,
-      queryParameters: q.isEmpty ? null : q,
-    );
+    return _client.getJsonList(_path, queryParameters: q.isEmpty ? null : q);
   }
 
   Future<JsonMap> audio(String id) => _client.getJson('$_path/$id');
 
-  Future<JsonMap> uploadAudio(JsonMap audio) => _client.postJson(
-        _path,
-        body: {'audio': audio},
-      );
+  Future<JsonMap> uploadAudio(JsonMap audio) =>
+      _client.postJson(_path, body: {'audio': audio});
 
   Future<JsonMap> deleteAudio(String id) => _client.deleteJson('$_path/$id');
 }

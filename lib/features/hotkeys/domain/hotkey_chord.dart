@@ -41,8 +41,11 @@ ParsedHotkey parseHotkeyString(String binding) {
   if (raw.isEmpty) {
     throw const FormatException('Empty hotkey binding');
   }
-  final parts =
-      raw.split('+').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  final parts = raw
+      .split('+')
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
+      .toList();
   if (parts.isEmpty) {
     throw FormatException('Invalid hotkey binding: $binding');
   }

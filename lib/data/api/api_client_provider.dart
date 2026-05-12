@@ -45,10 +45,10 @@ class ApiBaseUrl extends _$ApiBaseUrl {
   /// Persists and refreshes [apiClientProvider].
   Future<void> setBaseUrl(String input) async {
     final normalized = normalizeApiBaseUrl(input, kDefaultApiBaseUrl);
-    await ref.read(guestAppDatabaseProvider).settingsDao.setValue(
-          SettingsKeys.apiBaseUrl,
-          normalized,
-        );
+    await ref
+        .read(guestAppDatabaseProvider)
+        .settingsDao
+        .setValue(SettingsKeys.apiBaseUrl, normalized);
     state = AsyncData(normalized);
     ref.invalidate(apiClientProvider);
   }
@@ -60,16 +60,19 @@ class AiApiBaseUrl extends _$AiApiBaseUrl {
   Future<String> build() async {
     final db = ref.watch(guestAppDatabaseProvider);
     final raw = await db.settingsDao.getValue(SettingsKeys.apiAiBaseUrl);
-    return normalizeApiBaseUrl(raw ?? kDefaultAiApiBaseUrl, kDefaultAiApiBaseUrl);
+    return normalizeApiBaseUrl(
+      raw ?? kDefaultAiApiBaseUrl,
+      kDefaultAiApiBaseUrl,
+    );
   }
 
   /// Persists and refreshes [aiApiClientProvider].
   Future<void> setBaseUrl(String input) async {
     final normalized = normalizeApiBaseUrl(input, kDefaultAiApiBaseUrl);
-    await ref.read(guestAppDatabaseProvider).settingsDao.setValue(
-          SettingsKeys.apiAiBaseUrl,
-          normalized,
-        );
+    await ref
+        .read(guestAppDatabaseProvider)
+        .settingsDao
+        .setValue(SettingsKeys.apiAiBaseUrl, normalized);
     state = AsyncData(normalized);
     ref.invalidate(aiApiClientProvider);
   }

@@ -29,7 +29,9 @@ class AiPlaygroundScreen extends ConsumerStatefulWidget {
 
 class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
   final _systemCtrl = TextEditingController();
-  final _userCtrl = TextEditingController(text: 'Hello, summarize in one line.');
+  final _userCtrl = TextEditingController(
+    text: 'Hello, summarize in one line.',
+  );
   final _translateSourceCtrl = TextEditingController(text: 'en');
   final _translateTargetCtrl = TextEditingController(text: 'zh');
   final _translateTextCtrl = TextEditingController(text: 'Good morning.');
@@ -103,9 +105,9 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
       return;
     }
     try {
-      final result = await ref.read(asrServiceProvider).transcribe(
-        AsrRequest(audioBytes: bytes, filename: _pickedName),
-      );
+      final result = await ref
+          .read(asrServiceProvider)
+          .transcribe(AsrRequest(audioBytes: bytes, filename: _pickedName));
       _append('ASR text:\n${result.text}');
     } catch (e, st) {
       _log.warning('ASR failed', e, st);
@@ -117,10 +119,15 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
     try {
       final messages = <ChatMessage>[
         if (_systemCtrl.text.trim().isNotEmpty)
-          ChatMessage(role: ChatMessage.roleSystem, content: _systemCtrl.text.trim()),
+          ChatMessage(
+            role: ChatMessage.roleSystem,
+            content: _systemCtrl.text.trim(),
+          ),
         ChatMessage(role: ChatMessage.roleUser, content: _userCtrl.text.trim()),
       ];
-      final reply = await ref.read(chatServiceProvider).complete(messages: messages);
+      final reply = await ref
+          .read(chatServiceProvider)
+          .complete(messages: messages);
       _append('Chat reply:\n$reply');
     } catch (e, st) {
       _log.warning('Chat failed', e, st);
@@ -130,11 +137,13 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
 
   Future<void> _runTranslate() async {
     try {
-      final r = await ref.read(translationServiceProvider).translate(
-        text: _translateTextCtrl.text.trim(),
-        sourceLanguage: _translateSourceCtrl.text.trim(),
-        targetLanguage: _translateTargetCtrl.text.trim(),
-      );
+      final r = await ref
+          .read(translationServiceProvider)
+          .translate(
+            text: _translateTextCtrl.text.trim(),
+            sourceLanguage: _translateSourceCtrl.text.trim(),
+            targetLanguage: _translateTargetCtrl.text.trim(),
+          );
       _append('Translation:\n${r.translatedText}');
     } catch (e, st) {
       _log.warning('Translate failed', e, st);
@@ -144,11 +153,13 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
 
   Future<void> _runDictionary() async {
     try {
-      final r = await ref.read(dictionaryServiceProvider).lookup(
-        word: _dictWordCtrl.text.trim(),
-        sourceLanguage: _dictSourceCtrl.text.trim(),
-        targetLanguage: _dictTargetCtrl.text.trim(),
-      );
+      final r = await ref
+          .read(dictionaryServiceProvider)
+          .lookup(
+            word: _dictWordCtrl.text.trim(),
+            sourceLanguage: _dictSourceCtrl.text.trim(),
+            targetLanguage: _dictTargetCtrl.text.trim(),
+          );
       final buf = StringBuffer()
         ..writeln('${r.word} (${r.sourceLanguage} → ${r.targetLanguage})');
       if (r.lemma != null) buf.writeln('lemma: ${r.lemma}');
@@ -169,12 +180,16 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
   Future<void> _runAssessment() async {
     final l10n = AppLocalizations.of(context)!;
     if (kIsWeb) {
-      _append('${l10n.error}: pronunciation assessment is not available on web.');
+      _append(
+        '${l10n.error}: pronunciation assessment is not available on web.',
+      );
       return;
     }
     final bytes = _pickedAudio;
     if (bytes == null) {
-      _append('${l10n.error}: pick a WAV (or other) file first; assessment uses the same pick as ASR.');
+      _append(
+        '${l10n.error}: pick a WAV (or other) file first; assessment uses the same pick as ASR.',
+      );
       return;
     }
     final refText = _assessRefCtrl.text.trim();
@@ -183,13 +198,15 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
       return;
     }
     try {
-      final r = await ref.read(assessmentServiceProvider).assess(
-        AssessmentRequest(
-          audioBytes: bytes,
-          referenceText: refText,
-          language: _assessLangCtrl.text.trim(),
-        ),
-      );
+      final r = await ref
+          .read(assessmentServiceProvider)
+          .assess(
+            AssessmentRequest(
+              audioBytes: bytes,
+              referenceText: refText,
+              language: _assessLangCtrl.text.trim(),
+            ),
+          );
       final scores = r.detail.primaryScores;
       final buf = StringBuffer('Pronunciation assessment\n');
       if (scores != null) {
@@ -266,7 +283,10 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerLeft,
-            child: FilledButton(onPressed: _runChat, child: Text(l10n.aiPlaygroundSendChat)),
+            child: FilledButton(
+              onPressed: _runChat,
+              child: Text(l10n.aiPlaygroundSendChat),
+            ),
           ),
           const SizedBox(height: 24),
           _SectionTitle(text: l10n.aiPlaygroundSectionTranslation),
@@ -275,14 +295,18 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
               Expanded(
                 child: TextField(
                   controller: _translateSourceCtrl,
-                  decoration: InputDecoration(labelText: l10n.aiPlaygroundTranslateSource),
+                  decoration: InputDecoration(
+                    labelText: l10n.aiPlaygroundTranslateSource,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: TextField(
                   controller: _translateTargetCtrl,
-                  decoration: InputDecoration(labelText: l10n.aiPlaygroundTranslateTarget),
+                  decoration: InputDecoration(
+                    labelText: l10n.aiPlaygroundTranslateTarget,
+                  ),
                 ),
               ),
             ],
@@ -291,7 +315,9 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
           TextField(
             controller: _translateTextCtrl,
             maxLines: 2,
-            decoration: InputDecoration(labelText: l10n.aiPlaygroundTranslateText),
+            decoration: InputDecoration(
+              labelText: l10n.aiPlaygroundTranslateText,
+            ),
           ),
           const SizedBox(height: 8),
           Align(
@@ -313,14 +339,18 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
               Expanded(
                 child: TextField(
                   controller: _dictSourceCtrl,
-                  decoration: InputDecoration(labelText: l10n.aiPlaygroundDictSource),
+                  decoration: InputDecoration(
+                    labelText: l10n.aiPlaygroundDictSource,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: TextField(
                   controller: _dictTargetCtrl,
-                  decoration: InputDecoration(labelText: l10n.aiPlaygroundDictTarget),
+                  decoration: InputDecoration(
+                    labelText: l10n.aiPlaygroundDictTarget,
+                  ),
                 ),
               ),
             ],
@@ -340,12 +370,16 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
           TextField(
             controller: _assessRefCtrl,
             maxLines: 2,
-            decoration: InputDecoration(labelText: l10n.aiPlaygroundAssessmentReference),
+            decoration: InputDecoration(
+              labelText: l10n.aiPlaygroundAssessmentReference,
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _assessLangCtrl,
-            decoration: InputDecoration(labelText: l10n.aiPlaygroundAssessmentLanguage),
+            decoration: InputDecoration(
+              labelText: l10n.aiPlaygroundAssessmentLanguage,
+            ),
           ),
           const SizedBox(height: 8),
           Align(
@@ -383,9 +417,9 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }

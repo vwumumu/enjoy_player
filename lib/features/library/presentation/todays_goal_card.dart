@@ -102,8 +102,9 @@ class TodaysGoalCard extends ConsumerWidget {
     final authAsync = ref.watch(authCtrlProvider);
 
     final goalMinutes = authAsync.maybeWhen(
-      data: (auth) =>
-          auth is AuthSignedIn ? (auth.profile.goal ?? 30).clamp(1, 24 * 60) : 30,
+      data: (auth) => auth is AuthSignedIn
+          ? (auth.profile.goal ?? 30).clamp(1, 24 * 60)
+          : 30,
       orElse: () => 30,
     );
 
@@ -129,14 +130,17 @@ class TodaysGoalCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.track_changes_rounded, size: 20, color: cs.primary),
+                    Icon(
+                      Icons.track_changes_rounded,
+                      size: 20,
+                      color: cs.primary,
+                    ),
                     SizedBox(width: t.space8),
                     Expanded(
                       child: Text(
                         l10n.homeTodaysGoal,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -179,9 +183,9 @@ class TodaysGoalCard extends ConsumerWidget {
                 Text(
                   '${stats.today.recordingDurationMs > 0 ? _formatDurationMs(stats.today.recordingDurationMs) : '0m'} ${l10n.homeCompleted}',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
                 SizedBox(height: t.space12),
                 Text(
@@ -242,10 +246,7 @@ class _TodaysGoalLoadingCard extends StatelessWidget {
               child: Container(
                 width: 112,
                 height: 112,
-                decoration: BoxDecoration(
-                  color: base,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: base, shape: BoxShape.circle),
               ),
             ),
             SizedBox(height: t.space24),

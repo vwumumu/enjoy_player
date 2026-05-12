@@ -97,9 +97,7 @@ List<AzureWordAssessment> _azureJsonWordsList(Object? json) {
   return out;
 }
 
-AzurePronunciationAssessmentScores _azureJsonPronunciationScores(
-  Object? json,
-) {
+AzurePronunciationAssessmentScores _azureJsonPronunciationScores(Object? json) {
   if (json is Map<String, dynamic>) {
     return AzurePronunciationAssessmentScores.fromJson(json);
   }

@@ -25,10 +25,7 @@ class GlassSurface extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final blur = sigma ?? t.miniBarBlurSigma;
 
-    Widget inner = Material(
-      color: Colors.transparent,
-      child: child,
-    );
+    Widget inner = Material(color: Colors.transparent, child: child);
 
     if (padding != null) {
       inner = Padding(padding: padding!, child: inner);

@@ -126,10 +126,15 @@ class PlayerController extends _$PlayerController {
     await _activeEngine.disableRenderedSubtitles();
     if (gen != _openGeneration) return;
 
-    await ref.read(playerPreferencesCtrlProvider.notifier).applyCurrentToEngine();
+    await ref
+        .read(playerPreferencesCtrlProvider.notifier)
+        .applyCurrentToEngine();
     if (gen != _openGeneration) return;
 
-    final persisted = await db.echoSessionDao.getLatestForTarget(dexie, mediaId);
+    final persisted = await db.echoSessionDao.getLatestForTarget(
+      dexie,
+      mediaId,
+    );
     final posMs = persisted?.currentTimeMs ?? 0;
     if (posMs > 0) {
       await _activeEngine.seek(Duration(milliseconds: posMs));
@@ -137,12 +142,14 @@ class PlayerController extends _$PlayerController {
     if (gen != _openGeneration) return;
 
     if (persisted != null && persisted.echoActive) {
-      ref.read(echoModeProvider.notifier).restoreFromSession(
-        startLine: persisted.echoStartLine,
-        endLine: persisted.echoEndLine,
-        echoStartMs: persisted.echoStartMs ?? 0,
-        echoEndMs: persisted.echoEndMs ?? 0,
-      );
+      ref
+          .read(echoModeProvider.notifier)
+          .restoreFromSession(
+            startLine: persisted.echoStartLine,
+            endLine: persisted.echoEndLine,
+            echoStartMs: persisted.echoStartMs ?? 0,
+            echoEndMs: persisted.echoEndMs ?? 0,
+          );
     } else {
       ref.read(echoModeProvider.notifier).deactivate();
     }
@@ -154,8 +161,9 @@ class PlayerController extends _$PlayerController {
       mediaType: kind.storageValue,
       mediaTitle: title,
       thumbnailUrl: thumb,
-      durationSeconds:
-          durationSec > 0 ? durationSec.toDouble() : posMs / 1000.0,
+      durationSeconds: durationSec > 0
+          ? durationSec.toDouble()
+          : posMs / 1000.0,
       currentTimeSeconds: posMs / 1000.0,
       currentSegmentIndex: persisted?.currentSegmentIndex ?? -1,
       language: language,
@@ -176,19 +184,21 @@ class PlayerController extends _$PlayerController {
     if (kind == MediaKind.video &&
         video != null &&
         _activeEngine.supportsVideoPosterCapture) {
-      ref.read(videoPosterCaptureServiceProvider).scheduleCapture(
-        mediaId: mediaId,
-        video: video,
-        restoredPositionMs: posMs,
-        gen: gen,
-        currentOpenGeneration: () => _openGeneration,
-        currentSessionMediaId: () => state?.mediaId,
-        sessionDurationSeconds: () => state?.durationSeconds,
-        activeEngine: _activeEngine,
-        onSessionThumbnail: (path) {
-          state = state?.copyWith(thumbnailUrl: path);
-        },
-      );
+      ref
+          .read(videoPosterCaptureServiceProvider)
+          .scheduleCapture(
+            mediaId: mediaId,
+            video: video,
+            restoredPositionMs: posMs,
+            gen: gen,
+            currentOpenGeneration: () => _openGeneration,
+            currentSessionMediaId: () => state?.mediaId,
+            sessionDurationSeconds: () => state?.durationSeconds,
+            activeEngine: _activeEngine,
+            onSessionThumbnail: (path) {
+              state = state?.copyWith(thumbnailUrl: path);
+            },
+          );
     }
   }
 
@@ -213,8 +223,7 @@ class PlayerController extends _$PlayerController {
 
       final bucket = pos.inMilliseconds ~/ positionBucketMs;
       final prevSec = state?.currentTimeSeconds;
-      final likelySeek =
-          prevSec != null && (seconds - prevSec).abs() > 0.35;
+      final likelySeek = prevSec != null && (seconds - prevSec).abs() > 0.35;
       if (!likelySeek && bucket == _lastPositionEmitBucket) {
         return;
       }
@@ -226,11 +235,13 @@ class PlayerController extends _$PlayerController {
       );
       final s = state;
       if (s != null) {
-        ref.read(playbackSessionPersisterProvider).schedule(
-          mediaId: mediaId,
-          dexieTargetType: dexieTargetType,
-          session: s,
-        );
+        ref
+            .read(playbackSessionPersisterProvider)
+            .schedule(
+              mediaId: mediaId,
+              dexieTargetType: dexieTargetType,
+              session: s,
+            );
       }
     });
 
@@ -245,19 +256,17 @@ class PlayerController extends _$PlayerController {
       final sec = d.inMilliseconds ~/ 1000;
       state = state?.copyWith(durationSeconds: newSec);
       final db = ref.read(appDatabaseProvider);
-      if (kind == MediaKind.video && video != null && video.durationSeconds == 0) {
+      if (kind == MediaKind.video &&
+          video != null &&
+          video.durationSeconds == 0) {
         await db.videoDao.insertRow(
-          video.copyWith(
-            durationSeconds: sec,
-            updatedAt: DateTime.now(),
-          ),
+          video.copyWith(durationSeconds: sec, updatedAt: DateTime.now()),
         );
-      } else if (kind == MediaKind.audio && audio != null && audio.durationSeconds == 0) {
+      } else if (kind == MediaKind.audio &&
+          audio != null &&
+          audio.durationSeconds == 0) {
         await db.audioDao.insertRow(
-          audio.copyWith(
-            durationSeconds: sec,
-            updatedAt: DateTime.now(),
-          ),
+          audio.copyWith(durationSeconds: sec, updatedAt: DateTime.now()),
         );
       }
     });
@@ -291,18 +300,18 @@ class PlayerController extends _$PlayerController {
   }
 
   Future<void> seekTo(
-  Duration target, {
-  /// When set while echo is active, used for seek clamping instead of reading
-  /// [echoModeProvider] (avoids clamping to the previous segment on the same
-  /// stack as [EchoMode.activate]).
-  ({double start, double end})? echoWindowForSeekClamp,
-}) async {
+    Duration target, {
+
+    /// When set while echo is active, used for seek clamping instead of reading
+    /// [echoModeProvider] (avoids clamping to the previous segment on the same
+    /// stack as [EchoMode.activate]).
+    ({double start, double end})? echoWindowForSeekClamp,
+  }) async {
     final echo = ref.read(echoModeProvider);
     var seconds = target.inMilliseconds / 1000.0;
     if (echo.active) {
       final dur = state?.durationSeconds;
-      final startT =
-          echoWindowForSeekClamp?.start ?? echo.startTimeSeconds;
+      final startT = echoWindowForSeekClamp?.start ?? echo.startTimeSeconds;
       final endT = echoWindowForSeekClamp?.end ?? echo.endTimeSeconds;
       final window = normalizeEchoWindow((
         active: true,

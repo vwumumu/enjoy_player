@@ -44,10 +44,7 @@ YinPitchSeries estimatePitchYin(
     );
   }
 
-  final padded =
-      samples.length < frameSize
-          ? Float32List(frameSize)
-          : samples;
+  final padded = samples.length < frameSize ? Float32List(frameSize) : samples;
   if (samples.length < frameSize) {
     padded.setRange(0, samples.length, samples);
   }

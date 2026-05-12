@@ -6,8 +6,11 @@ List<String> hotkeyDisplayTokens(String binding) {
   final s = binding.trim().toLowerCase();
   if (s == 'shift+slash') return const ['?'];
 
-  final parts =
-      s.split('+').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  final parts = s
+      .split('+')
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
+      .toList();
   if (parts.isEmpty) return [binding];
 
   final out = <String>[];

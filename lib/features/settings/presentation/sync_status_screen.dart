@@ -32,9 +32,7 @@ class _SyncStatusScreenState extends ConsumerState<SyncStatusScreen> {
     final auth = ref.watch(authCtrlProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.syncScreenTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.syncScreenTitle)),
       body: auth.when(
         data: (state) {
           if (state is! AuthSignedIn) {
@@ -46,8 +44,8 @@ class _SyncStatusScreenState extends ConsumerState<SyncStatusScreen> {
                   Text(
                     l10n.syncScreenSignedOutBody,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   FilledButton(
@@ -74,8 +72,7 @@ class _SyncStatusScreenState extends ConsumerState<SyncStatusScreen> {
   Future<void> _runSyncNow(BuildContext context, AppLocalizations l10n) async {
     setState(() => _busySync = true);
     try {
-      final result =
-          await ref.read(syncCtrlProvider.notifier).triggerSync();
+      final result = await ref.read(syncCtrlProvider.notifier).triggerSync();
       if (!context.mounted) return;
       if (result.success) {
         AppNotice.success(context, l10n.syncSnackSuccess);
@@ -258,30 +255,30 @@ class _SignedInBody extends ConsumerWidget {
                           ),
                         ]
                       : snap.detailRows
-                          .map(
-                            (row) => ListTile(
-                              dense: true,
-                              title: Text(
-                                '${row.entityType} · ${row.entityId}',
-                                style: tt.bodyMedium,
-                              ),
-                              subtitle: Text(
-                                [
-                                  row.action,
-                                  'retries ${row.retryCount}',
-                                  if (row.error != null &&
-                                      row.error!.isNotEmpty)
-                                    _truncate(row.error!, 120),
-                                ].join('\n'),
-                                style: tt.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
+                            .map(
+                              (row) => ListTile(
+                                dense: true,
+                                title: Text(
+                                  '${row.entityType} · ${row.entityId}',
+                                  style: tt.bodyMedium,
                                 ),
+                                subtitle: Text(
+                                  [
+                                    row.action,
+                                    'retries ${row.retryCount}',
+                                    if (row.error != null &&
+                                        row.error!.isNotEmpty)
+                                      _truncate(row.error!, 120),
+                                  ].join('\n'),
+                                  style: tt.bodySmall?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                                isThreeLine:
+                                    row.error != null && row.error!.length > 40,
                               ),
-                              isThreeLine: row.error != null &&
-                                  row.error!.length > 40,
-                            ),
-                          )
-                          .toList(),
+                            )
+                            .toList(),
                 ),
               ],
             );

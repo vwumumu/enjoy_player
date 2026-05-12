@@ -46,8 +46,7 @@ class EchoRegionMergedCard extends ConsumerWidget {
     // Neutral surface — no colored background; left rail carries the echo accent.
     final shell = scheme.surfaceContainerLow;
 
-    final showShadow =
-        echo.startTimeSeconds >= 0 && echo.endTimeSeconds >= 0;
+    final showShadow = echo.startTimeSeconds >= 0 && echo.endTimeSeconds >= 0;
 
     final lineWidgets = <Widget>[];
     for (var i = echo.startLineIndex; i <= echo.endLineIndex; i++) {
@@ -65,7 +64,10 @@ class EchoRegionMergedCard extends ConsumerWidget {
 
       final line = lines[i];
       final isActive = i == activeCueIndex;
-      final secondaryText = transcriptMatchSecondary(line, secondaryLines)?.text;
+      final secondaryText = transcriptMatchSecondary(
+        line,
+        secondaryLines,
+      )?.text;
 
       final tile = TranscriptLineTile(
         line: line,
@@ -73,9 +75,8 @@ class EchoRegionMergedCard extends ConsumerWidget {
         isActive: isActive,
         inEcho: true,
         groupedInEcho: true,
-        onTap: () => ref
-            .read(playerInteractionsProvider.notifier)
-            .seekToLine(line, i),
+        onTap: () =>
+            ref.read(playerInteractionsProvider.notifier).seekToLine(line, i),
       );
 
       lineWidgets.add(tile);
@@ -106,9 +107,7 @@ class EchoRegionMergedCard extends ConsumerWidget {
                 // Orange rail
                 Container(
                   width: 8,
-                  decoration: BoxDecoration(
-                    color: tok.echoActive,
-                  ),
+                  decoration: BoxDecoration(color: tok.echoActive),
                 ),
                 // Content
                 Expanded(

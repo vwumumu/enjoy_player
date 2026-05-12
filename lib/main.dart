@@ -22,13 +22,10 @@ Future<void> main() async {
       defaultTargetPlatform == TargetPlatform.macOS ||
       defaultTargetPlatform == TargetPlatform.linux) {
     await windowManager.ensureInitialized();
-    await windowManager.waitUntilReadyToShow(
-      const WindowOptions(),
-      () async {
-        await windowManager.show();
-        await windowManager.focus();
-      },
-    );
+    await windowManager.waitUntilReadyToShow(const WindowOptions(), () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
   }
 
   runApp(const ProviderScope(child: EnjoyApp()));

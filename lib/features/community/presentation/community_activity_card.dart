@@ -218,10 +218,7 @@ class _ErrorCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
-              TextButton(
-                onPressed: onRetry,
-                child: Text(l10n.retry),
-              ),
+              TextButton(onPressed: onRetry, child: Text(l10n.retry)),
             ],
           ),
         ),
@@ -254,10 +251,7 @@ class _TodayStatsBody extends StatelessWidget {
           children: [
             Icon(Icons.auto_awesome, size: 16, color: cs.primary),
             SizedBox(width: t.space8),
-            Text(
-              l10n.communityToday.toUpperCase(),
-              style: small,
-            ),
+            Text(l10n.communityToday.toUpperCase(), style: small),
           ],
         ),
         SizedBox(height: t.space12),
@@ -319,18 +313,18 @@ class _StatBlock extends StatelessWidget {
             SizedBox(width: t.space8),
             Text(
               valueText,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),
         SizedBox(height: t.space4),
         Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: cs.onSurfaceVariant,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
         ),
       ],
     );
@@ -355,16 +349,16 @@ class _SimpleCountBody extends StatelessWidget {
         children: [
           Text(
             '0',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: t.space8),
           Text(
             l10n.homeNoActiveUsers,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       );
@@ -375,16 +369,16 @@ class _SimpleCountBody extends StatelessWidget {
       children: [
         Text(
           '${data.count}',
-          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         SizedBox(height: t.space4),
         Text(
           l10n.homePeopleLearning(data.count),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: cs.onSurfaceVariant,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
         ),
         SizedBox(height: t.space16),
         _AvatarWrap(
@@ -426,18 +420,14 @@ class _ActiveLearnersRow extends StatelessWidget {
             if (data.count > 0)
               Text(
                 '${data.count}',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
           ],
         ),
         SizedBox(height: t.space8),
-        _AvatarWrap(
-          users: data.users,
-          totalCount: data.count,
-          dense: dense,
-        ),
+        _AvatarWrap(users: data.users, totalCount: data.count, dense: dense),
       ],
     );
   }
@@ -460,8 +450,7 @@ class _AvatarWrap extends StatelessWidget {
     final size = dense ? 32.0 : 40.0;
     final fontSize = dense ? 10.0 : 12.0;
     final shown = users.take(_kMaxAvatars).toList();
-    final extra =
-        totalCount > _kMaxAvatars ? totalCount - _kMaxAvatars : 0;
+    final extra = totalCount > _kMaxAvatars ? totalCount - _kMaxAvatars : 0;
 
     return Wrap(
       spacing: dense ? 6 : 8,
@@ -480,10 +469,7 @@ class _AvatarWrap extends StatelessWidget {
             ),
             child: Text(
               '+$extra',
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w600),
             ),
           ),
       ],

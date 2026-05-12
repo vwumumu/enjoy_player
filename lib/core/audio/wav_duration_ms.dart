@@ -12,7 +12,8 @@ int? wavDurationMsFromBytes(Uint8List bytes) {
   int? byteRate;
   int? dataBytes;
 
-  while (offset + 8 <= bytes.length && (byteRate == null || dataBytes == null)) {
+  while (offset + 8 <= bytes.length &&
+      (byteRate == null || dataBytes == null)) {
     final chunkId = String.fromCharCodes(bytes.sublist(offset, offset + 4));
     final chunkSize = _readUint32Le(bytes, offset + 4);
     final dataStart = offset + 8;

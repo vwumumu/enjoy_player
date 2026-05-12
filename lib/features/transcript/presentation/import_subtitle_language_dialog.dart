@@ -27,40 +27,37 @@ Future<String?> showImportSubtitleLanguageDialog(
   final ctrl = TextEditingController(text: initialLanguage);
   return showDialog<String>(
     context: context,
-    builder:
-        (ctx) => AlertDialog(
-          title: Text(l10n.subtitlesImportLanguageTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.subtitlesImportLanguageHint,
-                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              SizedBox(height: EnjoyThemeTokens.of(ctx).space12),
-              TextField(
-                controller: ctrl,
-                autofocus: true,
-                textCapitalization: TextCapitalization.none,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.subtitlesImportLanguageTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.subtitlesImportLanguageHint,
+            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+              color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, ctrl.text),
-              child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
-            ),
-          ],
+          SizedBox(height: EnjoyThemeTokens.of(ctx).space12),
+          TextField(
+            controller: ctrl,
+            autofocus: true,
+            textCapitalization: TextCapitalization.none,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
         ),
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx, ctrl.text),
+          child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
+        ),
+      ],
+    ),
   );
 }

@@ -14,8 +14,7 @@ class Audios extends Table {
   TextColumn get title => text()();
   TextColumn get description => text().nullable()();
   TextColumn get thumbnailUrl => text().nullable()();
-  IntColumn get durationSeconds =>
-      integer().withDefault(const Constant(0))();
+  IntColumn get durationSeconds => integer().withDefault(const Constant(0))();
   TextColumn get language => text().withDefault(const Constant('und'))();
   TextColumn get translationKey => text().nullable()();
   TextColumn get sourceText => text().nullable()();

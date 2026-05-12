@@ -2,10 +2,7 @@ import 'package:azure_speech/azure_speech.dart';
 
 /// Parsed Azure pronunciation assessment (JSON from Speech SDK).
 final class AssessmentResult {
-  const AssessmentResult({
-    required this.detail,
-    required this.rawJson,
-  });
+  const AssessmentResult({required this.detail, required this.rawJson});
 
   final AzurePronunciationAssessmentResult detail;
 

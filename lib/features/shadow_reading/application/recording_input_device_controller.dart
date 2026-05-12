@@ -65,7 +65,8 @@ class RecordingInputDeviceCtrl extends _$RecordingInputDeviceCtrl {
   /// Re-enumerate devices (e.g. when settings opens or a USB mic is plugged
   /// in).
   Future<void> refresh() async {
-    final persisted = state.valueOrNull?.persistedId ?? await _readPersistedId();
+    final persisted =
+        state.valueOrNull?.persistedId ?? await _readPersistedId();
     final devices = await _enumerate();
     state = AsyncData(_stateFor(devices: devices, persisted: persisted));
   }
@@ -93,8 +94,7 @@ class RecordingInputDeviceCtrl extends _$RecordingInputDeviceCtrl {
     final lite = devices
         .map((d) => InputDeviceLite(id: d.id, label: d.label))
         .toList(growable: false);
-    final selectedId =
-        pickPreferredInputDeviceId(lite, preferredId: persisted);
+    final selectedId = pickPreferredInputDeviceId(lite, preferredId: persisted);
     return RecordingInputDeviceState(
       devices: devices,
       selectedId: selectedId,
@@ -103,9 +103,10 @@ class RecordingInputDeviceCtrl extends _$RecordingInputDeviceCtrl {
   }
 
   Future<String?> _readPersistedId() async {
-    final raw = await ref.read(appDatabaseProvider).settingsDao.getValue(
-          SettingsKeys.prefsRecordingInputDeviceId,
-        );
+    final raw = await ref
+        .read(appDatabaseProvider)
+        .settingsDao
+        .getValue(SettingsKeys.prefsRecordingInputDeviceId);
     if (raw == null || raw.isEmpty) return null;
     return raw;
   }

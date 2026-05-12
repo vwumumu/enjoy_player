@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 
-final videoRowForMediaProvider =
-    FutureProvider.family<VideoRow?, String>((ref, mediaId) async {
-      final db = ref.read(appDatabaseProvider);
-      return db.videoDao.getById(mediaId);
-    });
+final videoRowForMediaProvider = FutureProvider.family<VideoRow?, String>((
+  ref,
+  mediaId,
+) async {
+  final db = ref.read(appDatabaseProvider);
+  return db.videoDao.getById(mediaId);
+});

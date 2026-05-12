@@ -12,15 +12,24 @@ final class EnjoyLlmCapability implements LlmCapability {
     final choices = map['choices'] as List<dynamic>?;
     final first = choices?.isNotEmpty == true ? choices!.first : null;
     if (first is! Map<String, dynamic>) {
-      throw const ApiException(message: 'No choices in chat completion', statusCode: 502);
+      throw const ApiException(
+        message: 'No choices in chat completion',
+        statusCode: 502,
+      );
     }
     final message = first['message'];
     if (message is! Map<String, dynamic>) {
-      throw const ApiException(message: 'No message in completion choice', statusCode: 502);
+      throw const ApiException(
+        message: 'No message in completion choice',
+        statusCode: 502,
+      );
     }
     final content = message['content'] as String?;
     if (content == null || content.isEmpty) {
-      throw const ApiException(message: 'Empty completion content', statusCode: 502);
+      throw const ApiException(
+        message: 'Empty completion content',
+        statusCode: 502,
+      );
     }
     return content;
   }

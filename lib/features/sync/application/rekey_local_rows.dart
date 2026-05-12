@@ -18,12 +18,12 @@ Future<void> rekeyLocalMediaRowsOnSignIn({
 }) async {
   if (userId.isEmpty) return;
 
-  final videos = await (db.select(db.videos)
-        ..where((t) => t.syncStatus.equals('local-pending-rekey')))
-      .get();
-  final audios = await (db.select(db.audios)
-        ..where((t) => t.syncStatus.equals('local-pending-rekey')))
-      .get();
+  final videos = await (db.select(
+    db.videos,
+  )..where((t) => t.syncStatus.equals('local-pending-rekey'))).get();
+  final audios = await (db.select(
+    db.audios,
+  )..where((t) => t.syncStatus.equals('local-pending-rekey'))).get();
   if (videos.isEmpty && audios.isEmpty) return;
 
   // Single transaction → one Drift change notification batch vs N per-row txns.
@@ -85,8 +85,8 @@ Future<void> _rekeyOneVideo(
   if (canonical != null) {
     final mergedLocal =
         (canonical.localUri != null && canonical.localUri!.isNotEmpty)
-            ? canonical.localUri
-            : row.localUri;
+        ? canonical.localUri
+        : row.localUri;
     final mergedSize = canonical.size ?? row.size;
     await db.videoDao.insertRow(
       canonical.copyWith(
@@ -166,8 +166,8 @@ Future<void> _rekeyOneAudio(
   if (canonical != null) {
     final mergedLocal =
         (canonical.localUri != null && canonical.localUri!.isNotEmpty)
-            ? canonical.localUri
-            : row.localUri;
+        ? canonical.localUri
+        : row.localUri;
     final mergedSize = canonical.size ?? row.size;
     await db.audioDao.insertRow(
       canonical.copyWith(
@@ -248,12 +248,11 @@ Future<void> _retargetMediaForeignKeys(
     oldTargetId,
   );
   if (fetch != null) {
-    await (db.delete(db.transcriptFetchStates)
-          ..where(
-            (s) =>
-                s.targetType.equals(dexieTargetType) &
-                s.targetId.equals(oldTargetId),
-          ))
+    await (db.delete(db.transcriptFetchStates)..where(
+          (s) =>
+              s.targetType.equals(dexieTargetType) &
+              s.targetId.equals(oldTargetId),
+        ))
         .go();
     await db.transcriptFetchStateDao.upsertFetched(
       dexieTargetType,
@@ -271,11 +270,11 @@ Future<void> _retargetMediaForeignKeys(
 }
 
 Future<int> countPendingRekeyRows(AppDatabase db) async {
-  final v = await (db.select(db.videos)
-        ..where((t) => t.syncStatus.equals('local-pending-rekey')))
-      .get();
-  final a = await (db.select(db.audios)
-        ..where((t) => t.syncStatus.equals('local-pending-rekey')))
-      .get();
+  final v = await (db.select(
+    db.videos,
+  )..where((t) => t.syncStatus.equals('local-pending-rekey'))).get();
+  final a = await (db.select(
+    db.audios,
+  )..where((t) => t.syncStatus.equals('local-pending-rekey'))).get();
   return v.length + a.length;
 }

@@ -1,7 +1,8 @@
 /// Centralized haptic feedback — respects reduced motion and platform capability.
 library;
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 

@@ -46,11 +46,9 @@ class TranscriptPanel extends ConsumerWidget {
     final trimmed = lang.trim();
     if (trimmed.isEmpty) return;
 
-    await ref.read(transcriptRepositoryProvider).importSubtitle(
-          mediaId: mediaId,
-          file: XFile(path),
-          language: trimmed,
-        );
+    await ref
+        .read(transcriptRepositoryProvider)
+        .importSubtitle(mediaId: mediaId, file: XFile(path), language: trimmed);
     if (context.mounted) {
       AppNotice.success(
         context,
@@ -71,7 +69,8 @@ class TranscriptPanel extends ConsumerWidget {
     );
     final showLocalActions = !isYoutube;
     final session = ref.watch(playerControllerProvider);
-    final showExtractButton = session != null &&
+    final showExtractButton =
+        session != null &&
         session.dexieTargetType == 'Video' &&
         showLocalActions;
 
@@ -86,12 +85,12 @@ class TranscriptPanel extends ConsumerWidget {
                   onImport: () => _import(context, ref),
                   onExtract: showExtractButton
                       ? () => unawaited(
-                            runEmbeddedSubtitleExtract(
-                              context: context,
-                              ref: ref,
-                              mediaId: mediaId,
-                            ),
-                          )
+                          runEmbeddedSubtitleExtract(
+                            context: context,
+                            ref: ref,
+                            mediaId: mediaId,
+                          ),
+                        )
                       : null,
                   showImportButton: showLocalActions,
                   showExtractButton: showExtractButton,

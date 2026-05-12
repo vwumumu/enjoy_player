@@ -6,11 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 
 class EnjoyCard extends StatelessWidget {
-  const EnjoyCard({
-    super.key,
-    required this.child,
-    this.padding,
-  });
+  const EnjoyCard({super.key, required this.child, this.padding});
 
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -28,10 +24,7 @@ class EnjoyCard extends StatelessWidget {
         side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.28)),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: padding ?? EdgeInsets.zero,
-        child: child,
-      ),
+      child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
     );
   }
 }

@@ -18,8 +18,7 @@ bool shouldRetryQueueItem(SyncQueueRow item) {
   if (item.retryCount >= _kMaxRetries) return false;
   if (item.lastAttempt == null) return true;
   final delayMs = _kRetryBaseMs * (1 << item.retryCount);
-  final elapsed =
-      DateTime.now().difference(item.lastAttempt!).inMilliseconds;
+  final elapsed = DateTime.now().difference(item.lastAttempt!).inMilliseconds;
   return elapsed >= delayMs;
 }
 
@@ -29,10 +28,10 @@ class SyncEngine {
     required SyncQueueRepository queue,
     required SyncUploadService upload,
     required SyncDownloadService download,
-  })  : _db = db,
-        _queue = queue,
-        _upload = upload,
-        _download = download;
+  }) : _db = db,
+       _queue = queue,
+       _upload = upload,
+       _download = download;
 
   final AppDatabase _db;
   final SyncQueueRepository _queue;
@@ -75,11 +74,7 @@ class SyncEngine {
       }
     }
 
-    return SyncResult(
-      success: failed == 0,
-      synced: synced,
-      failed: failed,
-    );
+    return SyncResult(success: failed == 0, synced: synced, failed: failed);
   }
 
   Future<bool> _processOne(SyncQueueRow item) async {

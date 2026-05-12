@@ -87,10 +87,7 @@ class HeroArtwork extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            cs.surfaceContainerHighest,
-            cs.surfaceContainerHigh,
-          ],
+          colors: [cs.surfaceContainerHighest, cs.surfaceContainerHigh],
         ),
       ),
       child: Center(

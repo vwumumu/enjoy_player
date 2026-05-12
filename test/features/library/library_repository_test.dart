@@ -122,121 +122,130 @@ void main() {
       expect(await repo.getById(id), isNull);
     });
 
-    test('relocateLocalFile sets localUri when picked file hash matches', () async {
-      final bytes = utf8.encode('relocate-body');
-      final hash = sha256.convert(bytes).toString();
-      final id = enjoyVideoId(vid: hash);
-      final src = File(p.join(root.path, 'clip.mp4'));
-      await src.writeAsBytes(bytes);
+    test(
+      'relocateLocalFile sets localUri when picked file hash matches',
+      () async {
+        final bytes = utf8.encode('relocate-body');
+        final hash = sha256.convert(bytes).toString();
+        final id = enjoyVideoId(vid: hash);
+        final src = File(p.join(root.path, 'clip.mp4'));
+        await src.writeAsBytes(bytes);
 
-      final now = DateTime.now();
-      await db.videoDao.insertRow(
-        VideoRow(
-          id: id,
-          vid: hash,
-          provider: 'user',
-          title: 'Synced',
-          description: null,
-          thumbnailUrl: null,
-          durationSeconds: 0,
-          language: 'und',
-          source: null,
-          localUri: null,
-          md5: hash,
-          size: bytes.length,
-          mediaUrl: null,
-          syncStatus: 'synced',
-          serverUpdatedAt: null,
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
+        final now = DateTime.now();
+        await db.videoDao.insertRow(
+          VideoRow(
+            id: id,
+            vid: hash,
+            provider: 'user',
+            title: 'Synced',
+            description: null,
+            thumbnailUrl: null,
+            durationSeconds: 0,
+            language: 'und',
+            source: null,
+            localUri: null,
+            md5: hash,
+            size: bytes.length,
+            mediaUrl: null,
+            syncStatus: 'synced',
+            serverUpdatedAt: null,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
 
-      await repo.relocateLocalFile(
-        mediaId: id,
-        picked: XFile(src.path, name: 'clip.mp4'),
-      );
-
-      final row = await db.videoDao.getById(id);
-      expect(row, isNotNull);
-      expect(row!.localUri, isNotNull);
-      expect(row.localUri, contains(hash));
-      expect(row.size, bytes.length);
-    });
-
-    test('relocateLocalFile throws and keeps localUri when hash mismatches', () async {
-      final goodBytes = utf8.encode('good');
-      final hash = sha256.convert(goodBytes).toString();
-      final id = enjoyAudioId(aid: hash);
-      final wrong = File(p.join(root.path, 'wrong.mp3'));
-      await wrong.writeAsBytes(utf8.encode('other-bytes'));
-
-      final now = DateTime.now();
-      await db.audioDao.insertRow(
-        AudioRow(
-          id: id,
-          aid: hash,
-          provider: 'user',
-          title: 'Remote',
-          description: null,
-          thumbnailUrl: null,
-          durationSeconds: 0,
-          language: 'und',
-          translationKey: null,
-          sourceText: null,
-          voice: null,
-          source: null,
-          localUri: null,
-          md5: hash,
-          size: goodBytes.length,
-          mediaUrl: null,
-          syncStatus: null,
-          serverUpdatedAt: null,
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
-
-      await expectLater(
-        repo.relocateLocalFile(
+        await repo.relocateLocalFile(
           mediaId: id,
-          picked: XFile(wrong.path, name: 'wrong.mp3'),
-        ),
-        throwsA(isA<FileFailure>()),
-      );
+          picked: XFile(src.path, name: 'clip.mp4'),
+        );
 
-      final row = await db.audioDao.getById(id);
-      expect(row!.localUri, isNull);
-    });
+        final row = await db.videoDao.getById(id);
+        expect(row, isNotNull);
+        expect(row!.localUri, isNotNull);
+        expect(row.localUri, contains(hash));
+        expect(row.size, bytes.length);
+      },
+    );
 
-    test('ensureVideoPosterAfterMetadataInsert does not set thumbnail_url', () async {
-      final now = DateTime.now();
-      const id = 'v-poster-hook';
-      await db.videoDao.insertRow(
-        VideoRow(
-          id: id,
-          vid: 'x',
-          provider: 'user',
-          title: 't',
-          description: null,
-          thumbnailUrl: null,
-          durationSeconds: 0,
-          language: 'und',
-          source: null,
-          localUri: null,
-          md5: List.generate(64, (_) => 'a').join(),
-          size: 1,
-          mediaUrl: 'https://example.com/video.mp4',
-          syncStatus: null,
-          serverUpdatedAt: null,
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
-      final row = await db.videoDao.getById(id);
-      await repo.ensureVideoPosterAfterMetadataInsert(row!);
-      final after = await db.videoDao.getById(id);
-      expect(after!.thumbnailUrl, isNull);
-    });
+    test(
+      'relocateLocalFile throws and keeps localUri when hash mismatches',
+      () async {
+        final goodBytes = utf8.encode('good');
+        final hash = sha256.convert(goodBytes).toString();
+        final id = enjoyAudioId(aid: hash);
+        final wrong = File(p.join(root.path, 'wrong.mp3'));
+        await wrong.writeAsBytes(utf8.encode('other-bytes'));
+
+        final now = DateTime.now();
+        await db.audioDao.insertRow(
+          AudioRow(
+            id: id,
+            aid: hash,
+            provider: 'user',
+            title: 'Remote',
+            description: null,
+            thumbnailUrl: null,
+            durationSeconds: 0,
+            language: 'und',
+            translationKey: null,
+            sourceText: null,
+            voice: null,
+            source: null,
+            localUri: null,
+            md5: hash,
+            size: goodBytes.length,
+            mediaUrl: null,
+            syncStatus: null,
+            serverUpdatedAt: null,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+
+        await expectLater(
+          repo.relocateLocalFile(
+            mediaId: id,
+            picked: XFile(wrong.path, name: 'wrong.mp3'),
+          ),
+          throwsA(isA<FileFailure>()),
+        );
+
+        final row = await db.audioDao.getById(id);
+        expect(row!.localUri, isNull);
+      },
+    );
+
+    test(
+      'ensureVideoPosterAfterMetadataInsert does not set thumbnail_url',
+      () async {
+        final now = DateTime.now();
+        const id = 'v-poster-hook';
+        await db.videoDao.insertRow(
+          VideoRow(
+            id: id,
+            vid: 'x',
+            provider: 'user',
+            title: 't',
+            description: null,
+            thumbnailUrl: null,
+            durationSeconds: 0,
+            language: 'und',
+            source: null,
+            localUri: null,
+            md5: List.generate(64, (_) => 'a').join(),
+            size: 1,
+            mediaUrl: 'https://example.com/video.mp4',
+            syncStatus: null,
+            serverUpdatedAt: null,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+        final row = await db.videoDao.getById(id);
+        await repo.ensureVideoPosterAfterMetadataInsert(row!);
+        final after = await db.videoDao.getById(id);
+        expect(after!.thumbnailUrl, isNull);
+      },
+    );
   });
 }

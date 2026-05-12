@@ -56,10 +56,7 @@ final class MethodChannelAzureSpeech extends AzureSpeechPlatform {
       );
     } on FormatException catch (e, st) {
       Error.throwWithStackTrace(
-        AzureSpeechException(
-          code: 'parse_error',
-          message: e.message,
-        ),
+        AzureSpeechException(code: 'parse_error', message: e.message),
         st,
       );
     }

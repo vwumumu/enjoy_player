@@ -26,16 +26,16 @@ class TransportArtworkTile extends ConsumerWidget {
     // ADR-0003: single media_kit Player/VideoController — do not attach a second
     // [Video] here; the expanded player owns the texture. Mini bar uses art only.
     final thumb = localThumbnailFile(chrome.thumbnailUrl);
-    final Widget rawArt =
-        thumb != null
-            ? Image.file(
-              thumb,
-              width: width,
-              height: height,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => transportArtworkFallback(cs, isVideo: isVideo),
-            )
-            : transportArtworkFallback(cs, isVideo: isVideo);
+    final Widget rawArt = thumb != null
+        ? Image.file(
+            thumb,
+            width: width,
+            height: height,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) =>
+                transportArtworkFallback(cs, isVideo: isVideo),
+          )
+        : transportArtworkFallback(cs, isVideo: isVideo);
     final Widget content = Hero(
       tag: mediaArtworkHeroTag(chrome.mediaId),
       child: Material(type: MaterialType.transparency, child: rawArt),

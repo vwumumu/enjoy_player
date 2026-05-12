@@ -22,10 +22,9 @@ final profilePracticeStatsProvider =
     FutureProvider.autoDispose<ProfilePracticeStats>((ref) async {
       final db = ref.watch(appDatabaseProvider);
       final totals = await db.echoSessionDao.practiceTotals();
-      final libraryCount = ref.watch(libraryMediaProvider).maybeWhen(
-        data: (m) => m.length,
-        orElse: () => 0,
-      );
+      final libraryCount = ref
+          .watch(libraryMediaProvider)
+          .maybeWhen(data: (m) => m.length, orElse: () => 0);
       return ProfilePracticeStats(
         libraryItemCount: libraryCount,
         echoSessionCount: totals.sessionCount,

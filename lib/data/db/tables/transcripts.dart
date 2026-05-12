@@ -9,12 +9,15 @@ class Transcripts extends Table {
   String get tableName => 'transcripts';
 
   TextColumn get id => text()();
+
   /// Weapp `TargetType`: `Video` | `Audio` | `Example` | `Ebook`.
   TextColumn get targetType => text()();
   TextColumn get targetId => text()();
   TextColumn get language => text()();
+
   /// Weapp `TranscriptSource`: `official` | `auto` | `ai` | `user`.
   TextColumn get source => text()();
+
   /// JSON array of `TranscriptLine` (ms-based), same shape as weapp `timeline`.
   TextColumn get timelineJson => text()();
   TextColumn get referenceId => text().nullable()();

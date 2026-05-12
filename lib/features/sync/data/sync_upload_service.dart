@@ -16,10 +16,10 @@ class SyncUploadService {
     required AudioApi audioApi,
     required VideoApi videoApi,
     required RecordingApi recordingApi,
-  })  : _db = db,
-        _audioApi = audioApi,
-        _videoApi = videoApi,
-        _recordingApi = recordingApi;
+  }) : _db = db,
+       _audioApi = audioApi,
+       _videoApi = videoApi,
+       _recordingApi = recordingApi;
 
   final AppDatabase _db;
   final AudioApi _audioApi;
@@ -57,8 +57,9 @@ class SyncUploadService {
   }
 
   Future<void> uploadRecording(RecordingRow row) async {
-    final response =
-        await _recordingApi.uploadRecording(prepareForSyncRecordingMap(row));
+    final response = await _recordingApi.uploadRecording(
+      prepareForSyncRecordingMap(row),
+    );
     final inner = unwrapEntity(response, 'recording');
     final serverUpdated =
         parseIsoDate(inner['updatedAt']) ?? DateTime.now().toUtc();

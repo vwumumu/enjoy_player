@@ -24,13 +24,12 @@ final class DictionaryResult {
       targetLanguage: json['targetLanguage'] as String? ?? '',
       lemma: json['lemma'] as String?,
       ipa: json['ipa'] as String?,
-      senses:
-          sensesRaw
-              .map(
-                (e) =>
-                    DictionarySense.fromJson(Map<String, dynamic>.from(e as Map)),
-              )
-              .toList(),
+      senses: sensesRaw
+          .map(
+            (e) =>
+                DictionarySense.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
+          .toList(),
     );
   }
 }
@@ -57,14 +56,12 @@ final class DictionarySense {
       translation: json['translation'] as String?,
       partOfSpeech: json['partOfSpeech'] as String?,
       notes: json['notes'] as String?,
-      examples:
-          ex
-              ?.map(
-                (e) => DictionaryExample.fromJson(
-                  Map<String, dynamic>.from(e as Map),
-                ),
-              )
-              .toList(),
+      examples: ex
+          ?.map(
+            (e) =>
+                DictionaryExample.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
+          .toList(),
     );
   }
 }

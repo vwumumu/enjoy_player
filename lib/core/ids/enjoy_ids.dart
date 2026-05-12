@@ -28,23 +28,20 @@ String enjoySha256HexOfString(String input) =>
 String enjoyLocalAudioAid({
   required String contentHashHex,
   required String userId,
-}) =>
-    enjoySha256HexOfString('$contentHashHex:$userId');
+}) => enjoySha256HexOfString('$contentHashHex:$userId');
 
 /// Web `generateLocalVideoVid` — same formula as audio `aid`.
 String enjoyLocalVideoVid({
   required String contentHashHex,
   required String userId,
-}) =>
-    enjoySha256HexOfString('$contentHashHex:$userId');
+}) => enjoySha256HexOfString('$contentHashHex:$userId');
 
 String enjoyTranscriptId({
   required String targetType,
   required String targetId,
   required String language,
   required String source,
-}) =>
-    _uuid.v5(
-      enjoyUuidNamespaceUrl,
-      'transcript:$targetType:$targetId:$language:$source',
-    );
+}) => _uuid.v5(
+  enjoyUuidNamespaceUrl,
+  'transcript:$targetType:$targetId:$language:$source',
+);

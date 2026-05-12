@@ -13,6 +13,7 @@ class TranscriptTrack {
   });
 
   final String id;
+
   /// Dexie `TargetType` (`Video` | `Audio` | …).
   final String targetType;
   final String targetId;

@@ -79,18 +79,12 @@ AzureWordAssessment _$AzureWordAssessmentFromJson(
   pronunciationAssessment: _azureJsonWordPronunciation(
     json['PronunciationAssessment'],
   ),
-  syllables:
-      (json['Syllables'] as List<dynamic>?)
-          ?.map(
-            (e) => AzureSyllableAssessment.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
-  phonemes:
-      (json['Phonemes'] as List<dynamic>?)
-          ?.map(
-            (e) => AzurePhonemeAssessment.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
+  syllables: (json['Syllables'] as List<dynamic>?)
+      ?.map((e) => AzureSyllableAssessment.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  phonemes: (json['Phonemes'] as List<dynamic>?)
+      ?.map((e) => AzurePhonemeAssessment.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$AzureWordAssessmentToJson(
@@ -127,12 +121,9 @@ AzureSyllableAssessment _$AzureSyllableAssessmentFromJson(
   pronunciationAssessment: _azureJsonSyllablePronunciation(
     json['PronunciationAssessment'],
   ),
-  phonemes:
-      (json['Phonemes'] as List<dynamic>?)
-          ?.map(
-            (e) => AzurePhonemeAssessment.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
+  phonemes: (json['Phonemes'] as List<dynamic>?)
+      ?.map((e) => AzurePhonemeAssessment.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$AzureSyllableAssessmentToJson(
@@ -179,12 +170,9 @@ AzurePhonemePronunciationAssessment
 _$AzurePhonemePronunciationAssessmentFromJson(Map<String, dynamic> json) =>
     AzurePhonemePronunciationAssessment(
       accuracyScore: _azureJsonDoubleScore(json['AccuracyScore']),
-      nBestPhonemes:
-          (json['NBestPhonemes'] as List<dynamic>?)
-              ?.map(
-                (e) => AzureNBestPhoneme.fromJson(e as Map<String, dynamic>),
-              )
-              .toList(),
+      nBestPhonemes: (json['NBestPhonemes'] as List<dynamic>?)
+          ?.map((e) => AzureNBestPhoneme.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$AzurePhonemePronunciationAssessmentToJson(

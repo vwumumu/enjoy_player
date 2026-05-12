@@ -49,9 +49,7 @@ AppDatabase guestAppDatabase(Ref ref) {
 /// Per-session library + prefs: guest file when signed out; `enjoy_player_<userId>` when signed in.
 @Riverpod(keepAlive: true)
 AppDatabase appDatabase(Ref ref) {
-  final sessionName = ref.watch(
-    authCtrlProvider.select(_sessionDbBaseName),
-  );
+  final sessionName = ref.watch(authCtrlProvider.select(_sessionDbBaseName));
 
   if (sessionName == AppDatabase.guestDatabaseName) {
     return ref.watch(guestAppDatabaseProvider);

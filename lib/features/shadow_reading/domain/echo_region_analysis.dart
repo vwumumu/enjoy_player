@@ -77,18 +77,17 @@ List<EchoRegionSeriesPoint> mergeUserPitchOntoReference({
   }
 
   final scale = referenceDurationSec / userDurationSec;
-  final merged =
-      referencePoints
-          .map(
-            (p) => EchoRegionSeriesPoint(
-              t: p.t,
-              ampRef: p.ampRef,
-              pitchRefHz: p.pitchRefHz,
-              ampUser: 0,
-              pitchUserHz: null,
-            ),
-          )
-          .toList();
+  final merged = referencePoints
+      .map(
+        (p) => EchoRegionSeriesPoint(
+          t: p.t,
+          ampRef: p.ampRef,
+          pitchRefHz: p.pitchRefHz,
+          ampUser: 0,
+          pitchUserHz: null,
+        ),
+      )
+      .toList();
 
   const nearestTol = 0.1;
   for (final userPoint in userPoints) {
@@ -126,13 +125,7 @@ List<EchoRegionSeriesPoint> buildSeriesPoints({
   for (var i = 0; i < envelope.length; i++) {
     final e = envelope[i];
     final hz = pitchHzList[i];
-    out.add(
-      EchoRegionSeriesPoint(
-        t: e.t,
-        ampRef: e.amp,
-        pitchRefHz: hz,
-      ),
-    );
+    out.add(EchoRegionSeriesPoint(t: e.t, ampRef: e.amp, pitchRefHz: hz));
   }
   return out;
 }

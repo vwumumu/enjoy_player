@@ -39,6 +39,7 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     required this.motionStandard,
     required this.motionEnter,
     required this.motionExit,
+
     /// Transport / layout morphs: 220ms (between [motionFast] and [motionStandard]).
     required this.motionMedium,
     // ── Feature colors ─────────────────────────────────────────────
@@ -268,7 +269,8 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       motionMedium: motionMedium ?? this.motionMedium,
       echoActive: echoActive ?? this.echoActive,
       ccBadge: ccBadge ?? this.ccBadge,
-      transcriptLinePadding: transcriptLinePadding ?? this.transcriptLinePadding,
+      transcriptLinePadding:
+          transcriptLinePadding ?? this.transcriptLinePadding,
       contentMaxWidth: contentMaxWidth ?? this.contentMaxWidth,
       miniBarBlurSigma: miniBarBlurSigma ?? this.miniBarBlurSigma,
       sidebarWidth: sidebarWidth ?? this.sidebarWidth,
@@ -294,9 +296,11 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     if (t == 0) return this;
     if (t == 1) return other;
 
-    double ms(Duration a, Duration b) =>
-        lerpDouble(a.inMilliseconds.toDouble(), b.inMilliseconds.toDouble(), t)!
-            .roundToDouble();
+    double ms(Duration a, Duration b) => lerpDouble(
+      a.inMilliseconds.toDouble(),
+      b.inMilliseconds.toDouble(),
+      t,
+    )!.roundToDouble();
 
     return EnjoyThemeTokens(
       space4: lerpDouble(space4, other.space4, t)!,
@@ -317,32 +321,51 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       elevationSheet: lerpDouble(elevationSheet, other.elevationSheet, t)!,
       elevationModal: lerpDouble(elevationModal, other.elevationModal, t)!,
       elevationBar: lerpDouble(elevationBar, other.elevationBar, t)!,
-      elevationSurface: lerpDouble(elevationSurface, other.elevationSurface, t)!,
+      elevationSurface: lerpDouble(
+        elevationSurface,
+        other.elevationSurface,
+        t,
+      )!,
       breakpointRail: lerpDouble(breakpointRail, other.breakpointRail, t)!,
       breakpointTranscriptSideBySide: lerpDouble(
         breakpointTranscriptSideBySide,
         other.breakpointTranscriptSideBySide,
         t,
       )!,
-      motionFast: Duration(milliseconds: ms(motionFast, other.motionFast).round()),
-      motionStandard:
-          Duration(milliseconds: ms(motionStandard, other.motionStandard).round()),
-      motionEnter:
-          Duration(milliseconds: ms(motionEnter, other.motionEnter).round()),
-      motionExit:
-          Duration(milliseconds: ms(motionExit, other.motionExit).round()),
-      motionMedium:
-          Duration(milliseconds: ms(motionMedium, other.motionMedium).round()),
+      motionFast: Duration(
+        milliseconds: ms(motionFast, other.motionFast).round(),
+      ),
+      motionStandard: Duration(
+        milliseconds: ms(motionStandard, other.motionStandard).round(),
+      ),
+      motionEnter: Duration(
+        milliseconds: ms(motionEnter, other.motionEnter).round(),
+      ),
+      motionExit: Duration(
+        milliseconds: ms(motionExit, other.motionExit).round(),
+      ),
+      motionMedium: Duration(
+        milliseconds: ms(motionMedium, other.motionMedium).round(),
+      ),
       echoActive: Color.lerp(echoActive, other.echoActive, t)!,
       ccBadge: Color.lerp(ccBadge, other.ccBadge, t)!,
-      transcriptLinePadding:
-          EdgeInsets.lerp(transcriptLinePadding, other.transcriptLinePadding, t)!,
+      transcriptLinePadding: EdgeInsets.lerp(
+        transcriptLinePadding,
+        other.transcriptLinePadding,
+        t,
+      )!,
       contentMaxWidth: lerpDouble(contentMaxWidth, other.contentMaxWidth, t)!,
-      miniBarBlurSigma:
-          lerpDouble(miniBarBlurSigma, other.miniBarBlurSigma, t)!,
+      miniBarBlurSigma: lerpDouble(
+        miniBarBlurSigma,
+        other.miniBarBlurSigma,
+        t,
+      )!,
       sidebarWidth: lerpDouble(sidebarWidth, other.sidebarWidth, t)!,
-      sidebarBrandHeight:
-          lerpDouble(sidebarBrandHeight, other.sidebarBrandHeight, t)!,
+      sidebarBrandHeight: lerpDouble(
+        sidebarBrandHeight,
+        other.sidebarBrandHeight,
+        t,
+      )!,
       transportHeight: lerpDouble(transportHeight, other.transportHeight, t)!,
       heroTitleLetterSpacing: lerpDouble(
         heroTitleLetterSpacing,

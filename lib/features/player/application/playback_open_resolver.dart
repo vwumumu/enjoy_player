@@ -67,7 +67,9 @@ Future<PlaybackOpenResolved?> resolvePlaybackOpen(
 
   final thumb = video != null ? video.thumbnailUrl : audio!.thumbnailUrl;
   final language = video != null ? video.language : audio!.language;
-  final durationSec = video != null ? video.durationSeconds : audio!.durationSeconds;
+  final durationSec = video != null
+      ? video.durationSeconds
+      : audio!.durationSeconds;
 
   return PlaybackOpenResolved(
     mediaId: mediaId,

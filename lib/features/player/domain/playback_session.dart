@@ -18,6 +18,7 @@ class PlaybackSession {
   });
 
   final String mediaId;
+
   /// Weapp `TargetType` for the open media (`Video` | `Audio`).
   final String dexieTargetType;
   final String mediaType;

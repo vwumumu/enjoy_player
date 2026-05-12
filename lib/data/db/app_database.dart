@@ -82,17 +82,17 @@ class AppDatabase extends _$AppDatabase {
 class VideoDao extends DatabaseAccessor<AppDatabase> with _$VideoDaoMixin {
   VideoDao(super.db);
 
-  Stream<List<VideoRow>> watchAll() =>
-      (select(videos)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).watch();
+  Stream<List<VideoRow>> watchAll() => (select(
+    videos,
+  )..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).watch();
 
   Future<VideoRow?> getById(String id) =>
       (select(videos)..where((t) => t.id.equals(id))).getSingleOrNull();
 
   Future<VideoRow?> getYoutubeByVid(String youtubeVid) =>
-      (select(videos)
-            ..where(
-              (t) => t.provider.equals('youtube') & t.vid.equals(youtubeVid),
-            ))
+      (select(videos)..where(
+            (t) => t.provider.equals('youtube') & t.vid.equals(youtubeVid),
+          ))
           .getSingleOrNull();
 
   Future<List<VideoRow>> listAll() => select(videos).get();
@@ -118,8 +118,9 @@ class VideoDao extends DatabaseAccessor<AppDatabase> with _$VideoDaoMixin {
 class AudioDao extends DatabaseAccessor<AppDatabase> with _$AudioDaoMixin {
   AudioDao(super.db);
 
-  Stream<List<AudioRow>> watchAll() =>
-      (select(audios)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).watch();
+  Stream<List<AudioRow>> watchAll() => (select(
+    audios,
+  )..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).watch();
 
   Future<AudioRow?> getById(String id) =>
       (select(audios)..where((t) => t.id.equals(id))).getSingleOrNull();
@@ -171,11 +172,10 @@ class TranscriptDao extends DatabaseAccessor<AppDatabase>
     String targetType,
     String targetId,
   ) =>
-      (select(transcripts)
-            ..where(
-              (t) =>
-                  t.targetType.equals(targetType) & t.targetId.equals(targetId),
-            ))
+      (select(transcripts)..where(
+            (t) =>
+                t.targetType.equals(targetType) & t.targetId.equals(targetId),
+          ))
           .get();
 
   Future<void> upsert(TranscriptRow row) =>
@@ -194,26 +194,24 @@ class TranscriptFetchStateDao extends DatabaseAccessor<AppDatabase>
     String targetType,
     String targetId,
   ) =>
-      (select(transcriptFetchStates)
-            ..where(
-              (t) =>
-                  t.targetType.equals(targetType) & t.targetId.equals(targetId),
-            ))
+      (select(transcriptFetchStates)..where(
+            (t) =>
+                t.targetType.equals(targetType) & t.targetId.equals(targetId),
+          ))
           .getSingleOrNull();
 
   Future<void> upsertFetched(
     String targetType,
     String targetId,
     DateTime lastFetchedAt,
-  ) =>
-      into(transcriptFetchStates).insert(
-        TranscriptFetchStateRow(
-          targetType: targetType,
-          targetId: targetId,
-          lastFetchedAt: lastFetchedAt,
-        ),
-        mode: InsertMode.insertOrReplace,
-      );
+  ) => into(transcriptFetchStates).insert(
+    TranscriptFetchStateRow(
+      targetType: targetType,
+      targetId: targetId,
+      lastFetchedAt: lastFetchedAt,
+    ),
+    mode: InsertMode.insertOrReplace,
+  );
 }
 
 @DriftAccessor(tables: [EchoSessions])
@@ -356,10 +354,10 @@ class EchoSessionDao extends DatabaseAccessor<AppDatabase>
   /// Local aggregates for profile stats (single round-trip).
   Future<({int sessionCount, int recordingsDurationMs})> practiceTotals() {
     return customSelect(
-      'SELECT COUNT(*) AS c, COALESCE(SUM(recordings_duration_ms), 0) AS d '
-      'FROM echo_sessions',
-      readsFrom: {echoSessions},
-    )
+          'SELECT COUNT(*) AS c, COALESCE(SUM(recordings_duration_ms), 0) AS d '
+          'FROM echo_sessions',
+          readsFrom: {echoSessions},
+        )
         .map(
           (row) => (
             sessionCount: row.read<int>('c'),
@@ -371,10 +369,14 @@ class EchoSessionDao extends DatabaseAccessor<AppDatabase>
 }
 
 @DriftAccessor(tables: [Recordings])
-class RecordingDao extends DatabaseAccessor<AppDatabase> with _$RecordingDaoMixin {
+class RecordingDao extends DatabaseAccessor<AppDatabase>
+    with _$RecordingDaoMixin {
   RecordingDao(super.db);
 
-  Stream<List<RecordingRow>> watchByTarget(String targetType, String targetId) =>
+  Stream<List<RecordingRow>> watchByTarget(
+    String targetType,
+    String targetId,
+  ) =>
       (select(recordings)
             ..where(
               (t) =>
@@ -400,7 +402,13 @@ class RecordingDao extends DatabaseAccessor<AppDatabase> with _$RecordingDaoMixi
             )
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .watch()
-          .map((rows) => rows.where((r) => recordingOverlapsEchoRegion(r, echoStartMs, echoEndMs)).toList());
+          .map(
+            (rows) => rows
+                .where(
+                  (r) => recordingOverlapsEchoRegion(r, echoStartMs, echoEndMs),
+                )
+                .toList(),
+          );
 
   Future<List<RecordingRow>> listByEchoRegion({
     required String targetType,
@@ -419,7 +427,9 @@ class RecordingDao extends DatabaseAccessor<AppDatabase> with _$RecordingDaoMixi
               )
               ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
             .get();
-    return rows.where((r) => recordingOverlapsEchoRegion(r, echoStartMs, echoEndMs)).toList();
+    return rows
+        .where((r) => recordingOverlapsEchoRegion(r, echoStartMs, echoEndMs))
+        .toList();
   }
 
   Future<RecordingRow?> getById(String id) =>
@@ -433,34 +443,43 @@ class RecordingDao extends DatabaseAccessor<AppDatabase> with _$RecordingDaoMixi
     required int? pronunciationScore,
     required String? assessmentJson,
     required DateTime updatedAt,
-  }) =>
-      (update(recordings)..where((t) => t.id.equals(id))).write(
-        RecordingsCompanion(
-          pronunciationScore: Value(pronunciationScore),
-          assessmentJson: Value(assessmentJson),
-          updatedAt: Value(updatedAt),
-          syncStatus: const Value('local'),
-        ),
-      );
+  }) => (update(recordings)..where((t) => t.id.equals(id))).write(
+    RecordingsCompanion(
+      pronunciationScore: Value(pronunciationScore),
+      assessmentJson: Value(assessmentJson),
+      updatedAt: Value(updatedAt),
+      syncStatus: const Value('local'),
+    ),
+  );
 
   Future<void> deleteId(String id) =>
       (delete(recordings)..where((t) => t.id.equals(id))).go();
 }
 
 /// Recording `[referenceStart, referenceStart + referenceDuration)` vs echo `[echoStartMs, echoEndMs)` (ms).
-bool recordingOverlapsEchoRegion(RecordingRow r, int echoStartMs, int echoEndMs) {
+bool recordingOverlapsEchoRegion(
+  RecordingRow r,
+  int echoStartMs,
+  int echoEndMs,
+) {
   final recordingStart = r.referenceStart;
   final recordingEnd = r.referenceStart + r.referenceDuration;
-  final overlapStart = recordingStart > echoStartMs ? recordingStart : echoStartMs;
+  final overlapStart = recordingStart > echoStartMs
+      ? recordingStart
+      : echoStartMs;
   final overlapEnd = recordingEnd < echoEndMs ? recordingEnd : echoEndMs;
   return overlapStart < overlapEnd;
 }
 
 @DriftAccessor(tables: [Dictations])
-class DictationDao extends DatabaseAccessor<AppDatabase> with _$DictationDaoMixin {
+class DictationDao extends DatabaseAccessor<AppDatabase>
+    with _$DictationDaoMixin {
   DictationDao(super.db);
 
-  Stream<List<DictationRow>> watchByTarget(String targetType, String targetId) =>
+  Stream<List<DictationRow>> watchByTarget(
+    String targetType,
+    String targetId,
+  ) =>
       (select(dictations)
             ..where(
               (t) =>
@@ -477,7 +496,8 @@ class DictationDao extends DatabaseAccessor<AppDatabase> with _$DictationDaoMixi
 }
 
 @DriftAccessor(tables: [SyncQueue])
-class SyncQueueDao extends DatabaseAccessor<AppDatabase> with _$SyncQueueDaoMixin {
+class SyncQueueDao extends DatabaseAccessor<AppDatabase>
+    with _$SyncQueueDaoMixin {
   SyncQueueDao(super.db);
 
   Future<int> enqueue({
@@ -485,16 +505,15 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase> with _$SyncQueueDaoMixi
     required String entityId,
     required String action,
     String? payloadJson,
-  }) =>
-      into(syncQueue).insert(
-        SyncQueueCompanion.insert(
-          entityType: entityType,
-          entityId: entityId,
-          action: action,
-          payloadJson: Value(payloadJson),
-          createdAt: DateTime.now(),
-        ),
-      );
+  }) => into(syncQueue).insert(
+    SyncQueueCompanion.insert(
+      entityType: entityType,
+      entityId: entityId,
+      action: action,
+      payloadJson: Value(payloadJson),
+      createdAt: DateTime.now(),
+    ),
+  );
 
   Future<List<SyncQueueRow>> peekBatch({int limit = 50}) =>
       (select(syncQueue)
@@ -503,8 +522,9 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase> with _$SyncQueueDaoMixi
           .get();
 
   Future<void> markAttempted(int id, {String? error}) async {
-    final existing =
-        await (select(syncQueue)..where((t) => t.id.equals(id))).getSingleOrNull();
+    final existing = await (select(
+      syncQueue,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     if (existing == null) return;
     await (update(syncQueue)..where((t) => t.id.equals(id))).write(
       SyncQueueCompanion(
@@ -520,13 +540,14 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase> with _$SyncQueueDaoMixi
 }
 
 @DriftAccessor(tables: [SettingsKv])
-class SettingsDao extends DatabaseAccessor<AppDatabase> with _$SettingsDaoMixin {
+class SettingsDao extends DatabaseAccessor<AppDatabase>
+    with _$SettingsDaoMixin {
   SettingsDao(super.db);
 
   Future<String?> getValue(String key) async {
-    final row =
-        await (select(settingsKv)
-          ..where((t) => t.key.equals(key))).getSingleOrNull();
+    final row = await (select(
+      settingsKv,
+    )..where((t) => t.key.equals(key))).getSingleOrNull();
     return row?.value;
   }
 

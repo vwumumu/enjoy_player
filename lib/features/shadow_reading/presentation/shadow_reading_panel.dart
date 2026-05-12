@@ -44,7 +44,10 @@ String _shortSaveError(Object e) {
   return '${s.substring(0, 177)}…';
 }
 
-RecordingRow? _resolvedSelectedRow(List<RecordingRow> list, String? selectedId) {
+RecordingRow? _resolvedSelectedRow(
+  List<RecordingRow> list,
+  String? selectedId,
+) {
   if (list.isEmpty) return null;
   if (selectedId != null) {
     for (final r in list) {
@@ -95,11 +98,11 @@ class ShadowReadingPanel extends ConsumerStatefulWidget {
 /// (or auto-picked, non-virtual) microphone — this is what stops Windows from
 /// silently picking GlideX / VoiceMeeter / Stereo-Mix loopback devices.
 RecordConfig _buildShadowRecordConfig(InputDevice? device) => RecordConfig(
-      encoder: AudioEncoder.wav,
-      sampleRate: 16000,
-      numChannels: 1,
-      device: device,
-    );
+  encoder: AudioEncoder.wav,
+  sampleRate: 16000,
+  numChannels: 1,
+  device: device,
+);
 
 class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
     with TickerProviderStateMixin {
@@ -185,7 +188,9 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
   }
 
   void _setRecordingActiveOnBus(bool active) {
-    ref.read(shadowReadingHotkeyBusProvider.notifier).setRecordingActive(active);
+    ref
+        .read(shadowReadingHotkeyBusProvider.notifier)
+        .setRecordingActive(active);
   }
 
   /// Discard in-progress capture (Escape); does not persist to the library.
@@ -413,8 +418,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
         const minRms = 0.001;
         const minNonZeroRatio = 0.01;
         final looksSilent =
-            peak.rmsNormalized < minRms ||
-            peak.nonZeroRatio < minNonZeroRatio;
+            peak.rmsNormalized < minRms || peak.nonZeroRatio < minNonZeroRatio;
         if (looksSilent) {
           _log.warning(
             'recording wav appears silent '
@@ -454,8 +458,11 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
         updatedAt: now,
       );
       await db.recordingDao.insertRow(row);
-      await ref
-          .read(syncEnqueueProvider)(SyncEntityType.recording, id, SyncAction.create);
+      await ref.read(syncEnqueueProvider)(
+        SyncEntityType.recording,
+        id,
+        SyncAction.create,
+      );
       if (mounted) {
         setState(() => _selectedRecordingId = id);
       }
@@ -482,8 +489,11 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
   }
 
   Future<void> _deleteRecording(RecordingRow r) async {
-    await ref
-        .read(syncEnqueueProvider)(SyncEntityType.recording, r.id, SyncAction.delete);
+    await ref.read(syncEnqueueProvider)(
+      SyncEntityType.recording,
+      r.id,
+      SyncAction.delete,
+    );
     final preview = ref.read(recordingPreviewPlayerProvider);
     final lp = r.localPath;
     if (lp != null && lp.isNotEmpty) {
@@ -561,16 +571,19 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       'player.toggleRecording',
       _recording ? l10n.shadowRecordingStop : l10n.shadowRecordingRecord,
     );
-    final pitchContourTooltip =
-        hotkeyTooltipLabel(ref, 'player.togglePitchContour', l10n.pitchContourTitle);
-    final recordFabTooltip = '$ttToggleRecording\n${l10n.shadowReadingHint}';
-    ref.listen<int>(
-      shadowReadingHotkeyBusProvider.select((s) => s.recording),
-      (prev, next) {
-        if (prev == next) return;
-        unawaited(_onHotkeyRecordingPulse(l10n));
-      },
+    final pitchContourTooltip = hotkeyTooltipLabel(
+      ref,
+      'player.togglePitchContour',
+      l10n.pitchContourTitle,
     );
+    final recordFabTooltip = '$ttToggleRecording\n${l10n.shadowReadingHint}';
+    ref.listen<int>(shadowReadingHotkeyBusProvider.select((s) => s.recording), (
+      prev,
+      next,
+    ) {
+      if (prev == next) return;
+      unawaited(_onHotkeyRecordingPulse(l10n));
+    });
     ref.listen<int>(
       shadowReadingHotkeyBusProvider.select((s) => s.recordingCancel),
       (prev, next) {
@@ -579,13 +592,13 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
         unawaited(_cancelRecording());
       },
     );
-    ref.listen<int>(
-      shadowReadingHotkeyBusProvider.select((s) => s.playback),
-      (prev, next) {
-        if (prev == next) return;
-        unawaited(_onHotkeyPlaybackPulse());
-      },
-    );
+    ref.listen<int>(shadowReadingHotkeyBusProvider.select((s) => s.playback), (
+      prev,
+      next,
+    ) {
+      if (prev == next) return;
+      unawaited(_onHotkeyPlaybackPulse());
+    });
     ref.listen<int>(
       shadowReadingHotkeyBusProvider.select((s) => s.assessment),
       (prev, next) {
@@ -598,12 +611,15 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
     final tok = EnjoyThemeTokens.of(context);
     final tt = Theme.of(context).textTheme;
 
-    final targetSec = (widget.endSec - widget.startSec).clamp(0.0, double.infinity);
+    final targetSec = (widget.endSec - widget.startSec).clamp(
+      0.0,
+      double.infinity,
+    );
     final elapsedSec = _elapsed.inMicroseconds / 1e6;
-    final ringProgress =
-        targetSec > 0 ? (elapsedSec / targetSec).clamp(0.0, 1.0) : 0.0;
-    final overTarget =
-        _recording && targetSec > 0 && elapsedSec > targetSec;
+    final ringProgress = targetSec > 0
+        ? (elapsedSec / targetSec).clamp(0.0, 1.0)
+        : 0.0;
+    final overTarget = _recording && targetSec > 0 && elapsedSec > targetSec;
     final overBySec = overTarget ? elapsedSec - targetSec : 0.0;
 
     return FutureBuilder<String?>(
@@ -693,9 +709,12 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
                                 unawaited(_playOrPauseTake(path));
                               }
                             },
-                            onDeleteCurrent: () => unawaited(_deleteRecording(sel)),
+                            onDeleteCurrent: () =>
+                                unawaited(_deleteRecording(sel)),
                             onChooseTake: (id) async {
-                              await ref.read(recordingPreviewPlayerProvider).stop();
+                              await ref
+                                  .read(recordingPreviewPlayerProvider)
+                                  .stop();
                               if (mounted) {
                                 setState(() => _selectedRecordingId = id);
                               }
@@ -770,7 +789,9 @@ class _ShadowReadingToolbarRow extends StatelessWidget {
     final pitchIcon = Icon(
       Icons.show_chart_rounded,
       size: 22,
-      color: hasMediaPath ? null : scheme.onSurfaceVariant.withValues(alpha: 0.38),
+      color: hasMediaPath
+          ? null
+          : scheme.onSurfaceVariant.withValues(alpha: 0.38),
     );
 
     final Widget pitchControl = Tooltip(
@@ -793,9 +814,7 @@ class _ShadowReadingToolbarRow extends StatelessWidget {
                   )
           : IconButton(
               onPressed: null,
-              style: IconButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-              ),
+              style: IconButton.styleFrom(visualDensity: VisualDensity.compact),
               icon: pitchIcon,
             ),
     );
@@ -1077,9 +1096,7 @@ Future<void> _confirmDeleteCurrentTake({
     builder: (ctx) {
       return AlertDialog(
         title: Text(l10n.shadowRecordingDeleteConfirmTitle),
-        content: Text(
-          l10n.shadowRecordingDeleteConfirmMessage(takeSummary),
-        ),
+        content: Text(l10n.shadowRecordingDeleteConfirmMessage(takeSummary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -1135,11 +1152,7 @@ class _TakesToolbarActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final preview = ref.watch(recordingPreviewPlayerProvider);
     final lp = row.localPath;
-    final canPlay =
-        echoActive &&
-        lp != null &&
-        lp.isNotEmpty &&
-        !kIsWeb;
+    final canPlay = echoActive && lp != null && lp.isNotEmpty && !kIsWeb;
 
     final takeSummary =
         '${l10n.shadowRecordingTake} ${_takeNumber(row)} · '
@@ -1184,13 +1197,15 @@ class _TakesToolbarActions extends ConsumerWidget {
           onSelected: (value) {
             if (!echoActive) return;
             if (value == _kDeleteTakeToken) {
-              unawaited(_confirmDeleteCurrentTake(
-                context: context,
-                scheme: scheme,
-                l10n: l10n,
-                takeSummary: takeSummary,
-                onConfirmed: onDeleteCurrent,
-              ));
+              unawaited(
+                _confirmDeleteCurrentTake(
+                  context: context,
+                  scheme: scheme,
+                  l10n: l10n,
+                  takeSummary: takeSummary,
+                  onConfirmed: onDeleteCurrent,
+                ),
+              );
               return;
             }
             if (value == _kReassessTakeToken) {
@@ -1221,7 +1236,11 @@ class _TakesToolbarActions extends ConsumerWidget {
                           SizedBox(
                             width: 28,
                             child: r.id == row.id
-                                ? Icon(Icons.check, size: 20, color: scheme.primary)
+                                ? Icon(
+                                    Icons.check,
+                                    size: 20,
+                                    color: scheme.primary,
+                                  )
                                 : const SizedBox.shrink(),
                           ),
                           Expanded(
@@ -1267,7 +1286,8 @@ class _TakesToolbarActions extends ConsumerWidget {
                 ),
               PopupMenuItem<String>(
                 value: _kReassessTakeToken,
-                enabled: echoActive &&
+                enabled:
+                    echoActive &&
                     !kIsWeb &&
                     row.assessmentJson != null &&
                     row.assessmentJson!.trim().isNotEmpty,
@@ -1275,7 +1295,11 @@ class _TakesToolbarActions extends ConsumerWidget {
                   children: [
                     SizedBox(
                       width: 28,
-                      child: Icon(Icons.refresh_rounded, size: 20, color: scheme.primary),
+                      child: Icon(
+                        Icons.refresh_rounded,
+                        size: 20,
+                        color: scheme.primary,
+                      ),
                     ),
                     Expanded(child: Text(l10n.assessmentReassess)),
                   ],

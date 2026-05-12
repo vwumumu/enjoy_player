@@ -11,10 +11,9 @@ import 'package:google_fonts/google_fonts.dart';
 /// package ships that variant — tracking is manually tightened to match).
 TextTheme buildBaseTextTheme(TextTheme base, ColorScheme scheme) {
   // Apply Inter to the full theme, then hand-tune the scale.
-  final inter = GoogleFonts.interTextTheme(base).apply(
-    bodyColor: scheme.onSurface,
-    displayColor: scheme.onSurface,
-  );
+  final inter = GoogleFonts.interTextTheme(
+    base,
+  ).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
 
   return inter.copyWith(
     // ── Display (hero titles) — tight tracking ─────────────────────────
@@ -120,7 +119,8 @@ TextTheme buildBaseTextTheme(TextTheme base, ColorScheme scheme) {
 /// and use [bodyStyle] / [secondaryStyle] when the user has enabled
 /// serif reading mode.
 @immutable
-class TranscriptTypographyTokens extends ThemeExtension<TranscriptTypographyTokens> {
+class TranscriptTypographyTokens
+    extends ThemeExtension<TranscriptTypographyTokens> {
   const TranscriptTypographyTokens({
     required this.useSerif,
     required this.bodyStyle,
@@ -144,9 +144,9 @@ class TranscriptTypographyTokens extends ThemeExtension<TranscriptTypographyToke
     required ColorScheme scheme,
   }) {
     if (useSerif) {
-      final serif = GoogleFonts.sourceSerif4TextTheme(base).apply(
-        bodyColor: scheme.onSurface,
-      );
+      final serif = GoogleFonts.sourceSerif4TextTheme(
+        base,
+      ).apply(bodyColor: scheme.onSurface);
       return TranscriptTypographyTokens(
         useSerif: true,
         bodyStyle: (serif.bodyLarge ?? const TextStyle()).copyWith(
@@ -175,7 +175,10 @@ class TranscriptTypographyTokens extends ThemeExtension<TranscriptTypographyToke
     return _fallback(base, scheme);
   }
 
-  static TranscriptTypographyTokens _fallback(TextTheme base, ColorScheme scheme) {
+  static TranscriptTypographyTokens _fallback(
+    TextTheme base,
+    ColorScheme scheme,
+  ) {
     return TranscriptTypographyTokens(
       useSerif: false,
       bodyStyle: (base.bodyLarge ?? const TextStyle()).copyWith(

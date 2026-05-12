@@ -32,20 +32,23 @@ class FileImportResult {
 }
 
 /// Arguments for [_importMediaFileInIsolate]; only plain data for [Isolate.run].
-typedef _ImportIsolateArgs =
-    ({
-      String sourcePath,
-      String mediaDirPath,
-      String tempFileName,
-      String ext,
-      String title,
+typedef _ImportIsolateArgs = ({
+  String sourcePath,
+  String mediaDirPath,
+  String tempFileName,
+  String ext,
+  String title,
 
-      /// When set, import fails with [FileFailure] if chunked hash hex does not match.
-      String? expectedHashHex,
-    });
+  /// When set, import fails with [FileFailure] if chunked hash hex does not match.
+  String? expectedHashHex,
+});
 
-typedef _ImportIsolateResult =
-    ({String localPath, String contentHashHex, int fileSize, String title});
+typedef _ImportIsolateResult = ({
+  String localPath,
+  String contentHashHex,
+  int fileSize,
+  String title,
+});
 
 /// Copy bytes from source to temp; no hashing (hash computed separately).
 Future<void> _streamCopyFile(String sourcePath, String destPath) async {

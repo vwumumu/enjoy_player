@@ -23,21 +23,14 @@ class TranscriptApi {
     if (targetType != null) q['targetType'] = targetType;
     if (source != null) q['source'] = source;
     if (language != null) q['language'] = language;
-    return _client.getJsonList(
-      _path,
-      queryParameters: q.isEmpty ? null : q,
-    );
+    return _client.getJsonList(_path, queryParameters: q.isEmpty ? null : q);
   }
 
   Future<JsonMap> transcript(String id) => _client.getJson('$_path/$id');
 
-  Future<JsonMap> uploadTranscript(JsonMap transcript) => _client.postJson(
-        _path,
-        body: {'transcript': transcript},
-      );
+  Future<JsonMap> uploadTranscript(JsonMap transcript) =>
+      _client.postJson(_path, body: {'transcript': transcript});
 
-  Future<JsonMap> syncTranscript(JsonMap data) => _client.postJson(
-        _path,
-        body: data,
-      );
+  Future<JsonMap> syncTranscript(JsonMap data) =>
+      _client.postJson(_path, body: data);
 }

@@ -57,10 +57,12 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
     _prefsLog.info('prefs: build start');
     final db = ref.watch(appDatabaseProvider);
     final localeRaw = await db.settingsDao.getValue(SettingsKeys.prefsLocale);
-    final learnRaw =
-        await db.settingsDao.getValue(SettingsKeys.prefsLearningLanguage);
-    final nativeRaw =
-        await db.settingsDao.getValue(SettingsKeys.prefsNativeLanguage);
+    final learnRaw = await db.settingsDao.getValue(
+      SettingsKeys.prefsLearningLanguage,
+    );
+    final nativeRaw = await db.settingsDao.getValue(
+      SettingsKeys.prefsNativeLanguage,
+    );
 
     final out = AppPreferencesState(
       locale: _decodeLocale(localeRaw),
@@ -94,10 +96,10 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
     final next = (await future).copyWith(locale: locale);
     state = AsyncData(next);
     final tag = locale?.toLanguageTag() ?? 'en';
-    await ref.read(appDatabaseProvider).settingsDao.setValue(
-          SettingsKeys.prefsLocale,
-          tag,
-        );
+    await ref
+        .read(appDatabaseProvider)
+        .settingsDao
+        .setValue(SettingsKeys.prefsLocale, tag);
   }
 
   /// Server wins for locale + languages on login / profile refresh.

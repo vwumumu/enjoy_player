@@ -24,7 +24,8 @@ class HotkeysSettingsSection extends ConsumerStatefulWidget {
       _HotkeysSettingsSectionState();
 }
 
-class _HotkeysSettingsSectionState extends ConsumerState<HotkeysSettingsSection> {
+class _HotkeysSettingsSectionState
+    extends ConsumerState<HotkeysSettingsSection> {
   final _filter = TextEditingController();
 
   @override
@@ -33,10 +34,9 @@ class _HotkeysSettingsSectionState extends ConsumerState<HotkeysSettingsSection>
     super.dispose();
   }
 
-  List<HotkeyDefinition> _definitionsFor(HotkeyScope scope) =>
-      hotkeyDefinitions
-          .where((d) => d.customizable && d.scope == scope)
-          .toList();
+  List<HotkeyDefinition> _definitionsFor(HotkeyScope scope) => hotkeyDefinitions
+      .where((d) => d.customizable && d.scope == scope)
+      .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -47,16 +47,14 @@ class _HotkeysSettingsSectionState extends ConsumerState<HotkeysSettingsSection>
 
     ref.watch(hotkeysCtrlProvider);
     final ctrl = ref.read(hotkeysCtrlProvider.notifier);
-    final helpKeyLabel = formatHotkeyForDisplay(ctrl.effectiveKeys('global.help'));
+    final helpKeyLabel = formatHotkeyForDisplay(
+      ctrl.effectiveKeys('global.help'),
+    );
 
     String effective(String id) => ctrl.effectiveKeys(id);
 
-    bool matches(HotkeyDefinition d) => hotkeyDefinitionMatchesQuery(
-          d,
-          _filter.text,
-          l10n,
-          effective,
-        );
+    bool matches(HotkeyDefinition d) =>
+        hotkeyDefinitionMatchesQuery(d, _filter.text, l10n, effective);
 
     Future<void> editBinding(String id) async {
       final chord = await showDialog<String>(
@@ -83,7 +81,9 @@ class _HotkeysSettingsSectionState extends ConsumerState<HotkeysSettingsSection>
                 children: [
                   Text(
                     l10n.hotkeysSectionKeyboard,
-                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: tt.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   SizedBox(height: t.space4),
                   Text(

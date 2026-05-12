@@ -21,7 +21,9 @@ final class EnjoyTranslationCapability implements TranslationCapability {
       forceRefresh: forceRefresh,
     );
     final translated =
-        map['translatedText'] as String? ?? map['translated_text'] as String? ?? '';
+        map['translatedText'] as String? ??
+        map['translated_text'] as String? ??
+        '';
     return TranslationResult(
       translatedText: translated,
       sourceLanguage: sourceLanguage,

@@ -8,11 +8,12 @@ import 'package:enjoy_player/data/db/app_database_provider.dart';
 
 /// `targetType` is Dexie style: `Audio` | `Video`.
 final recordingsForTargetProvider = StreamProvider.autoDispose
-    .family<List<RecordingRow>, ({String targetType, String targetId})>(
-  (ref, key) {
-    return ref
-        .watch(appDatabaseProvider)
-        .recordingDao
-        .watchByTarget(key.targetType, key.targetId);
-  },
-);
+    .family<List<RecordingRow>, ({String targetType, String targetId})>((
+      ref,
+      key,
+    ) {
+      return ref
+          .watch(appDatabaseProvider)
+          .recordingDao
+          .watchByTarget(key.targetType, key.targetId);
+    });

@@ -12,16 +12,10 @@ class PlayerUiState {
 
   final PlayerChromeMode mode;
 
-  static const initial = PlayerUiState(
-    mode: PlayerChromeMode.mini,
-  );
+  static const initial = PlayerUiState(mode: PlayerChromeMode.mini);
 
-  PlayerUiState copyWith({
-    PlayerChromeMode? mode,
-  }) {
-    return PlayerUiState(
-      mode: mode ?? this.mode,
-    );
+  PlayerUiState copyWith({PlayerChromeMode? mode}) {
+    return PlayerUiState(mode: mode ?? this.mode);
   }
 }
 

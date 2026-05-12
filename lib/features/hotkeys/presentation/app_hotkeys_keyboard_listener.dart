@@ -91,13 +91,17 @@ class _AppHotkeysKeyboardListenerState
         return true;
       }
       if (isDesktop && ref.read(windowFullscreenProvider)) {
-        unawaited(ref.read(windowFullscreenProvider.notifier).setFullscreen(false));
+        unawaited(
+          ref.read(windowFullscreenProvider.notifier).setFullscreen(false),
+        );
         return true;
       }
       final session = ref.read(playerControllerProvider);
       if (session != null &&
           ref.read(shadowReadingHotkeyBusProvider).isRecordingActive) {
-        ref.read(shadowReadingHotkeyBusProvider.notifier).pulseRecordingCancel();
+        ref
+            .read(shadowReadingHotkeyBusProvider.notifier)
+            .pulseRecordingCancel();
         return true;
       }
       if (goRouter.canPop()) {
@@ -140,7 +144,8 @@ class _AppHotkeysKeyboardListenerState
     }
 
     final path = goRouter.state.uri.path;
-    if (path.startsWith('/library') && _matches(event, ctrl, 'library.search')) {
+    if (path.startsWith('/library') &&
+        _matches(event, ctrl, 'library.search')) {
       ref.read(librarySearchFocusNodeProvider).requestFocus();
       return true;
     }
@@ -211,7 +216,9 @@ class _AppHotkeysKeyboardListenerState
         final rate = ref.read(playerPreferencesCtrlProvider).playbackRate;
         final next = math.max(0.25, rate - 0.05);
         unawaited(
-          ref.read(playerPreferencesCtrlProvider.notifier).setPlaybackRate(next),
+          ref
+              .read(playerPreferencesCtrlProvider.notifier)
+              .setPlaybackRate(next),
         );
         return true;
       }
@@ -219,7 +226,9 @@ class _AppHotkeysKeyboardListenerState
         final rate = ref.read(playerPreferencesCtrlProvider).playbackRate;
         final next = math.min(2.0, rate + 0.05);
         unawaited(
-          ref.read(playerPreferencesCtrlProvider.notifier).setPlaybackRate(next),
+          ref
+              .read(playerPreferencesCtrlProvider.notifier)
+              .setPlaybackRate(next),
         );
         return true;
       }

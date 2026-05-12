@@ -98,17 +98,16 @@ class EmbeddedSubtitleService {
         continue;
       }
 
-      final srtText =
-          Platform.isWindows
-              ? await _extractTrackAsSrtProcess(
-                ffmpegExe!,
-                mediaInput,
-                ffmpegSubtitleOrdinal,
-              )
-              : await _extractTrackAsSrtFfmpegKit(
-                mediaInput,
-                ffmpegSubtitleOrdinal,
-              );
+      final srtText = Platform.isWindows
+          ? await _extractTrackAsSrtProcess(
+              ffmpegExe!,
+              mediaInput,
+              ffmpegSubtitleOrdinal,
+            )
+          : await _extractTrackAsSrtFfmpegKit(
+              mediaInput,
+              ffmpegSubtitleOrdinal,
+            );
       if (srtText == null || srtText.trim().isEmpty) {
         ffmpegSubtitleOrdinal++;
         continue;
@@ -181,10 +180,9 @@ class EmbeddedSubtitleService {
     for (var i = 0; i < probe.length; i++) {
       if (existingTrackIndices.contains(i)) continue;
 
-      final srtText =
-          Platform.isWindows
-              ? await _extractTrackAsSrtProcess(ffmpegExe!, mediaInput, i)
-              : await _extractTrackAsSrtFfmpegKit(mediaInput, i);
+      final srtText = Platform.isWindows
+          ? await _extractTrackAsSrtProcess(ffmpegExe!, mediaInput, i)
+          : await _extractTrackAsSrtFfmpegKit(mediaInput, i);
       if (srtText == null || srtText.trim().isEmpty) {
         _log.warning('Embedded subtitle stream $i produced no SRT text');
         continue;
@@ -196,8 +194,9 @@ class EmbeddedSubtitleService {
         fileName: 'track.srt',
       );
       if (lines.isEmpty) {
-        final preview =
-            cleaned.length > 500 ? cleaned.substring(0, 500) : cleaned;
+        final preview = cleaned.length > 500
+            ? cleaned.substring(0, 500)
+            : cleaned;
         _log.warning(
           'Embedded subtitle stream $i parsed to 0 cues. Preview: $preview',
         );
@@ -249,8 +248,9 @@ class EmbeddedSubtitleService {
         return const [];
       }
       final streams = mediaInformation.getStreams();
-      final subtitleStreams =
-          streams.where((s) => s.getType() == 'subtitle').toList();
+      final subtitleStreams = streams
+          .where((s) => s.getType() == 'subtitle')
+          .toList();
       if (subtitleStreams.isEmpty) {
         final types = streams.map((s) => s.getType() ?? 'unknown').join(', ');
         _log.fine(
@@ -262,8 +262,8 @@ class EmbeddedSubtitleService {
         final raw = tags?['language']?.toString().trim().toLowerCase();
         final language =
             raw == null || raw.isEmpty || raw == 'und' || raw == 'unknown'
-                ? null
-                : raw;
+            ? null
+            : raw;
         return (language: language);
       }).toList();
     } on Object catch (e, st) {

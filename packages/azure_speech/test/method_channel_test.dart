@@ -52,9 +52,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-      expect(call.method, 'assess');
-      return json;
-    });
+          expect(call.method, 'assess');
+          return json;
+        });
 
     final r = (await AzureSpeech.instance.assess(
       const AzurePronunciationAssessmentParams(
@@ -64,8 +64,7 @@ void main() {
         token: 't',
         region: 'eastus',
       ),
-    ))
-        .detail;
+    )).detail;
 
     expect(r.displayText, 'Hello.');
     expect(r.nBest, isNotEmpty);
@@ -73,8 +72,10 @@ void main() {
     expect(r.nBest.first.words.single.word, 'hello');
   });
 
-  test('fromJson tolerates null word Offset/Duration (Azure omission edge case)', () {
-    const raw = '''
+  test(
+    'fromJson tolerates null word Offset/Duration (Azure omission edge case)',
+    () {
+      const raw = '''
 {
   "RecognitionStatus": "Success",
   "Offset": 0,
@@ -107,14 +108,15 @@ void main() {
     }
   ]
 }''';
-    final r = AzurePronunciationAssessmentResult.fromJson(
-      jsonDecode(raw) as Map<String, dynamic>,
-    );
-    final w = r.nBest.first.words.single;
-    expect(w.offset, 0);
-    expect(w.duration, 0);
-    expect(w.word, 'hi');
-  });
+      final r = AzurePronunciationAssessmentResult.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+      final w = r.nBest.first.words.single;
+      expect(w.offset, 0);
+      expect(w.duration, 0);
+      expect(w.word, 'hi');
+    },
+  );
 
   test('fromJson tolerates null word PronunciationAssessment', () {
     const raw = '''

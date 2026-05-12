@@ -23,42 +23,45 @@ void main() {
     expect(await resolvePlaybackOpen(db, 'missing'), isNull);
   });
 
-  test('resolvePlaybackOpen throws when playable missing but hash set', () async {
-    final now = DateTime.now();
-    const id = 'x1';
-    const fingerprint =
-        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-    final missingPath = p.join(
-      Directory.systemTemp.path,
-      'enjoy_missing_${DateTime.now().microsecondsSinceEpoch}.mp4',
-    );
-    await db.videoDao.insertRow(
-      VideoRow(
-        id: id,
-        vid: fingerprint,
-        provider: 'user',
-        title: 't',
-        description: null,
-        thumbnailUrl: null,
-        durationSeconds: 1,
-        language: 'en',
-        source: null,
-        localUri: Uri.file(missingPath).toString(),
-        md5: fingerprint,
-        size: 1,
-        mediaUrl: null,
-        syncStatus: null,
-        serverUpdatedAt: null,
-        createdAt: now,
-        updatedAt: now,
-      ),
-    );
+  test(
+    'resolvePlaybackOpen throws when playable missing but hash set',
+    () async {
+      final now = DateTime.now();
+      const id = 'x1';
+      const fingerprint =
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      final missingPath = p.join(
+        Directory.systemTemp.path,
+        'enjoy_missing_${DateTime.now().microsecondsSinceEpoch}.mp4',
+      );
+      await db.videoDao.insertRow(
+        VideoRow(
+          id: id,
+          vid: fingerprint,
+          provider: 'user',
+          title: 't',
+          description: null,
+          thumbnailUrl: null,
+          durationSeconds: 1,
+          language: 'en',
+          source: null,
+          localUri: Uri.file(missingPath).toString(),
+          md5: fingerprint,
+          size: 1,
+          mediaUrl: null,
+          syncStatus: null,
+          serverUpdatedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
 
-    await expectLater(
-      resolvePlaybackOpen(db, id),
-      throwsA(isA<MediaNeedsRelocateException>()),
-    );
-  });
+      await expectLater(
+        resolvePlaybackOpen(db, id),
+        throwsA(isA<MediaNeedsRelocateException>()),
+      );
+    },
+  );
 
   test(
     'resolvePlaybackOpen uses YouTube when vid is id despite user provider',
@@ -77,7 +80,8 @@ void main() {
           language: 'en',
           source: null,
           localUri: null,
-          md5: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          md5:
+              'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
           size: 1,
           mediaUrl: null,
           syncStatus: null,
@@ -91,5 +95,6 @@ void main() {
       expect(r, isNotNull);
       expect(r!.playable, isA<YoutubePlayableSource>());
       expect((r.playable as YoutubePlayableSource).videoId, 'dQw4w9WgXcQ');
-    });
+    },
+  );
 }

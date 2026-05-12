@@ -30,7 +30,8 @@ class TranscriptScrollableList extends ConsumerStatefulWidget {
       _TranscriptScrollableListState();
 }
 
-class _TranscriptScrollableListState extends ConsumerState<TranscriptScrollableList> {
+class _TranscriptScrollableListState
+    extends ConsumerState<TranscriptScrollableList> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _activeLineKey = GlobalKey();
   final GlobalKey _echoRegionKey = GlobalKey();
@@ -63,8 +64,9 @@ class _TranscriptScrollableListState extends ConsumerState<TranscriptScrollableL
     if (!playing) return;
 
     final echo = ref.read(echoModeProvider);
-    final activeForUi =
-        ref.read(transcriptPlaybackHighlightProvider(widget.mediaId));
+    final activeForUi = ref.read(
+      transcriptPlaybackHighlightProvider(widget.mediaId),
+    );
 
     if (echo.active) {
       if (!force &&
@@ -118,7 +120,9 @@ class _TranscriptScrollableListState extends ConsumerState<TranscriptScrollableL
         return;
       }
 
-      final active = ref.read(transcriptPlaybackHighlightProvider(widget.mediaId));
+      final active = ref.read(
+        transcriptPlaybackHighlightProvider(widget.mediaId),
+      );
       if (active < 0) return;
 
       final ctx = _activeLineKey.currentContext;
@@ -220,7 +224,10 @@ class _TranscriptScrollableListState extends ConsumerState<TranscriptScrollableL
           echo.active &&
           lineIndex >= echo.startLineIndex &&
           lineIndex <= echo.endLineIndex;
-      final secondaryText = transcriptMatchSecondary(line, secondaryLines)?.text;
+      final secondaryText = transcriptMatchSecondary(
+        line,
+        secondaryLines,
+      )?.text;
 
       Widget tile = TranscriptLineTile(
         line: line,
@@ -248,7 +255,10 @@ class _TranscriptScrollableListState extends ConsumerState<TranscriptScrollableL
 
     return ListView(
       controller: _scrollController,
-      padding: EdgeInsets.symmetric(horizontal: tok.space12, vertical: tok.space8),
+      padding: EdgeInsets.symmetric(
+        horizontal: tok.space12,
+        vertical: tok.space8,
+      ),
       children: children,
     );
   }

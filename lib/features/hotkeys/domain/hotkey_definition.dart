@@ -1,12 +1,7 @@
 /// Hotkey metadata (aligned with web `HotkeyDefinition` in `stores/hotkeys.ts`).
 library;
 
-enum HotkeyScope {
-  global,
-  player,
-  library,
-  modal,
-}
+enum HotkeyScope { global, player, library, modal }
 
 class HotkeyDefinition {
   const HotkeyDefinition({

@@ -8,5 +8,5 @@ import 'transcript_repository_provider.dart';
 
 final allTranscriptsForMediaProvider =
     StreamProvider.family<List<TranscriptTrack>, String>((ref, mediaId) {
-  return ref.watch(transcriptRepositoryProvider).watchTracks(mediaId);
-});
+      return ref.watch(transcriptRepositoryProvider).watchTracks(mediaId);
+    });

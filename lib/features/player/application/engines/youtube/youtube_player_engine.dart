@@ -27,7 +27,8 @@ class YoutubePlayerEngine implements PlayerEngine {
       StreamController<Duration>.broadcast();
   final StreamController<Duration> _durationCtrl =
       StreamController<Duration>.broadcast();
-  final StreamController<bool> _playingCtrl = StreamController<bool>.broadcast();
+  final StreamController<bool> _playingCtrl =
+      StreamController<bool>.broadcast();
   final StreamController<bool> _bufferingCtrl =
       StreamController<bool>.broadcast();
 
@@ -87,7 +88,9 @@ class YoutubePlayerEngine implements PlayerEngine {
   @override
   Future<void> open(PlayableSource source) async {
     if (source is! YoutubePlayableSource) {
-      throw UnsupportedError('YoutubePlayerEngine requires YoutubePlayableSource');
+      throw UnsupportedError(
+        'YoutubePlayerEngine requires YoutubePlayableSource',
+      );
     }
     _videoId = source.videoId;
     _playbackCompleted = false;
@@ -262,9 +265,7 @@ class YoutubePlayerEngine implements PlayerEngine {
             if (args.length > 1) {
               final dur = (args[1] as num).toDouble();
               if (dur > 0 && dur.isFinite) {
-                _emitDuration(
-                  Duration(milliseconds: (dur * 1000).round()),
-                );
+                _emitDuration(Duration(milliseconds: (dur * 1000).round()));
                 _applyPendingSeek();
               }
             }
@@ -313,9 +314,7 @@ class YoutubePlayerEngine implements PlayerEngine {
     final secs = _pendingSeekSeconds;
     if (secs == null || secs <= 0) return;
     _pendingSeekSeconds = null;
-    unawaited(
-      seek(Duration(milliseconds: (secs * 1000).round())),
-    );
+    unawaited(seek(Duration(milliseconds: (secs * 1000).round())));
   }
 
   void _startPolling() {

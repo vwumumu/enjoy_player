@@ -7,7 +7,8 @@ library;
 
 import 'dart:io';
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 
 import 'package:enjoy_player/core/interaction/haptics.dart';
@@ -29,8 +30,9 @@ void _showMobileDeleteMenu(
 }) {
   Haptics.impactMedium(context);
   final ml = MaterialLocalizations.of(context);
-  final title =
-      (label != null && label.isNotEmpty) ? label : ml.deleteButtonTooltip;
+  final title = (label != null && label.isNotEmpty)
+      ? label
+      : ml.deleteButtonTooltip;
   showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -146,188 +148,187 @@ class _MediaCardTileState extends State<MediaCardTile> {
           },
           onLongPress:
               widget.onDelete != null && _deleteLongPressEnabledForPlatform()
-                  ? () => _showMobileDeleteMenu(
-                      context,
-                      onDelete: widget.onDelete!,
-                      label: widget.deleteTooltip,
-                    )
-                  : null,
+              ? () => _showMobileDeleteMenu(
+                  context,
+                  onDelete: widget.onDelete!,
+                  label: widget.deleteTooltip,
+                )
+              : null,
           hoverColor: cs.onSurface.withValues(alpha: 0.04),
           splashColor: accent.withValues(alpha: 0.12),
           highlightColor: accent.withValues(alpha: 0.06),
           child: AnimatedContainer(
-          duration: t.motionFast,
-          curve: Curves.easeOutCubic,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(t.radiusXl),
-            color:
-                _hover
-                    ? accent.withValues(alpha: 0.08)
-                    : cs.surfaceContainerLow,
-            border: Border.all(
-              color:
-                  _hover
-                      ? accent.withValues(alpha: 0.6)
-                      : cs.outlineVariant.withValues(alpha: 0.25),
-              width: _hover ? 1.5 : 1,
-            ),
-            boxShadow:
-                _hover
-                    ? [
+            duration: t.motionFast,
+            curve: Curves.easeOutCubic,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(t.radiusXl),
+              color: _hover
+                  ? accent.withValues(alpha: 0.08)
+                  : cs.surfaceContainerLow,
+              border: Border.all(
+                color: _hover
+                    ? accent.withValues(alpha: 0.6)
+                    : cs.outlineVariant.withValues(alpha: 0.25),
+                width: _hover ? 1.5 : 1,
+              ),
+              boxShadow: _hover
+                  ? [
                       BoxShadow(
                         color: accent.withValues(alpha: 0.12),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
                     ]
-                    : null,
-          ),
-          // Grid cells fix total height; thumbnail must flex so title block never overflows.
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(t.radiusXl - 1),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      _heroArtworkShell(
-                        widget.heroArtworkMediaId,
-                        _Thumbnail(
-                        file: widget.thumbnailFile,
-                        networkUrl: widget.thumbnailNetworkUrl,
-                        coverSeed: widget.coverSeed,
-                        isVideo: widget.isVideo,
-                        cs: cs,
-                      ),
-                      ),
-                      if (widget.providerBadge != null &&
-                          widget.providerBadge!.isNotEmpty)
-                        Positioned(
-                          top: t.space8,
-                          left: t.space8,
-                          child: _ProviderBadgePill(
-                            label: widget.providerBadge!,
+                  : null,
+            ),
+            // Grid cells fix total height; thumbnail must flex so title block never overflows.
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(t.radiusXl - 1),
+                    ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        _heroArtworkShell(
+                          widget.heroArtworkMediaId,
+                          _Thumbnail(
+                            file: widget.thumbnailFile,
+                            networkUrl: widget.thumbnailNetworkUrl,
+                            coverSeed: widget.coverSeed,
+                            isVideo: widget.isVideo,
+                            cs: cs,
                           ),
                         ),
-                      // Cinematic bottom scrim + play affordance for video
-                      if (widget.isVideo)
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          height: 56,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withValues(alpha: 0.55),
-                                ],
+                        if (widget.providerBadge != null &&
+                            widget.providerBadge!.isNotEmpty)
+                          Positioned(
+                            top: t.space8,
+                            left: t.space8,
+                            child: _ProviderBadgePill(
+                              label: widget.providerBadge!,
+                            ),
+                          ),
+                        // Cinematic bottom scrim + play affordance for video
+                        if (widget.isVideo)
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            height: 56,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withValues(alpha: 0.55),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      if (widget.isVideo)
-                        Positioned(
-                          right: t.space8,
-                          bottom: t.space8,
-                          child: Icon(
-                            Icons.play_circle_rounded,
-                            size: 36,
-                            color: Colors.white.withValues(alpha: 0.92),
-                            shadows: const [
-                              Shadow(blurRadius: 8, color: Colors.black54),
-                            ],
+                        if (widget.isVideo)
+                          Positioned(
+                            right: t.space8,
+                            bottom: t.space8,
+                            child: Icon(
+                              Icons.play_circle_rounded,
+                              size: 36,
+                              color: Colors.white.withValues(alpha: 0.92),
+                              shadows: const [
+                                Shadow(blurRadius: 8, color: Colors.black54),
+                              ],
+                            ),
                           ),
-                        ),
-                      if (widget.onDelete != null)
-                        Positioned(
-                          top: t.space8,
-                          right: t.space8,
-                          child: AnimatedOpacity(
-                            opacity: _hover ? 1 : 0,
-                            duration: t.motionFast,
-                            curve: Curves.easeOut,
-                            child: IgnorePointer(
-                              ignoring: !_hover,
-                              child: IconButton(
-                                visualDensity: VisualDensity.compact,
-                                iconSize: 20,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(
-                                  minWidth: 36,
-                                  minHeight: 36,
-                                ),
-                                tooltip:
-                                    (widget.deleteTooltip != null &&
-                                            widget.deleteTooltip!.isNotEmpty)
-                                        ? widget.deleteTooltip!
-                                        : MaterialLocalizations.of(
+                        if (widget.onDelete != null)
+                          Positioned(
+                            top: t.space8,
+                            right: t.space8,
+                            child: AnimatedOpacity(
+                              opacity: _hover ? 1 : 0,
+                              duration: t.motionFast,
+                              curve: Curves.easeOut,
+                              child: IgnorePointer(
+                                ignoring: !_hover,
+                                child: IconButton(
+                                  visualDensity: VisualDensity.compact,
+                                  iconSize: 20,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(
+                                    minWidth: 36,
+                                    minHeight: 36,
+                                  ),
+                                  tooltip:
+                                      (widget.deleteTooltip != null &&
+                                          widget.deleteTooltip!.isNotEmpty)
+                                      ? widget.deleteTooltip!
+                                      : MaterialLocalizations.of(
                                           context,
                                         ).deleteButtonTooltip,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: cs.surfaceContainerHighest
-                                      .withValues(alpha: 0.92),
-                                  foregroundColor: cs.onSurfaceVariant,
-                                  shape: const CircleBorder(),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: cs.surfaceContainerHighest
+                                        .withValues(alpha: 0.92),
+                                    foregroundColor: cs.onSurfaceVariant,
+                                    shape: const CircleBorder(),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                  ),
+                                  onPressed: widget.onDelete,
                                 ),
-                                icon: const Icon(Icons.delete_outline_rounded),
-                                onPressed: widget.onDelete,
                               ),
                             ),
                           ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Meta — fixed vertical budget (ellipsis); never steals flex from overflow.
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    t.space12,
+                    t.space8,
+                    t.space12,
+                    t.space12,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: tt.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          height: 1.25,
                         ),
+                      ),
+                      if (widget.subtitle != null) ...[
+                        SizedBox(height: t.space4),
+                        Text(
+                          widget.subtitle!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            height: 1.2,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-              ),
-              // Meta — fixed vertical budget (ellipsis); never steals flex from overflow.
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  t.space12,
-                  t.space8,
-                  t.space12,
-                  t.space12,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      widget.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: tt.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        height: 1.25,
-                      ),
-                    ),
-                    if (widget.subtitle != null) ...[
-                      SizedBox(height: t.space4),
-                      Text(
-                        widget.subtitle!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          height: 1.2,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -403,9 +404,9 @@ class _MediaCardRowState extends State<MediaCardRow> {
                 iconSize: 22,
                 tooltip:
                     (widget.deleteTooltip != null &&
-                            widget.deleteTooltip!.isNotEmpty)
-                        ? widget.deleteTooltip!
-                        : MaterialLocalizations.of(context).deleteButtonTooltip,
+                        widget.deleteTooltip!.isNotEmpty)
+                    ? widget.deleteTooltip!
+                    : MaterialLocalizations.of(context).deleteButtonTooltip,
                 onPressed: widget.onDelete,
                 icon: Icon(
                   Icons.delete_outline_rounded,
@@ -446,119 +447,118 @@ class _MediaCardRowState extends State<MediaCardRow> {
           },
           onLongPress:
               widget.trailing == null &&
-                      widget.onDelete != null &&
-                      _deleteLongPressEnabledForPlatform()
-                  ? () => _showMobileDeleteMenu(
-                      context,
-                      onDelete: widget.onDelete!,
-                      label: widget.deleteTooltip,
-                    )
-                  : null,
+                  widget.onDelete != null &&
+                  _deleteLongPressEnabledForPlatform()
+              ? () => _showMobileDeleteMenu(
+                  context,
+                  onDelete: widget.onDelete!,
+                  label: widget.deleteTooltip,
+                )
+              : null,
           hoverColor: cs.onSurface.withValues(alpha: 0.04),
           splashColor: accent.withValues(alpha: 0.10),
           highlightColor: accent.withValues(alpha: 0.05),
           child: AnimatedContainer(
-          duration: t.motionFast,
-          curve: Curves.easeOutCubic,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(t.radiusLg),
-            color:
-                _hover
-                    ? accent.withValues(alpha: 0.06)
-                    : cs.surfaceContainerLow,
-            border: Border.all(
-              color:
-                  _hover
-                      ? accent.withValues(alpha: 0.45)
-                      : cs.outlineVariant.withValues(alpha: 0.2),
-              width: _hover ? 1.5 : 1,
+            duration: t.motionFast,
+            curve: Curves.easeOutCubic,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(t.radiusLg),
+              color: _hover
+                  ? accent.withValues(alpha: 0.06)
+                  : cs.surfaceContainerLow,
+              border: Border.all(
+                color: _hover
+                    ? accent.withValues(alpha: 0.45)
+                    : cs.outlineVariant.withValues(alpha: 0.2),
+                width: _hover ? 1.5 : 1,
+              ),
             ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: t.space16,
-              vertical: t.space12,
-            ),
-            child: Row(
-              children: [
-                // Thumbnail square
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(t.radiusMd),
-                  child: SizedBox(
-                    width: 56,
-                    height: 56,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        _heroArtworkShell(
-                          widget.heroArtworkMediaId,
-                          _Thumbnail(
-                          file: widget.thumbnailFile,
-                          networkUrl: widget.thumbnailNetworkUrl,
-                          coverSeed: widget.coverSeed,
-                          isVideo: widget.isVideo,
-                          cs: cs,
-                        ),
-                        ),
-                        if (widget.providerBadge != null &&
-                            widget.providerBadge!.isNotEmpty)
-                          Positioned(
-                            top: 4,
-                            left: 4,
-                            child: _ProviderBadgePill(
-                              label: widget.providerBadge!,
-                              compact: true,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: t.space16,
+                vertical: t.space12,
+              ),
+              child: Row(
+                children: [
+                  // Thumbnail square
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(t.radiusMd),
+                    child: SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          _heroArtworkShell(
+                            widget.heroArtworkMediaId,
+                            _Thumbnail(
+                              file: widget.thumbnailFile,
+                              networkUrl: widget.thumbnailNetworkUrl,
+                              coverSeed: widget.coverSeed,
+                              isVideo: widget.isVideo,
+                              cs: cs,
                             ),
                           ),
+                          if (widget.providerBadge != null &&
+                              widget.providerBadge!.isNotEmpty)
+                            Positioned(
+                              top: 4,
+                              left: 4,
+                              child: _ProviderBadgePill(
+                                label: widget.providerBadge!,
+                                compact: true,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: t.space16),
+                  // Title + meta
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (widget.subtitle != null ||
+                            widget.badge != null) ...[
+                          SizedBox(height: t.space4),
+                          Row(
+                            children: [
+                              if (widget.badge != null) ...[
+                                _Badge(label: widget.badge!, cs: cs),
+                                SizedBox(width: t.space8),
+                              ],
+                              if (widget.subtitle != null)
+                                Text(
+                                  widget.subtitle!,
+                                  style: tt.bodySmall?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                ),
-                SizedBox(width: t.space16),
-                // Title + meta
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      if (widget.subtitle != null || widget.badge != null) ...[
-                        SizedBox(height: t.space4),
-                        Row(
-                          children: [
-                            if (widget.badge != null) ...[
-                              _Badge(label: widget.badge!, cs: cs),
-                              SizedBox(width: t.space8),
-                            ],
-                            if (widget.subtitle != null)
-                              Text(
-                                widget.subtitle!,
-                                style: tt.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                // Trailing
-                _buildTrailing(cs, t),
-              ],
+                  // Trailing
+                  _buildTrailing(cs, t),
+                ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );
@@ -659,10 +659,7 @@ class _Badge extends StatelessWidget {
 }
 
 class _ProviderBadgePill extends StatelessWidget {
-  const _ProviderBadgePill({
-    required this.label,
-    this.compact = false,
-  });
+  const _ProviderBadgePill({required this.label, this.compact = false});
 
   final String label;
   final bool compact;

@@ -20,16 +20,18 @@ String recordingAssessmentFailureMessage(
   String? debugMessage,
 }) {
   return switch (kind) {
-    RecordingAssessmentFailureKind.webUnsupported => l10n.assessmentWebUnsupported,
+    RecordingAssessmentFailureKind.webUnsupported =>
+      l10n.assessmentWebUnsupported,
     RecordingAssessmentFailureKind.noRecording => l10n.assessmentNoRecording,
-    RecordingAssessmentFailureKind.emptyReference => l10n.assessmentEmptyReference,
+    RecordingAssessmentFailureKind.emptyReference =>
+      l10n.assessmentEmptyReference,
     RecordingAssessmentFailureKind.fileTooSmall => l10n.assessmentNoRecording,
     RecordingAssessmentFailureKind.serviceError => l10n.assessmentRunFailed(() {
-        final raw = debugMessage?.replaceAll(RegExp(r'\s+'), ' ').trim();
-        if (raw == null || raw.isEmpty) return '—';
-        if (raw.length > 120) return '${raw.substring(0, 117)}…';
-        return raw;
-      }()),
+      final raw = debugMessage?.replaceAll(RegExp(r'\s+'), ' ').trim();
+      if (raw == null || raw.isEmpty) return '—';
+      if (raw.length > 120) return '${raw.substring(0, 117)}…';
+      return raw;
+    }()),
   };
 }
 
@@ -66,7 +68,9 @@ Future<void> triggerRecordingAssessment({
     }
   }
 
-  final notifier = ref.read(recordingAssessmentControllerProvider(row.id).notifier);
+  final notifier = ref.read(
+    recordingAssessmentControllerProvider(row.id).notifier,
+  );
   final outcome = await notifier.run(row);
   if (!context.mounted) return;
 
@@ -76,7 +80,11 @@ Future<void> triggerRecordingAssessment({
     case RecordingAssessmentFailure(:final kind, :final debugMessage):
       AppNotice.error(
         context,
-        recordingAssessmentFailureMessage(l10n, kind, debugMessage: debugMessage),
+        recordingAssessmentFailureMessage(
+          l10n,
+          kind,
+          debugMessage: debugMessage,
+        ),
       );
   }
 }

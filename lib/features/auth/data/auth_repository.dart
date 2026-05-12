@@ -45,8 +45,8 @@ class AuthRepository {
   AuthRepository({
     required AuthApi authApi,
     required SecureTokenStore tokenStore,
-  })  : _authApi = authApi,
-        _tokenStore = tokenStore;
+  }) : _authApi = authApi,
+       _tokenStore = tokenStore;
 
   final AuthApi _authApi;
   final SecureTokenStore _tokenStore;

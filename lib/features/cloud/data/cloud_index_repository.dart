@@ -7,20 +7,16 @@ import 'package:enjoy_player/features/cloud/domain/remote_library_item.dart';
 import 'package:enjoy_player/features/sync/data/sync_serializers.dart';
 
 class CloudIndexRepository {
-  CloudIndexRepository({
-    required AudioApi audioApi,
-    required VideoApi videoApi,
-  })  : _audioApi = audioApi,
-        _videoApi = videoApi;
+  CloudIndexRepository({required AudioApi audioApi, required VideoApi videoApi})
+    : _audioApi = audioApi,
+      _videoApi = videoApi;
 
   final AudioApi _audioApi;
   final VideoApi _videoApi;
 
   static const pageSize = 50;
 
-  Future<List<RemoteLibraryItem>> fetchAudios({
-    String? updatedAfter,
-  }) async {
+  Future<List<RemoteLibraryItem>> fetchAudios({String? updatedAfter}) async {
     final raw = await _audioApi.audios(
       limit: pageSize,
       updatedAfter: updatedAfter,
@@ -28,9 +24,7 @@ class CloudIndexRepository {
     return raw.map(_audioToItem).toList();
   }
 
-  Future<List<RemoteLibraryItem>> fetchVideos({
-    String? updatedAfter,
-  }) async {
+  Future<List<RemoteLibraryItem>> fetchVideos({String? updatedAfter}) async {
     final raw = await _videoApi.videos(
       limit: pageSize,
       updatedAfter: updatedAfter,

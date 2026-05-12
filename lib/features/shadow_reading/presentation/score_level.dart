@@ -21,6 +21,9 @@ Color assessmentScoreColor(ColorScheme scheme, AssessmentScoreLevel level) {
   };
 }
 
-Color assessmentScoreBackground(ColorScheme scheme, AssessmentScoreLevel level) {
+Color assessmentScoreBackground(
+  ColorScheme scheme,
+  AssessmentScoreLevel level,
+) {
   return assessmentScoreColor(scheme, level).withValues(alpha: 0.16);
 }

@@ -110,14 +110,14 @@ GoRouter appRouter(Ref ref) {
                 child: ExpandedPlayerScreen(mediaId: id),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(
-                    opacity: CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    ),
-                    child: child,
-                  );
-                },
+                      return FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
+                        child: child,
+                      );
+                    },
                 transitionDuration: const Duration(milliseconds: 220),
                 reverseTransitionDuration: const Duration(milliseconds: 180),
               );

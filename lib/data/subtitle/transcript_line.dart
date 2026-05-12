@@ -20,10 +20,10 @@ class TranscriptLine {
   double get endSeconds => (startMs + durationMs) / 1000.0;
 
   Map<String, dynamic> toJson() => {
-        'text': text,
-        'start': startMs,
-        'duration': durationMs,
-      };
+    'text': text,
+    'start': startMs,
+    'duration': durationMs,
+  };
 
   static TranscriptLine fromJson(Map<String, dynamic> json) {
     return TranscriptLine(

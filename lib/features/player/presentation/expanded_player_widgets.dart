@@ -48,10 +48,7 @@ class ExpandedPlayerGenericErrorBody extends StatelessWidget {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(
-            l10n.playerOpenGenericError,
-            textAlign: TextAlign.center,
-          ),
+          child: Text(l10n.playerOpenGenericError, textAlign: TextAlign.center),
         ),
       ),
     );
@@ -131,21 +128,20 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
                 ),
               ),
               centerTitle: false,
-              actions:
-                  isVideo && ytLoginChrome
-                      ? [
-                          IconButton(
-                            tooltip: l10n.youtubeLoginTooltip,
-                            icon: Icon(
-                              ytSignedIn
-                                  ? Icons.person_rounded
-                                  : Icons.person_outline_rounded,
-                              color: isVideo ? Colors.white : cs.onSurface,
-                            ),
-                            onPressed: () => context.push('/youtube/login'),
-                          ),
-                        ]
-                      : null,
+              actions: isVideo && ytLoginChrome
+                  ? [
+                      IconButton(
+                        tooltip: l10n.youtubeLoginTooltip,
+                        icon: Icon(
+                          ytSignedIn
+                              ? Icons.person_rounded
+                              : Icons.person_outline_rounded,
+                          color: isVideo ? Colors.white : cs.onSurface,
+                        ),
+                        onPressed: () => context.push('/youtube/login'),
+                      ),
+                    ]
+                  : null,
             ),
       body: PlayerAmbientBackdrop(
         accentColor: accent,
@@ -155,9 +151,7 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
                 engine: engine,
                 transcript: TranscriptPanel(mediaId: mediaId),
               )
-            : AudioPlayerLayout(
-                transcript: TranscriptPanel(mediaId: mediaId),
-              ),
+            : AudioPlayerLayout(transcript: TranscriptPanel(mediaId: mediaId)),
       ),
     );
   }

@@ -68,12 +68,9 @@ class VideoPosterCaptureService {
       if (currentSessionMediaId() != mediaId) return;
 
       final sessionDur = sessionDurationSeconds();
-      final durSec =
-          video.durationSeconds > 0
-              ? video.durationSeconds
-              : (sessionDur != null && sessionDur > 0
-                  ? sessionDur.floor()
-                  : 0);
+      final durSec = video.durationSeconds > 0
+          ? video.durationSeconds
+          : (sessionDur != null && sessionDur > 0 ? sessionDur.floor() : 0);
 
       final posterSeconds = posterSeekSeconds(durSec > 0 ? durSec : null);
       final posterMs = (posterSeconds * 1000).round();
@@ -105,7 +102,8 @@ class VideoPosterCaptureService {
       final absoluteThumb = f.absolute.path;
       await db.videoDao.updateLocalThumbnail(mediaId, absoluteThumb);
 
-      if (gen == currentOpenGeneration() && currentSessionMediaId() == mediaId) {
+      if (gen == currentOpenGeneration() &&
+          currentSessionMediaId() == mediaId) {
         onSessionThumbnail(absoluteThumb);
       }
     } on Object catch (e, st) {
@@ -123,6 +121,8 @@ class VideoPosterCaptureService {
 }
 
 /// Injectable [VideoPosterCaptureService] for [PlayerController].
-final videoPosterCaptureServiceProvider = Provider<VideoPosterCaptureService>((ref) {
+final videoPosterCaptureServiceProvider = Provider<VideoPosterCaptureService>((
+  ref,
+) {
   return VideoPosterCaptureService(ref);
 });

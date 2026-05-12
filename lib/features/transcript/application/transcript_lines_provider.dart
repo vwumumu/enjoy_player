@@ -34,8 +34,7 @@ Future<List<TranscriptLine>> _computeLines(
 }) async {
   final echo = await db.echoSessionDao.getLatestForTarget(tt, mediaId);
   final rows = await db.transcriptDao.listForTarget(tt, mediaId);
-  final id =
-      primary ? echo?.transcriptId : echo?.secondaryTranscriptId;
+  final id = primary ? echo?.transcriptId : echo?.secondaryTranscriptId;
   return _linesForActiveId(repo, rows, id);
 }
 
@@ -54,10 +53,14 @@ Stream<List<TranscriptLine>> _linesForMedia(
     ).asyncExpand((initial) async* {
       yield initial;
       yield* StreamGroup.merge([
-        db.echoSessionDao.watchLatestForTarget(tt, mediaId).asyncMap(
+        db.echoSessionDao
+            .watchLatestForTarget(tt, mediaId)
+            .asyncMap(
               (_) => _computeLines(db, repo, tt, mediaId, primary: primary),
             ),
-        db.transcriptDao.watchAllForTarget(tt, mediaId).asyncMap(
+        db.transcriptDao
+            .watchAllForTarget(tt, mediaId)
+            .asyncMap(
               (_) => _computeLines(db, repo, tt, mediaId, primary: primary),
             ),
       ]);

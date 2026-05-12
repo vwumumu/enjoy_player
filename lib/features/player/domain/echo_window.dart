@@ -45,8 +45,7 @@ const double defaultEchoStartGuardSeconds = 0.02;
 double _clamp(double value, double min, double max) =>
     value < min ? min : (value > max ? max : value);
 
-bool _isFiniteNumber(num? value) =>
-    value != null && value.isFinite;
+bool _isFiniteNumber(num? value) => value != null && value.isFinite;
 
 /// Normalize and validate the echo window (same rules as TS).
 EchoWindow? normalizeEchoWindow(NormalizeEchoWindowInput input) {
@@ -56,11 +55,11 @@ EchoWindow? normalizeEchoWindow(NormalizeEchoWindowInput input) {
     return null;
   }
 
-  final hasValidDuration = input.durationSeconds != null &&
+  final hasValidDuration =
+      input.durationSeconds != null &&
       input.durationSeconds!.isFinite &&
       input.durationSeconds! > 0;
-  final maxTime =
-      hasValidDuration ? input.durationSeconds! : double.infinity;
+  final maxTime = hasValidDuration ? input.durationSeconds! : double.infinity;
 
   final start = _clamp(input.startTimeSeconds, 0, maxTime);
   final end = _clamp(input.endTimeSeconds, 0, maxTime);
@@ -79,10 +78,9 @@ double clampSeekTimeToEchoWindow(
 }) {
   if (!_isFiniteNumber(requestedTimeSeconds)) return window.start;
 
-  final maxPlayable =
-      window.start > window.end - seekEpsilonSeconds
-          ? window.start
-          : window.end - seekEpsilonSeconds;
+  final maxPlayable = window.start > window.end - seekEpsilonSeconds
+      ? window.start
+      : window.end - seekEpsilonSeconds;
   return _clamp(requestedTimeSeconds, window.start, maxPlayable);
 }
 

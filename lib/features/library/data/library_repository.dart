@@ -56,11 +56,8 @@ Media _mediaFromAudio(AudioRow row) {
 }
 
 class MediaLibraryRepository {
-  MediaLibraryRepository(
-    this._db,
-    this._storage, {
-    SyncEnqueueFn? enqueueSync,
-  }) : _enqueueSync = enqueueSync;
+  MediaLibraryRepository(this._db, this._storage, {SyncEnqueueFn? enqueueSync})
+    : _enqueueSync = enqueueSync;
 
   final AppDatabase _db;
   final FileStorage _storage;
@@ -81,20 +78,14 @@ class MediaLibraryRepository {
     }
 
     return Stream<List<Media>>.multi((controller) {
-      subV = _db.videoDao.watchAll().listen(
-        (rows) {
-          videos = rows;
-          emit(controller);
-        },
-        onError: controller.addError,
-      );
-      subA = _db.audioDao.watchAll().listen(
-        (rows) {
-          audios = rows;
-          emit(controller);
-        },
-        onError: controller.addError,
-      );
+      subV = _db.videoDao.watchAll().listen((rows) {
+        videos = rows;
+        emit(controller);
+      }, onError: controller.addError);
+      subA = _db.audioDao.watchAll().listen((rows) {
+        audios = rows;
+        emit(controller);
+      }, onError: controller.addError);
       controller.onCancel = () {
         subV.cancel();
         subA.cancel();
@@ -103,14 +94,12 @@ class MediaLibraryRepository {
   }
 
   /// [signedInUserId] when non-null enables web-aligned `aid`/`vid` + outbound sync.
-  Future<String> importMedia(
-    XFile file, {
-    String? signedInUserId,
-  }) async {
+  Future<String> importMedia(XFile file, {String? signedInUserId}) async {
     try {
       final result = await _storage.importPickedFile(file);
-      final kind =
-          isVideoFileName(file.name) ? MediaKind.video : MediaKind.audio;
+      final kind = isVideoFileName(file.name)
+          ? MediaKind.video
+          : MediaKind.audio;
       final now = DateTime.now();
       final contentHash = result.contentHashHex;
       final signedIn = signedInUserId != null && signedInUserId.isNotEmpty;
@@ -226,8 +215,7 @@ class MediaLibraryRepository {
 
     final rowId = enjoyVideoId(provider: 'youtube', vid: id);
     final now = DateTime.now();
-    final signedIn =
-        signedInUserId != null && signedInUserId.isNotEmpty;
+    final signedIn = signedInUserId != null && signedInUserId.isNotEmpty;
 
     final row = VideoRow(
       id: rowId,

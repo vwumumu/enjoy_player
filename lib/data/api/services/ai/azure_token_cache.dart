@@ -8,11 +8,12 @@ import 'package:meta/meta.dart';
 final class AzureTokenCache {
   AzureTokenCache({
     AzureTokenApi? api,
-    @visibleForTesting Future<Map<String, dynamic>> Function()? debugOverrideFetch,
+    @visibleForTesting
+    Future<Map<String, dynamic>> Function()? debugOverrideFetch,
   }) : assert(
-          api != null || debugOverrideFetch != null,
-          'Provide api or debugOverrideFetch',
-        ),
+         api != null || debugOverrideFetch != null,
+         'Provide api or debugOverrideFetch',
+       ),
        _api = api,
        _debugOverrideFetch = debugOverrideFetch;
 
@@ -38,20 +39,17 @@ final class AzureTokenCache {
     final json = _debugOverrideFetch != null
         ? await _debugOverrideFetch()
         : await _api!.generateToken(
-      usage: <String, dynamic>{
-        'purpose': 'assessment',
-        'assessment': <String, dynamic>{
-          'durationSeconds': durationSeconds,
-        },
-      },
-    );
+            usage: <String, dynamic>{
+              'purpose': 'assessment',
+              'assessment': <String, dynamic>{
+                'durationSeconds': durationSeconds,
+              },
+            },
+          );
 
     final token = json['token'] as String?;
     final region = json['region'] as String?;
-    if (token == null ||
-        token.isEmpty ||
-        region == null ||
-        region.isEmpty) {
+    if (token == null || token.isEmpty || region == null || region.isEmpty) {
       throw StateError(
         'Azure token response missing token/region: ${json.keys.join(", ")}',
       );

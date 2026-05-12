@@ -28,7 +28,9 @@ void main() {
 
     test('4 MiB file uses first+last 4 MiB (duplicate) like web', () async {
       final n = kEnjoyHashChunkSize;
-      final data = Uint8List.fromList(List.generate(n, (i) => (i * 7 + 11) % 256));
+      final data = Uint8List.fromList(
+        List.generate(n, (i) => (i * 7 + 11) % 256),
+      );
       final path = p.join(tmp.path, '4mb.bin');
       await File(path).writeAsBytes(data);
       final combined = Uint8List.fromList([...data, ...data]);
@@ -47,7 +49,9 @@ void main() {
       await File(path).writeAsBytes(data);
       final first = data.sublist(0, n);
       final last = data.sublist(size - n);
-      final want = sha256.convert(Uint8List.fromList([...first, ...last])).toString();
+      final want = sha256
+          .convert(Uint8List.fromList([...first, ...last]))
+          .toString();
       expect(chunkedContentSha256HexFromFileSync(path), want);
     });
 
@@ -64,8 +68,9 @@ void main() {
       final first = data.sublist(0, n);
       final mid = data.sublist(middleOffset, middleOffset + n);
       final last = data.sublist(size - n);
-      final want =
-          sha256.convert(Uint8List.fromList([...first, ...mid, ...last])).toString();
+      final want = sha256
+          .convert(Uint8List.fromList([...first, ...mid, ...last]))
+          .toString();
       expect(chunkedContentSha256HexFromFileSync(path), want);
     });
   });

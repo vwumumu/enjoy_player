@@ -345,12 +345,7 @@ class _CloudAudioListState extends ConsumerState<_CloudAudioList> {
       child: ListView.separated(
         controller: _scroll,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(
-          t.space16,
-          t.space8,
-          t.space16,
-          t.space24,
-        ),
+        padding: EdgeInsets.fromLTRB(t.space16, t.space8, t.space16, t.space24),
         itemCount: widget.items.length + 1,
         separatorBuilder: (_, _) => SizedBox(height: t.space8),
         itemBuilder: (context, index) {
@@ -393,7 +388,9 @@ class _CloudAudioRowState extends ConsumerState<_CloudAudioRow> {
   }
 
   Future<void> _load() async {
-    final v = await ref.read(cloudAddToLibraryProvider).isInLibrary(widget.item);
+    final v = await ref
+        .read(cloudAddToLibraryProvider)
+        .isInLibrary(widget.item);
     if (mounted) setState(() => _inLibrary = v);
   }
 
@@ -420,11 +417,7 @@ class _CloudAudioRowState extends ConsumerState<_CloudAudioRow> {
         child: CircularProgressIndicator(strokeWidth: 2),
       );
     } else if (_inLibrary == true) {
-      trailing = Icon(
-        Icons.check_circle_rounded,
-        color: cs.primary,
-        size: 22,
-      );
+      trailing = Icon(Icons.check_circle_rounded, color: cs.primary, size: 22);
     } else {
       trailing = IconButton(
         visualDensity: VisualDensity.compact,
@@ -458,11 +451,11 @@ class _CloudAudioRowState extends ConsumerState<_CloudAudioRow> {
       coverSeed: seed,
       isVideo: false,
       accentColor: accent,
-      heroArtworkMediaId:
-          _inLibrary == true && playingId != item.id ? item.id : null,
+      heroArtworkMediaId: _inLibrary == true && playingId != item.id
+          ? item.id
+          : null,
       trailing: trailing,
-      providerBadge:
-          item.provider == 'youtube' ? l10n.youtubeBadge : null,
+      providerBadge: item.provider == 'youtube' ? l10n.youtubeBadge : null,
       onTap: () {
         if (_inLibrary == true) {
           openPlayerRoute(context, item.id);
@@ -557,7 +550,8 @@ class _CloudVideoGridState extends ConsumerState<_CloudVideoGrid> {
           crossAxisSpacing: 12,
           childAspectRatio: 16 / 11.5,
         ),
-        itemCount: widget.items.length + (widget.loading && !widget.done ? 1 : 0),
+        itemCount:
+            widget.items.length + (widget.loading && !widget.done ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= widget.items.length) {
             return Center(
@@ -594,7 +588,9 @@ class _CloudVideoTileState extends ConsumerState<_CloudVideoTile> {
   }
 
   Future<void> _load() async {
-    final v = await ref.read(cloudAddToLibraryProvider).isInLibrary(widget.item);
+    final v = await ref
+        .read(cloudAddToLibraryProvider)
+        .isInLibrary(widget.item);
     if (mounted) setState(() => _inLibrary = v);
   }
 
@@ -680,10 +676,10 @@ class _CloudVideoTileState extends ConsumerState<_CloudVideoTile> {
           coverSeed: seed,
           isVideo: true,
           accentColor: accent,
-          heroArtworkMediaId:
-              _inLibrary == true && playingId != item.id ? item.id : null,
-          providerBadge:
-              item.provider == 'youtube' ? l10n.youtubeBadge : null,
+          heroArtworkMediaId: _inLibrary == true && playingId != item.id
+              ? item.id
+              : null,
+          providerBadge: item.provider == 'youtube' ? l10n.youtubeBadge : null,
           onTap: () {
             if (_inLibrary == true) {
               openPlayerRoute(context, item.id);

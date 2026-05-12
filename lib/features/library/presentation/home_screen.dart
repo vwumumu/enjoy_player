@@ -95,13 +95,13 @@ class HomeScreen extends ConsumerWidget {
                       sliver: SliverToBoxAdapter(
                         child: Text(
                           l10n.homeRecentMedia,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
                         ),
                       ),
                     ),

@@ -14,11 +14,11 @@ class EchoSessions extends Table {
   TextColumn get language => text().withDefault(const Constant('und'))();
 
   IntColumn get currentTimeMs => integer().withDefault(const Constant(0))();
-  RealColumn get playbackRate =>
-      real().withDefault(const Constant(1.0))();
+  RealColumn get playbackRate => real().withDefault(const Constant(1.0))();
   RealColumn get volume => real().withDefault(const Constant(1.0))();
   IntColumn get echoStartMs => integer().nullable()();
   IntColumn get echoEndMs => integer().nullable()();
+
   /// Primary transcript (weapp `transcriptId`).
   TextColumn get transcriptId => text().nullable()();
   TextColumn get secondaryTranscriptId => text().nullable()();

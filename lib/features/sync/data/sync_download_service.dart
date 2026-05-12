@@ -15,10 +15,10 @@ class SyncDownloadService {
     required AudioApi audioApi,
     required VideoApi videoApi,
     required RecordingApi recordingApi,
-  })  : _db = db,
-        _audioApi = audioApi,
-        _videoApi = videoApi,
-        _recordingApi = recordingApi;
+  }) : _db = db,
+       _audioApi = audioApi,
+       _videoApi = videoApi,
+       _recordingApi = recordingApi;
 
   final AppDatabase _db;
   final AudioApi _audioApi;
@@ -36,7 +36,9 @@ class SyncDownloadService {
   Future<SyncResult> downloadRecordings() =>
       _downloadRecordingsInternal(resetCursor: false);
 
-  Future<SyncResult> _downloadAudiosInternal({required bool resetCursor}) async {
+  Future<SyncResult> _downloadAudiosInternal({
+    required bool resetCursor,
+  }) async {
     final errors = <String>[];
     var synced = 0;
     var failed = 0;
@@ -96,7 +98,9 @@ class SyncDownloadService {
     );
   }
 
-  Future<SyncResult> _downloadVideosInternal({required bool resetCursor}) async {
+  Future<SyncResult> _downloadVideosInternal({
+    required bool resetCursor,
+  }) async {
     final errors = <String>[];
     var synced = 0;
     var failed = 0;
@@ -165,8 +169,9 @@ class SyncDownloadService {
     if (resetCursor) {
       await _db.settingsDao.setValue(SettingsKeys.syncCursorRecording, '');
     }
-    var cursor =
-        await _db.settingsDao.getValue(SettingsKeys.syncCursorRecording);
+    var cursor = await _db.settingsDao.getValue(
+      SettingsKeys.syncCursorRecording,
+    );
     if (cursor != null && cursor.isEmpty) cursor = null;
 
     while (true) {
@@ -193,8 +198,7 @@ class SyncDownloadService {
           final id = m['id'] as String?;
           if (id == null || id.isEmpty) continue;
           final local = await _db.recordingDao.getById(id);
-          final merged =
-              mergeRecordingLastWriteWins(local: local, server: m);
+          final merged = mergeRecordingLastWriteWins(local: local, server: m);
           await _db.recordingDao.insertRow(merged);
           synced++;
         } catch (e) {

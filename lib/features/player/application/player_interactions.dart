@@ -77,7 +77,9 @@ class PlayerInteractions extends _$PlayerInteractions {
   Future<void> _seekLine(TranscriptLine line, int index) async {
     final echo = ref.read(echoModeProvider);
     if (echo.active) {
-      ref.read(echoModeProvider.notifier).activate(
+      ref
+          .read(echoModeProvider.notifier)
+          .activate(
             startLineIndex: index,
             endLineIndex: index,
             startTimeSeconds: line.startSeconds,
@@ -112,7 +114,9 @@ class PlayerInteractions extends _$PlayerInteractions {
     final idx = indexOfActiveLine(lines, session.currentTimeSeconds);
     if (idx < 0) return;
     final line = lines[idx];
-    ref.read(echoModeProvider.notifier).activate(
+    ref
+        .read(echoModeProvider.notifier)
+        .activate(
           startLineIndex: idx,
           endLineIndex: idx,
           startTimeSeconds: line.startSeconds,

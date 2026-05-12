@@ -71,15 +71,9 @@ void main() {
       ),
     );
 
-    final timelineJson = jsonEncode(
-      [
-        const TranscriptLine(
-          text: 'hello',
-          startMs: 0,
-          durationMs: 500,
-        ).toJson(),
-      ],
-    );
+    final timelineJson = jsonEncode([
+      const TranscriptLine(text: 'hello', startMs: 0, durationMs: 500).toJson(),
+    ]);
 
     await db.transcriptDao.upsert(
       TranscriptRow(

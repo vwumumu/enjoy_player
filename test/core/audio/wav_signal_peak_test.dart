@@ -30,7 +30,12 @@ Uint8List _pcm16MonoWav(int sampleRate, List<int> s16Samples) {
   return b.toBytes();
 }
 
-List<int> _le32(int v) => [v & 0xff, (v >> 8) & 0xff, (v >> 16) & 0xff, (v >> 24) & 0xff];
+List<int> _le32(int v) => [
+  v & 0xff,
+  (v >> 8) & 0xff,
+  (v >> 16) & 0xff,
+  (v >> 24) & 0xff,
+];
 List<int> _le16(int v) => [v & 0xff, (v >> 8) & 0xff];
 
 void main() {

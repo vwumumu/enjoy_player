@@ -1,10 +1,7 @@
 /// User profile returned by `GET/PATCH /api/v1/profile` (camelCase JSON).
 library;
 
-enum SubscriptionTier {
-  free,
-  pro,
-}
+enum SubscriptionTier { free, pro }
 
 SubscriptionTier? _subscriptionTierFromJson(Object? value) {
   if (value == null) return null;
@@ -71,7 +68,8 @@ class UserProfile {
       if (balance != null) 'balance': balance,
       if (hasMixin != null) 'hasMixin': hasMixin,
       if (subscriptionTier != null) 'subscriptionTier': subscriptionTier!.name,
-      if (subscriptionExpireDate != null) 'subscriptionExpireDate': subscriptionExpireDate,
+      if (subscriptionExpireDate != null)
+        'subscriptionExpireDate': subscriptionExpireDate,
       if (locale != null) 'locale': locale,
       if (learningLanguage != null) 'learningLanguage': learningLanguage,
       if (nativeLanguage != null) 'nativeLanguage': nativeLanguage,
@@ -103,7 +101,8 @@ class UserProfile {
       balance: balance ?? this.balance,
       hasMixin: hasMixin ?? this.hasMixin,
       subscriptionTier: subscriptionTier ?? this.subscriptionTier,
-      subscriptionExpireDate: subscriptionExpireDate ?? this.subscriptionExpireDate,
+      subscriptionExpireDate:
+          subscriptionExpireDate ?? this.subscriptionExpireDate,
       locale: locale ?? this.locale,
       learningLanguage: learningLanguage ?? this.learningLanguage,
       nativeLanguage: nativeLanguage ?? this.nativeLanguage,

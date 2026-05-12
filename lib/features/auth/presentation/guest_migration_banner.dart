@@ -91,11 +91,9 @@ class GuestMigrationBanner extends ConsumerWidget {
                       runSpacing: t.space8,
                       children: [
                         TextButton(
-                          onPressed:
-                              () =>
-                                  ref
-                                      .read(guestMigrationCtrlProvider.notifier)
-                                      .dismiss(),
+                          onPressed: () => ref
+                              .read(guestMigrationCtrlProvider.notifier)
+                              .dismiss(),
                           child: Text(l10n.migrationBannerActionDismiss),
                         ),
                         FilledButton(

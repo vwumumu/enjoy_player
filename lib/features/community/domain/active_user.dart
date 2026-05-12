@@ -20,11 +20,7 @@ int? _intFromJson(Object? value) {
 }
 
 class ActiveUser {
-  const ActiveUser({
-    required this.id,
-    required this.name,
-    this.avatarUrl,
-  });
+  const ActiveUser({required this.id, required this.name, this.avatarUrl});
 
   final String id;
   final String name;
@@ -50,6 +46,7 @@ class ActiveUsersResponse {
   final List<ActiveUser> users;
   final int count;
   final int? recordingsCountToday;
+
   /// Total practice duration for the community today, milliseconds.
   final int? recordingsDurationToday;
 

@@ -48,7 +48,9 @@ class _LocateMediaScreenState extends ConsumerState<LocateMediaScreen> {
       if (!mounted) return;
 
       try {
-        await ref.read(playerControllerProvider.notifier).relocateAndOpen(
+        await ref
+            .read(playerControllerProvider.notifier)
+            .relocateAndOpen(
               widget.info.mediaId,
               XFile(path, name: pick.files.single.name),
             );
@@ -68,10 +70,9 @@ class _LocateMediaScreenState extends ConsumerState<LocateMediaScreen> {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final sizeLabel = _formatExpectedSize(widget.info.expectedSize);
-    final sizeLine =
-        sizeLabel.isEmpty
-            ? l10n.mediaLocateSizeUnknown
-            : l10n.mediaLocateExpectedSize(sizeLabel);
+    final sizeLine = sizeLabel.isEmpty
+        ? l10n.mediaLocateSizeUnknown
+        : l10n.mediaLocateExpectedSize(sizeLabel);
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -103,21 +104,23 @@ class _LocateMediaScreenState extends ConsumerState<LocateMediaScreen> {
                 ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
               ),
               const SizedBox(height: 24),
-              Text(l10n.mediaLocateBody, style: Theme.of(context).textTheme.bodyLarge),
+              Text(
+                l10n.mediaLocateBody,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
               const Spacer(),
               FilledButton.icon(
                 onPressed: _working ? null : _onChooseFile,
-                icon:
-                    _working
-                        ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: cs.onPrimary,
-                          ),
-                        )
-                        : const Icon(Icons.folder_open),
+                icon: _working
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: cs.onPrimary,
+                        ),
+                      )
+                    : const Icon(Icons.folder_open),
                 label: Text(
                   _working ? l10n.importingMedia : l10n.mediaLocateChooseFile,
                 ),

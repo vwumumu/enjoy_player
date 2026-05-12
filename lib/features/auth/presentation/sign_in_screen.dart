@@ -36,27 +36,26 @@ class SignInScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar:
-          signingIn
-              ? null
-              : AppBar(
-                leading: IconButton(
-                  icon: const Icon(Icons.close_rounded),
-                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                  onPressed: () {
-                    final cur = ref.read(authCtrlProvider).valueOrNull;
-                    if (cur is AuthSigningIn) {
-                      ref.read(authCtrlProvider.notifier).cancelSignIn();
-                    }
-                    if (!context.mounted) return;
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      context.go('/');
-                    }
-                  },
-                ),
+      appBar: signingIn
+          ? null
+          : AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.close_rounded),
+                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                onPressed: () {
+                  final cur = ref.read(authCtrlProvider).valueOrNull;
+                  if (cur is AuthSigningIn) {
+                    ref.read(authCtrlProvider.notifier).cancelSignIn();
+                  }
+                  if (!context.mounted) return;
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/');
+                  }
+                },
               ),
+            ),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -98,7 +97,9 @@ class SignInScreen extends ConsumerWidget {
 
               // ── In-app WebView sign-in + polling ────────────────────────────
               if (state is AuthSigningIn) {
-                return _SigningInWebPane(verificationUrl: state.verificationUrl);
+                return _SigningInWebPane(
+                  verificationUrl: state.verificationUrl,
+                );
               }
 
               // ── Default: sign in prompt ──────────────────────────────────────
@@ -191,7 +192,11 @@ class SignInScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.cloud_off_rounded, size: 56, color: cs.error),
+                        Icon(
+                          Icons.cloud_off_rounded,
+                          size: 56,
+                          color: cs.error,
+                        ),
                         SizedBox(height: t2.space24),
                         Text(
                           l10n.errorNetwork,
@@ -325,13 +330,12 @@ class _SigningInWebPaneState extends ConsumerState<_SigningInWebPane> {
                       _openInSystemBrowser();
                     }
                   },
-                  itemBuilder:
-                      (context) => [
-                        PopupMenuItem<String>(
-                          value: 'browser',
-                          child: Text(l10n.authOpenInSystemBrowser),
-                        ),
-                      ],
+                  itemBuilder: (context) => [
+                    PopupMenuItem<String>(
+                      value: 'browser',
+                      child: Text(l10n.authOpenInSystemBrowser),
+                    ),
+                  ],
                 ),
               ],
             ),

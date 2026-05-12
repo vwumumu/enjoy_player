@@ -163,520 +163,536 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
               SliverToBoxAdapter(child: SizedBox(height: t.space8)),
 
-          // ── Guest data migration (signed-in + guest DB has data) ───────
-          Consumer(
-            builder: (context, ref, _) {
-              final auth = ref.watch(authCtrlProvider);
-              final signedIn = auth.maybeWhen(
-                data: (s) => s is AuthSignedIn,
-                orElse: () => false,
-              );
-              if (!signedIn) {
-                return const SliverToBoxAdapter(child: SizedBox.shrink());
-              }
-
-              final guestDataAsync = ref.watch(guestDatabaseHasDataProvider);
-              return guestDataAsync.when(
-                data: (hasGuestData) {
-                  if (!hasGuestData) {
-                    return const SliverToBoxAdapter(child: SizedBox.shrink());
-                  }
-                  final migration = ref.watch(guestMigrationCtrlProvider);
-                  return SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _SettingsSectionHeader(
-                          title: l10n.settingsSectionDataMigration,
-                          hint: l10n.settingsSectionDataMigrationHint,
-                          icon: Icons.folder_shared_outlined,
-                        ),
-                        _SettingsCard(
-                          padding: EdgeInsets.zero,
-                          child: _SettingsTile(
-                            leadingIcon: Icons.move_to_inbox_rounded,
-                            title: l10n.settingsMigrationTitle,
-                            subtitle: l10n.settingsMigrationSubtitle,
-                            showChevron: !migration.isLoading,
-                            trailing: migration.isLoading
-                                ? Skeleton.circle(diameter: 24)
-                                : null,
-                            onTap: migration.isLoading
-                                ? null
-                                : () async {
-                                    await ref
-                                        .read(
-                                          guestMigrationCtrlProvider.notifier,
-                                        )
-                                        .migrate();
-                                    if (!context.mounted) return;
-                                    final s = ref.read(
-                                      guestMigrationCtrlProvider,
-                                    );
-                                    s.when(
-                                      data: (_) {
-                                        AppNotice.success(
-                                          context,
-                                          l10n.migrationSuccess,
-                                        );
-                                      },
-                                      error: (Object e, StackTrace st) {
-                                        AppNotice.error(
-                                          context,
-                                          l10n.migrationMigrationFailed,
-                                        );
-                                      },
-                                      loading: () {},
-                                    );
-                                  },
-                          ),
-                        ),
-                        SizedBox(height: t.space8),
-                      ],
-                    ),
-                  );
-                },
-                loading:
-                    () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-                error:
-                    (Object error, StackTrace stackTrace) =>
-                        const SliverToBoxAdapter(child: SizedBox.shrink()),
-              );
-            },
-          ),
-
-          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
-
-          // ── Cloud sync ──────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _SettingsSectionHeader(
-              title: l10n.settingsSectionSync,
-              hint: l10n.settingsSectionSyncHint,
-              icon: Icons.cloud_sync_outlined,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _SettingsCard(
-              padding: EdgeInsets.zero,
-              child: Consumer(
+              // ── Guest data migration (signed-in + guest DB has data) ───────
+              Consumer(
                 builder: (context, ref, _) {
                   final auth = ref.watch(authCtrlProvider);
-                  final snapAsync = ref.watch(syncQueueSnapshotProvider);
-                  return auth.when(
-                    data: (state) {
-                      if (state is AuthSignedIn) {
-                        return snapAsync.when(
-                          data: (snap) {
-                            final subtitle = snap.isFullyCaughtUp
-                                ? l10n.syncSettingsTileSubtitleUpToDate
-                                : l10n.syncSettingsTileSubtitleCounts(
-                                    snap.retryablePending,
-                                    snap.permanentlyFailed,
-                                  );
-                            return _SettingsTile(
-                              leadingIcon: Icons.cloud_sync_outlined,
-                              title: l10n.syncSettingsTileTitle,
-                              subtitle: subtitle,
-                              onTap: () => context.push('/settings/sync'),
-                            );
-                          },
-                          loading: () => _SettingsTile(
-                            leadingIcon: Icons.cloud_sync_outlined,
-                            title: l10n.syncSettingsTileTitle,
-                            subtitle: l10n.loading,
-                            onTap: () => context.push('/settings/sync'),
-                          ),
-                          error: (Object e, StackTrace s) => _SettingsTile(
-                            leadingIcon: Icons.cloud_sync_outlined,
-                            leadingIconTint: cs.error,
-                            title: l10n.syncSettingsTileTitle,
-                            subtitle: '$e',
-                            onTap: () => context.push('/settings/sync'),
-                          ),
+                  final signedIn = auth.maybeWhen(
+                    data: (s) => s is AuthSignedIn,
+                    orElse: () => false,
+                  );
+                  if (!signedIn) {
+                    return const SliverToBoxAdapter(child: SizedBox.shrink());
+                  }
+
+                  final guestDataAsync = ref.watch(
+                    guestDatabaseHasDataProvider,
+                  );
+                  return guestDataAsync.when(
+                    data: (hasGuestData) {
+                      if (!hasGuestData) {
+                        return const SliverToBoxAdapter(
+                          child: SizedBox.shrink(),
                         );
                       }
-                      return _SettingsTile(
-                        leadingIcon: Icons.cloud_off_outlined,
-                        leadingIconTint: cs.onSurfaceVariant,
-                        title: l10n.syncSettingsTileTitle,
-                        subtitle: l10n.syncSettingsTileSubtitleSignedOut,
-                        onTap: () => context.push('/settings/sync'),
-                      );
-                    },
-                    loading: () => _SettingsTile(
-                      leading: Skeleton.circle(diameter: 40),
-                      title: l10n.syncSettingsTileTitle,
-                      showChevron: false,
-                    ),
-                    error: (Object e, StackTrace s) => const SizedBox.shrink(),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
-
-          // ── Appearance & Language ───────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _SettingsSectionHeader(
-              title: l10n.settingsSectionAppearanceLanguage,
-              hint: l10n.settingsSectionAppearanceLanguageHint,
-              icon: Icons.palette_outlined,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _SettingsCard(
-              padding: EdgeInsets.zero,
-              child: Consumer(
-                builder: (context, ref, _) {
-                  final prefs = ref.watch(appPreferencesCtrlProvider);
-                  return prefs.when(
-                    data: (state) {
-                      final displayLang =
-                          state.locale?.toLanguageTag() ?? 'en';
-                      final learn = state.learningLanguage ?? '—';
-                      final native = state.nativeLanguage ?? '—';
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Tooltip(
-                            message: l10n.settingsAppearanceSyncedFromProfile,
-                            child: _SettingsTile(
-                              leading: Container(
-                                width: 36,
-                                height: 22,
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(t.radiusSm),
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      t.gradientStart,
-                                      t.gradientEnd,
-                                    ],
-                                  ),
-                                ),
+                      final migration = ref.watch(guestMigrationCtrlProvider);
+                      return SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _SettingsSectionHeader(
+                              title: l10n.settingsSectionDataMigration,
+                              hint: l10n.settingsSectionDataMigrationHint,
+                              icon: Icons.folder_shared_outlined,
+                            ),
+                            _SettingsCard(
+                              padding: EdgeInsets.zero,
+                              child: _SettingsTile(
+                                leadingIcon: Icons.move_to_inbox_rounded,
+                                title: l10n.settingsMigrationTitle,
+                                subtitle: l10n.settingsMigrationSubtitle,
+                                showChevron: !migration.isLoading,
+                                trailing: migration.isLoading
+                                    ? Skeleton.circle(diameter: 24)
+                                    : null,
+                                onTap: migration.isLoading
+                                    ? null
+                                    : () async {
+                                        await ref
+                                            .read(
+                                              guestMigrationCtrlProvider
+                                                  .notifier,
+                                            )
+                                            .migrate();
+                                        if (!context.mounted) return;
+                                        final s = ref.read(
+                                          guestMigrationCtrlProvider,
+                                        );
+                                        s.when(
+                                          data: (_) {
+                                            AppNotice.success(
+                                              context,
+                                              l10n.migrationSuccess,
+                                            );
+                                          },
+                                          error: (Object e, StackTrace st) {
+                                            AppNotice.error(
+                                              context,
+                                              l10n.migrationMigrationFailed,
+                                            );
+                                          },
+                                          loading: () {},
+                                        );
+                                      },
                               ),
-                              title: l10n.settingsAppearanceTheme,
-                              subtitle: l10n.settingsAppearanceThemeValue,
-                              showChevron: false,
                             ),
-                          ),
-                          Divider(
-                            height: 1,
-                            color: cs.outlineVariant.withValues(alpha: 0.35),
-                          ),
-                          Tooltip(
-                            message: l10n.settingsAppearanceSyncedFromProfile,
-                            child: _SettingsTile(
-                              leadingIcon: Icons.language_rounded,
-                              title: l10n.settingsAppearanceDisplayLanguage,
-                              subtitle: displayLang,
-                              showChevron: false,
-                            ),
-                          ),
-                          Divider(
-                            height: 1,
-                            color: cs.outlineVariant.withValues(alpha: 0.35),
-                          ),
-                          Tooltip(
-                            message: l10n.settingsAppearanceSyncedFromProfile,
-                            child: _SettingsTile(
-                              leadingIcon: Icons.translate_rounded,
-                              title: l10n.settingsAppearanceLearningLanguage,
-                              subtitle: learn,
-                              showChevron: false,
-                            ),
-                          ),
-                          Divider(
-                            height: 1,
-                            color: cs.outlineVariant.withValues(alpha: 0.35),
-                          ),
-                          Tooltip(
-                            message: l10n.settingsAppearanceSyncedFromProfile,
-                            child: _SettingsTile(
-                              leadingIcon: Icons.record_voice_over_outlined,
-                              title: l10n.settingsAppearanceNativeLanguage,
-                              subtitle: native,
-                              showChevron: false,
-                            ),
-                          ),
-                        ],
+                            SizedBox(height: t.space8),
+                          ],
+                        ),
                       );
                     },
-                    loading: () => Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Skeleton.line(width: double.infinity, height: 18),
-                          const SizedBox(height: 16),
-                          Skeleton.line(width: 220, height: 14),
-                          const SizedBox(height: 12),
-                          Skeleton.line(width: 180, height: 14),
-                        ],
-                      ),
-                    ),
-                    error: (e, s) => const SizedBox.shrink(),
+                    loading: () =>
+                        const SliverToBoxAdapter(child: SizedBox.shrink()),
+                    error: (Object error, StackTrace stackTrace) =>
+                        const SliverToBoxAdapter(child: SizedBox.shrink()),
                   );
                 },
               ),
-            ),
-          ),
 
-          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+              SliverToBoxAdapter(child: SizedBox(height: t.space8)),
 
-          // ── Recording (microphone) ─────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _SettingsSectionHeader(
-              title: l10n.settingsSectionRecording,
-              hint: l10n.settingsSectionRecordingHint,
-              icon: Icons.mic_none_rounded,
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: _SettingsCard(
-              padding: EdgeInsets.zero,
-              child: _RecordingMicTile(),
-            ),
-          ),
-
-          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
-
-          // ── Keyboard shortcuts (desktop only) ─────────────────────────
-          if (isDesktop) ...[
-            SliverToBoxAdapter(
-              child: _SettingsSectionHeader(
-                title: l10n.hotkeysSectionKeyboard,
-                hint: l10n.hotkeysSectionKeyboardHint,
-                icon: Icons.keyboard_outlined,
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: _SettingsCard(
-                padding: EdgeInsets.zero,
-                child: Column(
-                  key: _keyboardSectionKey,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Consumer(
-                      builder: (context, ref, _) {
-                        ref.watch(hotkeysCtrlProvider);
-                        final keys = ref
-                            .read(hotkeysCtrlProvider.notifier)
-                            .effectiveKeys('global.help');
-                        return _SettingsTile(
-                          leadingIcon: Icons.help_outline_rounded,
-                          title: l10n.settingsKeyboardOpenCheatsheet,
-                          subtitle:
-                              l10n.settingsKeyboardOpenCheatsheetSubtitle,
-                          trailing: KbdChordRow(
-                            binding: keys,
-                            compact: true,
-                          ),
-                          showChevron: false,
-                          onTap: () => showHotkeysHelpDialog(context),
-                        );
-                      },
-                    ),
-                    Divider(
-                      height: 1,
-                      color: cs.outlineVariant.withValues(alpha: 0.35),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: HotkeysSettingsSection(),
-                    ),
-                  ],
+              // ── Cloud sync ──────────────────────────────────────────────────
+              SliverToBoxAdapter(
+                child: _SettingsSectionHeader(
+                  title: l10n.settingsSectionSync,
+                  hint: l10n.settingsSectionSyncHint,
+                  icon: Icons.cloud_sync_outlined,
                 ),
               ),
-            ),
-            SliverToBoxAdapter(child: SizedBox(height: t.space8)),
-          ],
-
-          // ── Advanced ────────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _SettingsSectionHeader(
-              title: l10n.settingsSectionAdvanced,
-              hint: l10n.settingsSectionAdvancedHint,
-              icon: Icons.tune_rounded,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _SettingsCard(
-              padding: EdgeInsets.zero,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Theme(
-                    data: Theme.of(context).copyWith(
-                      dividerColor: Colors.transparent,
-                    ),
-                    child: ExpansionTile(
-                      tilePadding: EdgeInsets.symmetric(
-                        horizontal: t.space16,
-                        vertical: t.space4,
-                      ),
-                      childrenPadding: EdgeInsets.fromLTRB(
-                        t.space16,
-                        0,
-                        t.space16,
-                        t.space16,
-                      ),
-                      leading: Icon(
-                        Icons.dns_outlined,
-                        color: cs.primary,
-                      ),
-                      title: Text(
-                        l10n.settingsApiBaseUrl,
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+              SliverToBoxAdapter(
+                child: _SettingsCard(
+                  padding: EdgeInsets.zero,
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final auth = ref.watch(authCtrlProvider);
+                      final snapAsync = ref.watch(syncQueueSnapshotProvider);
+                      return auth.when(
+                        data: (state) {
+                          if (state is AuthSignedIn) {
+                            return snapAsync.when(
+                              data: (snap) {
+                                final subtitle = snap.isFullyCaughtUp
+                                    ? l10n.syncSettingsTileSubtitleUpToDate
+                                    : l10n.syncSettingsTileSubtitleCounts(
+                                        snap.retryablePending,
+                                        snap.permanentlyFailed,
+                                      );
+                                return _SettingsTile(
+                                  leadingIcon: Icons.cloud_sync_outlined,
+                                  title: l10n.syncSettingsTileTitle,
+                                  subtitle: subtitle,
+                                  onTap: () => context.push('/settings/sync'),
+                                );
+                              },
+                              loading: () => _SettingsTile(
+                                leadingIcon: Icons.cloud_sync_outlined,
+                                title: l10n.syncSettingsTileTitle,
+                                subtitle: l10n.loading,
+                                onTap: () => context.push('/settings/sync'),
+                              ),
+                              error: (Object e, StackTrace s) => _SettingsTile(
+                                leadingIcon: Icons.cloud_sync_outlined,
+                                leadingIconTint: cs.error,
+                                title: l10n.syncSettingsTileTitle,
+                                subtitle: '$e',
+                                onTap: () => context.push('/settings/sync'),
+                              ),
+                            );
+                          }
+                          return _SettingsTile(
+                            leadingIcon: Icons.cloud_off_outlined,
+                            leadingIconTint: cs.onSurfaceVariant,
+                            title: l10n.syncSettingsTileTitle,
+                            subtitle: l10n.syncSettingsTileSubtitleSignedOut,
+                            onTap: () => context.push('/settings/sync'),
+                          );
+                        },
+                        loading: () => _SettingsTile(
+                          leading: Skeleton.circle(diameter: 40),
+                          title: l10n.syncSettingsTileTitle,
+                          showChevron: false,
                         ),
-                      ),
-                      subtitle: Text(
-                        l10n.settingsApiBaseUrlHint,
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      children: const [_ApiBaseUrlEditor()],
-                    ),
+                        error: (Object e, StackTrace s) =>
+                            const SizedBox.shrink(),
+                      );
+                    },
                   ),
-                  Divider(
-                    height: 1,
-                    indent: t.space16,
-                    endIndent: t.space16,
-                    color: cs.outlineVariant.withValues(alpha: 0.35),
-                  ),
-                  Theme(
-                    data: Theme.of(context).copyWith(
-                      dividerColor: Colors.transparent,
-                    ),
-                    child: ExpansionTile(
-                      tilePadding: EdgeInsets.symmetric(
-                        horizontal: t.space16,
-                        vertical: t.space4,
-                      ),
-                      childrenPadding: EdgeInsets.fromLTRB(
-                        t.space16,
-                        0,
-                        t.space16,
-                        t.space16,
-                      ),
-                      leading: Icon(
-                        Icons.smart_toy_outlined,
-                        color: cs.primary,
-                      ),
-                      title: Text(
-                        l10n.settingsAiApiBaseUrl,
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        l10n.settingsAiApiBaseUrlHint,
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      children: const [_AiApiBaseUrlEditor()],
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+              SliverToBoxAdapter(child: SizedBox(height: t.space8)),
 
-          // ── Developer ───────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _SettingsSectionHeader(
-              title: l10n.settingsSectionDeveloper,
-              hint: l10n.settingsSectionDeveloperHint,
-              icon: Icons.developer_mode_outlined,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _SettingsCard(
-              padding: EdgeInsets.zero,
-              child: _SettingsTile(
-                leadingIcon: Icons.science_outlined,
-                title: l10n.settingsAiPlaygroundTileTitle,
-                subtitle: l10n.settingsAiPlaygroundTileSubtitle,
-                onTap: () => context.push('/settings/ai-playground'),
+              // ── Appearance & Language ───────────────────────────────────────
+              SliverToBoxAdapter(
+                child: _SettingsSectionHeader(
+                  title: l10n.settingsSectionAppearanceLanguage,
+                  hint: l10n.settingsSectionAppearanceLanguageHint,
+                  icon: Icons.palette_outlined,
+                ),
               ),
-            ),
-          ),
-
-          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
-
-          // ── About ───────────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _SettingsSectionHeader(
-              title: l10n.settingsSectionAbout,
-              hint: l10n.settingsSectionAboutHint,
-              icon: Icons.info_outline_rounded,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _SettingsCard(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: cs.primaryContainer,
-                      borderRadius: BorderRadius.circular(t.radiusMd),
-                    ),
-                    child: Icon(
-                      Icons.play_arrow_rounded,
-                      color: cs.onPrimaryContainer,
-                      size: 28,
-                    ),
+              SliverToBoxAdapter(
+                child: _SettingsCard(
+                  padding: EdgeInsets.zero,
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final prefs = ref.watch(appPreferencesCtrlProvider);
+                      return prefs.when(
+                        data: (state) {
+                          final displayLang =
+                              state.locale?.toLanguageTag() ?? 'en';
+                          final learn = state.learningLanguage ?? '—';
+                          final native = state.nativeLanguage ?? '—';
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Tooltip(
+                                message:
+                                    l10n.settingsAppearanceSyncedFromProfile,
+                                child: _SettingsTile(
+                                  leading: Container(
+                                    width: 36,
+                                    height: 22,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(
+                                        t.radiusSm,
+                                      ),
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          t.gradientStart,
+                                          t.gradientEnd,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  title: l10n.settingsAppearanceTheme,
+                                  subtitle: l10n.settingsAppearanceThemeValue,
+                                  showChevron: false,
+                                ),
+                              ),
+                              Divider(
+                                height: 1,
+                                color: cs.outlineVariant.withValues(
+                                  alpha: 0.35,
+                                ),
+                              ),
+                              Tooltip(
+                                message:
+                                    l10n.settingsAppearanceSyncedFromProfile,
+                                child: _SettingsTile(
+                                  leadingIcon: Icons.language_rounded,
+                                  title: l10n.settingsAppearanceDisplayLanguage,
+                                  subtitle: displayLang,
+                                  showChevron: false,
+                                ),
+                              ),
+                              Divider(
+                                height: 1,
+                                color: cs.outlineVariant.withValues(
+                                  alpha: 0.35,
+                                ),
+                              ),
+                              Tooltip(
+                                message:
+                                    l10n.settingsAppearanceSyncedFromProfile,
+                                child: _SettingsTile(
+                                  leadingIcon: Icons.translate_rounded,
+                                  title:
+                                      l10n.settingsAppearanceLearningLanguage,
+                                  subtitle: learn,
+                                  showChevron: false,
+                                ),
+                              ),
+                              Divider(
+                                height: 1,
+                                color: cs.outlineVariant.withValues(
+                                  alpha: 0.35,
+                                ),
+                              ),
+                              Tooltip(
+                                message:
+                                    l10n.settingsAppearanceSyncedFromProfile,
+                                child: _SettingsTile(
+                                  leadingIcon: Icons.record_voice_over_outlined,
+                                  title: l10n.settingsAppearanceNativeLanguage,
+                                  subtitle: native,
+                                  showChevron: false,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                        loading: () => Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Skeleton.line(width: double.infinity, height: 18),
+                              const SizedBox(height: 16),
+                              Skeleton.line(width: 220, height: 14),
+                              const SizedBox(height: 12),
+                              Skeleton.line(width: 180, height: 14),
+                            ],
+                          ),
+                        ),
+                        error: (e, s) => const SizedBox.shrink(),
+                      );
+                    },
                   ),
-                  SizedBox(width: t.space16),
-                  Expanded(
+                ),
+              ),
+
+              SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+
+              // ── Recording (microphone) ─────────────────────────────────────
+              SliverToBoxAdapter(
+                child: _SettingsSectionHeader(
+                  title: l10n.settingsSectionRecording,
+                  hint: l10n.settingsSectionRecordingHint,
+                  icon: Icons.mic_none_rounded,
+                ),
+              ),
+              const SliverToBoxAdapter(
+                child: _SettingsCard(
+                  padding: EdgeInsets.zero,
+                  child: _RecordingMicTile(),
+                ),
+              ),
+
+              SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+
+              // ── Keyboard shortcuts (desktop only) ─────────────────────────
+              if (isDesktop) ...[
+                SliverToBoxAdapter(
+                  child: _SettingsSectionHeader(
+                    title: l10n.hotkeysSectionKeyboard,
+                    hint: l10n.hotkeysSectionKeyboardHint,
+                    icon: Icons.keyboard_outlined,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: _SettingsCard(
+                    padding: EdgeInsets.zero,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      key: _keyboardSectionKey,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                          l10n.appTitle,
-                          style: tt.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Consumer(
+                          builder: (context, ref, _) {
+                            ref.watch(hotkeysCtrlProvider);
+                            final keys = ref
+                                .read(hotkeysCtrlProvider.notifier)
+                                .effectiveKeys('global.help');
+                            return _SettingsTile(
+                              leadingIcon: Icons.help_outline_rounded,
+                              title: l10n.settingsKeyboardOpenCheatsheet,
+                              subtitle:
+                                  l10n.settingsKeyboardOpenCheatsheetSubtitle,
+                              trailing: KbdChordRow(
+                                binding: keys,
+                                compact: true,
+                              ),
+                              showChevron: false,
+                              onTap: () => showHotkeysHelpDialog(context),
+                            );
+                          },
                         ),
-                        SizedBox(height: t.space4),
-                        Text(
-                          l10n.settingsAboutSubtitle,
-                          style: tt.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                            height: 1.4,
-                          ),
+                        Divider(
+                          height: 1,
+                          color: cs.outlineVariant.withValues(alpha: 0.35),
                         ),
-                        SizedBox(height: t.space8),
-                        Text(
-                          l10n.settingsAboutMadeWithCare,
-                          style: tt.labelMedium?.copyWith(
-                            color: cs.onSurfaceVariant.withValues(alpha: 0.85),
-                          ),
+                        const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: HotkeysSettingsSection(),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
+                SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+              ],
 
-          SliverToBoxAdapter(child: SizedBox(height: t.space32)),
-        ],
+              // ── Advanced ────────────────────────────────────────────────────
+              SliverToBoxAdapter(
+                child: _SettingsSectionHeader(
+                  title: l10n.settingsSectionAdvanced,
+                  hint: l10n.settingsSectionAdvancedHint,
+                  icon: Icons.tune_rounded,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _SettingsCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Theme(
+                        data: Theme.of(
+                          context,
+                        ).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: EdgeInsets.symmetric(
+                            horizontal: t.space16,
+                            vertical: t.space4,
+                          ),
+                          childrenPadding: EdgeInsets.fromLTRB(
+                            t.space16,
+                            0,
+                            t.space16,
+                            t.space16,
+                          ),
+                          leading: Icon(Icons.dns_outlined, color: cs.primary),
+                          title: Text(
+                            l10n.settingsApiBaseUrl,
+                            style: tt.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            l10n.settingsApiBaseUrlHint,
+                            style: tt.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                          children: const [_ApiBaseUrlEditor()],
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: t.space16,
+                        endIndent: t.space16,
+                        color: cs.outlineVariant.withValues(alpha: 0.35),
+                      ),
+                      Theme(
+                        data: Theme.of(
+                          context,
+                        ).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: EdgeInsets.symmetric(
+                            horizontal: t.space16,
+                            vertical: t.space4,
+                          ),
+                          childrenPadding: EdgeInsets.fromLTRB(
+                            t.space16,
+                            0,
+                            t.space16,
+                            t.space16,
+                          ),
+                          leading: Icon(
+                            Icons.smart_toy_outlined,
+                            color: cs.primary,
+                          ),
+                          title: Text(
+                            l10n.settingsAiApiBaseUrl,
+                            style: tt.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            l10n.settingsAiApiBaseUrlHint,
+                            style: tt.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                          children: const [_AiApiBaseUrlEditor()],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+
+              // ── Developer ───────────────────────────────────────────────────
+              SliverToBoxAdapter(
+                child: _SettingsSectionHeader(
+                  title: l10n.settingsSectionDeveloper,
+                  hint: l10n.settingsSectionDeveloperHint,
+                  icon: Icons.developer_mode_outlined,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _SettingsCard(
+                  padding: EdgeInsets.zero,
+                  child: _SettingsTile(
+                    leadingIcon: Icons.science_outlined,
+                    title: l10n.settingsAiPlaygroundTileTitle,
+                    subtitle: l10n.settingsAiPlaygroundTileSubtitle,
+                    onTap: () => context.push('/settings/ai-playground'),
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+
+              // ── About ───────────────────────────────────────────────────────
+              SliverToBoxAdapter(
+                child: _SettingsSectionHeader(
+                  title: l10n.settingsSectionAbout,
+                  hint: l10n.settingsSectionAboutHint,
+                  icon: Icons.info_outline_rounded,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _SettingsCard(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer,
+                          borderRadius: BorderRadius.circular(t.radiusMd),
+                        ),
+                        child: Icon(
+                          Icons.play_arrow_rounded,
+                          color: cs.onPrimaryContainer,
+                          size: 28,
+                        ),
+                      ),
+                      SizedBox(width: t.space16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.appTitle,
+                              style: tt.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: t.space4),
+                            Text(
+                              l10n.settingsAboutSubtitle,
+                              style: tt.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                                height: 1.4,
+                              ),
+                            ),
+                            SizedBox(height: t.space8),
+                            Text(
+                              l10n.settingsAboutMadeWithCare,
+                              style: tt.labelMedium?.copyWith(
+                                color: cs.onSurfaceVariant.withValues(
+                                  alpha: 0.85,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(child: SizedBox(height: t.space32)),
+            ],
+          ),
+        ),
       ),
-    ),
-  ),
-);
+    );
   }
 }
 
@@ -776,10 +792,7 @@ class _SettingsTile extends StatelessWidget {
                 ?trailing,
                 if (showChevron && onTap != null) ...[
                   SizedBox(width: t.space4),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
                 ],
               ],
             ),
@@ -911,33 +924,28 @@ class _ApiBaseUrlEditorState extends ConsumerState<_ApiBaseUrlEditor> {
         ),
         SizedBox(height: t.space12),
         FilledButton(
-          onPressed:
-              (!_loaded || _saving)
-                  ? null
-                  : () async {
-                    setState(() => _saving = true);
-                    try {
-                      await ref
-                          .read(apiBaseUrlProvider.notifier)
-                          .setBaseUrl(_controller.text);
-                      if (context.mounted) {
-                        AppNotice.success(
-                          context,
-                          l10n.settingsApiBaseUrlSave,
-                        );
-                      }
-                    } finally {
-                      if (mounted) setState(() => _saving = false);
+          onPressed: (!_loaded || _saving)
+              ? null
+              : () async {
+                  setState(() => _saving = true);
+                  try {
+                    await ref
+                        .read(apiBaseUrlProvider.notifier)
+                        .setBaseUrl(_controller.text);
+                    if (context.mounted) {
+                      AppNotice.success(context, l10n.settingsApiBaseUrlSave);
                     }
-                  },
-          child:
-              _saving
-                  ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                  : Text(l10n.settingsApiBaseUrlSave),
+                  } finally {
+                    if (mounted) setState(() => _saving = false);
+                  }
+                },
+          child: _saving
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(l10n.settingsApiBaseUrlSave),
         ),
         SizedBox(height: t.space4),
         Text(
@@ -1004,33 +1012,28 @@ class _AiApiBaseUrlEditorState extends ConsumerState<_AiApiBaseUrlEditor> {
         ),
         SizedBox(height: t.space12),
         FilledButton(
-          onPressed:
-              (!_loaded || _saving)
-                  ? null
-                  : () async {
-                    setState(() => _saving = true);
-                    try {
-                      await ref
-                          .read(aiApiBaseUrlProvider.notifier)
-                          .setBaseUrl(_controller.text);
-                      if (context.mounted) {
-                        AppNotice.success(
-                          context,
-                          l10n.settingsAiApiBaseUrlSave,
-                        );
-                      }
-                    } finally {
-                      if (mounted) setState(() => _saving = false);
+          onPressed: (!_loaded || _saving)
+              ? null
+              : () async {
+                  setState(() => _saving = true);
+                  try {
+                    await ref
+                        .read(aiApiBaseUrlProvider.notifier)
+                        .setBaseUrl(_controller.text);
+                    if (context.mounted) {
+                      AppNotice.success(context, l10n.settingsAiApiBaseUrlSave);
                     }
-                  },
-          child:
-              _saving
-                  ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                  : Text(l10n.settingsAiApiBaseUrlSave),
+                  } finally {
+                    if (mounted) setState(() => _saving = false);
+                  }
+                },
+          child: _saving
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(l10n.settingsAiApiBaseUrlSave),
         ),
         SizedBox(height: t.space4),
         Text(
@@ -1072,9 +1075,7 @@ class _RecordingMicTile extends ConsumerWidget {
       title: l10n.settingsRecordingMicTitle,
       subtitle: subtitle,
       onTap: () async {
-        await ref
-            .read(recordingInputDeviceCtrlProvider.notifier)
-            .refresh();
+        await ref.read(recordingInputDeviceCtrlProvider.notifier).refresh();
         if (!context.mounted) return;
         await _showRecordingMicPicker(context, ref);
       },

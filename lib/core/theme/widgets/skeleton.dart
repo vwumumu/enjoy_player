@@ -52,7 +52,8 @@ class Skeleton extends StatefulWidget {
   State<Skeleton> createState() => _SkeletonState();
 }
 
-class _SkeletonState extends State<Skeleton> with SingleTickerProviderStateMixin {
+class _SkeletonState extends State<Skeleton>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
 
   @override
@@ -332,7 +333,11 @@ class SkeletonTranscript extends StatelessWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Skeleton.box(width: 44, height: 14, borderRadius: BorderRadius.circular(4)),
+            Skeleton.box(
+              width: 44,
+              height: 14,
+              borderRadius: BorderRadius.circular(4),
+            ),
             SizedBox(width: t.space12),
             Expanded(
               child: Column(
@@ -340,7 +345,10 @@ class SkeletonTranscript extends StatelessWidget {
                 children: [
                   Skeleton.line(width: double.infinity, height: 14),
                   SizedBox(height: t.space8),
-                  Skeleton.line(width: i % 2 == 0 ? double.infinity : 200.0, height: 14),
+                  Skeleton.line(
+                    width: i % 2 == 0 ? double.infinity : 200.0,
+                    height: 14,
+                  ),
                 ],
               ),
             ),

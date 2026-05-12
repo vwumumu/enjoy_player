@@ -54,7 +54,10 @@ Future<EchoSegmentPcmResult?> extractMonoFloat32Segment({
     for (var i = 0; i < nFloat; i++) {
       samples[i] = bd.getFloat32(i * 4, Endian.little);
     }
-    return EchoSegmentPcmResult(samples: samples, sampleRate: kEchoPcmSampleRate.toDouble());
+    return EchoSegmentPcmResult(
+      samples: samples,
+      sampleRate: kEchoPcmSampleRate.toDouble(),
+    );
   } finally {
     try {
       final f = File(outFile);
@@ -114,7 +117,9 @@ Future<bool> _runFfmpegExtract({
 }
 
 /// Decodes full media (or local file) to mono float32 PCM (for short user recordings).
-Future<EchoSegmentPcmResult?> extractEntireFileMonoF32(String mediaFilePath) async {
+Future<EchoSegmentPcmResult?> extractEntireFileMonoF32(
+  String mediaFilePath,
+) async {
   if (mediaFilePath.trim().isEmpty) return null;
   final tempDir = await getTemporaryDirectory();
   final outFile = p.join(
@@ -138,7 +143,10 @@ Future<EchoSegmentPcmResult?> extractEntireFileMonoF32(String mediaFilePath) asy
     for (var i = 0; i < nFloat; i++) {
       samples[i] = bd.getFloat32(i * 4, Endian.little);
     }
-    return EchoSegmentPcmResult(samples: samples, sampleRate: kEchoPcmSampleRate.toDouble());
+    return EchoSegmentPcmResult(
+      samples: samples,
+      sampleRate: kEchoPcmSampleRate.toDouble(),
+    );
   } finally {
     try {
       final f = File(outFile);

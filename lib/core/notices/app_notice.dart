@@ -107,10 +107,12 @@ abstract final class AppNotice {
     final mq = MediaQuery.of(context);
     final shellExtra = RootShellBottomInset.clearanceOf(context);
     final horizontal = tokens?.space16 ?? 16.0;
-    final bottomPad = mq.padding.bottom + shellExtra + (tokens?.space16 ?? 16.0);
+    final bottomPad =
+        mq.padding.bottom + shellExtra + (tokens?.space16 ?? 16.0);
     final maxW = mq.size.width;
-    final snackWidth =
-        maxW >= 600 ? math.min(520.0, maxW - horizontal * 2) : null;
+    final snackWidth = maxW >= 600
+        ? math.min(520.0, maxW - horizontal * 2)
+        : null;
 
     final radius = tokens?.radiusXl ?? 16.0;
     final elevation = tokens?.elevationSheet ?? 3.0;
@@ -138,12 +140,7 @@ abstract final class AppNotice {
           children: [
             Icon(icon, color: foregroundColor, size: 22),
             SizedBox(width: tokens?.space12 ?? 12),
-            Expanded(
-              child: Text(
-                message,
-                style: textStyle,
-              ),
-            ),
+            Expanded(child: Text(message, style: textStyle)),
           ],
         ),
       ),

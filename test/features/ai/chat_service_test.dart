@@ -42,9 +42,7 @@ void main() {
 
   test('ChatService uses overridden LlmCapability', () async {
     final container = ProviderContainer(
-      overrides: [
-        llmCapabilityProvider.overrideWithValue(const _FakeLlm()),
-      ],
+      overrides: [llmCapabilityProvider.overrideWithValue(const _FakeLlm())],
     );
     addTearDown(container.dispose);
 

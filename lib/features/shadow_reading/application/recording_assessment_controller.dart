@@ -115,7 +115,9 @@ class RecordingAssessmentController extends _$RecordingAssessmentController {
 
     state = RecordingAssessmentUiState.running;
     try {
-      final result = await ref.read(assessmentServiceProvider).assess(
+      final result = await ref
+          .read(assessmentServiceProvider)
+          .assess(
             AssessmentRequest(
               audioPath: path,
               referenceText: row.referenceText,
@@ -144,7 +146,10 @@ class RecordingAssessmentController extends _$RecordingAssessmentController {
 
       final json = jsonEncode(result.rawJson);
       final now = DateTime.now();
-      await ref.read(appDatabaseProvider).recordingDao.updateAssessment(
+      await ref
+          .read(appDatabaseProvider)
+          .recordingDao
+          .updateAssessment(
             id: row.id,
             pronunciationScore: score,
             assessmentJson: json,

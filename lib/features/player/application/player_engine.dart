@@ -90,10 +90,9 @@ class MediaKitPlayerEngine implements PlayerEngine {
   VideoController get videoController {
     return _videoController ??= VideoController(
       _player,
-      configuration:
-          Platform.isWindows
-              ? const VideoControllerConfiguration(width: 1920, height: 1080)
-              : const VideoControllerConfiguration(),
+      configuration: Platform.isWindows
+          ? const VideoControllerConfiguration(width: 1920, height: 1080)
+          : const VideoControllerConfiguration(),
     );
   }
 
@@ -136,10 +135,9 @@ class MediaKitPlayerEngine implements PlayerEngine {
       (playing: _player.state.playing, buffering: _player.state.buffering);
 
   @override
-  Stream<double> get videoAspectRatioStream =>
-      _player.stream.videoParams
-          .map((vp) => aspectRatioFromVideoParams(vp, _player.state))
-          .distinct((a, b) => (a - b).abs() < 0.0001);
+  Stream<double> get videoAspectRatioStream => _player.stream.videoParams
+      .map((vp) => aspectRatioFromVideoParams(vp, _player.state))
+      .distinct((a, b) => (a - b).abs() < 0.0001);
 
   @override
   Widget buildVideoStage({
@@ -194,8 +192,9 @@ class MediaKitPlayerEngine implements PlayerEngine {
     final uri = switch (source) {
       LocalFilePlayableSource(:final uri) => uri,
       RemoteUrlPlayableSource(:final uri) => uri,
-      YoutubePlayableSource() =>
-        throw UnsupportedError('MediaKitPlayerEngine cannot open YouTube'),
+      YoutubePlayableSource() => throw UnsupportedError(
+        'MediaKitPlayerEngine cannot open YouTube',
+      ),
     };
     await _player.open(mk.Media(uri));
   }

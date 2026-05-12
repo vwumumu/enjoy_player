@@ -67,9 +67,9 @@ class SidebarAccountChip extends ConsumerWidget {
               ),
               subtitle: Text(
                 l10n.settingsAccountOpenProfile,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: cs.primary,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: cs.primary),
               ),
               onTap: () => context.push('/profile'),
             );

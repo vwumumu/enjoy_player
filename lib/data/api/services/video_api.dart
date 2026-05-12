@@ -30,17 +30,14 @@ class VideoApi {
 
   Future<JsonMap> video(String id) => _client.getJson('$_minePath/$id');
 
-  Future<JsonMap> uploadVideo(JsonMap video) => _client.postJson(
-        _minePath,
-        body: {'video': video},
-      );
+  Future<JsonMap> uploadVideo(JsonMap video) =>
+      _client.postJson(_minePath, body: {'video': video});
 
-  Future<JsonMap> deleteVideo(String id) => _client.deleteJson('$_minePath/$id');
+  Future<JsonMap> deleteVideo(String id) =>
+      _client.deleteJson('$_minePath/$id');
 
-  Future<JsonMap> registerVideo(JsonMap data) => _client.postJson(
-        _publicPath,
-        body: data,
-      );
+  Future<JsonMap> registerVideo(JsonMap data) =>
+      _client.postJson(_publicPath, body: data);
 
   Future<({List<JsonMap> videos, JsonMap pagy})> listVideos({
     String? provider,

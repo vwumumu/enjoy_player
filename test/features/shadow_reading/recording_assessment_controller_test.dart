@@ -98,7 +98,9 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         appDatabaseProvider.overrideWithValue(db),
-        assessmentCapabilityProvider.overrideWithValue(_FakeAssessmentCapability()),
+        assessmentCapabilityProvider.overrideWithValue(
+          _FakeAssessmentCapability(),
+        ),
         syncEnqueueProvider.overrideWithValue((type, entityId, action) async {
           expect(type, SyncEntityType.recording);
           expect(entityId, id);
@@ -112,7 +114,9 @@ void main() {
     final row = await db.recordingDao.getById(id);
     expect(row, isNotNull);
 
-    final notifier = container.read(recordingAssessmentControllerProvider(id).notifier);
+    final notifier = container.read(
+      recordingAssessmentControllerProvider(id).notifier,
+    );
     final outcome = await notifier.run(row!);
 
     expect(outcome, isA<RecordingAssessmentSuccess>());

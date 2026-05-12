@@ -62,8 +62,9 @@ class TransportFullscreenButton extends ConsumerWidget {
     if (!isDesktop || !isVideo) return const SizedBox.shrink();
 
     final isFullscreen = ref.watch(windowFullscreenProvider);
-    final tooltip =
-        isFullscreen ? l10n.transportExitFullscreen : l10n.transportFullscreen;
+    final tooltip = isFullscreen
+        ? l10n.transportExitFullscreen
+        : l10n.transportFullscreen;
     final icon = isFullscreen
         ? const Icon(Icons.fullscreen_exit_rounded)
         : const Icon(Icons.fullscreen_rounded);
@@ -71,8 +72,7 @@ class TransportFullscreenButton extends ConsumerWidget {
     return IconButton(
       tooltip: tooltip,
       icon: icon,
-      onPressed: () =>
-          ref.read(windowFullscreenProvider.notifier).toggle(),
+      onPressed: () => ref.read(windowFullscreenProvider.notifier).toggle(),
     );
   }
 }

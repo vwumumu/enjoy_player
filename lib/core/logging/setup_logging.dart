@@ -18,12 +18,16 @@ void setupAppLogging() {
           '[${record.level.name}] ${record.loggerName}: ${record.message}';
       debugPrint(line);
       if (record.error != null) {
-        debugPrint('[${record.level.name}] ${record.loggerName} error: '
-            '${record.error}');
+        debugPrint(
+          '[${record.level.name}] ${record.loggerName} error: '
+          '${record.error}',
+        );
       }
       if (record.stackTrace != null) {
-        debugPrint('[${record.level.name}] ${record.loggerName} stack:\n'
-            '${record.stackTrace}');
+        debugPrint(
+          '[${record.level.name}] ${record.loggerName} stack:\n'
+          '${record.stackTrace}',
+        );
       }
     }
     developer.log(

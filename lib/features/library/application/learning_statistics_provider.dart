@@ -30,7 +30,9 @@ Future<LearningStatistics?> learningStatistics(Ref ref) async {
     final json = await api
         .learningStatistics(timezone: DateTime.now().timeZoneName)
         .timeout(const Duration(seconds: 15));
-    _statsLog.info('stats: learningStatistics done in ${sw.elapsedMilliseconds}ms');
+    _statsLog.info(
+      'stats: learningStatistics done in ${sw.elapsedMilliseconds}ms',
+    );
     return LearningStatistics.fromJson(json);
   } catch (e, st) {
     _statsLog.warning(

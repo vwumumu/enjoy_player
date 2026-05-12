@@ -34,8 +34,8 @@ class PlayerPreferencesCtrl extends _$PlayerPreferencesCtrl {
       state = PlayerPreferences(
         volume: ((map['volume'] as num?)?.toDouble() ?? 1).clamp(0, 1),
         playbackRate: ((map['rate'] as num?)?.toDouble() ?? 1).clamp(0.25, 2),
-        repeatMode: RepeatMode
-            .values[repeatIdx.clamp(0, RepeatMode.values.length - 1)],
+        repeatMode:
+            RepeatMode.values[repeatIdx.clamp(0, RepeatMode.values.length - 1)],
       );
       final v = state.volume;
       _lastNonZeroVolume = v > 0.01 ? v : 1;

@@ -233,8 +233,7 @@ int? parseSubtitleColorToArgb(String raw) {
     'cyan': 0xFF00FFFF,
     'magenta': 0xFFFF00FF,
     'silver': 0xFFC0C0C0,
-    'gray':
-        0xFF808080,
+    'gray': 0xFF808080,
     'grey': 0xFF808080,
     'lime': 0xFF00FF00,
     'navy': 0xFF000080,
@@ -247,7 +246,9 @@ int? parseSubtitleColorToArgb(String raw) {
   return named[t];
 }
 
-List<SubtitleTextSegment> _mergeAdjacentSameStyle(List<SubtitleTextSegment> segments) {
+List<SubtitleTextSegment> _mergeAdjacentSameStyle(
+  List<SubtitleTextSegment> segments,
+) {
   if (segments.isEmpty) return segments;
   final merged = <SubtitleTextSegment>[segments.first];
   for (var i = 1; i < segments.length; i++) {

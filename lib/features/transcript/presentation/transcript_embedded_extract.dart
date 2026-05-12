@@ -44,7 +44,9 @@ Future<void> runEmbeddedSubtitleExtract({
     }
   }
 
-  final count = await ref.read(transcriptRepositoryProvider).extractEmbeddedTracks(
+  final count = await ref
+      .read(transcriptRepositoryProvider)
+      .extractEmbeddedTracks(
         mediaId: mediaId,
         sourceUri: uri,
         playerSubtitleTracks: playerSubs,

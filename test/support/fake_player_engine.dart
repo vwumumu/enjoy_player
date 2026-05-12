@@ -15,10 +15,8 @@ class FakePlayerEngine implements PlayerEngine {
       StreamController<Duration>.broadcast();
   final StreamController<Duration> _duration =
       StreamController<Duration>.broadcast();
-  final StreamController<bool> _playing =
-      StreamController<bool>.broadcast();
-  final StreamController<bool> _buffering =
-      StreamController<bool>.broadcast();
+  final StreamController<bool> _playing = StreamController<bool>.broadcast();
+  final StreamController<bool> _buffering = StreamController<bool>.broadcast();
 
   final List<String> openUris = <String>[];
   final List<Duration> seekCalls = <Duration>[];
@@ -69,8 +67,7 @@ class FakePlayerEngine implements PlayerEngine {
     required BuildContext context,
     required double maxWidth,
     required double maxHeight,
-  }) =>
-      const SizedBox.shrink();
+  }) => const SizedBox.shrink();
 
   void _recordUriFromSource(PlayableSource source) {
     switch (source) {

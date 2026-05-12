@@ -106,10 +106,7 @@ Future<bool> writeVideoPosterJpeg({
         args = [
           '-y',
           '-hide_banner',
-          if (net) ...[
-            '-protocol_whitelist',
-            'file,http,https,tcp,tls,crypto',
-          ],
+          if (net) ...['-protocol_whitelist', 'file,http,https,tcp,tls,crypto'],
           '-i',
           input,
           '-ss',
@@ -124,10 +121,7 @@ Future<bool> writeVideoPosterJpeg({
         args = [
           '-y',
           '-hide_banner',
-          if (net) ...[
-            '-protocol_whitelist',
-            'file,http,https,tcp,tls,crypto',
-          ],
+          if (net) ...['-protocol_whitelist', 'file,http,https,tcp,tls,crypto'],
           '-ss',
           seekStr,
           '-i',
@@ -145,10 +139,9 @@ Future<bool> writeVideoPosterJpeg({
         return false;
       }
     } else {
-      final proto =
-          net
-              ? '-protocol_whitelist file,http,https,tcp,tls,crypto '
-              : '';
+      final proto = net
+          ? '-protocol_whitelist file,http,https,tcp,tls,crypto '
+          : '';
       final String cmd;
       if (accurate) {
         cmd =

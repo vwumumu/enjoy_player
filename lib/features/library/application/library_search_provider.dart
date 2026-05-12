@@ -3,8 +3,9 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final librarySearchProvider =
-    NotifierProvider<LibrarySearchNotifier, String>(LibrarySearchNotifier.new);
+final librarySearchProvider = NotifierProvider<LibrarySearchNotifier, String>(
+  LibrarySearchNotifier.new,
+);
 
 class LibrarySearchNotifier extends Notifier<String> {
   @override

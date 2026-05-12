@@ -121,10 +121,9 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
                             .clamp(0.0, 1.0);
                         return Slider(
                           value: vol,
-                          onChanged:
-                              (v) => ref
-                                  .read(playerPreferencesCtrlProvider.notifier)
-                                  .setVolume(v),
+                          onChanged: (v) => ref
+                              .read(playerPreferencesCtrlProvider.notifier)
+                              .setVolume(v),
                         );
                       },
                     ),
@@ -139,8 +138,9 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
         onEnter: (_) => _onPointerInside(true),
         onExit: (_) => _onPointerInside(false),
         child: IconButton(
-          tooltip:
-              prefs.volume <= 0.01 ? l10n.transportUnmute : l10n.transportMute,
+          tooltip: prefs.volume <= 0.01
+              ? l10n.transportUnmute
+              : l10n.transportMute,
           icon: Icon(
             prefs.volume <= 0.01
                 ? Icons.volume_off_rounded

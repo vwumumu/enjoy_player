@@ -19,10 +19,7 @@ Future<YoutubeOembedMetadata?> fetchYoutubeOembed(String videoId) async {
     final j = jsonDecode(r.body) as Map<String, dynamic>;
     final title = j['title'] as String?;
     final thumb = j['thumbnail_url'] as String?;
-    return (
-      title: title ?? 'YouTube video $videoId',
-      thumbnailUrl: thumb,
-    );
+    return (title: title ?? 'YouTube video $videoId', thumbnailUrl: thumb);
   } on Object {
     return null;
   }

@@ -115,32 +115,35 @@ void main() {
       expect(m.containsKey('thumbnailUrl'), isFalse);
     });
 
-    test('recording map uses milliseconds for duration and reference times', () {
-      final now = DateTime.utc(2025, 5, 9);
-      final row = RecordingRow(
-        id: 'rec-1',
-        targetType: 'Audio',
-        targetId: 'audio-1',
-        referenceStart: 5000,
-        referenceDuration: 12_000,
-        referenceText: 'hello',
-        language: 'en',
-        duration: 11_234,
-        md5: 'abc',
-        audioUrl: null,
-        pronunciationScore: null,
-        assessmentJson: null,
-        localPath: '/tmp/t.wav',
-        syncStatus: 'local',
-        serverUpdatedAt: null,
-        createdAt: now,
-        updatedAt: now,
-      );
-      final m = prepareForSyncRecordingMap(row);
-      expect(m['duration'], 11_234);
-      expect(m['referenceStart'], 5000);
-      expect(m['referenceDuration'], 12_000);
-    });
+    test(
+      'recording map uses milliseconds for duration and reference times',
+      () {
+        final now = DateTime.utc(2025, 5, 9);
+        final row = RecordingRow(
+          id: 'rec-1',
+          targetType: 'Audio',
+          targetId: 'audio-1',
+          referenceStart: 5000,
+          referenceDuration: 12_000,
+          referenceText: 'hello',
+          language: 'en',
+          duration: 11_234,
+          md5: 'abc',
+          audioUrl: null,
+          pronunciationScore: null,
+          assessmentJson: null,
+          localPath: '/tmp/t.wav',
+          syncStatus: 'local',
+          serverUpdatedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        );
+        final m = prepareForSyncRecordingMap(row);
+        expect(m['duration'], 11_234);
+        expect(m['referenceStart'], 5000);
+        expect(m['referenceDuration'], 12_000);
+      },
+    );
   });
 
   group('recordingRowFromServerJson', () {

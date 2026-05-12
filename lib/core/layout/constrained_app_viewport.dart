@@ -19,10 +19,9 @@ class ConstrainedAppViewport extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final h = constraints.maxHeight.isFinite ? constraints.maxHeight : 0.0;
-        final w =
-            constraints.maxWidth.isFinite
-                ? constraints.maxWidth
-                : kMinAppViewportWidth;
+        final w = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : kMinAppViewportWidth;
         if (w >= kMinAppViewportWidth) {
           return SizedBox(width: w, height: h, child: child);
         }

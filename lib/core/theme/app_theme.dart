@@ -201,10 +201,7 @@ ThemeData buildAppTheme() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(tokens.radiusSm),
         ),
-        side: BorderSide(
-          color: colorScheme.outlineVariant,
-          width: 1,
-        ),
+        side: BorderSide(color: colorScheme.outlineVariant, width: 1),
         textStyle: textTheme.labelLarge?.copyWith(letterSpacing: 0.1),
       ),
     ),
@@ -220,10 +217,7 @@ ThemeData buildAppTheme() {
         textStyle: textTheme.labelLarge?.copyWith(letterSpacing: 0.1),
       ),
     ),
-    iconTheme: IconThemeData(
-      color: colorScheme.onSurfaceVariant,
-      size: 24,
-    ),
+    iconTheme: IconThemeData(color: colorScheme.onSurfaceVariant, size: 24),
     dividerTheme: DividerThemeData(
       color: colorScheme.outlineVariant.withValues(alpha: 0.4),
       thickness: 1,
@@ -260,10 +254,7 @@ ThemeData buildAppTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(tokens.radiusMd),
-        borderSide: BorderSide(
-          color: colorScheme.primary,
-          width: 1.5,
-        ),
+        borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
       ),
       contentPadding: EdgeInsets.symmetric(
         horizontal: tokens.space16,

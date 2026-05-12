@@ -27,7 +27,8 @@ class EditorialHeader extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Padding(
-      padding: padding ??
+      padding:
+          padding ??
           EdgeInsets.fromLTRB(t.space24, t.space24, t.space24, t.space16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -57,10 +58,7 @@ class EditorialHeader extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) ...[
-            SizedBox(width: t.space16),
-            trailing!,
-          ],
+          if (trailing != null) ...[SizedBox(width: t.space16), trailing!],
         ],
       ),
     );

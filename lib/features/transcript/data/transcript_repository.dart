@@ -28,8 +28,8 @@ class _LinesCacheEntry {
 }
 
 List<TranscriptLine> _decodeTimeline(String timelineJson) {
-  final decoded =
-      (jsonDecode(timelineJson) as List).cast<Map<String, dynamic>>();
+  final decoded = (jsonDecode(timelineJson) as List)
+      .cast<Map<String, dynamic>>();
   return decoded.map(TranscriptLine.fromJson).toList();
 }
 
@@ -177,7 +177,11 @@ class TranscriptRepository {
               force: force,
             );
           } on Object catch (e, st) {
-            _log.warning('fetchCloudTranscripts (YouTube worker) failed for $mediaId', e, st);
+            _log.warning(
+              'fetchCloudTranscripts (YouTube worker) failed for $mediaId',
+              e,
+              st,
+            );
           }
           return;
         }
@@ -258,14 +262,22 @@ class TranscriptRepository {
           fallbackNow: now,
         );
         if (stored) {
-          await _db.transcriptFetchStateDao.upsertFetched('Video', mediaId, DateTime.now());
+          await _db.transcriptFetchStateDao.upsertFetched(
+            'Video',
+            mediaId,
+            DateTime.now(),
+          );
           await _maybeSetPrimaryTranscript('Video', mediaId, 1);
         }
         return;
       }
 
       if (status == 'failed') {
-        await _db.transcriptFetchStateDao.upsertFetched('Video', mediaId, DateTime.now());
+        await _db.transcriptFetchStateDao.upsertFetched(
+          'Video',
+          mediaId,
+          DateTime.now(),
+        );
         _log.warning(
           'YouTube worker transcript failed for $mediaId: ${map['error']}',
         );
@@ -340,7 +352,10 @@ class TranscriptRepository {
     int storedCount,
   ) async {
     if (storedCount <= 0) return;
-    final session = await _db.echoSessionDao.getLatestForTarget(targetType, mediaId);
+    final session = await _db.echoSessionDao.getLatestForTarget(
+      targetType,
+      mediaId,
+    );
     if (session?.transcriptId != null) return;
     final rows = await _db.transcriptDao.listForTarget(targetType, mediaId);
     _sortTranscriptRows(rows);
@@ -439,7 +454,11 @@ class TranscriptRepository {
     );
     final session = await _db.echoSessionDao.getLatestForTarget(tt, mediaId);
     if (session?.transcriptId == null) {
-      await _db.echoSessionDao.updatePrimaryTranscriptForTarget(tt, mediaId, id);
+      await _db.echoSessionDao.updatePrimaryTranscriptForTarget(
+        tt,
+        mediaId,
+        id,
+      );
     }
   }
 
@@ -458,11 +477,10 @@ class TranscriptRepository {
     if (tt == null) return 0;
 
     final existing = await _db.transcriptDao.listForTarget(tt, mediaId);
-    final existingIndices =
-        existing
-            .where((r) => r.trackIndex != null)
-            .map((r) => r.trackIndex!)
-            .toSet();
+    final existingIndices = existing
+        .where((r) => r.trackIndex != null)
+        .map((r) => r.trackIndex!)
+        .toSet();
 
     final extracted = await const EmbeddedSubtitleService().extractTracks(
       targetId: mediaId,
@@ -500,7 +518,10 @@ class TranscriptRepository {
     );
   }
 
-  Future<void> setSecondaryTranscript(String mediaId, String? transcriptId) async {
+  Future<void> setSecondaryTranscript(
+    String mediaId,
+    String? transcriptId,
+  ) async {
     final tt = await dexieTargetTypeForId(_db, mediaId);
     if (tt == null) return;
     await _db.echoSessionDao.updateSecondaryTranscriptForTarget(

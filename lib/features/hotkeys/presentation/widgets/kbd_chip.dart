@@ -9,11 +9,7 @@ import 'package:enjoy_player/features/hotkeys/presentation/hotkey_format.dart';
 
 /// One key cap (single token label).
 class KbdChip extends StatelessWidget {
-  const KbdChip({
-    super.key,
-    required this.label,
-    this.compact = false,
-  });
+  const KbdChip({super.key, required this.label, this.compact = false});
 
   final String label;
   final bool compact;
@@ -33,9 +29,7 @@ class KbdChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(t.radiusSm),
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: 0.45),
-        ),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.35),
@@ -68,11 +62,7 @@ class KbdChip extends StatelessWidget {
 
 /// Renders a chord as a row of [KbdChip]s joined by faint `+` signs.
 class KbdChordRow extends StatelessWidget {
-  const KbdChordRow({
-    super.key,
-    required this.binding,
-    this.compact = false,
-  });
+  const KbdChordRow({super.key, required this.binding, this.compact = false});
 
   final String binding;
   final bool compact;
@@ -96,9 +86,9 @@ class KbdChordRow extends StatelessWidget {
             Text(
               '+',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.55),
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: cs.onSurfaceVariant.withValues(alpha: 0.55),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           KbdChip(label: tokens[i], compact: compact),
         ],

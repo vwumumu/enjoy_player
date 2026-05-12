@@ -72,7 +72,7 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
       builder: (context, constraints) {
         final useSideBySide =
             constraints.maxWidth > t.breakpointTranscriptSideBySide &&
-                MediaQuery.orientationOf(context) == Orientation.landscape;
+            MediaQuery.orientationOf(context) == Orientation.landscape;
 
         if (useSideBySide) {
           final total = constraints.maxWidth;
@@ -101,8 +101,9 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
                 hitWidth: _kSplitterHitWidth,
                 hovered: _splitterHovered,
                 onHover: (v) => setState(() => _splitterHovered = v),
-                semanticLabel:
-                    AppLocalizations.of(context)!.playerTranscriptResizeHint,
+                semanticLabel: AppLocalizations.of(
+                  context,
+                )!.playerTranscriptResizeHint,
                 onDragDelta: (dx) => _applyDragDelta(total, dx),
               ),
               SizedBox(
@@ -128,8 +129,7 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AspectRatio(
-              aspectRatio:
-                  _kMobileVideoAspectWidth / _kMobileVideoAspectHeight,
+              aspectRatio: _kMobileVideoAspectWidth / _kMobileVideoAspectHeight,
               child: ColoredBox(
                 color: Colors.black,
                 child: LayoutBuilder(
@@ -144,10 +144,7 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
               ),
             ),
             Expanded(
-              child: ColoredBox(
-                color: cs.surface,
-                child: widget.transcript,
-              ),
+              child: ColoredBox(color: cs.surface, child: widget.transcript),
             ),
           ],
         );
@@ -188,7 +185,7 @@ class _ResizeSplitter extends StatelessWidget {
           child: Tooltip(
             message: semanticLabel,
             child: Center(
-                child: AnimatedContainer(
+              child: AnimatedContainer(
                 duration: const Duration(milliseconds: 160),
                 curve: Curves.easeOut,
                 width: hovered ? 4 : 3,

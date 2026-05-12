@@ -19,10 +19,9 @@ final class AsrResult {
     final transcriptionInfo = _jsonMap(json['transcriptionInfo']);
     return AsrResult(
       text: json['text'] as String? ?? '',
-      segments:
-          segs
-              ?.map((e) => AsrSegment.fromJson(_jsonMap(e) ?? const {}))
-              .toList(),
+      segments: segs
+          ?.map((e) => AsrSegment.fromJson(_jsonMap(e) ?? const {}))
+          .toList(),
       language:
           transcriptionInfo?['language'] as String? ??
           json['language'] as String?,
@@ -51,10 +50,7 @@ final class AsrSegment {
       start: (json['start'] as num?)?.toDouble() ?? 0,
       end: (json['end'] as num?)?.toDouble() ?? 0,
       text: json['text'] as String? ?? '',
-      words:
-          w
-              ?.map((e) => AsrWord.fromJson(_jsonMap(e) ?? const {}))
-              .toList(),
+      words: w?.map((e) => AsrWord.fromJson(_jsonMap(e) ?? const {})).toList(),
     );
   }
 }

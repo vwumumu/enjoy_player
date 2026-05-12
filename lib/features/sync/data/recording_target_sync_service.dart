@@ -11,8 +11,8 @@ class RecordingTargetSyncService {
   RecordingTargetSyncService({
     required AppDatabase db,
     required RecordingApi recordingApi,
-  })  : _db = db,
-        _recordingApi = recordingApi;
+  }) : _db = db,
+       _recordingApi = recordingApi;
 
   final AppDatabase _db;
   final RecordingApi _recordingApi;

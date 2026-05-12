@@ -158,33 +158,28 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           );
         },
         loading: () => const SkeletonMediaList(),
-        error:
-            (e, _) => Center(
-              child: Padding(
-                padding: EdgeInsets.all(t.space24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline_rounded,
-                      size: 48,
-                      color: cs.error,
-                    ),
-                    SizedBox(height: t.space16),
-                    Text(
-                      '${l10n.error}: $e',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    SizedBox(height: t.space16),
-                    FilledButton.tonal(
-                      onPressed: () => ref.invalidate(libraryMediaProvider),
-                      child: Text(l10n.retry),
-                    ),
-                  ],
+        error: (e, _) => Center(
+          child: Padding(
+            padding: EdgeInsets.all(t.space24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline_rounded, size: 48, color: cs.error),
+                SizedBox(height: t.space16),
+                Text(
+                  '${l10n.error}: $e',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-              ),
+                SizedBox(height: t.space16),
+                FilledButton.tonal(
+                  onPressed: () => ref.invalidate(libraryMediaProvider),
+                  child: Text(l10n.retry),
+                ),
+              ],
             ),
+          ),
+        ),
       ),
     );
   }
@@ -245,8 +240,7 @@ class _AudioRow extends ConsumerWidget {
       title: media.title,
       subtitle: dur,
       badge: media.language,
-      providerBadge:
-          media.provider == 'youtube' ? l10n.youtubeBadge : null,
+      providerBadge: media.provider == 'youtube' ? l10n.youtubeBadge : null,
       thumbnailFile: thumb,
       thumbnailNetworkUrl: netThumb,
       coverSeed: media.coverSeed,
@@ -317,8 +311,7 @@ class _VideoTile extends ConsumerWidget {
       title: media.title,
       subtitle: '${l10n.miniPlayerMediaVideo} · $dur',
       thumbnailFile: thumb,
-      providerBadge:
-          media.provider == 'youtube' ? l10n.youtubeBadge : null,
+      providerBadge: media.provider == 'youtube' ? l10n.youtubeBadge : null,
       thumbnailNetworkUrl: netThumb,
       coverSeed: media.coverSeed,
       isVideo: true,

@@ -41,7 +41,9 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           playerEngineTestDoubleProvider.overrideWithValue(fake),
-          transcriptRepositoryProvider.overrideWithValue(TranscriptRepository(db)),
+          transcriptRepositoryProvider.overrideWithValue(
+            TranscriptRepository(db),
+          ),
         ],
       );
     });
@@ -99,33 +101,28 @@ void main() {
       expect(container.read(playerEngineProvider), same(fake));
     });
 
-    test('playerIsPlayingProvider seeds from engine transportSnapshot', () async {
-      final id = await insertAudio('e2');
-      await container.read(playerControllerProvider.notifier).openMedia(id);
-      bool? last;
-      container.listen(
-        playerIsPlayingProvider,
-        (_, n) {
+    test(
+      'playerIsPlayingProvider seeds from engine transportSnapshot',
+      () async {
+        final id = await insertAudio('e2');
+        await container.read(playerControllerProvider.notifier).openMedia(id);
+        bool? last;
+        container.listen(playerIsPlayingProvider, (_, n) {
           if (n.hasValue) last = n.requireValue;
-        },
-        fireImmediately: true,
-      );
-      await Future<void>.delayed(const Duration(milliseconds: 30));
-      expect(last, isFalse);
-    });
+        }, fireImmediately: true);
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        expect(last, isFalse);
+      },
+    );
 
     test('displayPositionProvider quantizes to 400ms buckets', () async {
       final id = await insertAudio('e3');
       await container.read(playerControllerProvider.notifier).openMedia(id);
 
       Duration? last;
-      final sub = container.listen(
-        displayPositionProvider,
-        (_, n) {
-          if (n.hasValue) last = n.requireValue;
-        },
-        fireImmediately: true,
-      );
+      final sub = container.listen(displayPositionProvider, (_, n) {
+        if (n.hasValue) last = n.requireValue;
+      }, fireImmediately: true);
 
       fake.emitPosition(const Duration(milliseconds: 430));
       await Future<void>.delayed(const Duration(milliseconds: 80));

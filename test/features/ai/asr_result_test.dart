@@ -8,10 +8,7 @@ void main() {
   test(
     'AsrResult.fromJson parses transcriptionInfo when nested map is Map<dynamic, dynamic>',
     () {
-      final nested = <dynamic, dynamic>{
-        'language': 'en',
-        'duration': 1.25,
-      };
+      final nested = <dynamic, dynamic>{'language': 'en', 'duration': 1.25};
       final json = <String, dynamic>{
         'text': 'hello',
         'transcriptionInfo': nested,

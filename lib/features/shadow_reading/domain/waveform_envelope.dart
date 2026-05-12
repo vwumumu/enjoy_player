@@ -34,7 +34,9 @@ List<WaveformPoint> computePeakEnvelope(
 
   final values = <double>[];
   for (var offset = 0; offset < samples.length; offset += bucketSize) {
-    final end = offset + bucketSize > samples.length ? samples.length : offset + bucketSize;
+    final end = offset + bucketSize > samples.length
+        ? samples.length
+        : offset + bucketSize;
 
     switch (envelopeType) {
       case WaveformEnvelopeKind.peak:

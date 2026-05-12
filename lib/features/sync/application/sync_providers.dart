@@ -24,10 +24,10 @@ SyncQueueRepository syncQueueRepository(Ref ref) =>
     SyncQueueRepository(ref.watch(appDatabaseProvider));
 
 @Riverpod(keepAlive: true)
-Future<String?> syncLastFullSyncAt(Ref ref) =>
-    ref.watch(appDatabaseProvider).settingsDao.getValue(
-          SettingsKeys.syncLastFullSyncAt,
-        );
+Future<String?> syncLastFullSyncAt(Ref ref) => ref
+    .watch(appDatabaseProvider)
+    .settingsDao
+    .getValue(SettingsKeys.syncLastFullSyncAt);
 
 @Riverpod(keepAlive: true)
 Stream<SyncQueueSnapshot> syncQueueSnapshot(Ref ref) =>
@@ -35,19 +35,19 @@ Stream<SyncQueueSnapshot> syncQueueSnapshot(Ref ref) =>
 
 @Riverpod(keepAlive: true)
 SyncUploadService syncUploadService(Ref ref) => SyncUploadService(
-      db: ref.watch(appDatabaseProvider),
-      audioApi: AudioApi(ref.watch(apiClientProvider)),
-      videoApi: VideoApi(ref.watch(apiClientProvider)),
-      recordingApi: RecordingApi(ref.watch(apiClientProvider)),
-    );
+  db: ref.watch(appDatabaseProvider),
+  audioApi: AudioApi(ref.watch(apiClientProvider)),
+  videoApi: VideoApi(ref.watch(apiClientProvider)),
+  recordingApi: RecordingApi(ref.watch(apiClientProvider)),
+);
 
 @Riverpod(keepAlive: true)
 SyncDownloadService syncDownloadService(Ref ref) => SyncDownloadService(
-      db: ref.watch(appDatabaseProvider),
-      audioApi: AudioApi(ref.watch(apiClientProvider)),
-      videoApi: VideoApi(ref.watch(apiClientProvider)),
-      recordingApi: RecordingApi(ref.watch(apiClientProvider)),
-    );
+  db: ref.watch(appDatabaseProvider),
+  audioApi: AudioApi(ref.watch(apiClientProvider)),
+  videoApi: VideoApi(ref.watch(apiClientProvider)),
+  recordingApi: RecordingApi(ref.watch(apiClientProvider)),
+);
 
 @Riverpod(keepAlive: true)
 RecordingTargetSyncService recordingTargetSyncService(Ref ref) =>
@@ -58,11 +58,11 @@ RecordingTargetSyncService recordingTargetSyncService(Ref ref) =>
 
 @Riverpod(keepAlive: true)
 SyncEngine syncEngine(Ref ref) => SyncEngine(
-      db: ref.watch(appDatabaseProvider),
-      queue: ref.watch(syncQueueRepositoryProvider),
-      upload: ref.watch(syncUploadServiceProvider),
-      download: ref.watch(syncDownloadServiceProvider),
-    );
+  db: ref.watch(appDatabaseProvider),
+  queue: ref.watch(syncQueueRepositoryProvider),
+  upload: ref.watch(syncUploadServiceProvider),
+  download: ref.watch(syncDownloadServiceProvider),
+);
 
 @Riverpod(keepAlive: true)
 SyncEnqueueFn syncEnqueue(Ref ref) {

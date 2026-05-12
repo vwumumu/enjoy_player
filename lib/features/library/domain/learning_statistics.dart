@@ -45,15 +45,9 @@ class LearningStatistics {
     final week = json['week'];
     final month = json['month'];
     return LearningStatistics(
-      today: PeriodStats.fromJson(
-        today is Map<String, dynamic> ? today : null,
-      ),
-      week: PeriodStats.fromJson(
-        week is Map<String, dynamic> ? week : null,
-      ),
-      month: PeriodStats.fromJson(
-        month is Map<String, dynamic> ? month : null,
-      ),
+      today: PeriodStats.fromJson(today is Map<String, dynamic> ? today : null),
+      week: PeriodStats.fromJson(week is Map<String, dynamic> ? week : null),
+      month: PeriodStats.fromJson(month is Map<String, dynamic> ? month : null),
     );
   }
 }

@@ -116,7 +116,9 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           playerEngineTestDoubleProvider.overrideWithValue(fake),
-          transcriptRepositoryProvider.overrideWithValue(TranscriptRepository(db)),
+          transcriptRepositoryProvider.overrideWithValue(
+            TranscriptRepository(db),
+          ),
         ],
       );
     });
@@ -157,7 +159,8 @@ void main() {
     });
 
     test('openMedia ignores stale completion when superseded', () async {
-      fake.openDelay = () => Future<void>.delayed(const Duration(milliseconds: 250));
+      fake.openDelay = () =>
+          Future<void>.delayed(const Duration(milliseconds: 250));
       final idA = await insertMedia(id: 'a');
       final idB = await insertMedia(id: 'b');
 
@@ -204,51 +207,52 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fake.seekCalls, isNotEmpty);
-      expect(
-        fake.seekCalls.last,
-        const Duration(milliseconds: 2000),
-      );
+      expect(fake.seekCalls.last, const Duration(milliseconds: 2000));
     });
 
-    test('openMedia throws MediaNeedsRelocateException when local missing and hash set', () async {
-      final now = DateTime.now();
-      const id = 'reloc-1';
-      const fingerprint = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-      final missingPath = p.join(
-        Directory.systemTemp.path,
-        'enjoy_missing_${DateTime.now().microsecondsSinceEpoch}.mp4',
-      );
-      final uri = Uri.file(missingPath).toString();
+    test(
+      'openMedia throws MediaNeedsRelocateException when local missing and hash set',
+      () async {
+        final now = DateTime.now();
+        const id = 'reloc-1';
+        const fingerprint =
+            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        final missingPath = p.join(
+          Directory.systemTemp.path,
+          'enjoy_missing_${DateTime.now().microsecondsSinceEpoch}.mp4',
+        );
+        final uri = Uri.file(missingPath).toString();
 
-      await db.videoDao.insertRow(
-        VideoRow(
-          id: id,
-          vid: fingerprint,
-          provider: 'user',
-          title: 'From sync',
-          description: null,
-          thumbnailUrl: null,
-          durationSeconds: 1,
-          language: 'en',
-          source: null,
-          localUri: uri,
-          md5: fingerprint,
-          size: 100,
-          mediaUrl: null,
-          syncStatus: null,
-          serverUpdatedAt: null,
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
+        await db.videoDao.insertRow(
+          VideoRow(
+            id: id,
+            vid: fingerprint,
+            provider: 'user',
+            title: 'From sync',
+            description: null,
+            thumbnailUrl: null,
+            durationSeconds: 1,
+            language: 'en',
+            source: null,
+            localUri: uri,
+            md5: fingerprint,
+            size: 100,
+            mediaUrl: null,
+            syncStatus: null,
+            serverUpdatedAt: null,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
 
-      final n = container.read(playerControllerProvider.notifier);
-      await expectLater(
-        n.openMedia(id),
-        throwsA(isA<MediaNeedsRelocateException>()),
-      );
-      expect(fake.openUris, isEmpty);
-    });
+        final n = container.read(playerControllerProvider.notifier);
+        await expectLater(
+          n.openMedia(id),
+          throwsA(isA<MediaNeedsRelocateException>()),
+        );
+        expect(fake.openUris, isEmpty);
+      },
+    );
 
     test('openMedia uses mediaUrl when local file is missing', () async {
       final id = await insertMedia(
@@ -267,58 +271,67 @@ void main() {
       expect(fake.openUris, ['https://example.com/media.mp4']);
     });
 
-    test('openMedia persists video poster from screenshot when thumbnail missing', () async {
-      const hash =
-          '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
-      final id = await insertMedia(id: 'v-cap', kind: 'video', md5: hash);
-      fake.screenshotReturnValue = Uint8List.fromList(const [10, 11, 12]);
-      final n = container.read(playerControllerProvider.notifier);
-      await n.openMedia(id);
-      await Future<void>.delayed(const Duration(milliseconds: 1200));
+    test(
+      'openMedia persists video poster from screenshot when thumbnail missing',
+      () async {
+        const hash =
+            '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+        final id = await insertMedia(id: 'v-cap', kind: 'video', md5: hash);
+        fake.screenshotReturnValue = Uint8List.fromList(const [10, 11, 12]);
+        final n = container.read(playerControllerProvider.notifier);
+        await n.openMedia(id);
+        await Future<void>.delayed(const Duration(milliseconds: 1200));
 
-      expect(fake.screenshotCalls, greaterThanOrEqualTo(1));
-      final row = await db.videoDao.getById(id);
-      expect(row!.thumbnailUrl, isNotNull);
-      final thumbFile = File(row.thumbnailUrl!);
-      expect(thumbFile.existsSync(), isTrue);
-      expect(await thumbFile.readAsBytes(), fake.screenshotReturnValue);
+        expect(fake.screenshotCalls, greaterThanOrEqualTo(1));
+        final row = await db.videoDao.getById(id);
+        expect(row!.thumbnailUrl, isNotNull);
+        final thumbFile = File(row.thumbnailUrl!);
+        expect(thumbFile.existsSync(), isTrue);
+        expect(await thumbFile.readAsBytes(), fake.screenshotReturnValue);
 
-      final session = container.read(playerControllerProvider);
-      expect(session?.thumbnailUrl, row.thumbnailUrl);
-    });
+        final session = container.read(playerControllerProvider);
+        expect(session?.thumbnailUrl, row.thumbnailUrl);
+      },
+    );
 
-    test('openMedia skips poster capture when remote thumbnail url set', () async {
-      final id = await insertMedia(
-        id: 'v-remote',
-        kind: 'video',
-        thumbnailUrl: 'https://cdn.example/x.jpg',
-      );
-      fake.screenshotReturnValue = Uint8List.fromList(const [1, 2, 3]);
-      final n = container.read(playerControllerProvider.notifier);
-      await n.openMedia(id);
-      await Future<void>.delayed(const Duration(milliseconds: 1200));
-      expect(fake.screenshotCalls, 0);
-    });
+    test(
+      'openMedia skips poster capture when remote thumbnail url set',
+      () async {
+        final id = await insertMedia(
+          id: 'v-remote',
+          kind: 'video',
+          thumbnailUrl: 'https://cdn.example/x.jpg',
+        );
+        fake.screenshotReturnValue = Uint8List.fromList(const [1, 2, 3]);
+        final n = container.read(playerControllerProvider.notifier);
+        await n.openMedia(id);
+        await Future<void>.delayed(const Duration(milliseconds: 1200));
+        expect(fake.screenshotCalls, 0);
+      },
+    );
 
-    test('openMedia skips poster capture when local thumbnail file exists', () async {
-      final tmp = File(
-        p.join(
-          Directory.systemTemp.path,
-          'enjoy_thumb_${DateTime.now().microsecondsSinceEpoch}.jpg',
-        ),
-      );
-      await tmp.writeAsBytes(const [1, 2, 3]);
-      final id = await insertMedia(
-        id: 'v-has-thumb',
-        kind: 'video',
-        thumbnailUrl: tmp.path,
-      );
-      fake.screenshotReturnValue = Uint8List.fromList(const [9, 9, 9]);
-      final n = container.read(playerControllerProvider.notifier);
-      await n.openMedia(id);
-      await Future<void>.delayed(const Duration(milliseconds: 1200));
-      expect(fake.screenshotCalls, 0);
-    });
+    test(
+      'openMedia skips poster capture when local thumbnail file exists',
+      () async {
+        final tmp = File(
+          p.join(
+            Directory.systemTemp.path,
+            'enjoy_thumb_${DateTime.now().microsecondsSinceEpoch}.jpg',
+          ),
+        );
+        await tmp.writeAsBytes(const [1, 2, 3]);
+        final id = await insertMedia(
+          id: 'v-has-thumb',
+          kind: 'video',
+          thumbnailUrl: tmp.path,
+        );
+        fake.screenshotReturnValue = Uint8List.fromList(const [9, 9, 9]);
+        final n = container.read(playerControllerProvider.notifier);
+        await n.openMedia(id);
+        await Future<void>.delayed(const Duration(milliseconds: 1200));
+        expect(fake.screenshotCalls, 0);
+      },
+    );
 
     test('openMedia does not capture poster for audio', () async {
       final id = await insertMedia(id: 'a-cap');
@@ -347,14 +360,21 @@ void main() {
       expect(fake.stopCallCount, greaterThan(0));
     });
 
-    test('openMedia persists decoded duration when video row duration is zero', () async {
-      final id = await insertMedia(id: 'v-dur0', kind: 'video', durationSeconds: 0);
-      final n = container.read(playerControllerProvider.notifier);
-      await n.openMedia(id);
-      fake.emitDuration(const Duration(seconds: 91));
-      await Future<void>.delayed(const Duration(milliseconds: 120));
-      final row = await db.videoDao.getById(id);
-      expect(row!.durationSeconds, 91);
-    });
+    test(
+      'openMedia persists decoded duration when video row duration is zero',
+      () async {
+        final id = await insertMedia(
+          id: 'v-dur0',
+          kind: 'video',
+          durationSeconds: 0,
+        );
+        final n = container.read(playerControllerProvider.notifier);
+        await n.openMedia(id);
+        fake.emitDuration(const Duration(seconds: 91));
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+        final row = await db.videoDao.getById(id);
+        expect(row!.durationSeconds, 91);
+      },
+    );
   });
 }

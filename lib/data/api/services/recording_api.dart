@@ -8,7 +8,7 @@ typedef JsonMap = Map<String, dynamic>;
 
 class RecordingApi {
   RecordingApi(this._client, {String? clientPlatform})
-      : clientPlatform = clientPlatform ?? recordingClientPlatformValue();
+    : clientPlatform = clientPlatform ?? recordingClientPlatformValue();
 
   final ApiClient _client;
 
@@ -31,10 +31,7 @@ class RecordingApi {
     if (language != null) q['language'] = language;
     if (limit != null) q['limit'] = '$limit';
     if (updatedAfter != null) q['updatedAfter'] = updatedAfter;
-    return _client.getJsonList(
-      _path,
-      queryParameters: q.isEmpty ? null : q,
-    );
+    return _client.getJsonList(_path, queryParameters: q.isEmpty ? null : q);
   }
 
   Future<JsonMap> recording(String id) => _client.getJson('$_path/$id');
@@ -43,11 +40,14 @@ class RecordingApi {
     final payload = <String, dynamic>{
       if (recording['id'] != null) 'id': recording['id'],
       if (recording['targetId'] != null) 'targetId': recording['targetId'],
-      if (recording['targetType'] != null) 'targetType': recording['targetType'],
+      if (recording['targetType'] != null)
+        'targetType': recording['targetType'],
       if (recording['duration'] != null) 'duration': recording['duration'],
       if (recording['md5'] != null) 'md5': recording['md5'],
-      if (recording['referenceText'] != null) 'referenceText': recording['referenceText'],
-      if (recording['referenceStart'] != null) 'referenceStart': recording['referenceStart'],
+      if (recording['referenceText'] != null)
+        'referenceText': recording['referenceText'],
+      if (recording['referenceStart'] != null)
+        'referenceStart': recording['referenceStart'],
       if (recording['referenceDuration'] != null)
         'referenceDuration': recording['referenceDuration'],
       if (recording['language'] != null) 'language': recording['language'],
@@ -55,22 +55,16 @@ class RecordingApi {
       if (recording['createdAt'] != null) 'createdAt': recording['createdAt'],
       if (recording['updatedAt'] != null) 'updatedAt': recording['updatedAt'],
     };
-    return _client.postJson(
-      _path,
-      body: {'recording': payload},
-    );
+    return _client.postJson(_path, body: {'recording': payload});
   }
 
-  Future<JsonMap> deleteRecording(String id) => _client.deleteJson('$_path/$id');
+  Future<JsonMap> deleteRecording(String id) =>
+      _client.deleteJson('$_path/$id');
 
   Future<JsonMap> updateRecording(
     String id,
     JsonMap data, {
     bool skipTransform = false,
   }) =>
-      _client.putJson(
-        '$_path/$id',
-        body: data,
-        transformBody: !skipTransform,
-      );
+      _client.putJson('$_path/$id', body: data, transformBody: !skipTransform);
 }

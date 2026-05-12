@@ -7,13 +7,12 @@ InputDeviceLite _d(String id, String label) =>
 void main() {
   group('isLikelyVirtualInputDevice', () {
     test('matches GlideX, VoiceMeeter, VB-Audio, Stereo Mix, loopback', () {
+      expect(isLikelyVirtualInputDevice('麦克风阵列 (GlideX Shared Audio)'), isTrue);
+      expect(isLikelyVirtualInputDevice('VoiceMeeter Output'), isTrue);
       expect(
-        isLikelyVirtualInputDevice('麦克风阵列 (GlideX Shared Audio)'),
+        isLikelyVirtualInputDevice('CABLE Output (VB-Audio Cable)'),
         isTrue,
       );
-      expect(isLikelyVirtualInputDevice('VoiceMeeter Output'), isTrue);
-      expect(isLikelyVirtualInputDevice('CABLE Output (VB-Audio Cable)'),
-          isTrue);
       expect(isLikelyVirtualInputDevice('Stereo Mix (Realtek)'), isTrue);
       expect(isLikelyVirtualInputDevice('麦克风 (立体声混音)'), isTrue);
       expect(isLikelyVirtualInputDevice('Loopback Capture'), isTrue);
@@ -21,10 +20,7 @@ void main() {
     });
 
     test('does not match real microphones', () {
-      expect(
-        isLikelyVirtualInputDevice('麦克风阵列 (Realtek(R) Audio)'),
-        isFalse,
-      );
+      expect(isLikelyVirtualInputDevice('麦克风阵列 (Realtek(R) Audio)'), isFalse);
       expect(isLikelyVirtualInputDevice('Headset Microphone'), isFalse);
       expect(isLikelyVirtualInputDevice('USB Audio Device'), isFalse);
     });
@@ -46,18 +42,20 @@ void main() {
       );
     });
 
-    test('falls back to the first non-virtual device when preferred is gone',
-        () {
-      final devices = [
-        _d('id-glidex', 'GlideX Shared Audio'),
-        _d('id-real', 'Realtek Microphone Array'),
-        _d('id-vm', 'VoiceMeeter Output'),
-      ];
-      expect(
-        pickPreferredInputDeviceId(devices, preferredId: 'id-missing'),
-        'id-real',
-      );
-    });
+    test(
+      'falls back to the first non-virtual device when preferred is gone',
+      () {
+        final devices = [
+          _d('id-glidex', 'GlideX Shared Audio'),
+          _d('id-real', 'Realtek Microphone Array'),
+          _d('id-vm', 'VoiceMeeter Output'),
+        ];
+        expect(
+          pickPreferredInputDeviceId(devices, preferredId: 'id-missing'),
+          'id-real',
+        );
+      },
+    );
 
     test('skips a leading virtual device when no preference is set', () {
       final devices = [

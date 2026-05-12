@@ -67,11 +67,7 @@ String normalizeServerVideoProviderFields({
   final exLower = ex?.toLowerCase();
   if (exLower == 'netflix') return 'netflix';
 
-  if (_signalsYoutubeFromFields(
-    vid: vid,
-    mediaUrl: mediaUrl,
-    source: source,
-  )) {
+  if (_signalsYoutubeFromFields(vid: vid, mediaUrl: mediaUrl, source: source)) {
     return 'youtube';
   }
 

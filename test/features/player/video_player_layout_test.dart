@@ -50,7 +50,9 @@ void main() {
     expect(find.byType(Row), findsWidgets);
   });
 
-  testWidgets('VideoPlayerLayout stacks transcript when narrow', (tester) async {
+  testWidgets('VideoPlayerLayout stacks transcript when narrow', (
+    tester,
+  ) async {
     await pumpLayout(tester, width: 500, height: 700);
     expect(find.text('TR_STUB'), findsOneWidget);
     expect(find.byType(Column), findsWidgets);

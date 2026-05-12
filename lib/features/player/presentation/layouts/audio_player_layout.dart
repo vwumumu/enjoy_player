@@ -12,10 +12,7 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import '../../application/player_state_providers.dart';
 
 class AudioPlayerLayout extends ConsumerWidget {
-  const AudioPlayerLayout({
-    required this.transcript,
-    super.key,
-  });
+  const AudioPlayerLayout({required this.transcript, super.key});
 
   final Widget transcript;
 

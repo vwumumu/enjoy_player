@@ -2,11 +2,7 @@
 library;
 
 final class ApiException implements Exception {
-  const ApiException({
-    required this.message,
-    this.statusCode,
-    this.body,
-  });
+  const ApiException({required this.message, this.statusCode, this.body});
 
   final String message;
   final int? statusCode;

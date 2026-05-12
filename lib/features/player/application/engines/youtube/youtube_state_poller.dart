@@ -31,7 +31,8 @@ class YoutubeStatePoller {
       Duration? newDuration,
       required bool jsPaused,
       required bool jsEnded,
-    }) onResult,
+    })
+    onResult,
   }) async {
     if (disposed || web == null) return;
     try {

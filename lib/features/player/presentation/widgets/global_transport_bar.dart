@@ -116,49 +116,45 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
         buffering: isBuffering,
         tooltip: ttPlayPause,
         accentColor: playAccent,
-        onPressed:
-            isBuffering
-                ? null
-                : Haptics.wrapTap(
-                  context,
-                  () => ref.read(playerControllerProvider.notifier).togglePlay(),
-                ),
+        onPressed: isBuffering
+            ? null
+            : Haptics.wrapTap(
+                context,
+                () => ref.read(playerControllerProvider.notifier).togglePlay(),
+              ),
       ),
       IconButton(
         tooltip: ttPrev,
         iconSize: 22,
-        onPressed:
-            isBuffering || !hasTranscriptLines
-                ? null
-                : Haptics.wrapTap(
-                  context,
-                  () => ref.read(playerInteractionsProvider.notifier).prevLine(),
-                ),
+        onPressed: isBuffering || !hasTranscriptLines
+            ? null
+            : Haptics.wrapTap(
+                context,
+                () => ref.read(playerInteractionsProvider.notifier).prevLine(),
+              ),
         icon: const Icon(Icons.skip_previous_rounded),
       ),
       IconButton(
         tooltip: ttNext,
         iconSize: 22,
-        onPressed:
-            isBuffering || !hasTranscriptLines
-                ? null
-                : Haptics.wrapTap(
-                  context,
-                  () => ref.read(playerInteractionsProvider.notifier).nextLine(),
-                ),
+        onPressed: isBuffering || !hasTranscriptLines
+            ? null
+            : Haptics.wrapTap(
+                context,
+                () => ref.read(playerInteractionsProvider.notifier).nextLine(),
+              ),
         icon: const Icon(Icons.skip_next_rounded),
       ),
       IconButton(
         tooltip: ttReplay,
         iconSize: 22,
-        onPressed:
-            isBuffering || !hasTranscriptLines
-                ? null
-                : Haptics.wrapTap(
-                  context,
-                  () =>
-                      ref.read(playerInteractionsProvider.notifier).replayLine(),
-                ),
+        onPressed: isBuffering || !hasTranscriptLines
+            ? null
+            : Haptics.wrapTap(
+                context,
+                () =>
+                    ref.read(playerInteractionsProvider.notifier).replayLine(),
+              ),
         icon: const Icon(Icons.replay_rounded),
       ),
     ];
@@ -167,43 +163,36 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
       IconButton(
         tooltip: ttEcho,
         color: echo.active ? t.echoActive : null,
-        style:
-            echo.active
-                ? IconButton.styleFrom(
-                  backgroundColor: t.echoActive.withValues(alpha: 0.18),
-                )
-                : null,
-        onPressed:
-            echo.active || hasTranscriptLines
-                ? Haptics.wrapTap(
-                  context,
-                  () => ref
-                      .read(playerInteractionsProvider.notifier)
-                      .toggleEcho(),
-                )
-                : null,
+        style: echo.active
+            ? IconButton.styleFrom(
+                backgroundColor: t.echoActive.withValues(alpha: 0.18),
+              )
+            : null,
+        onPressed: echo.active || hasTranscriptLines
+            ? Haptics.wrapTap(
+                context,
+                () =>
+                    ref.read(playerInteractionsProvider.notifier).toggleEcho(),
+              )
+            : null,
         icon: const Icon(Icons.mic_none_rounded),
       ),
       TransportCcButton(mediaId: chrome.mediaId),
       PopupMenuButton<double>(
         tooltip: ttSpeed,
-        onSelected:
-            (rate) => ref
-                .read(playerPreferencesCtrlProvider.notifier)
-                .setPlaybackRate(rate),
-        itemBuilder:
-            (ctx) => [
-              for (final r in kPlaybackRatePresets)
-                CheckedPopupMenuItem<double>(
-                  value: r,
-                  checked: playbackRatesEqual(playbackRate, r),
-                  child: Text(
-                    AppLocalizations.of(ctx)!.playbackRateTimes(
-                      _formatRateCore(r),
-                    ),
-                  ),
-                ),
-            ],
+        onSelected: (rate) => ref
+            .read(playerPreferencesCtrlProvider.notifier)
+            .setPlaybackRate(rate),
+        itemBuilder: (ctx) => [
+          for (final r in kPlaybackRatePresets)
+            CheckedPopupMenuItem<double>(
+              value: r,
+              checked: playbackRatesEqual(playbackRate, r),
+              child: Text(
+                AppLocalizations.of(ctx)!.playbackRateTimes(_formatRateCore(r)),
+              ),
+            ),
+        ],
         child: Padding(
           padding: EdgeInsets.all(t.space8),
           child: Stack(
@@ -216,9 +205,9 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                   right: -2,
                   bottom: -4,
                   child: Text(
-                    AppLocalizations.of(context)!.playbackRateTimes(
-                      _formatRateCore(playbackRate),
-                    ),
+                    AppLocalizations.of(
+                      context,
+                    )!.playbackRateTimes(_formatRateCore(playbackRate)),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontSize: 9,
                       height: 1,
@@ -280,119 +269,121 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                   return FadeTransition(
                     opacity: anim,
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.03),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(parent: anim, curve: Curves.easeOutCubic),
-                      ),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(0, 0.03),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: anim,
+                              curve: Curves.easeOutCubic,
+                            ),
+                          ),
                       child: child,
                     ),
                   );
                 },
                 child: KeyedSubtree(
                   key: ValueKey<bool>(hideBottomMediaInfo),
-                  child:
-                      hideBottomMediaInfo
+                  child: hideBottomMediaInfo
                       ? LayoutBuilder(
-                        builder: (context, paddedConstraints) {
-                          return SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minWidth: paddedConstraints.maxWidth,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: primaryTransport,
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: secondaryTransport,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                      : Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: primaryTransport,
-                          ),
-                          SizedBox(width: t.space12),
-                          Expanded(
-                            flex: 2,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                children: [
-                                  if (!onPlayer) ...[
-                                    TransportArtworkTile(chrome: chrome),
-                                    SizedBox(width: t.space12),
+                          builder: (context, paddedConstraints) {
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minWidth: paddedConstraints.maxWidth,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: primaryTransport,
+                                    ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: secondaryTransport,
+                                    ),
                                   ],
-                                  Flexible(
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      clipBehavior: Clip.antiAlias,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          t.radiusSm,
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: primaryTransport,
+                            ),
+                            SizedBox(width: t.space12),
+                            Expanded(
+                              flex: 2,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  children: [
+                                    if (!onPlayer) ...[
+                                      TransportArtworkTile(chrome: chrome),
+                                      SizedBox(width: t.space12),
+                                    ],
+                                    Flexible(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        clipBehavior: Clip.antiAlias,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            t.radiusSm,
+                                          ),
                                         ),
-                                      ),
-                                      child: InkWell(
-                                        onTap:
-                                            onPlayer
-                                                ? null
-                                                : Haptics.wrapTap(
+                                        child: InkWell(
+                                          onTap: onPlayer
+                                              ? null
+                                              : Haptics.wrapTap(
                                                   context,
                                                   () => openPlayerRoute(
                                                     context,
                                                     chrome.mediaId,
                                                   ),
                                                 ),
-                                        borderRadius: BorderRadius.circular(
-                                          t.radiusSm,
-                                        ),
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: t.space4,
-                                            horizontal: t.space4,
+                                          borderRadius: BorderRadius.circular(
+                                            t.radiusSm,
                                           ),
-                                          child: TransportMetaRow(
-                                            chrome: chrome,
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: t.space4,
+                                              horizontal: t.space4,
+                                            ),
+                                            child: TransportMetaRow(
+                                              chrome: chrome,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: secondaryTransport,
+                                  ],
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                            Expanded(
+                              flex: 2,
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: secondaryTransport,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ),

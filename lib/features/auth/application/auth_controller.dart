@@ -31,8 +31,9 @@ class AuthCtrl extends _$AuthCtrl {
     final sw = Stopwatch()..start();
     _log.info('auth: loadInitialAuthState start');
     try {
-      final state =
-          await ref.read(authRepositoryProvider).loadInitialAuthState();
+      final state = await ref
+          .read(authRepositoryProvider)
+          .loadInitialAuthState();
       _log.info(
         'auth: loadInitialAuthState done in ${sw.elapsedMilliseconds}ms '
         '(${state.runtimeType})',

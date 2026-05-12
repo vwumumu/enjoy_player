@@ -27,7 +27,9 @@ Future<EchoRegionAnalysisResult?> analyzeMediaTimeRange({
   return _analyzePcmOffUiThread(pcm.samples, pcm.sampleRate);
 }
 
-Future<EchoRegionAnalysisResult?> analyzeMediaFileFull({required String mediaPath}) async {
+Future<EchoRegionAnalysisResult?> analyzeMediaFileFull({
+  required String mediaPath,
+}) async {
   final pcm = await extractEntireFileMonoF32(mediaPath);
   if (pcm == null) return null;
   return _analyzePcmOffUiThread(pcm.samples, pcm.sampleRate);
@@ -45,7 +47,10 @@ Future<EchoRegionAnalysisResult> _analyzePcmOffUiThread(
   return Isolate.run(() => analyzePcmSamples(s, sr));
 }
 
-EchoRegionAnalysisResult analyzePcmSamples(Float32List samples, double sampleRate) {
+EchoRegionAnalysisResult analyzePcmSamples(
+  Float32List samples,
+  double sampleRate,
+) {
   final env = computePeakEnvelope(samples, sampleRate, points: 520);
   final yin = estimatePitchYin(samples, sampleRate);
   final hz = pitchAtEnvelopeTimes(envelope: env, yin: yin);

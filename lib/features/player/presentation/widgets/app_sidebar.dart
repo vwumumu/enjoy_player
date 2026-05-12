@@ -45,8 +45,11 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final path = GoRouterState.of(context).uri.path;
-    final searchTooltip =
-        hotkeyTooltipLabel(ref, 'library.search', l10n.hotkeysDescLibrarySearch);
+    final searchTooltip = hotkeyTooltipLabel(
+      ref,
+      'library.search',
+      l10n.hotkeysDescLibrarySearch,
+    );
 
     return SizedBox(
       width: t.sidebarWidth,
@@ -120,7 +123,9 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                       size: 20,
                     ),
                     filled: true,
-                    fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+                    fillColor: cs.surfaceContainerHighest.withValues(
+                      alpha: 0.6,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(t.radiusSm),
                       borderSide: BorderSide.none,
@@ -219,10 +224,7 @@ class _SidebarNavItem extends StatelessWidget {
           child: AnimatedContainer(
             duration: t.motionFast,
             curve: Curves.easeOutCubic,
-            padding: EdgeInsets.symmetric(
-              horizontal: t.space16,
-              vertical: 10,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: t.space16, vertical: 10),
             decoration: BoxDecoration(
               color: selected
                   ? cs.primaryContainer.withValues(alpha: 0.6)

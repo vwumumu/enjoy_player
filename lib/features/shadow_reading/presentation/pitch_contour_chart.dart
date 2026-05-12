@@ -128,7 +128,9 @@ class _PitchContourPainter extends CustomPainter {
       if (p.pitchRefHz != null && p.pitchRefHz!.isFinite && p.pitchRefHz! > 0) {
         maxPitch = math.max(maxPitch, p.pitchRefHz!);
       }
-      if (p.pitchUserHz != null && p.pitchUserHz!.isFinite && p.pitchUserHz! > 0) {
+      if (p.pitchUserHz != null &&
+          p.pitchUserHz!.isFinite &&
+          p.pitchUserHz! > 0) {
         maxPitch = math.max(maxPitch, p.pitchUserHz!);
       }
     }

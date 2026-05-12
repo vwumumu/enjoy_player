@@ -8,7 +8,7 @@
 /// does not match a known virtual/loopback pattern so shadow-reading captures
 /// the real microphone unless the user picked otherwise.
 library;
- 
+
 /// Substrings (lowercased) that identify devices we'd rather not capture from
 /// when a real mic is also available.
 const List<String> kKnownVirtualInputDeviceMarkers = <String>[

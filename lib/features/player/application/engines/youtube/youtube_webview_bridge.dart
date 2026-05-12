@@ -116,8 +116,6 @@ class YoutubeWebViewBridge {
     InAppWebViewController? web,
     String videoId,
   ) async {
-    await web?.loadUrl(
-      urlRequest: URLRequest(url: watchUri(videoId)),
-    );
+    await web?.loadUrl(urlRequest: URLRequest(url: watchUri(videoId)));
   }
 }

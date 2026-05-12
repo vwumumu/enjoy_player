@@ -20,7 +20,8 @@ class TransportPlayRingButton extends StatefulWidget {
   final Color? accentColor;
 
   @override
-  State<TransportPlayRingButton> createState() => _TransportPlayRingButtonState();
+  State<TransportPlayRingButton> createState() =>
+      _TransportPlayRingButtonState();
 }
 
 class _TransportPlayRingButtonState extends State<TransportPlayRingButton> {
@@ -36,10 +37,9 @@ class _TransportPlayRingButtonState extends State<TransportPlayRingButton> {
       child: Tooltip(
         message: widget.tooltip,
         child: Listener(
-          onPointerDown:
-              widget.onPressed == null
-                  ? null
-                  : (_) => setState(() => _pressed = true),
+          onPointerDown: widget.onPressed == null
+              ? null
+              : (_) => setState(() => _pressed = true),
           onPointerUp: (_) => setState(() => _pressed = false),
           onPointerCancel: (_) => setState(() => _pressed = false),
           child: Material(
@@ -68,31 +68,30 @@ class _TransportPlayRingButtonState extends State<TransportPlayRingButton> {
                     ],
                   ),
                   child: Center(
-                    child:
-                        widget.buffering
-                            ? SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: ringColor,
-                              ),
-                            )
-                            : AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 180),
-                              switchInCurve: Curves.easeOutCubic,
-                              switchOutCurve: Curves.easeInCubic,
-                              transitionBuilder: (child, anim) =>
-                                  FadeTransition(opacity: anim, child: child),
-                              child: Icon(
-                                widget.playing
-                                    ? Icons.pause_rounded
-                                    : Icons.play_arrow_rounded,
-                                key: ValueKey<bool>(widget.playing),
-                                color: cs.onSurface,
-                                size: 26,
-                              ),
+                    child: widget.buffering
+                        ? SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: ringColor,
                             ),
+                          )
+                        : AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 180),
+                            switchInCurve: Curves.easeOutCubic,
+                            switchOutCurve: Curves.easeInCubic,
+                            transitionBuilder: (child, anim) =>
+                                FadeTransition(opacity: anim, child: child),
+                            child: Icon(
+                              widget.playing
+                                  ? Icons.pause_rounded
+                                  : Icons.play_arrow_rounded,
+                              key: ValueKey<bool>(widget.playing),
+                              color: cs.onSurface,
+                              size: 26,
+                            ),
+                          ),
                   ),
                 ),
               ),

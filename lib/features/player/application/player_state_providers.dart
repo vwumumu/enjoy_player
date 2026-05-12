@@ -19,8 +19,5 @@ final playerIsPlayingProvider = StreamProvider<bool>((ref) {
 final playerIsBufferingProvider = StreamProvider<bool>((ref) {
   final engine = ref.watch(playerEngineProvider);
   final snap = engine.transportSnapshot;
-  return _seedThenFollow(
-    snap.buffering,
-    engine.buffering,
-  ).distinct();
+  return _seedThenFollow(snap.buffering, engine.buffering).distinct();
 });

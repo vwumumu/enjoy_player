@@ -41,7 +41,8 @@ Map<String, dynamic> prepareForSyncAudioMap(AudioRow row) {
     'provider': row.provider,
     'title': row.title,
     if (row.description != null) 'description': row.description,
-    if (isRemoteThumbnailUrl(row.thumbnailUrl)) 'thumbnailUrl': row.thumbnailUrl!,
+    if (isRemoteThumbnailUrl(row.thumbnailUrl))
+      'thumbnailUrl': row.thumbnailUrl!,
     'duration': row.durationSeconds,
     'language': row.language,
     if (row.translationKey != null) 'translationKey': row.translationKey,
@@ -63,7 +64,8 @@ Map<String, dynamic> prepareForSyncVideoMap(VideoRow row) {
     'provider': row.provider,
     'title': row.title,
     if (row.description != null) 'description': row.description,
-    if (isRemoteThumbnailUrl(row.thumbnailUrl)) 'thumbnailUrl': row.thumbnailUrl!,
+    if (isRemoteThumbnailUrl(row.thumbnailUrl))
+      'thumbnailUrl': row.thumbnailUrl!,
     'duration': row.durationSeconds,
     'language': row.language,
     if (row.source != null) 'source': row.source,
@@ -87,7 +89,8 @@ Map<String, dynamic> prepareForSyncRecordingMap(RecordingRow row) {
     'referenceDuration': row.referenceDuration,
     'language': row.language,
     if (row.audioUrl != null) 'audioUrl': row.audioUrl,
-    if (row.pronunciationScore != null) 'pronunciationScore': row.pronunciationScore,
+    if (row.pronunciationScore != null)
+      'pronunciationScore': row.pronunciationScore,
     if (row.assessmentJson != null) 'assessmentJson': row.assessmentJson,
     'createdAt': row.createdAt.toUtc().toIso8601String(),
     'updatedAt': row.updatedAt.toUtc().toIso8601String(),
@@ -190,9 +193,7 @@ AudioRow mergeAudioLastWriteWins({
   final serverRow = audioRowFromServerJson(server);
   if (local == null) return serverRow;
   if (local.updatedAt.isAfter(serverRow.updatedAt)) return local;
-  return serverRow.copyWith(
-    localUri: Value(local.localUri),
-  );
+  return serverRow.copyWith(localUri: Value(local.localUri));
 }
 
 VideoRow mergeVideoLastWriteWins({
@@ -202,9 +203,7 @@ VideoRow mergeVideoLastWriteWins({
   final serverRow = videoRowFromServerJson(server);
   if (local == null) return serverRow;
   if (local.updatedAt.isAfter(serverRow.updatedAt)) return local;
-  return serverRow.copyWith(
-    localUri: Value(local.localUri),
-  );
+  return serverRow.copyWith(localUri: Value(local.localUri));
 }
 
 RecordingRow mergeRecordingLastWriteWins({
@@ -214,9 +213,7 @@ RecordingRow mergeRecordingLastWriteWins({
   final serverRow = recordingRowFromServerJson(server);
   if (local == null) return serverRow;
   if (local.updatedAt.isAfter(serverRow.updatedAt)) return local;
-  return serverRow.copyWith(
-    localPath: Value(local.localPath),
-  );
+  return serverRow.copyWith(localPath: Value(local.localPath));
 }
 
 Map<String, dynamic> unwrapEntity(Map<String, dynamic> response, String key) {

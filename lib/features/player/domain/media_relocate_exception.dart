@@ -16,6 +16,7 @@ class MediaNeedsRelocateException implements Exception {
   final String mediaId;
   final MediaKind kind;
   final String title;
+
   /// SHA-256 hex stored in Drift `md5` column.
   final String expectedHash;
   final int? expectedSize;

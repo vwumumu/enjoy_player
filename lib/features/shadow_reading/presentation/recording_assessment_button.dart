@@ -90,13 +90,13 @@ class RecordingAssessmentButton extends ConsumerWidget {
             onTap: !canInteract || isAssessing
                 ? null
                 : () => unawaited(
-                      triggerRecordingAssessment(
-                        context: context,
-                        ref: ref,
-                        l10n: l10n,
-                        row: row,
-                      ),
+                    triggerRecordingAssessment(
+                      context: context,
+                      ref: ref,
+                      l10n: l10n,
+                      row: row,
                     ),
+                  ),
             child: Center(
               child: isAssessing
                   ? SizedBox(
@@ -118,7 +118,9 @@ class RecordingAssessmentButton extends ConsumerWidget {
                   : Icon(
                       Icons.auto_awesome_rounded,
                       size: 20,
-                      color: canInteract ? scheme.primary : scheme.onSurfaceVariant,
+                      color: canInteract
+                          ? scheme.primary
+                          : scheme.onSurfaceVariant,
                     ),
             ),
           ),

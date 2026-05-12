@@ -39,9 +39,10 @@ Future<bool> showGuestMigrationBanner(Ref ref) async {
   final hasGuest = await ref.watch(guestDatabaseHasDataProvider.future);
   if (!hasGuest) return false;
 
-  final dismissed = await ref.watch(appDatabaseProvider).settingsDao.getValue(
-        SettingsKeys.migrationGuestDismissed,
-      );
+  final dismissed = await ref
+      .watch(appDatabaseProvider)
+      .settingsDao
+      .getValue(SettingsKeys.migrationGuestDismissed);
   if (dismissed == 'true') return false;
   return true;
 }
@@ -69,10 +70,10 @@ class GuestMigrationCtrl extends _$GuestMigrationCtrl {
       await _migrateGuestToUser(guest: guest, user: user);
       _log.info('guest migration completed for user ${auth.profile.id}');
 
-      await ref.read(appDatabaseProvider).settingsDao.setValue(
-            SettingsKeys.migrationGuestDismissed,
-            '',
-          );
+      await ref
+          .read(appDatabaseProvider)
+          .settingsDao
+          .setValue(SettingsKeys.migrationGuestDismissed, '');
 
       ref.invalidate(guestDatabaseHasDataProvider);
       ref.invalidate(showGuestMigrationBannerProvider);
@@ -84,17 +85,18 @@ class GuestMigrationCtrl extends _$GuestMigrationCtrl {
   }
 
   Future<void> dismiss() async {
-    await ref.read(appDatabaseProvider).settingsDao.setValue(
-          SettingsKeys.migrationGuestDismissed,
-          'true',
-        );
+    await ref
+        .read(appDatabaseProvider)
+        .settingsDao
+        .setValue(SettingsKeys.migrationGuestDismissed, 'true');
     ref.invalidate(showGuestMigrationBannerProvider);
   }
 }
 
 Future<bool> _guestHasMigratableData(AppDatabase guest) async {
-  final row = await guest.customSelect(
-    r'''
+  final row = await guest
+      .customSelect(
+        r'''
 SELECT (
   EXISTS(SELECT 1 FROM videos LIMIT 1) OR
   EXISTS(SELECT 1 FROM audios LIMIT 1) OR
@@ -105,16 +107,17 @@ SELECT (
   EXISTS(SELECT 1 FROM sync_queue LIMIT 1)
 ) AS has_data
 ''',
-    readsFrom: {
-      guest.videos,
-      guest.audios,
-      guest.transcripts,
-      guest.echoSessions,
-      guest.recordings,
-      guest.dictations,
-      guest.syncQueue,
-    },
-  ).getSingle();
+        readsFrom: {
+          guest.videos,
+          guest.audios,
+          guest.transcripts,
+          guest.echoSessions,
+          guest.recordings,
+          guest.dictations,
+          guest.syncQueue,
+        },
+      )
+      .getSingle();
 
   final v = row.data['has_data'];
   if (v is bool) return v;

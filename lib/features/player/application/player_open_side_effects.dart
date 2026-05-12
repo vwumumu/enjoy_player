@@ -23,7 +23,9 @@ void schedulePlayerOpenSideEffects(
   final auth = ref.read(authCtrlProvider).valueOrNull;
   if (auth is AuthSignedIn) {
     unawaited(
-      ref.read(recordingTargetSyncServiceProvider).pullRecordingsForTarget(
+      ref
+          .read(recordingTargetSyncServiceProvider)
+          .pullRecordingsForTarget(
             targetType: dexieTargetType,
             targetId: mediaId,
           ),

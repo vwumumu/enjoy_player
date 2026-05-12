@@ -31,7 +31,9 @@ class GenerativeMediaCover extends StatelessWidget {
         CustomPaint(painter: _GenerativeCoverPainter(spec)),
         // Light noise (web uses SVG turbulence; this approximates texture).
         CustomPaint(painter: _NoisePainter(seed: seed, opacity: 0.03)),
-        Center(child: _CenterGlassIcon(accent: spec.accent, isVideo: isVideo)),
+        Center(
+          child: _CenterGlassIcon(accent: spec.accent, isVideo: isVideo),
+        ),
       ],
     );
   }
@@ -125,10 +127,9 @@ void _paintCircles(
       final ux = size.width / 100;
       final uy = size.height / 100;
       final rr = r * 0.01 * size.shortestSide;
-      final paint =
-          Paint()
-            ..color = color.withValues(alpha: opacity)
-            ..style = PaintingStyle.fill;
+      final paint = Paint()
+        ..color = color.withValues(alpha: opacity)
+        ..style = PaintingStyle.fill;
       canvas.drawCircle(Offset(cx * ux, cy * uy), rr, paint);
     });
   }
@@ -152,10 +153,9 @@ void _paintRectangles(
       final ux = size.width / 100;
       final uy = size.height / 100;
       final rect = Rect.fromLTWH(x * ux, y * uy, w * ux, h * uy);
-      final paint =
-          Paint()
-            ..color = color.withValues(alpha: opacity)
-            ..style = PaintingStyle.fill;
+      final paint = Paint()
+        ..color = color.withValues(alpha: opacity)
+        ..style = PaintingStyle.fill;
       if (rx > 0) {
         canvas.drawRRect(RRect.fromRectXY(rect, rx * ux, rx * uy), paint);
       } else {
@@ -197,10 +197,9 @@ void _paintWaves(
       path.lineTo(100 * ux, 100 * uy);
       path.lineTo(0, 100 * uy);
       path.close();
-      final paint =
-          Paint()
-            ..color = color.withValues(alpha: opacity)
-            ..style = PaintingStyle.fill;
+      final paint = Paint()
+        ..color = color.withValues(alpha: opacity)
+        ..style = PaintingStyle.fill;
       canvas.drawPath(path, paint);
     });
   }
@@ -233,10 +232,9 @@ void _paintGrid(
             cellWidth * ux,
             cellHeight * uy,
           );
-          final paint =
-              Paint()
-                ..color = color.withValues(alpha: opacity)
-                ..style = PaintingStyle.fill;
+          final paint = Paint()
+            ..color = color.withValues(alpha: opacity)
+            ..style = PaintingStyle.fill;
           canvas.drawRRect(RRect.fromRectXY(rect, 3 * ux, 3 * uy), paint);
         });
       }
@@ -258,17 +256,15 @@ void _paintDiagonal(
     shapes.add((canvas, size) {
       final ux = size.width / 100;
       final uy = size.height / 100;
-      final path =
-          Path()
-            ..moveTo(startX * ux, 0)
-            ..lineTo((startX + width) * ux, 0)
-            ..lineTo((startX + width + 100) * ux, 100 * uy)
-            ..lineTo((startX + 100) * ux, 100 * uy)
-            ..close();
-      final paint =
-          Paint()
-            ..color = color.withValues(alpha: opacity)
-            ..style = PaintingStyle.fill;
+      final path = Path()
+        ..moveTo(startX * ux, 0)
+        ..lineTo((startX + width) * ux, 0)
+        ..lineTo((startX + width + 100) * ux, 100 * uy)
+        ..lineTo((startX + 100) * ux, 100 * uy)
+        ..close();
+      final paint = Paint()
+        ..color = color.withValues(alpha: opacity)
+        ..style = PaintingStyle.fill;
       canvas.drawPath(path, paint);
     });
   }
@@ -360,10 +356,9 @@ class _NoisePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (opacity <= 0) return;
     final rnd = math.Random(hashToNumber(seed, 16));
-    final paint =
-        Paint()
-          ..strokeWidth = 1
-          ..style = PaintingStyle.fill;
+    final paint = Paint()
+      ..strokeWidth = 1
+      ..style = PaintingStyle.fill;
     // Sparse grain — cheap stand-in for SVG fractal noise.
     for (var i = 0; i < 180; i++) {
       final x = rnd.nextDouble() * size.width;

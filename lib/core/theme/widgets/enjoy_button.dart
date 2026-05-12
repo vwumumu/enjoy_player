@@ -85,41 +85,31 @@ class EnjoyButton extends StatelessWidget {
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
 
-    final label =
-        icon != null
-            ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 18),
-                SizedBox(width: t.space8),
-                Flexible(child: child),
-              ],
-            )
-            : child;
+    final label = icon != null
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18),
+              SizedBox(width: t.space8),
+              Flexible(child: child),
+            ],
+          )
+        : child;
 
     switch (variant) {
       case EnjoyButtonVariant.primary:
         return FilledButton(
-          onPressed:
-              onPressed == null
-                  ? null
-                  : () => _handleTap(context),
+          onPressed: onPressed == null ? null : () => _handleTap(context),
           child: label,
         );
       case EnjoyButtonVariant.secondary:
         return FilledButton.tonal(
-          onPressed:
-              onPressed == null
-                  ? null
-                  : () => _handleTap(context),
+          onPressed: onPressed == null ? null : () => _handleTap(context),
           child: label,
         );
       case EnjoyButtonVariant.ghost:
         return TextButton(
-          onPressed:
-              onPressed == null
-                  ? null
-                  : () => _handleTap(context),
+          onPressed: onPressed == null ? null : () => _handleTap(context),
           child: label,
         );
       case EnjoyButtonVariant.destructive:
@@ -128,10 +118,7 @@ class EnjoyButton extends StatelessWidget {
             backgroundColor: cs.error,
             foregroundColor: cs.onError,
           ),
-          onPressed:
-              onPressed == null
-                  ? null
-                  : () => _handleTap(context),
+          onPressed: onPressed == null ? null : () => _handleTap(context),
           child: label,
         );
     }

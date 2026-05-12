@@ -24,7 +24,10 @@ bool _localUriPlayable(String? uri) {
 }
 
 /// Same resolution as [PlayerController.openMedia] — returns structured source.
-Future<PlayableSource?> resolvePlayableSource(AppDatabase db, String mediaId) async {
+Future<PlayableSource?> resolvePlayableSource(
+  AppDatabase db,
+  String mediaId,
+) async {
   final video = await db.videoDao.getById(mediaId);
   final audio = video == null ? await db.audioDao.getById(mediaId) : null;
   if (video == null && audio == null) return null;

@@ -59,10 +59,9 @@ Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
   try {
     final auth = ref.read(authCtrlProvider).valueOrNull;
     final userId = auth is AuthSignedIn ? auth.profile.id : null;
-    final id = await ref.read(mediaLibraryRepositoryProvider).importMedia(
-          XFile(path),
-          signedInUserId: userId,
-        );
+    final id = await ref
+        .read(mediaLibraryRepositoryProvider)
+        .importMedia(XFile(path), signedInUserId: userId);
     if (context.mounted) {
       Navigator.of(context, rootNavigator: true).pop();
     }
@@ -90,21 +89,20 @@ Future<void> confirmAndDeleteMedia(
   final l10n = AppLocalizations.of(context)!;
   final confirmed = await showDialog<bool>(
     context: context,
-    builder:
-        (ctx) => AlertDialog(
-          title: Text(l10n.libraryDeleteMediaTitle),
-          content: Text(l10n.libraryDeleteMediaMessage(media.title)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(MaterialLocalizations.of(ctx).deleteButtonTooltip),
-            ),
-          ],
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.libraryDeleteMediaTitle),
+      content: Text(l10n.libraryDeleteMediaMessage(media.title)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
         ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(MaterialLocalizations.of(ctx).deleteButtonTooltip),
+        ),
+      ],
+    ),
   );
   if (confirmed != true || !context.mounted) return;
   try {
@@ -117,8 +115,7 @@ Future<void> confirmAndDeleteMedia(
     if (!context.mounted) return;
     AppNotice.success(context, l10n.libraryMediaDeleted);
   } catch (_) {
-    if (context.mounted) {
-    }
+    if (context.mounted) {}
   }
 }
 
@@ -156,7 +153,10 @@ Future<void> showImportChooser(BuildContext context, WidgetRef ref) async {
   );
 }
 
-Future<void> importYoutubeFromDialog(BuildContext context, WidgetRef ref) async {
+Future<void> importYoutubeFromDialog(
+  BuildContext context,
+  WidgetRef ref,
+) async {
   final l10n = AppLocalizations.of(context)!;
   final controller = TextEditingController();
 
@@ -173,9 +173,7 @@ Future<void> importYoutubeFromDialog(BuildContext context, WidgetRef ref) async 
             children: [
               TextField(
                 controller: controller,
-                decoration: InputDecoration(
-                  hintText: d.youtubeImportHint,
-                ),
+                decoration: InputDecoration(hintText: d.youtubeImportHint),
                 autofocus: true,
                 maxLines: 3,
                 minLines: 1,
@@ -245,10 +243,9 @@ Future<void> importYoutubeFromDialog(BuildContext context, WidgetRef ref) async 
   try {
     final auth = ref.read(authCtrlProvider).valueOrNull;
     final userId = auth is AuthSignedIn ? auth.profile.id : null;
-    final id = await ref.read(mediaLibraryRepositoryProvider).importYoutubeVideo(
-          submitted,
-          signedInUserId: userId,
-        );
+    final id = await ref
+        .read(mediaLibraryRepositoryProvider)
+        .importYoutubeVideo(submitted, signedInUserId: userId);
     if (context.mounted) {
       Navigator.of(context, rootNavigator: true).pop();
     }

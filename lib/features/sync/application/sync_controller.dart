@@ -62,8 +62,9 @@ class SyncCtrl extends _$SyncCtrl {
       // Let other microtasks run before queue drain.
       await Future<void>.delayed(Duration.zero);
 
-      final result =
-          await ref.read(syncEngineProvider).fullSync(const SyncOptions());
+      final result = await ref
+          .read(syncEngineProvider)
+          .fullSync(const SyncOptions());
       await _persistLastFullSyncTimestamp(result);
     } catch (e, st) {
       _log.warning('fullSync on sign-in failed', e, st);
@@ -115,7 +116,10 @@ class SyncCtrl extends _$SyncCtrl {
   Future<void> _persistLastFullSyncTimestamp(SyncResult result) async {
     if (!result.success) return;
     try {
-      await ref.read(appDatabaseProvider).settingsDao.setValue(
+      await ref
+          .read(appDatabaseProvider)
+          .settingsDao
+          .setValue(
             SettingsKeys.syncLastFullSyncAt,
             DateTime.now().toUtc().toIso8601String(),
           );

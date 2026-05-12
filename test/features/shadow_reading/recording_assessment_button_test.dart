@@ -72,7 +72,9 @@ void main() {
         md5: null,
         audioUrl: null,
         pronunciationScore: 91,
-        assessmentJson: jsonEncode(jsonDecode(_kAssessmentJson) as Map<String, dynamic>),
+        assessmentJson: jsonEncode(
+          jsonDecode(_kAssessmentJson) as Map<String, dynamic>,
+        ),
         localPath: '/tmp/fake.wav',
         syncStatus: 'local',
         serverUpdatedAt: null,
@@ -86,9 +88,7 @@ void main() {
     final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF1144AA));
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          appDatabaseProvider.overrideWithValue(db),
-        ],
+        overrides: [appDatabaseProvider.overrideWithValue(db)],
         child: MaterialApp(
           theme: ThemeData(
             colorScheme: scheme,

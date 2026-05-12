@@ -97,7 +97,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         : () async {
                             setState(() => _saving = true);
                             try {
-                              await ref.read(authCtrlProvider.notifier).signOut();
+                              await ref
+                                  .read(authCtrlProvider.notifier)
+                                  .signOut();
                               if (context.mounted) context.go('/');
                             } finally {
                               if (mounted) setState(() => _saving = false);
@@ -142,10 +144,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         radius: 36,
                         backgroundImage:
                             p.avatarUrl != null && p.avatarUrl!.isNotEmpty
-                                ? NetworkImage(p.avatarUrl!)
-                                : null,
+                            ? NetworkImage(p.avatarUrl!)
+                            : null,
                         child: p.avatarUrl == null || p.avatarUrl!.isEmpty
-                            ? Icon(Icons.person_rounded, size: 40, color: cs.primary)
+                            ? Icon(
+                                Icons.person_rounded,
+                                size: 40,
+                                color: cs.primary,
+                              )
                             : null,
                       ),
                       SizedBox(width: t.space16),
@@ -159,9 +165,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                             Text(
                               p.email,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: cs.onSurfaceVariant,
-                                  ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: cs.onSurfaceVariant),
                             ),
                             SizedBox(height: t.space8),
                             _SubscriptionChip(tier: p.subscriptionTier),
@@ -171,25 +176,42 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ],
                   ),
                 ),
-                ref.watch(profilePracticeStatsProvider).when(
-                  data: (stats) => Padding(
-                    padding: EdgeInsets.only(top: t.space16),
-                    child: _ProfileStatsRow(stats: stats),
-                  ),
-                  loading: () => Padding(
-                    padding: EdgeInsets.only(top: t.space16),
-                    child: Row(
-                      children: [
-                        Expanded(child: Skeleton.line(width: double.infinity, height: 56)),
-                        SizedBox(width: t.space12),
-                        Expanded(child: Skeleton.line(width: double.infinity, height: 56)),
-                        SizedBox(width: t.space12),
-                        Expanded(child: Skeleton.line(width: double.infinity, height: 56)),
-                      ],
+                ref
+                    .watch(profilePracticeStatsProvider)
+                    .when(
+                      data: (stats) => Padding(
+                        padding: EdgeInsets.only(top: t.space16),
+                        child: _ProfileStatsRow(stats: stats),
+                      ),
+                      loading: () => Padding(
+                        padding: EdgeInsets.only(top: t.space16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Skeleton.line(
+                                width: double.infinity,
+                                height: 56,
+                              ),
+                            ),
+                            SizedBox(width: t.space12),
+                            Expanded(
+                              child: Skeleton.line(
+                                width: double.infinity,
+                                height: 56,
+                              ),
+                            ),
+                            SizedBox(width: t.space12),
+                            Expanded(
+                              child: Skeleton.line(
+                                width: double.infinity,
+                                height: 56,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      error: (_, _) => const SizedBox.shrink(),
                     ),
-                  ),
-                  error: (_, _) => const SizedBox.shrink(),
-                ),
                 if (p.balance != null) ...[
                   SizedBox(height: t.space12),
                   Text(
@@ -205,90 +227,103 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                      TextFormField(
-                        controller: _name,
-                        decoration: InputDecoration(
-                          labelText: l10n.profileFieldName,
-                          border: const OutlineInputBorder(),
+                        TextFormField(
+                          controller: _name,
+                          decoration: InputDecoration(
+                            labelText: l10n.profileFieldName,
+                            border: const OutlineInputBorder(),
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? l10n.profileFieldRequired
+                              : null,
                         ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? l10n.profileFieldRequired : null,
-                      ),
-                      SizedBox(height: t.space16),
-                      TextFormField(
-                        controller: _goal,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: l10n.profileFieldGoal,
-                          border: const OutlineInputBorder(),
+                        SizedBox(height: t.space16),
+                        TextFormField(
+                          controller: _goal,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: l10n.profileFieldGoal,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: t.space16),
-                      TextFormField(
-                        controller: _learning,
-                        decoration: InputDecoration(
-                          labelText: l10n.profileFieldLearningLanguage,
-                          border: const OutlineInputBorder(),
+                        SizedBox(height: t.space16),
+                        TextFormField(
+                          controller: _learning,
+                          decoration: InputDecoration(
+                            labelText: l10n.profileFieldLearningLanguage,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: t.space16),
-                      TextFormField(
-                        controller: _native,
-                        decoration: InputDecoration(
-                          labelText: l10n.profileFieldNativeLanguage,
-                          border: const OutlineInputBorder(),
+                        SizedBox(height: t.space16),
+                        TextFormField(
+                          controller: _native,
+                          decoration: InputDecoration(
+                            labelText: l10n.profileFieldNativeLanguage,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: t.space24),
-                      EnjoyButton.primary(
-                        onPressed: _saving
-                            ? null
-                            : () async {
-                                if (!_formKey.currentState!.validate()) return;
-                                setState(() => _saving = true);
-                                try {
-                                  final goalText = _goal.text.trim();
-                                  int? goal;
-                                  if (goalText.isNotEmpty) {
-                                    goal = int.tryParse(goalText);
+                        SizedBox(height: t.space24),
+                        EnjoyButton.primary(
+                          onPressed: _saving
+                              ? null
+                              : () async {
+                                  if (!_formKey.currentState!.validate()) {
+                                    return;
                                   }
-                                  await ref.read(authCtrlProvider.notifier).updateProfile(
-                                        UpdateProfileRequest(
-                                          name: _name.text.trim(),
-                                          goal: goal,
-                                          learningLanguage: _learning.text.trim().isEmpty
-                                              ? null
-                                              : _learning.text.trim(),
-                                          nativeLanguage: _native.text.trim().isEmpty
-                                              ? null
-                                              : _native.text.trim(),
-                                        ),
+                                  setState(() => _saving = true);
+                                  try {
+                                    final goalText = _goal.text.trim();
+                                    int? goal;
+                                    if (goalText.isNotEmpty) {
+                                      goal = int.tryParse(goalText);
+                                    }
+                                    await ref
+                                        .read(authCtrlProvider.notifier)
+                                        .updateProfile(
+                                          UpdateProfileRequest(
+                                            name: _name.text.trim(),
+                                            goal: goal,
+                                            learningLanguage:
+                                                _learning.text.trim().isEmpty
+                                                ? null
+                                                : _learning.text.trim(),
+                                            nativeLanguage:
+                                                _native.text.trim().isEmpty
+                                                ? null
+                                                : _native.text.trim(),
+                                          ),
+                                        );
+                                    final after = ref
+                                        .read(authCtrlProvider)
+                                        .valueOrNull;
+                                    if (after is AuthSignedIn) {
+                                      _applyProfile(after.profile);
+                                    }
+                                    if (context.mounted) {
+                                      AppNotice.success(
+                                        context,
+                                        l10n.profileSaveSuccess,
                                       );
-                                  final after = ref.read(authCtrlProvider).valueOrNull;
-                                  if (after is AuthSignedIn) {
-                                    _applyProfile(after.profile);
+                                    }
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() => _saving = false);
+                                    }
                                   }
-                                  if (context.mounted) {
-                                    AppNotice.success(
-                                      context,
-                                      l10n.profileSaveSuccess,
-                                    );
-                                  }
-                                } finally {
-                                  if (mounted) setState(() => _saving = false);
-                                }
-                              },
-                        child: _saving
-                            ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : Text(l10n.profileSave),
-                      ),
-                    ],
+                                },
+                          child: _saving
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(l10n.profileSave),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 ),
               ],
             ),
@@ -382,12 +417,16 @@ class _ProfileStatTile extends StatelessWidget {
           children: [
             Text(
               value,
-              style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             SizedBox(height: tokens.space4),
             Text(
               title,
-              style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+              style: textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             Text(
               subtitle,

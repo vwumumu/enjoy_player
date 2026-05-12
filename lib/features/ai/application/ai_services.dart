@@ -40,11 +40,13 @@ final class ChatService {
     int? maxTokens,
   }) async {
     try {
-      return await _ref.read(llmCapabilityProvider).generateChatCompletion(
-        messages: messages,
-        temperature: temperature,
-        maxTokens: maxTokens,
-      );
+      return await _ref
+          .read(llmCapabilityProvider)
+          .generateChatCompletion(
+            messages: messages,
+            temperature: temperature,
+            maxTokens: maxTokens,
+          );
     } on ApiException catch (e) {
       throw mapApiExceptionToAppFailure(e);
     }
@@ -63,12 +65,14 @@ final class TranslationService {
     bool? forceRefresh,
   }) async {
     try {
-      return await _ref.read(translationCapabilityProvider).translate(
-        text: text,
-        sourceLanguage: sourceLanguage,
-        targetLanguage: targetLanguage,
-        forceRefresh: forceRefresh,
-      );
+      return await _ref
+          .read(translationCapabilityProvider)
+          .translate(
+            text: text,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+            forceRefresh: forceRefresh,
+          );
     } on ApiException catch (e) {
       throw mapApiExceptionToAppFailure(e);
     }
@@ -87,12 +91,14 @@ final class DictionaryService {
     bool? forceRefresh,
   }) async {
     try {
-      return await _ref.read(dictionaryCapabilityProvider).lookupDictionary(
-        word: word,
-        sourceLanguage: sourceLanguage,
-        targetLanguage: targetLanguage,
-        forceRefresh: forceRefresh,
-      );
+      return await _ref
+          .read(dictionaryCapabilityProvider)
+          .lookupDictionary(
+            word: word,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+            forceRefresh: forceRefresh,
+          );
     } on ApiException catch (e) {
       throw mapApiExceptionToAppFailure(e);
     }

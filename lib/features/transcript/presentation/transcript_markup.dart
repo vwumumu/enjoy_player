@@ -64,8 +64,9 @@ TextStyle _cueStyle(
   bool italic = false,
   bool underline = false,
 }) {
-  final weight =
-      emphasize || bold ? FontWeight.w600 : base.fontWeight ?? FontWeight.normal;
+  final weight = emphasize || bold
+      ? FontWeight.w600
+      : base.fontWeight ?? FontWeight.normal;
   return base.copyWith(
     color: defaultColor,
     fontWeight: weight,

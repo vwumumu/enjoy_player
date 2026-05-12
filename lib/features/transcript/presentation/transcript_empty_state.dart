@@ -58,17 +58,18 @@ class TranscriptEmptyState extends StatelessWidget {
                     Text(
                       l10n.noTranscript,
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     SizedBox(height: t.space8),
                     Text(
                       l10n.noTranscriptHint,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            height: 1.35,
-                          ),
+                        color: scheme.onSurfaceVariant,
+                        height: 1.35,
+                      ),
                     ),
                     if (showExtractButton || showImportButton) ...[
                       SizedBox(height: t.space24),

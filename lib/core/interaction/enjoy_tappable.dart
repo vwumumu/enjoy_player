@@ -42,12 +42,9 @@ class _EnjoyTappableSurfaceState extends State<EnjoyTappableSurface> {
     final cs = Theme.of(context).colorScheme;
     final instant = MediaQuery.disableAnimationsOf(context);
     final scale =
-        (!instant &&
-                widget.enableHoverScale &&
-                widget.onTap != null &&
-                _hover)
-            ? widget.hoverScale
-            : 1.0;
+        (!instant && widget.enableHoverScale && widget.onTap != null && _hover)
+        ? widget.hoverScale
+        : 1.0;
 
     Widget core = Material(
       color: Colors.transparent,
@@ -55,20 +52,18 @@ class _EnjoyTappableSurfaceState extends State<EnjoyTappableSurface> {
       shape: RoundedRectangleBorder(borderRadius: widget.borderRadius),
       child: InkWell(
         borderRadius: widget.borderRadius,
-        onTap:
-            widget.onTap == null
-                ? null
-                : () {
-                  Haptics.selection(context);
-                  widget.onTap!();
-                },
-        onLongPress:
-            widget.onLongPress == null
-                ? null
-                : () {
-                  Haptics.impactMedium(context);
-                  widget.onLongPress!();
-                },
+        onTap: widget.onTap == null
+            ? null
+            : () {
+                Haptics.selection(context);
+                widget.onTap!();
+              },
+        onLongPress: widget.onLongPress == null
+            ? null
+            : () {
+                Haptics.impactMedium(context);
+                widget.onLongPress!();
+              },
         hoverColor: cs.onSurface.withValues(alpha: 0.06),
         splashColor: cs.primary.withValues(alpha: 0.10),
         highlightColor: cs.primary.withValues(alpha: 0.06),
@@ -83,16 +78,12 @@ class _EnjoyTappableSurfaceState extends State<EnjoyTappableSurface> {
       child: core,
     );
 
-    core = Focus(
-      canRequestFocus: widget.onTap != null,
-      child: core,
-    );
+    core = Focus(canRequestFocus: widget.onTap != null, child: core);
 
     core = MouseRegion(
-      cursor:
-          widget.onTap != null
-              ? SystemMouseCursors.click
-              : MouseCursor.defer,
+      cursor: widget.onTap != null
+          ? SystemMouseCursors.click
+          : MouseCursor.defer,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
       child: core,
@@ -141,13 +132,12 @@ class EnjoyTappableIcon extends StatelessWidget {
       icon: Icon(icon, size: iconSize, color: color),
       visualDensity: visualDensity,
       style: style,
-      onPressed:
-          onPressed == null
-              ? null
-              : () {
-                Haptics.selection(context);
-                onPressed!();
-              },
+      onPressed: onPressed == null
+          ? null
+          : () {
+              Haptics.selection(context);
+              onPressed!();
+            },
     );
     if (semanticLabel == null) return button;
     return Semantics(label: semanticLabel, button: true, child: button);

@@ -34,11 +34,7 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp> {
       scaffoldMessengerKey: appScaffoldMessengerKey,
       theme: theme,
       home: const ConstrainedAppViewport(
-        child: Scaffold(
-          body: Center(
-            child: SkeletonAppBootstrap(),
-          ),
-        ),
+        child: Scaffold(body: Center(child: SkeletonAppBootstrap())),
       ),
     );
   }

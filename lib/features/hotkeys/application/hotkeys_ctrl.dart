@@ -70,10 +70,10 @@ class HotkeysCtrl extends _$HotkeysCtrl {
   }
 
   Future<void> _persist(Map<String, String> next) async {
-    await ref.read(appDatabaseProvider).settingsDao.setValue(
-          kHotkeysCustomBindingsKey,
-          jsonEncode(next),
-        );
+    await ref
+        .read(appDatabaseProvider)
+        .settingsDao
+        .setValue(kHotkeysCustomBindingsKey, jsonEncode(next));
   }
 
   /// Returns false if invalid, non-customizable, or conflicting with another action.

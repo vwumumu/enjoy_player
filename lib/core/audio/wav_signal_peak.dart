@@ -182,7 +182,7 @@ WavPeakScan _scanInt({
   required int dz,
   required double fullScale,
   required double Function(Uint8List data, int byteOffset)
-      readSampleAtByteOffset,
+  readSampleAtByteOffset,
   required int sampleStride,
 }) {
   var peak = 0.0;

@@ -9,11 +9,9 @@ import 'player_engine_provider.dart';
 final transportSliderPositionProvider = StreamProvider<Duration>((ref) {
   final engine = ref.watch(playerEngineProvider);
   const bucketMs = 50;
-  return engine.position
-      .map((position) {
-        final ms = position.inMilliseconds;
-        final quantizedMs = (ms ~/ bucketMs) * bucketMs;
-        return Duration(milliseconds: quantizedMs);
-      })
-      .distinct();
+  return engine.position.map((position) {
+    final ms = position.inMilliseconds;
+    final quantizedMs = (ms ~/ bucketMs) * bucketMs;
+    return Duration(milliseconds: quantizedMs);
+  }).distinct();
 });

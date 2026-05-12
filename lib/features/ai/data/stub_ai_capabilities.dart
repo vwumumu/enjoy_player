@@ -54,7 +54,8 @@ final class UnimplementedLlmCapability implements LlmCapability {
   }
 }
 
-final class UnimplementedTranslationCapability implements TranslationCapability {
+final class UnimplementedTranslationCapability
+    implements TranslationCapability {
   const UnimplementedTranslationCapability();
 
   @override

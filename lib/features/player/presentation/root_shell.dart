@@ -55,8 +55,9 @@ class _RootShellState extends ConsumerState<RootShell> {
   @override
   Widget build(BuildContext context) {
     ref.watch(syncCtrlProvider);
-    final sessionActive =
-        ref.watch(playerControllerProvider.select((s) => s != null));
+    final sessionActive = ref.watch(
+      playerControllerProvider.select((s) => s != null),
+    );
     final l10n = AppLocalizations.of(context)!;
     final path = GoRouterState.of(context).uri.path;
     final onPlayer = path.startsWith('/player/');
@@ -87,7 +88,9 @@ class _RootShellState extends ConsumerState<RootShell> {
                     ),
                     NavigationDestination(
                       icon: const Icon(Icons.collections_bookmark_outlined),
-                      selectedIcon: const Icon(Icons.collections_bookmark_rounded),
+                      selectedIcon: const Icon(
+                        Icons.collections_bookmark_rounded,
+                      ),
                       label: l10n.libraryTitle,
                     ),
                     NavigationDestination(
@@ -107,7 +110,9 @@ class _RootShellState extends ConsumerState<RootShell> {
 
           final bottomClearance =
               (sessionActive ? kRootShellTransportSnackClearance : 0.0) +
-              (!useSidebar && !onPlayer ? kRootShellBottomNavSnackClearance : 0.0);
+              (!useSidebar && !onPlayer
+                  ? kRootShellBottomNavSnackClearance
+                  : 0.0);
 
           if (useSidebar) {
             return RootShellBottomInset(

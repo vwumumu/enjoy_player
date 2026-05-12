@@ -40,84 +40,78 @@ class ApiClient {
     String path, {
     Map<String, String>? queryParameters,
     bool requireAuth = true,
-  }) =>
-      _sendMap(
-        method: 'GET',
-        path: path,
-        queryParameters: queryParameters,
-        body: null,
-        requireAuth: requireAuth,
-      );
+  }) => _sendMap(
+    method: 'GET',
+    path: path,
+    queryParameters: queryParameters,
+    body: null,
+    requireAuth: requireAuth,
+  );
 
   /// For endpoints that return a JSON array (e.g. Rails `render json: @items`).
   Future<List<Map<String, dynamic>>> getJsonList(
     String path, {
     Map<String, String>? queryParameters,
     bool requireAuth = true,
-  }) =>
-      _sendList(
-        method: 'GET',
-        path: path,
-        queryParameters: queryParameters,
-        body: null,
-        requireAuth: requireAuth,
-      );
+  }) => _sendList(
+    method: 'GET',
+    path: path,
+    queryParameters: queryParameters,
+    body: null,
+    requireAuth: requireAuth,
+  );
 
   Future<Map<String, dynamic>> postJson(
     String path, {
     Map<String, dynamic>? body,
     bool requireAuth = true,
-  }) =>
-      _sendMap(
-        method: 'POST',
-        path: path,
-        queryParameters: null,
-        body: body,
-        requireAuth: requireAuth,
-      );
+  }) => _sendMap(
+    method: 'POST',
+    path: path,
+    queryParameters: null,
+    body: body,
+    requireAuth: requireAuth,
+  );
 
   Future<Map<String, dynamic>> patchJson(
     String path, {
     Map<String, dynamic>? body,
     bool requireAuth = true,
     bool transformBody = true,
-  }) =>
-      _sendMap(
-        method: 'PATCH',
-        path: path,
-        queryParameters: null,
-        body: body,
-        requireAuth: requireAuth,
-        transformBody: transformBody,
-      );
+  }) => _sendMap(
+    method: 'PATCH',
+    path: path,
+    queryParameters: null,
+    body: body,
+    requireAuth: requireAuth,
+    transformBody: transformBody,
+  );
 
   Future<Map<String, dynamic>> putJson(
     String path, {
     Map<String, dynamic>? body,
     bool requireAuth = true,
     bool transformBody = true,
-  }) =>
-      _sendMap(
-        method: 'PUT',
-        path: path,
-        queryParameters: null,
-        body: body,
-        requireAuth: requireAuth,
-        transformBody: transformBody,
-      );
+  }) => _sendMap(
+    method: 'PUT',
+    path: path,
+    queryParameters: null,
+    body: body,
+    requireAuth: requireAuth,
+    transformBody: transformBody,
+  );
 
   Future<Map<String, dynamic>> deleteJson(
     String path, {
     bool requireAuth = true,
-  }) =>
-      _sendMap(
-        method: 'DELETE',
-        path: path,
-        queryParameters: null,
-        body: null,
-        requireAuth: requireAuth,
-        allowEmptyBody: true,
-      );
+  }) => _sendMap(
+    method: 'DELETE',
+    path: path,
+    queryParameters: null,
+    body: null,
+    requireAuth: requireAuth,
+    allowEmptyBody: true,
+  );
 
   /// Multipart POST (e.g. Whisper) returning a JSON object with camelCase keys.
   Future<Map<String, dynamic>> postMultipartJson(
@@ -137,10 +131,7 @@ class ApiClient {
     if (sendAuthHeader && requireAuth) {
       final token = await getAccessToken();
       if (token == null || token.isEmpty) {
-        throw const ApiException(
-          message: 'Not authenticated',
-          statusCode: 401,
-        );
+        throw const ApiException(message: 'Not authenticated', statusCode: 401);
       }
       bearer = token;
     }
@@ -310,9 +301,7 @@ class ApiClient {
     final merged = uriBase.resolveUri(pathUri);
     final uri = queryParameters == null || queryParameters.isEmpty
         ? merged
-        : merged.replace(
-            queryParameters: _snakeCaseQuery(queryParameters),
-          );
+        : merged.replace(queryParameters: _snakeCaseQuery(queryParameters));
 
     final headers = <String, String>{
       'Accept': 'application/json',
@@ -322,10 +311,7 @@ class ApiClient {
     if (sendAuthHeader && requireAuth) {
       final token = await getAccessToken();
       if (token == null || token.isEmpty) {
-        throw const ApiException(
-          message: 'Not authenticated',
-          statusCode: 401,
-        );
+        throw const ApiException(message: 'Not authenticated', statusCode: 401);
       }
       headers['Authorization'] = 'Bearer $token';
     }
@@ -347,8 +333,11 @@ class ApiClient {
         case 'POST':
           response = await _client.post(uri, headers: headers, body: bodyBytes);
         case 'PATCH':
-          response =
-              await _client.patch(uri, headers: headers, body: bodyBytes);
+          response = await _client.patch(
+            uri,
+            headers: headers,
+            body: bodyBytes,
+          );
         case 'PUT':
           response = await _client.put(uri, headers: headers, body: bodyBytes);
         case 'DELETE':

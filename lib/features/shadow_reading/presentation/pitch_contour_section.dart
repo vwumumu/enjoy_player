@@ -23,10 +23,13 @@ class PitchContourSection extends ConsumerStatefulWidget {
     this.currentTimeRelativeSec,
     this.selectedRecordingPath,
     this.selectedRecordingDurationMs,
+
     /// When non-null, expansion is controlled by the parent ([expanded] drives UI).
     this.expanded,
+
     /// Called when the section should toggle (header tap or hotkey). Parent updates [expanded].
     this.onToggleExpanded,
+
     /// When false, only the expandable body (chart + chips) is rendered — no chevron row.
     this.showHeader = true,
     super.key,
@@ -47,7 +50,8 @@ class PitchContourSection extends ConsumerStatefulWidget {
   final bool showHeader;
 
   @override
-  ConsumerState<PitchContourSection> createState() => _PitchContourSectionState();
+  ConsumerState<PitchContourSection> createState() =>
+      _PitchContourSectionState();
 }
 
 class _PitchContourSectionState extends ConsumerState<PitchContourSection> {
@@ -90,7 +94,8 @@ class _PitchContourSectionState extends ConsumerState<PitchContourSection> {
       }
     }
     if (oldWidget.selectedRecordingPath != widget.selectedRecordingPath ||
-        oldWidget.selectedRecordingDurationMs != widget.selectedRecordingDurationMs) {
+        oldWidget.selectedRecordingDurationMs !=
+            widget.selectedRecordingDurationMs) {
       _userRequestGen++;
       _user = null;
       if (_effectiveExpanded && widget.selectedRecordingPath != null) {
@@ -229,8 +234,11 @@ class _PitchContourSectionState extends ConsumerState<PitchContourSection> {
     );
 
     final l10n = AppLocalizations.of(context)!;
-    final pitchTooltip =
-        hotkeyTooltipLabel(ref, 'player.togglePitchContour', l10n.pitchContourTitle);
+    final pitchTooltip = hotkeyTooltipLabel(
+      ref,
+      'player.togglePitchContour',
+      l10n.pitchContourTitle,
+    );
     final scheme = Theme.of(context).colorScheme;
     final refColor = scheme.tertiary;
     final userColor = scheme.secondary;
@@ -250,9 +258,9 @@ class _PitchContourSectionState extends ConsumerState<PitchContourSection> {
               const SizedBox(height: 8),
               Text(
                 l10n.pitchContourAnalyzing,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
               ),
             ] else if (_error != null)
               Text(
@@ -317,7 +325,9 @@ class _PitchContourSectionState extends ConsumerState<PitchContourSection> {
                 child: Row(
                   children: [
                     Icon(
-                      _effectiveExpanded ? Icons.expand_less : Icons.expand_more,
+                      _effectiveExpanded
+                          ? Icons.expand_less
+                          : Icons.expand_more,
                       color: scheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 8),
@@ -348,7 +358,9 @@ class _PitchContourChartSkeleton extends StatelessWidget {
     return SizedBox(
       height: 160,
       width: double.infinity,
-      child: CustomPaint(painter: _PitchContourSkeletonPainter(baseColor: base)),
+      child: CustomPaint(
+        painter: _PitchContourSkeletonPainter(baseColor: base),
+      ),
     );
   }
 }
@@ -376,18 +388,18 @@ class _PitchContourSkeletonPainter extends CustomPainter {
         paint,
       );
     }
-    final linePaint =
-        Paint()
-          ..color = baseColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.5
-          ..strokeCap = StrokeCap.round;
+    final linePaint = Paint()
+      ..color = baseColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
     final path = Path();
     const steps = 48;
     for (var i = 0; i <= steps; i++) {
       final t = i / steps;
       final x = t * size.width;
-      final y = size.height * 0.26 + math.sin(t * math.pi * 5) * size.height * 0.09;
+      final y =
+          size.height * 0.26 + math.sin(t * math.pi * 5) * size.height * 0.09;
       if (i == 0) {
         path.moveTo(x, y);
       } else {

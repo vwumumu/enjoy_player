@@ -231,7 +231,9 @@ final class EnjoyAssessmentCapability implements AssessmentCapability {
   }
 
   /// Returns `(path, shouldDeleteAfter)`.
-  static Future<(String, bool)> _materializeWav(AssessmentRequest request) async {
+  static Future<(String, bool)> _materializeWav(
+    AssessmentRequest request,
+  ) async {
     final pathArg = request.audioPath?.trim();
     if (pathArg != null && pathArg.isNotEmpty) {
       final f = File(pathArg);

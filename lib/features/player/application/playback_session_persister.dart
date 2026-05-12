@@ -64,7 +64,9 @@ class PlaybackSessionPersister {
   void dispose() => cancel();
 }
 
-final playbackSessionPersisterProvider = Provider<PlaybackSessionPersister>((ref) {
+final playbackSessionPersisterProvider = Provider<PlaybackSessionPersister>((
+  ref,
+) {
   final p = PlaybackSessionPersister(ref);
   ref.onDispose(p.dispose);
   return p;

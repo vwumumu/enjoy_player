@@ -69,13 +69,18 @@ class _AssessmentResultDialogState extends State<AssessmentResultDialog> {
     final scheme = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final nBest = widget.assessment.nBest.isEmpty ? null : widget.assessment.nBest.first;
+    final nBest = widget.assessment.nBest.isEmpty
+        ? null
+        : widget.assessment.nBest.first;
     if (nBest == null) {
       return AlertDialog(
         title: Text(l10n.assessmentTitle),
         content: const Text('—'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
         ],
       );
     }
@@ -98,7 +103,9 @@ class _AssessmentResultDialogState extends State<AssessmentResultDialog> {
                         const SizedBox(height: 4),
                         Text(
                           l10n.assessmentDescription,
-                          style: tt.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                          style: tt.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
@@ -179,13 +186,17 @@ class _AssessmentResultSheetState extends State<AssessmentResultSheet> {
                           SizedBox(height: t.space4),
                           Text(
                             l10n.assessmentDescription,
-                            style: tt.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                            style: tt.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
-                      tooltip: MaterialLocalizations.of(context).closeButtonLabel,
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).closeButtonLabel,
                       style: IconButton.styleFrom(
                         minimumSize: const Size(48, 48),
                         fixedSize: const Size(48, 48),
@@ -201,7 +212,12 @@ class _AssessmentResultSheetState extends State<AssessmentResultSheet> {
                 child: ListView(
                   controller: scrollCtrl,
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(padH, t.space16, padH, bottomInset),
+                  padding: EdgeInsets.fromLTRB(
+                    padH,
+                    t.space16,
+                    padH,
+                    bottomInset,
+                  ),
                   children: [
                     _AssessmentResultInner(
                       nBest: nBest,
@@ -313,10 +329,7 @@ class _AssessmentResultInner extends StatelessWidget {
             ],
           ),
         const SizedBox(height: 24),
-        Text(
-          l10n.assessmentPronunciationAnalysis,
-          style: tt.titleSmall,
-        ),
+        Text(l10n.assessmentPronunciationAnalysis, style: tt.titleSmall),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -463,7 +476,11 @@ class _WordChip extends StatelessWidget {
     final pa = word.pronunciationAssessment;
     final score = pa.accuracyScore;
     final err = pa.errorType;
-    final (Color fg, Color? bg, Color? border) = _wordColors(scheme, err, score);
+    final (Color fg, Color? bg, Color? border) = _wordColors(
+      scheme,
+      err,
+      score,
+    );
 
     return Material(
       color: bg ?? scheme.surfaceContainerHighest,
@@ -476,9 +493,7 @@ class _WordChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: selected
-                  ? (border ?? scheme.primary)
-                  : Colors.transparent,
+              color: selected ? (border ?? scheme.primary) : Colors.transparent,
               width: selected ? 2 : 0,
             ),
           ),
@@ -487,7 +502,9 @@ class _WordChip extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.w600,
               color: fg,
-              decoration: err == 'Insertion' ? TextDecoration.lineThrough : null,
+              decoration: err == 'Insertion'
+                  ? TextDecoration.lineThrough
+                  : null,
             ),
           ),
         ),
@@ -503,11 +520,7 @@ class _WordChip extends StatelessWidget {
 ) {
   switch (errorType) {
     case 'Insertion':
-      return (
-        scheme.error,
-        scheme.error.withValues(alpha: 0.12),
-        scheme.error,
-      );
+      return (scheme.error, scheme.error.withValues(alpha: 0.12), scheme.error);
     case 'Omission':
       return (
         scheme.onSurfaceVariant,
@@ -515,11 +528,7 @@ class _WordChip extends StatelessWidget {
         scheme.outline,
       );
     case 'Mispronunciation':
-      return (
-        scheme.error,
-        scheme.error.withValues(alpha: 0.12),
-        scheme.error,
-      );
+      return (scheme.error, scheme.error.withValues(alpha: 0.12), scheme.error);
     case 'UnexpectedBreak':
       return (
         scheme.secondary,
@@ -582,7 +591,9 @@ class _SelectedWordPanel extends StatelessWidget {
                 Expanded(
                   child: Text(
                     word.word,
-                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    style: tt.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 if (err != 'None')
@@ -593,10 +604,7 @@ class _SelectedWordPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              l10n.assessmentAccuracyScore,
-              style: tt.labelLarge,
-            ),
+            Text(l10n.assessmentAccuracyScore, style: tt.labelLarge),
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -620,10 +628,7 @@ class _SelectedWordPanel extends StatelessWidget {
                 value: (acc / 100).clamp(0.0, 1.0),
                 minHeight: 6,
                 backgroundColor: scheme.surfaceContainerHighest,
-                color: assessmentScoreColor(
-                  scheme,
-                  assessmentScoreLevel(acc),
-                ),
+                color: assessmentScoreColor(scheme, assessmentScoreLevel(acc)),
               ),
             ),
             if (word.syllables != null && word.syllables!.isNotEmpty) ...[
@@ -653,13 +658,17 @@ class _SelectedWordPanel extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: scheme.errorContainer.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: scheme.error.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: scheme.error.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
                     _errorExplanation(l10n, err),
-                    style: tt.bodySmall?.copyWith(color: scheme.onErrorContainer),
+                    style: tt.bodySmall?.copyWith(
+                      color: scheme.onErrorContainer,
+                    ),
                   ),
                 ),
               ),

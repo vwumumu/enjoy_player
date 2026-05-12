@@ -1,7 +1,8 @@
 /// Progress slider + elapsed / total times for the transport bar.
 library;
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -70,7 +71,8 @@ class TransportProgressStrip extends ConsumerStatefulWidget {
       _TransportProgressStripState();
 }
 
-class _TransportProgressStripState extends ConsumerState<TransportProgressStrip> {
+class _TransportProgressStripState
+    extends ConsumerState<TransportProgressStrip> {
   int? _scrubSecond;
 
   bool get _hapticScrub =>
@@ -81,16 +83,18 @@ class _TransportProgressStripState extends ConsumerState<TransportProgressStrip>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final durationSec =
-        widget.chrome.durationSeconds > 0 ? widget.chrome.durationSeconds : 1.0;
+    final durationSec = widget.chrome.durationSeconds > 0
+        ? widget.chrome.durationSeconds
+        : 1.0;
 
     final posAsync = ref.watch(transportSliderPositionProvider);
     final pos = switch (posAsync) {
       AsyncData(:final value) => value,
       _ => Duration.zero,
     };
-    final fraction =
-        durationSec > 0 ? pos.inMilliseconds / 1000 / durationSec : 0.0;
+    final fraction = durationSec > 0
+        ? pos.inMilliseconds / 1000 / durationSec
+        : 0.0;
 
     final timeStyle = tt.labelSmall?.copyWith(
       fontFeatures: const [FontFeature.tabularFigures()],

@@ -36,37 +36,31 @@ class EchoRegionControlsBar extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final tok = EnjoyThemeTokens.of(context);
 
-    final expandLabel =
-        position == EchoRegionBarPosition.top
-            ? l10n.expandEchoBackward
-            : l10n.expandEchoForward;
-    final shrinkLabel =
-        position == EchoRegionBarPosition.top
-            ? l10n.shrinkEchoBackward
-            : l10n.shrinkEchoForward;
+    final expandLabel = position == EchoRegionBarPosition.top
+        ? l10n.expandEchoBackward
+        : l10n.expandEchoForward;
+    final shrinkLabel = position == EchoRegionBarPosition.top
+        ? l10n.shrinkEchoBackward
+        : l10n.shrinkEchoForward;
 
-    final expandId =
-        position == EchoRegionBarPosition.top
-            ? 'player.expandEchoBackward'
-            : 'player.expandEchoForward';
-    final shrinkId =
-        position == EchoRegionBarPosition.top
-            ? 'player.shrinkEchoBackward'
-            : 'player.shrinkEchoForward';
+    final expandId = position == EchoRegionBarPosition.top
+        ? 'player.expandEchoBackward'
+        : 'player.expandEchoForward';
+    final shrinkId = position == EchoRegionBarPosition.top
+        ? 'player.shrinkEchoBackward'
+        : 'player.shrinkEchoForward';
     final expandTip = hotkeyTooltipLabel(ref, expandId, expandLabel);
     final shrinkTip = hotkeyTooltipLabel(ref, shrinkId, shrinkLabel);
 
-    final expandIcon =
-        position == EchoRegionBarPosition.top
-            ? Icons.expand_less
-            : Icons.expand_more;
+    final expandIcon = position == EchoRegionBarPosition.top
+        ? Icons.expand_less
+        : Icons.expand_more;
 
-    final edgePadding =
-        dense
-            ? EdgeInsets.symmetric(vertical: tok.space4)
-            : (position == EchoRegionBarPosition.top
-                ? EdgeInsets.only(bottom: tok.space4)
-                : EdgeInsets.only(top: tok.space4));
+    final edgePadding = dense
+        ? EdgeInsets.symmetric(vertical: tok.space4)
+        : (position == EchoRegionBarPosition.top
+              ? EdgeInsets.only(bottom: tok.space4)
+              : EdgeInsets.only(top: tok.space4));
 
     return Padding(
       padding: edgePadding,
@@ -74,7 +68,10 @@ class EchoRegionControlsBar extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            child: Divider(height: 1, color: scheme.outlineVariant.withValues(alpha: 0.5)),
+            child: Divider(
+              height: 1,
+              color: scheme.outlineVariant.withValues(alpha: 0.5),
+            ),
           ),
           SizedBox(width: tok.space8),
           Tooltip(
@@ -95,7 +92,10 @@ class EchoRegionControlsBar extends ConsumerWidget {
           ),
           SizedBox(width: tok.space8),
           Expanded(
-            child: Divider(height: 1, color: scheme.outlineVariant.withValues(alpha: 0.5)),
+            child: Divider(
+              height: 1,
+              color: scheme.outlineVariant.withValues(alpha: 0.5),
+            ),
           ),
         ],
       ),

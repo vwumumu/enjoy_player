@@ -120,11 +120,13 @@ class _SubtitleTrackPickerSheetState
 
     setState(() => _importing = true);
     try {
-      await ref.read(transcriptRepositoryProvider).importSubtitle(
-        mediaId: widget.mediaId,
-        file: XFile(f.path!),
-        language: trimmed,
-      );
+      await ref
+          .read(transcriptRepositoryProvider)
+          .importSubtitle(
+            mediaId: widget.mediaId,
+            file: XFile(f.path!),
+            language: trimmed,
+          );
       if (mounted) {
         AppNotice.success(
           context,
@@ -168,21 +170,20 @@ class _SubtitleTrackPickerSheetState
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: Text(l10n.subtitlesDeleteTrack),
-            content: Text(track.label.isEmpty ? track.id : track.label),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(MaterialLocalizations.of(ctx).deleteButtonTooltip),
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.subtitlesDeleteTrack),
+        content: Text(track.label.isEmpty ? track.id : track.label),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(MaterialLocalizations.of(ctx).deleteButtonTooltip),
+          ),
+        ],
+      ),
     );
     if (confirmed != true) return;
     await ref.read(transcriptRepositoryProvider).deleteTranscript(track.id);
@@ -228,10 +229,9 @@ class _SubtitleTrackPickerSheetState
               track: track,
               contentPadding: _sheetRowPadding(t),
               groupValue: primaryId,
-              onTap:
-                  () => ref
-                      .read(transcriptRepositoryProvider)
-                      .setActiveTranscript(widget.mediaId, track.id),
+              onTap: () => ref
+                  .read(transcriptRepositoryProvider)
+                  .setActiveTranscript(widget.mediaId, track.id),
               onDelete: () => _deleteTrack(track),
             ),
           ),
@@ -241,10 +241,9 @@ class _SubtitleTrackPickerSheetState
           contentPadding: _sheetRowPadding(t),
           value: null,
           groupValue: secondaryId,
-          onChanged:
-              (_) => ref
-                  .read(transcriptRepositoryProvider)
-                  .setSecondaryTranscript(widget.mediaId, null),
+          onChanged: (_) => ref
+              .read(transcriptRepositoryProvider)
+              .setSecondaryTranscript(widget.mediaId, null),
           title: Text(l10n.subtitlesNone),
         ),
         ...tracks.map(
@@ -252,10 +251,9 @@ class _SubtitleTrackPickerSheetState
             track: track,
             contentPadding: _sheetRowPadding(t),
             groupValue: secondaryId,
-            onTap:
-                () => ref
-                    .read(transcriptRepositoryProvider)
-                    .setSecondaryTranscript(widget.mediaId, track.id),
+            onTap: () => ref
+                .read(transcriptRepositoryProvider)
+                .setSecondaryTranscript(widget.mediaId, track.id),
             onDelete: () => _deleteTrack(track),
           ),
         ),
@@ -263,30 +261,8 @@ class _SubtitleTrackPickerSheetState
         if (showExtractEmbedded)
           ListTile(
             contentPadding: _sheetRowPadding(t),
-            leading:
-                _extractingEmbedded
-                    ? SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: theme.colorScheme.primary,
-                      ),
-                    )
-                    : Icon(
-                      Icons.subtitles_outlined,
-                      size: 24,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-            title: Text(l10n.subtitlesExtractEmbedded),
-            enabled: !_extractingEmbedded,
-            onTap: _extractingEmbedded ? null : _extractEmbedded,
-          ),
-        ListTile(
-          contentPadding: _sheetRowPadding(t),
-          leading:
-              _refreshingCloud
-                  ? SizedBox(
+            leading: _extractingEmbedded
+                ? SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
@@ -294,11 +270,31 @@ class _SubtitleTrackPickerSheetState
                       color: theme.colorScheme.primary,
                     ),
                   )
-                  : Icon(
-                    Icons.cloud_download_outlined,
+                : Icon(
+                    Icons.subtitles_outlined,
                     size: 24,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
+            title: Text(l10n.subtitlesExtractEmbedded),
+            enabled: !_extractingEmbedded,
+            onTap: _extractingEmbedded ? null : _extractEmbedded,
+          ),
+        ListTile(
+          contentPadding: _sheetRowPadding(t),
+          leading: _refreshingCloud
+              ? SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: theme.colorScheme.primary,
+                  ),
+                )
+              : Icon(
+                  Icons.cloud_download_outlined,
+                  size: 24,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
           title: Text(l10n.subtitlesRefreshCloud),
           enabled: !_refreshingCloud,
           onTap: _refreshingCloud ? null : _refreshCloud,
@@ -306,21 +302,20 @@ class _SubtitleTrackPickerSheetState
         if (showImportFile)
           ListTile(
             contentPadding: _sheetRowPadding(t),
-            leading:
-                _importing
-                    ? SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: theme.colorScheme.primary,
-                      ),
-                    )
-                    : Icon(
-                      Icons.upload_file_rounded,
-                      size: 24,
-                      color: theme.colorScheme.onSurfaceVariant,
+            leading: _importing
+                ? SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: theme.colorScheme.primary,
                     ),
+                  )
+                : Icon(
+                    Icons.upload_file_rounded,
+                    size: 24,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
             title: Text(l10n.subtitlesImportFile),
             enabled: !_importing,
             onTap: _importing ? null : _importFile,
@@ -352,9 +347,7 @@ class _SubtitleTrackPickerSheetState
       orElse: () => false,
     );
     final showExtractEmbedded =
-        session != null &&
-        session.dexieTargetType == 'Video' &&
-        !isYoutube;
+        session != null && session.dexieTargetType == 'Video' && !isYoutube;
 
     return SafeArea(
       child: DraggableScrollableSheet(
@@ -367,7 +360,9 @@ class _SubtitleTrackPickerSheetState
             children: [
               const PaddedSheetDragHandle(),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: _sheetHorizontalPadding(t)),
+                padding: EdgeInsets.symmetric(
+                  horizontal: _sheetHorizontalPadding(t),
+                ),
                 child: Row(
                   children: [
                     Text(
@@ -383,7 +378,9 @@ class _SubtitleTrackPickerSheetState
                         fixedSize: const Size(48, 48),
                       ),
                       icon: const Icon(Icons.close_rounded),
-                      tooltip: MaterialLocalizations.of(context).closeButtonLabel,
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).closeButtonLabel,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -392,56 +389,51 @@ class _SubtitleTrackPickerSheetState
               const Divider(),
               Expanded(
                 child: tracksAsync.when(
-                  data:
-                      (tracks) => _buildTrackList(
-                        context: context,
-                        scrollCtrl: scrollCtrl,
-                        t: t,
-                        l10n: l10n,
-                        tracks: tracks,
-                        primaryId: primaryId,
-                        secondaryId: secondaryId,
-                        showExtractEmbedded: showExtractEmbedded,
-                        showImportFile: !isYoutube,
-                      ),
-                  loading: () => SkeletonTranscript(
-                    lineCount: 12,
-                    controller: scrollCtrl,
+                  data: (tracks) => _buildTrackList(
+                    context: context,
+                    scrollCtrl: scrollCtrl,
+                    t: t,
+                    l10n: l10n,
+                    tracks: tracks,
+                    primaryId: primaryId,
+                    secondaryId: secondaryId,
+                    showExtractEmbedded: showExtractEmbedded,
+                    showImportFile: !isYoutube,
                   ),
-                  error:
-                      (error, _) => ListView(
-                        controller: scrollCtrl,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.all(_sheetHorizontalPadding(t)),
-                        children: [
-                          SizedBox(height: t.space24),
-                          Icon(
-                            Icons.error_outline_rounded,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                          SizedBox(height: t.space12),
-                          Text(
-                            l10n.error,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          SizedBox(height: t.space8),
-                          Text(
-                            error.toString(),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          SizedBox(height: t.space16),
-                          FilledButton.tonal(
-                            onPressed:
-                                () => ref.invalidate(
-                                  allTranscriptsForMediaProvider(widget.mediaId),
-                                ),
-                            child: Text(l10n.retry),
-                          ),
-                        ],
+                  loading: () =>
+                      SkeletonTranscript(lineCount: 12, controller: scrollCtrl),
+                  error: (error, _) => ListView(
+                    controller: scrollCtrl,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.all(_sheetHorizontalPadding(t)),
+                    children: [
+                      SizedBox(height: t.space24),
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 40,
+                        color: Theme.of(context).colorScheme.error,
                       ),
+                      SizedBox(height: t.space12),
+                      Text(
+                        l10n.error,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      SizedBox(height: t.space8),
+                      Text(
+                        error.toString(),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      SizedBox(height: t.space16),
+                      FilledButton.tonal(
+                        onPressed: () => ref.invalidate(
+                          allTranscriptsForMediaProvider(widget.mediaId),
+                        ),
+                        child: Text(l10n.retry),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -559,10 +551,7 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: t.space8,
-        vertical: t.space4,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: t.space8, vertical: t.space4),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(t.space4),

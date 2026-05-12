@@ -9,9 +9,12 @@ void main() {
     expect(mapTranscriptLanguageToAzure(null), 'en-US');
   });
 
-  test('mapTranscriptLanguageToAzure preserves xx-YY when already Azure-like', () {
-    expect(mapTranscriptLanguageToAzure('de-DE'), 'de-DE');
-  });
+  test(
+    'mapTranscriptLanguageToAzure preserves xx-YY when already Azure-like',
+    () {
+      expect(mapTranscriptLanguageToAzure('de-DE'), 'de-DE');
+    },
+  );
 
   test('mapTranscriptLanguageToAzure maps undetermined ISO codes to en-US', () {
     expect(mapTranscriptLanguageToAzure('und'), 'en-US');

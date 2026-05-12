@@ -47,16 +47,14 @@ class _HotkeysHelpDialogState extends ConsumerState<HotkeysHelpDialog> {
 
     ref.watch(hotkeysCtrlProvider);
     final ctrl = ref.read(hotkeysCtrlProvider.notifier);
-    final helpKeyLabel = formatHotkeyForDisplay(ctrl.effectiveKeys('global.help'));
+    final helpKeyLabel = formatHotkeyForDisplay(
+      ctrl.effectiveKeys('global.help'),
+    );
 
     String effective(String id) => ctrl.effectiveKeys(id);
 
-    bool matches(HotkeyDefinition d) => hotkeyDefinitionMatchesQuery(
-          d,
-          _search.text,
-          l10n,
-          effective,
-        );
+    bool matches(HotkeyDefinition d) =>
+        hotkeyDefinitionMatchesQuery(d, _search.text, l10n, effective);
 
     return Dialog(
       backgroundColor: cs.surfaceContainerHigh,
@@ -137,8 +135,9 @@ class _HotkeysHelpDialogState extends ConsumerState<HotkeysHelpDialog> {
                       ),
                     ),
                     IconButton(
-                      tooltip: MaterialLocalizations.of(context)
-                          .closeButtonLabel,
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).closeButtonLabel,
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close_rounded),
                     ),
@@ -152,7 +151,9 @@ class _HotkeysHelpDialogState extends ConsumerState<HotkeysHelpDialog> {
                     hintText: l10n.hotkeysHelpSearchHint,
                     prefixIcon: const Icon(Icons.search_rounded),
                     filled: true,
-                    fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.65),
+                    fillColor: cs.surfaceContainerHighest.withValues(
+                      alpha: 0.65,
+                    ),
                   ),
                 ),
                 SizedBox(height: t.space16),
@@ -210,9 +211,7 @@ class _HotkeysHelpList extends StatelessWidget {
     final children = <Widget>[];
     var any = false;
     for (final scope in HotkeyScope.values) {
-      final defs = _hotkeyDefinitionsForScope(scope)
-          .where(matches)
-          .toList();
+      final defs = _hotkeyDefinitionsForScope(scope).where(matches).toList();
       if (defs.isEmpty) continue;
       any = true;
       children.add(
@@ -241,10 +240,7 @@ class _HotkeysHelpList extends StatelessWidget {
                     runSpacing: t.space4,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Text(
-                        hotkeyDescription(l10n, def),
-                        style: tt.bodyMedium,
-                      ),
+                      Text(hotkeyDescription(l10n, def), style: tt.bodyMedium),
                       if (ctrl.hasCustomBinding(def.id))
                         Chip(
                           label: Text(

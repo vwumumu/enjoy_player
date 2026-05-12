@@ -13,11 +13,9 @@ Stream<Duration> displayPosition(Ref ref) {
   // Windows accessibility bridge can get flooded when semantics-heavy widgets
   // (slider, transcript list items) rebuild for every raw position tick.
   const bucketMs = 400;
-  return engine.position
-      .map((position) {
-        final ms = position.inMilliseconds;
-        final quantizedMs = (ms ~/ bucketMs) * bucketMs;
-        return Duration(milliseconds: quantizedMs);
-      })
-      .distinct();
+  return engine.position.map((position) {
+    final ms = position.inMilliseconds;
+    final quantizedMs = (ms ~/ bucketMs) * bucketMs;
+    return Duration(milliseconds: quantizedMs);
+  }).distinct();
 }

@@ -49,7 +49,9 @@ Uint8List _minimalPcmWav({
 
   final pad = dataByteLength.isOdd ? 1 : 0;
   final riffPayloadMinus8 =
-      4 + (8 + 16) + (8 + dataByteLength + pad); // WAVE + fmt chunk + data chunk
+      4 +
+      (8 + 16) +
+      (8 + dataByteLength + pad); // WAVE + fmt chunk + data chunk
 
   final b = BytesBuilder(copy: false);
   b.addByte(0x52);
