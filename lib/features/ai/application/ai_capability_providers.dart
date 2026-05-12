@@ -82,7 +82,9 @@ AssessmentCapability resolveAssessmentCapability(
 ) {
   switch (config.provider) {
     case AIProvider.enjoy:
-      return const EnjoyAssessmentCapability();
+      return EnjoyAssessmentCapability(
+        tokenCache: ref.read(azureTokenCacheProvider),
+      );
     case AIProvider.byok:
     case AIProvider.local:
       return const UnimplementedAssessmentCapability();

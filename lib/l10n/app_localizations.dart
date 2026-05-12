@@ -1747,7 +1747,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiPlaygroundIntro.
   ///
   /// In en, this message translates to:
-  /// **'Calls the Enjoy API using your saved base URL and access token. TTS and pronunciation assessment are not wired on Flutter yet (see ADR-0014).'**
+  /// **'Calls the Enjoy API using your saved base URL and access token. TTS is not wired on Flutter yet; pronunciation assessment uses Azure Speech via a native plugin when signed in.'**
   String get aiPlaygroundIntro;
 
   /// No description provided for @aiPlaygroundPickAudio.
@@ -1828,17 +1828,29 @@ abstract class AppLocalizations {
   /// **'Dictionary lookup'**
   String get aiPlaygroundDictLookup;
 
-  /// No description provided for @aiPlaygroundTtsDisabled.
+  /// No description provided for @aiPlaygroundAssessmentReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference text (what you spoke)'**
+  String get aiPlaygroundAssessmentReference;
+
+  /// No description provided for @aiPlaygroundAssessmentLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language (e.g. en, en-US)'**
+  String get aiPlaygroundAssessmentLanguage;
+
+  /// No description provided for @aiPlaygroundAssess.
+  ///
+  /// In en, this message translates to:
+  /// **'Run pronunciation assessment'**
+  String get aiPlaygroundAssess;
+
+  /// No description provided for @aiPlaygroundAssessmentTtsNote.
   ///
   /// In en, this message translates to:
   /// **'TTS is not available in this build (Azure Speech integration pending).'**
-  String get aiPlaygroundTtsDisabled;
-
-  /// No description provided for @aiPlaygroundAssessmentDisabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Pronunciation assessment is not available in this build (Azure Speech integration pending).'**
-  String get aiPlaygroundAssessmentDisabled;
+  String get aiPlaygroundAssessmentTtsNote;
 
   /// No description provided for @aiPlaygroundOutput.
   ///

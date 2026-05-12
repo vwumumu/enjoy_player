@@ -213,6 +213,48 @@ final class AzureTokenApiProvider
 
 String _$azureTokenApiHash() => r'ebaf3ff19fa0ea2ca31dec25c094786212f86d60';
 
+@ProviderFor(azureTokenCache)
+final azureTokenCacheProvider = AzureTokenCacheProvider._();
+
+final class AzureTokenCacheProvider
+    extends
+        $FunctionalProvider<AzureTokenCache, AzureTokenCache, AzureTokenCache>
+    with $Provider<AzureTokenCache> {
+  AzureTokenCacheProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'azureTokenCacheProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$azureTokenCacheHash();
+
+  @$internal
+  @override
+  $ProviderElement<AzureTokenCache> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AzureTokenCache create(Ref ref) {
+    return azureTokenCache(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AzureTokenCache value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AzureTokenCache>(value),
+    );
+  }
+}
+
+String _$azureTokenCacheHash() => r'cbc5715993d398adc99e13ba0ee42b7a13a40f06';
+
 @ProviderFor(youtubeTranscriptsClient)
 final youtubeTranscriptsClientProvider = YoutubeTranscriptsClientProvider._();
 

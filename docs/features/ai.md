@@ -10,11 +10,21 @@ Enjoy Player calls the same Enjoy / worker HTTP surface as the web `@enjoy/ai` p
 | LLM / chat | `POST /chat/completions` | `chatServiceProvider` → `LlmCapability` |
 | Translation | `POST /translations` | `translationServiceProvider` → `TranslationCapability` |
 | Dictionary | `POST /dictionary/query` | `dictionaryServiceProvider` → `DictionaryCapability` |
-| Azure token | `POST /azure/tokens` | `azureTokenApiProvider` (reserved for TTS/assessment) |
+| Azure token | `POST /azure/tokens` | `azureTokenApiProvider` + `azureTokenCacheProvider` (9 min TTL) |
+| Pronunciation assessment | `POST /azure/tokens` + **native Azure Speech SDK** | `assessmentServiceProvider` → `EnjoyAssessmentCapability` → [`packages/azure_pronunciation_assessment`](../../packages/azure_pronunciation_assessment/) |
+
+### Native pronunciation plugin
+
+- **Package**: [`packages/azure_pronunciation_assessment/README.md`](../../packages/azure_pronunciation_assessment/README.md)
+- **Capability**: [`lib/features/ai/data/enjoy/enjoy_assessment_capability.dart`](../../lib/features/ai/data/enjoy/enjoy_assessment_capability.dart) (token cache + WAV path or temp file from bytes).
+- **Language codes**: [`lib/features/ai/data/azure_language_mapper.dart`](../../lib/features/ai/data/azure_language_mapper.dart) maps short / transcript codes to Azure locales (aligned with the browser extension mapper).
+- **ADR**: [ADR-0017](../decisions/0017-azure-pronunciation-assessment.md)
+
+Assessment is **not available on web** in this app. Shadow-reading hotkey / per-take UI wiring may follow in a separate change.
 
 ## Not wired yet
 
-- **TTS** and **pronunciation assessment** on the Enjoy path rely on Azure Speech SDK in the web stack. The player exposes capabilities that throw `UnimplementedError` until a native or server-mediated path exists ([ADR-0014](../decisions/0014-ai-capabilities-layer.md)).
+- **TTS** on the Enjoy path still throws `UnimplementedError` (Azure Speech in Flutter pending).
 - **BYOK** and **local** providers are typed (`AIServiceConfig`, `BYOKConfig`) but implementations throw `UnimplementedError`.
 
 ## Code layout
@@ -23,7 +33,7 @@ Enjoy Player calls the same Enjoy / worker HTTP surface as the web `@enjoy/ai` p
 - Enjoy + stub implementations: `lib/features/ai/data/`
 - Riverpod services and capability wiring: `lib/features/ai/application/`
 - HTTP clients (paths only): `lib/data/api/services/ai/`
-- Debug UI: **Settings → Developer → AI playground** (`AiPlaygroundScreen`)
+- Debug UI: **Settings → Developer → AI playground** (`AiPlaygroundScreen`) — includes **pronunciation assessment** (pick WAV + reference text + language).
 
 ## Consumers
 

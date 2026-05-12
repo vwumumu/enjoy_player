@@ -2,17 +2,19 @@
 library;
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:azure_pronunciation_assessment/azure_pronunciation_assessment.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/features/ai/application/ai_services.dart';
 import 'package:enjoy_player/features/ai/domain/chat_message.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_request.dart';
+import 'package:enjoy_player/features/ai/domain/models/assessment_request.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
 
@@ -34,6 +36,8 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
   final _dictWordCtrl = TextEditingController(text: 'run');
   final _dictSourceCtrl = TextEditingController(text: 'en');
   final _dictTargetCtrl = TextEditingController(text: 'zh');
+  final _assessRefCtrl = TextEditingController(text: 'Hello world.');
+  final _assessLangCtrl = TextEditingController(text: 'en');
 
   String _output = '';
   Uint8List? _pickedAudio;
@@ -49,6 +53,8 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
     _dictWordCtrl.dispose();
     _dictSourceCtrl.dispose();
     _dictTargetCtrl.dispose();
+    _assessRefCtrl.dispose();
+    _assessLangCtrl.dispose();
     super.dispose();
   }
 
@@ -157,6 +163,64 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
     } catch (e, st) {
       _log.warning('Dictionary failed', e, st);
       _append('Dictionary ${_err(e)}');
+    }
+  }
+
+  Future<void> _runAssessment() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (kIsWeb) {
+      _append('${l10n.error}: pronunciation assessment is not available on web.');
+      return;
+    }
+    final bytes = _pickedAudio;
+    if (bytes == null) {
+      _append('${l10n.error}: pick a WAV (or other) file first; assessment uses the same pick as ASR.');
+      return;
+    }
+    final refText = _assessRefCtrl.text.trim();
+    if (refText.isEmpty) {
+      _append('${l10n.error}: enter reference text.');
+      return;
+    }
+    try {
+      final r = await ref.read(assessmentServiceProvider).assess(
+        AssessmentRequest(
+          audioBytes: bytes,
+          referenceText: refText,
+          language: _assessLangCtrl.text.trim(),
+        ),
+      );
+      final scores = r.detail.primaryScores;
+      final buf = StringBuffer('Pronunciation assessment\n');
+      if (scores != null) {
+        buf.writeln(
+          'PronScore: ${scores.pronScore.toStringAsFixed(1)} · '
+          'Accuracy: ${scores.accuracyScore.toStringAsFixed(1)} · '
+          'Fluency: ${scores.fluencyScore.toStringAsFixed(1)} · '
+          'Completeness: ${scores.completenessScore.toStringAsFixed(1)}',
+        );
+        if (scores.prosodyScore != null) {
+          buf.writeln('Prosody: ${scores.prosodyScore!.toStringAsFixed(1)}');
+        }
+      }
+      buf.writeln('Display: ${r.detail.displayText}');
+      final words = r.detail.nBest.isEmpty ? null : r.detail.nBest.first.words;
+      if (words != null && words.isNotEmpty) {
+        buf.writeln('\nWords:');
+        for (final w in words) {
+          buf.writeln(
+            '  · ${w.word}  acc=${w.pronunciationAssessment.accuracyScore.toStringAsFixed(0)}  '
+            '${w.pronunciationAssessment.errorType}',
+          );
+        }
+      }
+      _append(buf.toString());
+    } on AzurePronunciationAssessmentException catch (e, st) {
+      _log.warning('Assessment failed', e, st);
+      _append('Assessment ${e.code}: ${e.message}');
+    } catch (e, st) {
+      _log.warning('Assessment failed', e, st);
+      _append('Assessment ${_err(e)}');
     }
   }
 
@@ -271,17 +335,24 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
           ),
           const SizedBox(height: 24),
           _SectionTitle(text: l10n.aiPlaygroundSectionTtsAssessment),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.aiPlaygroundTtsDisabled, style: tt.bodySmall),
-                  const SizedBox(height: 8),
-                  Text(l10n.aiPlaygroundAssessmentDisabled, style: tt.bodySmall),
-                ],
-              ),
+          Text(l10n.aiPlaygroundAssessmentTtsNote, style: tt.bodySmall),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _assessRefCtrl,
+            maxLines: 2,
+            decoration: InputDecoration(labelText: l10n.aiPlaygroundAssessmentReference),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _assessLangCtrl,
+            decoration: InputDecoration(labelText: l10n.aiPlaygroundAssessmentLanguage),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.tonal(
+              onPressed: _runAssessment,
+              child: Text(l10n.aiPlaygroundAssess),
             ),
           ),
           const SizedBox(height: 24),

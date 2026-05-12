@@ -1,0 +1,35 @@
+name: azure_pronunciation_assessment
+description: Flutter plugin wrapping Azure Cognitive Services Speech SDK for pronunciation assessment (token auth).
+version: 0.1.0
+publish_to: "none"
+
+environment:
+  sdk: ^3.7.0
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  json_annotation: ^4.9.0
+  meta: ^1.16.0
+  plugin_platform_interface: ^2.1.8
+
+dev_dependencies:
+  build_runner: ^2.5.4
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  json_serializable: ^6.9.5
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: dev.enjoy_player.azure_pronunciation_assessment
+        pluginClass: AzurePronunciationAssessmentPlugin
+      ios:
+        pluginClass: AzurePronunciationAssessmentPlugin
+      macos:
+        pluginClass: AzurePronunciationAssessmentPlugin
+      windows:
+        pluginClass: AzurePronunciationAssessmentPluginCApi

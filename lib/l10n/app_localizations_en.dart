@@ -890,7 +890,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiPlaygroundIntro =>
-      'Calls the Enjoy API using your saved base URL and access token. TTS and pronunciation assessment are not wired on Flutter yet (see ADR-0014).';
+      'Calls the Enjoy API using your saved base URL and access token. TTS is not wired on Flutter yet; pronunciation assessment uses Azure Speech via a native plugin when signed in.';
 
   @override
   String get aiPlaygroundPickAudio => 'Pick audio file';
@@ -932,12 +932,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiPlaygroundDictLookup => 'Dictionary lookup';
 
   @override
-  String get aiPlaygroundTtsDisabled =>
-      'TTS is not available in this build (Azure Speech integration pending).';
+  String get aiPlaygroundAssessmentReference =>
+      'Reference text (what you spoke)';
 
   @override
-  String get aiPlaygroundAssessmentDisabled =>
-      'Pronunciation assessment is not available in this build (Azure Speech integration pending).';
+  String get aiPlaygroundAssessmentLanguage => 'Language (e.g. en, en-US)';
+
+  @override
+  String get aiPlaygroundAssess => 'Run pronunciation assessment';
+
+  @override
+  String get aiPlaygroundAssessmentTtsNote =>
+      'TTS is not available in this build (Azure Speech integration pending).';
 
   @override
   String get aiPlaygroundOutput => 'Output';

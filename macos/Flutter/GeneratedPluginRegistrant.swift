@@ -5,6 +5,7 @@
 import FlutterMacOS
 import Foundation
 
+import azure_pronunciation_assessment
 import ffmpeg_kit_flutter_new
 import file_picker
 import flutter_inappwebview_macos
@@ -21,6 +22,7 @@ import wakelock_plus
 import window_manager
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  AzurePronunciationAssessmentPlugin.register(with: registry.registrar(forPlugin: "AzurePronunciationAssessmentPlugin"))
   FFmpegKitFlutterPlugin.register(with: registry.registrar(forPlugin: "FFmpegKitFlutterPlugin"))
   FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))
   InAppWebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "InAppWebViewFlutterPlugin"))

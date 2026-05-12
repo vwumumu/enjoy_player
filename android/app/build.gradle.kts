@@ -22,8 +22,8 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.enjoy_player"
-        // media_kit + plugin baseline
-        minSdk = flutter.minSdkVersion
+        // media_kit + plugin baseline; Azure Speech SDK requires API 24+
+        minSdk = maxOf(flutter.minSdkVersion, 24)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
