@@ -24,7 +24,7 @@ class DictionaryApi {
         'word': word,
         'sourceLang': sourceLanguage,
         'targetLang': targetLanguage,
-        if (forceRefresh != null) 'forceRefresh': forceRefresh,
+        'forceRefresh': ?forceRefresh,
       },
     );
   }

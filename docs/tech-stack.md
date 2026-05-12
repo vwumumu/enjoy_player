@@ -2,7 +2,7 @@
 
 | Concern | Choice | Notes |
 |---------|--------|-------|
-| Language | Dart ^3.7 | Strict analysis |
+| Language | Dart ^3.9 | Strict analysis |
 | UI | Flutter 3.x / Material 3 + `google_fonts` | Dark-only `buildAppTheme()` + `EnjoyThemeTokens` in `lib/core/theme/` |
 | State | `flutter_riverpod` + `riverpod_annotation` | `@Riverpod` notifiers, `build_runner` |
 | Navigation | `go_router` | Shell route for persistent mini player |
@@ -16,6 +16,6 @@
 | Browser / deep links | `url_launcher` | OAuth `start_auth` browser step |
 | i18n | `flutter_localizations` + ARB | MVP English only (`lib/l10n/app_en.arb`) |
 | Codegen | `build_runner`, `drift_dev`, `riverpod_generator` | Run after schema/provider edits |
-| Lint | `flutter_lints`, `custom_lint`, `riverpod_lint` | See `analysis_options.yaml` |
+| Lint | `flutter_lints` | `analysis_options.yaml` (no `custom_lint`: incompatible analyzer range vs `drift_dev` / codegen) |
 
 Deferred (ADR-0005): `flutter_inappwebview`, URL streaming UX polish. Library/recording **cloud sync** remains deferred; see [ADR-0006](decisions/0006-auth-and-profile-sync.md) for optional auth + profile scope.

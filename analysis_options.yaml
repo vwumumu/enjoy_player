@@ -5,8 +5,6 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "packages/azure_speech/test/**"
-  plugins:
-    - custom_lint
   errors:
     avoid_print: error
 

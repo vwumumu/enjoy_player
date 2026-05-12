@@ -24,10 +24,10 @@ class ChatApi {
       _path,
       body: {
         'messages': messages.map((m) => m.toJsonBody()).toList(),
-        if (temperature != null) 'temperature': temperature,
-        if (maxTokens != null) 'maxTokens': maxTokens,
+        'temperature': ?temperature,
+        'maxTokens': ?maxTokens,
         'stream': stream,
-        if (responseFormat != null) 'responseFormat': responseFormat,
+        'responseFormat': ?responseFormat,
       },
     );
   }

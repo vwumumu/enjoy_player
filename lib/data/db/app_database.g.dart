@@ -349,26 +349,22 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, VideoRow> {
   VideoRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return VideoRow(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
-      vid:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}vid'],
-          )!,
-      provider:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}provider'],
-          )!,
-      title:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}title'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      vid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vid'],
+      )!,
+      provider: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provider'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
@@ -377,16 +373,14 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, VideoRow> {
         DriftSqlType.string,
         data['${effectivePrefix}thumbnail_url'],
       ),
-      durationSeconds:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}duration_seconds'],
-          )!,
-      language:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}language'],
-          )!,
+      durationSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_seconds'],
+      )!,
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      )!,
       source: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}source'],
@@ -415,16 +409,14 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, VideoRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}server_updated_at'],
       ),
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}created_at'],
-          )!,
-      updatedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}updated_at'],
-          )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -522,36 +514,31 @@ class VideoRow extends DataClass implements Insertable<VideoRow> {
       vid: Value(vid),
       provider: Value(provider),
       title: Value(title),
-      description:
-          description == null && nullToAbsent
-              ? const Value.absent()
-              : Value(description),
-      thumbnailUrl:
-          thumbnailUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(thumbnailUrl),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
       durationSeconds: Value(durationSeconds),
       language: Value(language),
-      source:
-          source == null && nullToAbsent ? const Value.absent() : Value(source),
-      localUri:
-          localUri == null && nullToAbsent
-              ? const Value.absent()
-              : Value(localUri),
+      source: source == null && nullToAbsent
+          ? const Value.absent()
+          : Value(source),
+      localUri: localUri == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localUri),
       md5: md5 == null && nullToAbsent ? const Value.absent() : Value(md5),
       size: size == null && nullToAbsent ? const Value.absent() : Value(size),
-      mediaUrl:
-          mediaUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaUrl),
-      syncStatus:
-          syncStatus == null && nullToAbsent
-              ? const Value.absent()
-              : Value(syncStatus),
-      serverUpdatedAt:
-          serverUpdatedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(serverUpdatedAt),
+      mediaUrl: mediaUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaUrl),
+      syncStatus: syncStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncStatus),
+      serverUpdatedAt: serverUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverUpdatedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -639,8 +626,9 @@ class VideoRow extends DataClass implements Insertable<VideoRow> {
     size: size.present ? size.value : this.size,
     mediaUrl: mediaUrl.present ? mediaUrl.value : this.mediaUrl,
     syncStatus: syncStatus.present ? syncStatus.value : this.syncStatus,
-    serverUpdatedAt:
-        serverUpdatedAt.present ? serverUpdatedAt.value : this.serverUpdatedAt,
+    serverUpdatedAt: serverUpdatedAt.present
+        ? serverUpdatedAt.value
+        : this.serverUpdatedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -650,28 +638,27 @@ class VideoRow extends DataClass implements Insertable<VideoRow> {
       vid: data.vid.present ? data.vid.value : this.vid,
       provider: data.provider.present ? data.provider.value : this.provider,
       title: data.title.present ? data.title.value : this.title,
-      description:
-          data.description.present ? data.description.value : this.description,
-      thumbnailUrl:
-          data.thumbnailUrl.present
-              ? data.thumbnailUrl.value
-              : this.thumbnailUrl,
-      durationSeconds:
-          data.durationSeconds.present
-              ? data.durationSeconds.value
-              : this.durationSeconds,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      durationSeconds: data.durationSeconds.present
+          ? data.durationSeconds.value
+          : this.durationSeconds,
       language: data.language.present ? data.language.value : this.language,
       source: data.source.present ? data.source.value : this.source,
       localUri: data.localUri.present ? data.localUri.value : this.localUri,
       md5: data.md5.present ? data.md5.value : this.md5,
       size: data.size.present ? data.size.value : this.size,
       mediaUrl: data.mediaUrl.present ? data.mediaUrl.value : this.mediaUrl,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
-      serverUpdatedAt:
-          data.serverUpdatedAt.present
-              ? data.serverUpdatedAt.value
-              : this.serverUpdatedAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      serverUpdatedAt: data.serverUpdatedAt.present
+          ? data.serverUpdatedAt.value
+          : this.serverUpdatedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -1378,26 +1365,22 @@ class $AudiosTable extends Audios with TableInfo<$AudiosTable, AudioRow> {
   AudioRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return AudioRow(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
-      aid:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}aid'],
-          )!,
-      provider:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}provider'],
-          )!,
-      title:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}title'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      aid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}aid'],
+      )!,
+      provider: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provider'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
@@ -1406,16 +1389,14 @@ class $AudiosTable extends Audios with TableInfo<$AudiosTable, AudioRow> {
         DriftSqlType.string,
         data['${effectivePrefix}thumbnail_url'],
       ),
-      durationSeconds:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}duration_seconds'],
-          )!,
-      language:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}language'],
-          )!,
+      durationSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_seconds'],
+      )!,
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      )!,
       translationKey: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}translation_key'],
@@ -1456,16 +1437,14 @@ class $AudiosTable extends Audios with TableInfo<$AudiosTable, AudioRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}server_updated_at'],
       ),
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}created_at'],
-          )!,
-      updatedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}updated_at'],
-          )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -1574,46 +1553,40 @@ class AudioRow extends DataClass implements Insertable<AudioRow> {
       aid: Value(aid),
       provider: Value(provider),
       title: Value(title),
-      description:
-          description == null && nullToAbsent
-              ? const Value.absent()
-              : Value(description),
-      thumbnailUrl:
-          thumbnailUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(thumbnailUrl),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
       durationSeconds: Value(durationSeconds),
       language: Value(language),
-      translationKey:
-          translationKey == null && nullToAbsent
-              ? const Value.absent()
-              : Value(translationKey),
-      sourceText:
-          sourceText == null && nullToAbsent
-              ? const Value.absent()
-              : Value(sourceText),
-      voice:
-          voice == null && nullToAbsent ? const Value.absent() : Value(voice),
-      source:
-          source == null && nullToAbsent ? const Value.absent() : Value(source),
-      localUri:
-          localUri == null && nullToAbsent
-              ? const Value.absent()
-              : Value(localUri),
+      translationKey: translationKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(translationKey),
+      sourceText: sourceText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceText),
+      voice: voice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voice),
+      source: source == null && nullToAbsent
+          ? const Value.absent()
+          : Value(source),
+      localUri: localUri == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localUri),
       md5: md5 == null && nullToAbsent ? const Value.absent() : Value(md5),
       size: size == null && nullToAbsent ? const Value.absent() : Value(size),
-      mediaUrl:
-          mediaUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaUrl),
-      syncStatus:
-          syncStatus == null && nullToAbsent
-              ? const Value.absent()
-              : Value(syncStatus),
-      serverUpdatedAt:
-          serverUpdatedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(serverUpdatedAt),
+      mediaUrl: mediaUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaUrl),
+      syncStatus: syncStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncStatus),
+      serverUpdatedAt: serverUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverUpdatedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -1704,8 +1677,9 @@ class AudioRow extends DataClass implements Insertable<AudioRow> {
     thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
     durationSeconds: durationSeconds ?? this.durationSeconds,
     language: language ?? this.language,
-    translationKey:
-        translationKey.present ? translationKey.value : this.translationKey,
+    translationKey: translationKey.present
+        ? translationKey.value
+        : this.translationKey,
     sourceText: sourceText.present ? sourceText.value : this.sourceText,
     voice: voice.present ? voice.value : this.voice,
     source: source.present ? source.value : this.source,
@@ -1714,8 +1688,9 @@ class AudioRow extends DataClass implements Insertable<AudioRow> {
     size: size.present ? size.value : this.size,
     mediaUrl: mediaUrl.present ? mediaUrl.value : this.mediaUrl,
     syncStatus: syncStatus.present ? syncStatus.value : this.syncStatus,
-    serverUpdatedAt:
-        serverUpdatedAt.present ? serverUpdatedAt.value : this.serverUpdatedAt,
+    serverUpdatedAt: serverUpdatedAt.present
+        ? serverUpdatedAt.value
+        : this.serverUpdatedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -1725,35 +1700,34 @@ class AudioRow extends DataClass implements Insertable<AudioRow> {
       aid: data.aid.present ? data.aid.value : this.aid,
       provider: data.provider.present ? data.provider.value : this.provider,
       title: data.title.present ? data.title.value : this.title,
-      description:
-          data.description.present ? data.description.value : this.description,
-      thumbnailUrl:
-          data.thumbnailUrl.present
-              ? data.thumbnailUrl.value
-              : this.thumbnailUrl,
-      durationSeconds:
-          data.durationSeconds.present
-              ? data.durationSeconds.value
-              : this.durationSeconds,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      durationSeconds: data.durationSeconds.present
+          ? data.durationSeconds.value
+          : this.durationSeconds,
       language: data.language.present ? data.language.value : this.language,
-      translationKey:
-          data.translationKey.present
-              ? data.translationKey.value
-              : this.translationKey,
-      sourceText:
-          data.sourceText.present ? data.sourceText.value : this.sourceText,
+      translationKey: data.translationKey.present
+          ? data.translationKey.value
+          : this.translationKey,
+      sourceText: data.sourceText.present
+          ? data.sourceText.value
+          : this.sourceText,
       voice: data.voice.present ? data.voice.value : this.voice,
       source: data.source.present ? data.source.value : this.source,
       localUri: data.localUri.present ? data.localUri.value : this.localUri,
       md5: data.md5.present ? data.md5.value : this.md5,
       size: data.size.present ? data.size.value : this.size,
       mediaUrl: data.mediaUrl.present ? data.mediaUrl.value : this.mediaUrl,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
-      serverUpdatedAt:
-          data.serverUpdatedAt.present
-              ? data.serverUpdatedAt.value
-              : this.serverUpdatedAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      serverUpdatedAt: data.serverUpdatedAt.present
+          ? data.serverUpdatedAt.value
+          : this.serverUpdatedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2383,45 +2357,38 @@ class $TranscriptsTable extends Transcripts
   TranscriptRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TranscriptRow(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
-      targetType:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_type'],
-          )!,
-      targetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_id'],
-          )!,
-      language:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}language'],
-          )!,
-      source:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}source'],
-          )!,
-      timelineJson:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}timeline_json'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      targetType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_type'],
+      )!,
+      targetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_id'],
+      )!,
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      timelineJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}timeline_json'],
+      )!,
       referenceId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}reference_id'],
       ),
-      label:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}label'],
-          )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
       trackIndex: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}track_index'],
@@ -2434,16 +2401,14 @@ class $TranscriptsTable extends Transcripts
         DriftSqlType.dateTime,
         data['${effectivePrefix}server_updated_at'],
       ),
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}created_at'],
-          )!,
-      updatedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}updated_at'],
-          )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -2523,23 +2488,19 @@ class TranscriptRow extends DataClass implements Insertable<TranscriptRow> {
       language: Value(language),
       source: Value(source),
       timelineJson: Value(timelineJson),
-      referenceId:
-          referenceId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(referenceId),
+      referenceId: referenceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(referenceId),
       label: Value(label),
-      trackIndex:
-          trackIndex == null && nullToAbsent
-              ? const Value.absent()
-              : Value(trackIndex),
-      syncStatus:
-          syncStatus == null && nullToAbsent
-              ? const Value.absent()
-              : Value(syncStatus),
-      serverUpdatedAt:
-          serverUpdatedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(serverUpdatedAt),
+      trackIndex: trackIndex == null && nullToAbsent
+          ? const Value.absent()
+          : Value(trackIndex),
+      syncStatus: syncStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncStatus),
+      serverUpdatedAt: serverUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverUpdatedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -2611,34 +2572,37 @@ class TranscriptRow extends DataClass implements Insertable<TranscriptRow> {
     label: label ?? this.label,
     trackIndex: trackIndex.present ? trackIndex.value : this.trackIndex,
     syncStatus: syncStatus.present ? syncStatus.value : this.syncStatus,
-    serverUpdatedAt:
-        serverUpdatedAt.present ? serverUpdatedAt.value : this.serverUpdatedAt,
+    serverUpdatedAt: serverUpdatedAt.present
+        ? serverUpdatedAt.value
+        : this.serverUpdatedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   TranscriptRow copyWithCompanion(TranscriptsCompanion data) {
     return TranscriptRow(
       id: data.id.present ? data.id.value : this.id,
-      targetType:
-          data.targetType.present ? data.targetType.value : this.targetType,
+      targetType: data.targetType.present
+          ? data.targetType.value
+          : this.targetType,
       targetId: data.targetId.present ? data.targetId.value : this.targetId,
       language: data.language.present ? data.language.value : this.language,
       source: data.source.present ? data.source.value : this.source,
-      timelineJson:
-          data.timelineJson.present
-              ? data.timelineJson.value
-              : this.timelineJson,
-      referenceId:
-          data.referenceId.present ? data.referenceId.value : this.referenceId,
+      timelineJson: data.timelineJson.present
+          ? data.timelineJson.value
+          : this.timelineJson,
+      referenceId: data.referenceId.present
+          ? data.referenceId.value
+          : this.referenceId,
       label: data.label.present ? data.label.value : this.label,
-      trackIndex:
-          data.trackIndex.present ? data.trackIndex.value : this.trackIndex,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
-      serverUpdatedAt:
-          data.serverUpdatedAt.present
-              ? data.serverUpdatedAt.value
-              : this.serverUpdatedAt,
+      trackIndex: data.trackIndex.present
+          ? data.trackIndex.value
+          : this.trackIndex,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      serverUpdatedAt: data.serverUpdatedAt.present
+          ? data.serverUpdatedAt.value
+          : this.serverUpdatedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2984,21 +2948,18 @@ class $TranscriptFetchStatesTable extends TranscriptFetchStates
   }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TranscriptFetchStateRow(
-      targetType:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_type'],
-          )!,
-      targetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_id'],
-          )!,
-      lastFetchedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}last_fetched_at'],
-          )!,
+      targetType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_type'],
+      )!,
+      targetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_id'],
+      )!,
+      lastFetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_fetched_at'],
+      )!,
     );
   }
 
@@ -3070,13 +3031,13 @@ class TranscriptFetchStateRow extends DataClass
     TranscriptFetchStatesCompanion data,
   ) {
     return TranscriptFetchStateRow(
-      targetType:
-          data.targetType.present ? data.targetType.value : this.targetType,
+      targetType: data.targetType.present
+          ? data.targetType.value
+          : this.targetType,
       targetId: data.targetId.present ? data.targetId.value : this.targetId,
-      lastFetchedAt:
-          data.lastFetchedAt.present
-              ? data.lastFetchedAt.value
-              : this.lastFetchedAt,
+      lastFetchedAt: data.lastFetchedAt.present
+          ? data.lastFetchedAt.value
+          : this.lastFetchedAt,
     );
   }
 
@@ -3721,41 +3682,34 @@ class $EchoSessionsTable extends EchoSessions
   EchoSessionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return EchoSessionRow(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
-      targetType:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_type'],
-          )!,
-      targetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_id'],
-          )!,
-      language:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}language'],
-          )!,
-      currentTimeMs:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}current_time_ms'],
-          )!,
-      playbackRate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}playback_rate'],
-          )!,
-      volume:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}volume'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      targetType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_type'],
+      )!,
+      targetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_id'],
+      )!,
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      )!,
+      currentTimeMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_time_ms'],
+      )!,
+      playbackRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}playback_rate'],
+      )!,
+      volume: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}volume'],
+      )!,
       echoStartMs: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}echo_start_ms'],
@@ -3772,50 +3726,42 @@ class $EchoSessionsTable extends EchoSessions
         DriftSqlType.string,
         data['${effectivePrefix}secondary_transcript_id'],
       ),
-      recordingsCount:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}recordings_count'],
-          )!,
-      recordingsDurationMs:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}recordings_duration_ms'],
-          )!,
+      recordingsCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recordings_count'],
+      )!,
+      recordingsDurationMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recordings_duration_ms'],
+      )!,
       lastRecordingAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_recording_at'],
       ),
-      currentSegmentIndex:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}current_segment_index'],
-          )!,
-      echoActive:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}echo_active'],
-          )!,
-      echoStartLine:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}echo_start_line'],
-          )!,
-      echoEndLine:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}echo_end_line'],
-          )!,
-      startedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}started_at'],
-          )!,
-      lastActiveAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}last_active_at'],
-          )!,
+      currentSegmentIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_segment_index'],
+      )!,
+      echoActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}echo_active'],
+      )!,
+      echoStartLine: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}echo_start_line'],
+      )!,
+      echoEndLine: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}echo_end_line'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      )!,
+      lastActiveAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_active_at'],
+      )!,
       completedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}completed_at'],
@@ -3828,16 +3774,14 @@ class $EchoSessionsTable extends EchoSessions
         DriftSqlType.dateTime,
         data['${effectivePrefix}server_updated_at'],
       ),
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}created_at'],
-          )!,
-      updatedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}updated_at'],
-          )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -3958,46 +3902,38 @@ class EchoSessionRow extends DataClass implements Insertable<EchoSessionRow> {
       currentTimeMs: Value(currentTimeMs),
       playbackRate: Value(playbackRate),
       volume: Value(volume),
-      echoStartMs:
-          echoStartMs == null && nullToAbsent
-              ? const Value.absent()
-              : Value(echoStartMs),
-      echoEndMs:
-          echoEndMs == null && nullToAbsent
-              ? const Value.absent()
-              : Value(echoEndMs),
-      transcriptId:
-          transcriptId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(transcriptId),
-      secondaryTranscriptId:
-          secondaryTranscriptId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(secondaryTranscriptId),
+      echoStartMs: echoStartMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(echoStartMs),
+      echoEndMs: echoEndMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(echoEndMs),
+      transcriptId: transcriptId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transcriptId),
+      secondaryTranscriptId: secondaryTranscriptId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(secondaryTranscriptId),
       recordingsCount: Value(recordingsCount),
       recordingsDurationMs: Value(recordingsDurationMs),
-      lastRecordingAt:
-          lastRecordingAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(lastRecordingAt),
+      lastRecordingAt: lastRecordingAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastRecordingAt),
       currentSegmentIndex: Value(currentSegmentIndex),
       echoActive: Value(echoActive),
       echoStartLine: Value(echoStartLine),
       echoEndLine: Value(echoEndLine),
       startedAt: Value(startedAt),
       lastActiveAt: Value(lastActiveAt),
-      completedAt:
-          completedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(completedAt),
-      syncStatus:
-          syncStatus == null && nullToAbsent
-              ? const Value.absent()
-              : Value(syncStatus),
-      serverUpdatedAt:
-          serverUpdatedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(serverUpdatedAt),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+      syncStatus: syncStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncStatus),
+      serverUpdatedAt: serverUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverUpdatedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -4113,14 +4049,14 @@ class EchoSessionRow extends DataClass implements Insertable<EchoSessionRow> {
     echoStartMs: echoStartMs.present ? echoStartMs.value : this.echoStartMs,
     echoEndMs: echoEndMs.present ? echoEndMs.value : this.echoEndMs,
     transcriptId: transcriptId.present ? transcriptId.value : this.transcriptId,
-    secondaryTranscriptId:
-        secondaryTranscriptId.present
-            ? secondaryTranscriptId.value
-            : this.secondaryTranscriptId,
+    secondaryTranscriptId: secondaryTranscriptId.present
+        ? secondaryTranscriptId.value
+        : this.secondaryTranscriptId,
     recordingsCount: recordingsCount ?? this.recordingsCount,
     recordingsDurationMs: recordingsDurationMs ?? this.recordingsDurationMs,
-    lastRecordingAt:
-        lastRecordingAt.present ? lastRecordingAt.value : this.lastRecordingAt,
+    lastRecordingAt: lastRecordingAt.present
+        ? lastRecordingAt.value
+        : this.lastRecordingAt,
     currentSegmentIndex: currentSegmentIndex ?? this.currentSegmentIndex,
     echoActive: echoActive ?? this.echoActive,
     echoStartLine: echoStartLine ?? this.echoStartLine,
@@ -4129,75 +4065,71 @@ class EchoSessionRow extends DataClass implements Insertable<EchoSessionRow> {
     lastActiveAt: lastActiveAt ?? this.lastActiveAt,
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
     syncStatus: syncStatus.present ? syncStatus.value : this.syncStatus,
-    serverUpdatedAt:
-        serverUpdatedAt.present ? serverUpdatedAt.value : this.serverUpdatedAt,
+    serverUpdatedAt: serverUpdatedAt.present
+        ? serverUpdatedAt.value
+        : this.serverUpdatedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   EchoSessionRow copyWithCompanion(EchoSessionsCompanion data) {
     return EchoSessionRow(
       id: data.id.present ? data.id.value : this.id,
-      targetType:
-          data.targetType.present ? data.targetType.value : this.targetType,
+      targetType: data.targetType.present
+          ? data.targetType.value
+          : this.targetType,
       targetId: data.targetId.present ? data.targetId.value : this.targetId,
       language: data.language.present ? data.language.value : this.language,
-      currentTimeMs:
-          data.currentTimeMs.present
-              ? data.currentTimeMs.value
-              : this.currentTimeMs,
-      playbackRate:
-          data.playbackRate.present
-              ? data.playbackRate.value
-              : this.playbackRate,
+      currentTimeMs: data.currentTimeMs.present
+          ? data.currentTimeMs.value
+          : this.currentTimeMs,
+      playbackRate: data.playbackRate.present
+          ? data.playbackRate.value
+          : this.playbackRate,
       volume: data.volume.present ? data.volume.value : this.volume,
-      echoStartMs:
-          data.echoStartMs.present ? data.echoStartMs.value : this.echoStartMs,
+      echoStartMs: data.echoStartMs.present
+          ? data.echoStartMs.value
+          : this.echoStartMs,
       echoEndMs: data.echoEndMs.present ? data.echoEndMs.value : this.echoEndMs,
-      transcriptId:
-          data.transcriptId.present
-              ? data.transcriptId.value
-              : this.transcriptId,
-      secondaryTranscriptId:
-          data.secondaryTranscriptId.present
-              ? data.secondaryTranscriptId.value
-              : this.secondaryTranscriptId,
-      recordingsCount:
-          data.recordingsCount.present
-              ? data.recordingsCount.value
-              : this.recordingsCount,
-      recordingsDurationMs:
-          data.recordingsDurationMs.present
-              ? data.recordingsDurationMs.value
-              : this.recordingsDurationMs,
-      lastRecordingAt:
-          data.lastRecordingAt.present
-              ? data.lastRecordingAt.value
-              : this.lastRecordingAt,
-      currentSegmentIndex:
-          data.currentSegmentIndex.present
-              ? data.currentSegmentIndex.value
-              : this.currentSegmentIndex,
-      echoActive:
-          data.echoActive.present ? data.echoActive.value : this.echoActive,
-      echoStartLine:
-          data.echoStartLine.present
-              ? data.echoStartLine.value
-              : this.echoStartLine,
-      echoEndLine:
-          data.echoEndLine.present ? data.echoEndLine.value : this.echoEndLine,
+      transcriptId: data.transcriptId.present
+          ? data.transcriptId.value
+          : this.transcriptId,
+      secondaryTranscriptId: data.secondaryTranscriptId.present
+          ? data.secondaryTranscriptId.value
+          : this.secondaryTranscriptId,
+      recordingsCount: data.recordingsCount.present
+          ? data.recordingsCount.value
+          : this.recordingsCount,
+      recordingsDurationMs: data.recordingsDurationMs.present
+          ? data.recordingsDurationMs.value
+          : this.recordingsDurationMs,
+      lastRecordingAt: data.lastRecordingAt.present
+          ? data.lastRecordingAt.value
+          : this.lastRecordingAt,
+      currentSegmentIndex: data.currentSegmentIndex.present
+          ? data.currentSegmentIndex.value
+          : this.currentSegmentIndex,
+      echoActive: data.echoActive.present
+          ? data.echoActive.value
+          : this.echoActive,
+      echoStartLine: data.echoStartLine.present
+          ? data.echoStartLine.value
+          : this.echoStartLine,
+      echoEndLine: data.echoEndLine.present
+          ? data.echoEndLine.value
+          : this.echoEndLine,
       startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
-      lastActiveAt:
-          data.lastActiveAt.present
-              ? data.lastActiveAt.value
-              : this.lastActiveAt,
-      completedAt:
-          data.completedAt.present ? data.completedAt.value : this.completedAt,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
-      serverUpdatedAt:
-          data.serverUpdatedAt.present
-              ? data.serverUpdatedAt.value
-              : this.serverUpdatedAt,
+      lastActiveAt: data.lastActiveAt.present
+          ? data.lastActiveAt.value
+          : this.lastActiveAt,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      serverUpdatedAt: data.serverUpdatedAt.present
+          ? data.serverUpdatedAt.value
+          : this.serverUpdatedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -4990,46 +4922,38 @@ class $RecordingsTable extends Recordings
   RecordingRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RecordingRow(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
-      targetType:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_type'],
-          )!,
-      targetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_id'],
-          )!,
-      referenceStart:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}reference_start'],
-          )!,
-      referenceDuration:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}reference_duration'],
-          )!,
-      referenceText:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}reference_text'],
-          )!,
-      language:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}language'],
-          )!,
-      duration:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}duration'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      targetType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_type'],
+      )!,
+      targetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_id'],
+      )!,
+      referenceStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reference_start'],
+      )!,
+      referenceDuration: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reference_duration'],
+      )!,
+      referenceText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference_text'],
+      )!,
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      )!,
+      duration: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration'],
+      )!,
       md5: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}md5'],
@@ -5058,16 +4982,14 @@ class $RecordingsTable extends Recordings
         DriftSqlType.dateTime,
         data['${effectivePrefix}server_updated_at'],
       ),
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}created_at'],
-          )!,
-      updatedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}updated_at'],
-          )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -5162,30 +5084,24 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
       language: Value(language),
       duration: Value(duration),
       md5: md5 == null && nullToAbsent ? const Value.absent() : Value(md5),
-      audioUrl:
-          audioUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(audioUrl),
-      pronunciationScore:
-          pronunciationScore == null && nullToAbsent
-              ? const Value.absent()
-              : Value(pronunciationScore),
-      assessmentJson:
-          assessmentJson == null && nullToAbsent
-              ? const Value.absent()
-              : Value(assessmentJson),
-      localPath:
-          localPath == null && nullToAbsent
-              ? const Value.absent()
-              : Value(localPath),
-      syncStatus:
-          syncStatus == null && nullToAbsent
-              ? const Value.absent()
-              : Value(syncStatus),
-      serverUpdatedAt:
-          serverUpdatedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(serverUpdatedAt),
+      audioUrl: audioUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(audioUrl),
+      pronunciationScore: pronunciationScore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pronunciationScore),
+      assessmentJson: assessmentJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(assessmentJson),
+      localPath: localPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localPath),
+      syncStatus: syncStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncStatus),
+      serverUpdatedAt: serverUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverUpdatedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -5269,56 +5185,53 @@ class RecordingRow extends DataClass implements Insertable<RecordingRow> {
     duration: duration ?? this.duration,
     md5: md5.present ? md5.value : this.md5,
     audioUrl: audioUrl.present ? audioUrl.value : this.audioUrl,
-    pronunciationScore:
-        pronunciationScore.present
-            ? pronunciationScore.value
-            : this.pronunciationScore,
-    assessmentJson:
-        assessmentJson.present ? assessmentJson.value : this.assessmentJson,
+    pronunciationScore: pronunciationScore.present
+        ? pronunciationScore.value
+        : this.pronunciationScore,
+    assessmentJson: assessmentJson.present
+        ? assessmentJson.value
+        : this.assessmentJson,
     localPath: localPath.present ? localPath.value : this.localPath,
     syncStatus: syncStatus.present ? syncStatus.value : this.syncStatus,
-    serverUpdatedAt:
-        serverUpdatedAt.present ? serverUpdatedAt.value : this.serverUpdatedAt,
+    serverUpdatedAt: serverUpdatedAt.present
+        ? serverUpdatedAt.value
+        : this.serverUpdatedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   RecordingRow copyWithCompanion(RecordingsCompanion data) {
     return RecordingRow(
       id: data.id.present ? data.id.value : this.id,
-      targetType:
-          data.targetType.present ? data.targetType.value : this.targetType,
+      targetType: data.targetType.present
+          ? data.targetType.value
+          : this.targetType,
       targetId: data.targetId.present ? data.targetId.value : this.targetId,
-      referenceStart:
-          data.referenceStart.present
-              ? data.referenceStart.value
-              : this.referenceStart,
-      referenceDuration:
-          data.referenceDuration.present
-              ? data.referenceDuration.value
-              : this.referenceDuration,
-      referenceText:
-          data.referenceText.present
-              ? data.referenceText.value
-              : this.referenceText,
+      referenceStart: data.referenceStart.present
+          ? data.referenceStart.value
+          : this.referenceStart,
+      referenceDuration: data.referenceDuration.present
+          ? data.referenceDuration.value
+          : this.referenceDuration,
+      referenceText: data.referenceText.present
+          ? data.referenceText.value
+          : this.referenceText,
       language: data.language.present ? data.language.value : this.language,
       duration: data.duration.present ? data.duration.value : this.duration,
       md5: data.md5.present ? data.md5.value : this.md5,
       audioUrl: data.audioUrl.present ? data.audioUrl.value : this.audioUrl,
-      pronunciationScore:
-          data.pronunciationScore.present
-              ? data.pronunciationScore.value
-              : this.pronunciationScore,
-      assessmentJson:
-          data.assessmentJson.present
-              ? data.assessmentJson.value
-              : this.assessmentJson,
+      pronunciationScore: data.pronunciationScore.present
+          ? data.pronunciationScore.value
+          : this.pronunciationScore,
+      assessmentJson: data.assessmentJson.present
+          ? data.assessmentJson.value
+          : this.assessmentJson,
       localPath: data.localPath.present ? data.localPath.value : this.localPath,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
-      serverUpdatedAt:
-          data.serverUpdatedAt.present
-              ? data.serverUpdatedAt.value
-              : this.serverUpdatedAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      serverUpdatedAt: data.serverUpdatedAt.present
+          ? data.serverUpdatedAt.value
+          : this.serverUpdatedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -5988,66 +5901,54 @@ class $DictationsTable extends Dictations
   DictationRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DictationRow(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
-      targetType:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_type'],
-          )!,
-      targetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}target_id'],
-          )!,
-      referenceStartMs:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}reference_start_ms'],
-          )!,
-      referenceDurationMs:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}reference_duration_ms'],
-          )!,
-      referenceText:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}reference_text'],
-          )!,
-      language:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}language'],
-          )!,
-      userInput:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_input'],
-          )!,
-      accuracy:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}accuracy'],
-          )!,
-      correctWords:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}correct_words'],
-          )!,
-      missedWords:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}missed_words'],
-          )!,
-      extraWords:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}extra_words'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      targetType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_type'],
+      )!,
+      targetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_id'],
+      )!,
+      referenceStartMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reference_start_ms'],
+      )!,
+      referenceDurationMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reference_duration_ms'],
+      )!,
+      referenceText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference_text'],
+      )!,
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      )!,
+      userInput: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_input'],
+      )!,
+      accuracy: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}accuracy'],
+      )!,
+      correctWords: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}correct_words'],
+      )!,
+      missedWords: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}missed_words'],
+      )!,
+      extraWords: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}extra_words'],
+      )!,
       syncStatus: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}sync_status'],
@@ -6056,16 +5957,14 @@ class $DictationsTable extends Dictations
         DriftSqlType.dateTime,
         data['${effectivePrefix}server_updated_at'],
       ),
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}created_at'],
-          )!,
-      updatedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}updated_at'],
-          )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -6150,14 +6049,12 @@ class DictationRow extends DataClass implements Insertable<DictationRow> {
       correctWords: Value(correctWords),
       missedWords: Value(missedWords),
       extraWords: Value(extraWords),
-      syncStatus:
-          syncStatus == null && nullToAbsent
-              ? const Value.absent()
-              : Value(syncStatus),
-      serverUpdatedAt:
-          serverUpdatedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(serverUpdatedAt),
+      syncStatus: syncStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncStatus),
+      serverUpdatedAt: serverUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverUpdatedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -6243,46 +6140,46 @@ class DictationRow extends DataClass implements Insertable<DictationRow> {
     missedWords: missedWords ?? this.missedWords,
     extraWords: extraWords ?? this.extraWords,
     syncStatus: syncStatus.present ? syncStatus.value : this.syncStatus,
-    serverUpdatedAt:
-        serverUpdatedAt.present ? serverUpdatedAt.value : this.serverUpdatedAt,
+    serverUpdatedAt: serverUpdatedAt.present
+        ? serverUpdatedAt.value
+        : this.serverUpdatedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   DictationRow copyWithCompanion(DictationsCompanion data) {
     return DictationRow(
       id: data.id.present ? data.id.value : this.id,
-      targetType:
-          data.targetType.present ? data.targetType.value : this.targetType,
+      targetType: data.targetType.present
+          ? data.targetType.value
+          : this.targetType,
       targetId: data.targetId.present ? data.targetId.value : this.targetId,
-      referenceStartMs:
-          data.referenceStartMs.present
-              ? data.referenceStartMs.value
-              : this.referenceStartMs,
-      referenceDurationMs:
-          data.referenceDurationMs.present
-              ? data.referenceDurationMs.value
-              : this.referenceDurationMs,
-      referenceText:
-          data.referenceText.present
-              ? data.referenceText.value
-              : this.referenceText,
+      referenceStartMs: data.referenceStartMs.present
+          ? data.referenceStartMs.value
+          : this.referenceStartMs,
+      referenceDurationMs: data.referenceDurationMs.present
+          ? data.referenceDurationMs.value
+          : this.referenceDurationMs,
+      referenceText: data.referenceText.present
+          ? data.referenceText.value
+          : this.referenceText,
       language: data.language.present ? data.language.value : this.language,
       userInput: data.userInput.present ? data.userInput.value : this.userInput,
       accuracy: data.accuracy.present ? data.accuracy.value : this.accuracy,
-      correctWords:
-          data.correctWords.present
-              ? data.correctWords.value
-              : this.correctWords,
-      missedWords:
-          data.missedWords.present ? data.missedWords.value : this.missedWords,
-      extraWords:
-          data.extraWords.present ? data.extraWords.value : this.extraWords,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
-      serverUpdatedAt:
-          data.serverUpdatedAt.present
-              ? data.serverUpdatedAt.value
-              : this.serverUpdatedAt,
+      correctWords: data.correctWords.present
+          ? data.correctWords.value
+          : this.correctWords,
+      missedWords: data.missedWords.present
+          ? data.missedWords.value
+          : this.missedWords,
+      extraWords: data.extraWords.present
+          ? data.extraWords.value
+          : this.extraWords,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      serverUpdatedAt: data.serverUpdatedAt.present
+          ? data.serverUpdatedAt.value
+          : this.serverUpdatedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -6786,35 +6683,30 @@ class $SyncQueueTable extends SyncQueue
   SyncQueueRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SyncQueueRow(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      entityType:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}entity_type'],
-          )!,
-      entityId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}entity_id'],
-          )!,
-      action:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}action'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      entityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_type'],
+      )!,
+      entityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_id'],
+      )!,
+      action: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}action'],
+      )!,
       payloadJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}payload_json'],
       ),
-      retryCount:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}retry_count'],
-          )!,
+      retryCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}retry_count'],
+      )!,
       lastAttempt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_attempt'],
@@ -6823,11 +6715,10 @@ class $SyncQueueTable extends SyncQueue
         DriftSqlType.string,
         data['${effectivePrefix}error'],
       ),
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}created_at'],
-          )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
     );
   }
 
@@ -6885,17 +6776,16 @@ class SyncQueueRow extends DataClass implements Insertable<SyncQueueRow> {
       entityType: Value(entityType),
       entityId: Value(entityId),
       action: Value(action),
-      payloadJson:
-          payloadJson == null && nullToAbsent
-              ? const Value.absent()
-              : Value(payloadJson),
+      payloadJson: payloadJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payloadJson),
       retryCount: Value(retryCount),
-      lastAttempt:
-          lastAttempt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(lastAttempt),
-      error:
-          error == null && nullToAbsent ? const Value.absent() : Value(error),
+      lastAttempt: lastAttempt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastAttempt),
+      error: error == null && nullToAbsent
+          ? const Value.absent()
+          : Value(error),
       createdAt: Value(createdAt),
     );
   }
@@ -6957,16 +6847,20 @@ class SyncQueueRow extends DataClass implements Insertable<SyncQueueRow> {
   SyncQueueRow copyWithCompanion(SyncQueueCompanion data) {
     return SyncQueueRow(
       id: data.id.present ? data.id.value : this.id,
-      entityType:
-          data.entityType.present ? data.entityType.value : this.entityType,
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
       entityId: data.entityId.present ? data.entityId.value : this.entityId,
       action: data.action.present ? data.action.value : this.action,
-      payloadJson:
-          data.payloadJson.present ? data.payloadJson.value : this.payloadJson,
-      retryCount:
-          data.retryCount.present ? data.retryCount.value : this.retryCount,
-      lastAttempt:
-          data.lastAttempt.present ? data.lastAttempt.value : this.lastAttempt,
+      payloadJson: data.payloadJson.present
+          ? data.payloadJson.value
+          : this.payloadJson,
+      retryCount: data.retryCount.present
+          ? data.retryCount.value
+          : this.retryCount,
+      lastAttempt: data.lastAttempt.present
+          ? data.lastAttempt.value
+          : this.lastAttempt,
       error: data.error.present ? data.error.value : this.error,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
@@ -7211,16 +7105,14 @@ class $SettingsKvTable extends SettingsKv
   SettingRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SettingRow(
-      key:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}key'],
-          )!,
-      value:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}value'],
-          )!,
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
     );
   }
 
@@ -7724,12 +7616,12 @@ class $$VideosTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$VideosTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$VideosTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$VideosTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$VideosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$VideosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$VideosTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -7810,16 +7702,9 @@ class $$VideosTableTableManager
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -8212,12 +8097,12 @@ class $$AudiosTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$AudiosTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$AudiosTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$AudiosTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$AudiosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AudiosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AudiosTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -8310,16 +8195,9 @@ class $$AudiosTableTableManager
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -8608,13 +8486,12 @@ class $$TranscriptsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$TranscriptsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$TranscriptsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () =>
-                  $$TranscriptsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$TranscriptsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TranscriptsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TranscriptsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -8679,16 +8556,9 @@ class $$TranscriptsTableTableManager
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -8828,18 +8698,18 @@ class $$TranscriptFetchStatesTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$TranscriptFetchStatesTableFilterComposer(
+          createFilteringComposer: () =>
+              $$TranscriptFetchStatesTableFilterComposer(
                 $db: db,
                 $table: table,
               ),
-          createOrderingComposer:
-              () => $$TranscriptFetchStatesTableOrderingComposer(
+          createOrderingComposer: () =>
+              $$TranscriptFetchStatesTableOrderingComposer(
                 $db: db,
                 $table: table,
               ),
-          createComputedFieldComposer:
-              () => $$TranscriptFetchStatesTableAnnotationComposer(
+          createComputedFieldComposer: () =>
+              $$TranscriptFetchStatesTableAnnotationComposer(
                 $db: db,
                 $table: table,
               ),
@@ -8867,16 +8737,9 @@ class $$TranscriptFetchStatesTableTableManager
                 lastFetchedAt: lastFetchedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -9374,13 +9237,12 @@ class $$EchoSessionsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$EchoSessionsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$EchoSessionsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () =>
-                  $$EchoSessionsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$EchoSessionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EchoSessionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EchoSessionsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -9493,16 +9355,9 @@ class $$EchoSessionsTableTableManager
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -9858,12 +9713,12 @@ class $$RecordingsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$RecordingsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$RecordingsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$RecordingsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$RecordingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RecordingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RecordingsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -9944,16 +9799,9 @@ class $$RecordingsTableTableManager
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -10296,12 +10144,12 @@ class $$DictationsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$DictationsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$DictationsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$DictationsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$DictationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DictationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DictationsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -10378,16 +10226,9 @@ class $$DictationsTableTableManager
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -10613,12 +10454,12 @@ class $$SyncQueueTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$SyncQueueTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$SyncQueueTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$SyncQueueTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$SyncQueueTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncQueueTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncQueueTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -10663,16 +10504,9 @@ class $$SyncQueueTableTableManager
                 error: error,
                 createdAt: createdAt,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -10787,12 +10621,12 @@ class $$SettingsKvTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$SettingsKvTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$SettingsKvTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$SettingsKvTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$SettingsKvTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SettingsKvTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SettingsKvTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> key = const Value.absent(),
@@ -10809,16 +10643,9 @@ class $$SettingsKvTableTableManager
                 value: value,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

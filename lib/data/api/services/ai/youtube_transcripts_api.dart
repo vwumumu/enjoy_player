@@ -32,8 +32,8 @@ class YoutubeTranscriptsApi implements YoutubeTranscriptsClient {
       body: {
         'videoId': videoId,
         'language': language,
-        if (captionFetch != null) 'captionFetch': captionFetch,
-        if (forceRefresh != null) 'forceRefresh': forceRefresh,
+        'captionFetch': ?captionFetch,
+        'forceRefresh': ?forceRefresh,
       },
     );
   }

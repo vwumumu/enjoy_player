@@ -773,7 +773,7 @@ class _SettingsTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (trailing != null) trailing!,
+                ?trailing,
                 if (showChevron && onTap != null) ...[
                   SizedBox(width: t.space4),
                   Icon(

@@ -52,9 +52,6 @@ jobs:
       - name: Flutter analyze
         run: flutter analyze
 
-      - name: Custom lint
-        run: dart run custom_lint
-
       - name: Flutter test (app)
         run: flutter test
 

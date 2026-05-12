@@ -24,7 +24,7 @@ class TranslationApi {
         'text': text,
         'sourceLang': sourceLanguage,
         'targetLang': targetLanguage,
-        if (forceRefresh != null) 'forceRefresh': forceRefresh,
+        'forceRefresh': ?forceRefresh,
       },
     );
   }
