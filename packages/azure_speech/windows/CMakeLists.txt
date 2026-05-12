@@ -34,17 +34,36 @@ endif()
 list(GET _SPEECH_CAPI_HEADER 0 _SPEECH_CAPI_HEADER_ONE)
 cmake_path(GET _SPEECH_CAPI_HEADER_ONE PARENT_PATH AZURE_CAPI_INCLUDE)
 
-file(GLOB_RECURSE AZURE_LIB_DEBUG
-  "${AZURE_SDK_DIR}/extract/**/Debug/Microsoft.CognitiveServices.Speech.core.lib")
-file(GLOB_RECURSE AZURE_LIB_RELEASE
-  "${AZURE_SDK_DIR}/extract/**/Release/Microsoft.CognitiveServices.Speech.core.lib")
-if(NOT AZURE_LIB_DEBUG OR NOT AZURE_LIB_RELEASE)
-  message(FATAL_ERROR "Could not locate Speech SDK .lib (Debug/Release) under ${AZURE_SDK_DIR}/extract")
+# NuGet 1.49.x: x64 Release import lib only (no Debug import libs). Desktop layout is
+# either extract/build/native/x64/Release/... (flat .nupkg) or
+# extract/<packageId>/build/native/x64/Release/...
+set(_azure_core_lib_flat
+  "${AZURE_SDK_DIR}/extract/build/native/x64/Release/Microsoft.CognitiveServices.Speech.core.lib")
+if(EXISTS "${_azure_core_lib_flat}")
+  set(AZURE_CORE_IMPORT_LIB "${_azure_core_lib_flat}")
+else()
+  file(GLOB _azure_core_nested
+    "${AZURE_SDK_DIR}/extract/*/build/native/x64/Release/Microsoft.CognitiveServices.Speech.core.lib")
+  if(_azure_core_nested)
+    list(GET _azure_core_nested 0 AZURE_CORE_IMPORT_LIB)
+  endif()
 endif()
-list(GET AZURE_LIB_DEBUG 0 AZURE_LIB_DEBUG_PATH)
-list(GET AZURE_LIB_RELEASE 0 AZURE_LIB_RELEASE_PATH)
+if(NOT AZURE_CORE_IMPORT_LIB)
+  message(FATAL_ERROR
+    "Could not locate build/native/x64/Release/Microsoft.CognitiveServices.Speech.core.lib under ${AZURE_SDK_DIR}/extract")
+endif()
 
-file(GLOB AZURE_DLLS "${AZURE_SDK_DIR}/extract/**/runtimes/win-x64/native/*.dll")
+# Flat NuGet extract: runtimes/ is at the root of extract/, not under a sub-folder.
+file(GLOB AZURE_DLLS
+  "${AZURE_SDK_DIR}/extract/runtimes/win-x64/native/*.dll")
+if(NOT AZURE_DLLS)
+  # Rare: extract unpacked into a versioned sub-folder.
+  file(GLOB AZURE_DLLS
+    "${AZURE_SDK_DIR}/extract/*/runtimes/win-x64/native/*.dll")
+endif()
+if(NOT AZURE_DLLS)
+  message(FATAL_ERROR "Could not locate Speech SDK DLLs under ${AZURE_SDK_DIR}/extract/runtimes/win-x64/native/")
+endif()
 
 list(APPEND PLUGIN_SOURCES
   "azure_speech_plugin.cpp"
@@ -71,8 +90,8 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
-target_link_libraries(${PLUGIN_NAME} PRIVATE
-  "$<IF:$<CONFIG:Debug>,${AZURE_LIB_DEBUG_PATH},${AZURE_LIB_RELEASE_PATH}>")
+# Same import .lib for Debug and Release (SDK does not publish separate Debug import libs).
+target_link_libraries(${PLUGIN_NAME} PRIVATE "${AZURE_CORE_IMPORT_LIB}")
 
 set(azure_speech_bundled_libraries
   ${AZURE_DLLS}
