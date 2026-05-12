@@ -1,5 +1,10 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+# CMake 3.31+ CMP0175: flutter_inappwebview_windows uses add_custom_command(TARGET ... DEPENDS).
+# Plugins call cmake_policy(VERSION ...3.25), which unsets CMP0175; a default avoids dev warnings.
+if(POLICY CMP0175)
+  set(CMAKE_POLICY_DEFAULT_CMP0175 OLD CACHE STRING "" FORCE)
+endif()
 project(enjoy_player LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
