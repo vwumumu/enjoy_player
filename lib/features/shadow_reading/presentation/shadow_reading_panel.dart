@@ -23,6 +23,9 @@ import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
 import 'package:enjoy_player/features/shadow_reading/application/shadow_reading_hotkey_bus.dart';
+import 'package:enjoy_player/features/shadow_reading/presentation/recording_assessment_button.dart';
+import 'package:enjoy_player/features/shadow_reading/presentation/recording_assessment_flow.dart';
+import 'package:enjoy_player/features/shadow_reading/presentation/score_level.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -373,8 +376,29 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
   void _onHotkeyAssessmentPulse() {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.hotkeysStubAssessment)),
+    unawaited(_onHotkeyAssessmentRun(l10n));
+  }
+
+  Future<void> _onHotkeyAssessmentRun(AppLocalizations l10n) async {
+    if (!widget.echoActive) return;
+    if (kIsWeb) return;
+    final db = ref.read(appDatabaseProvider);
+    final list = await db.recordingDao.listByEchoRegion(
+      targetType: widget.targetType,
+      targetId: widget.mediaId,
+      language: widget.language,
+      echoStartMs: (widget.startSec * 1000).round(),
+      echoEndMs: (widget.endSec * 1000).round(),
+    );
+    if (!mounted) return;
+    if (list.isEmpty) return;
+    final sel = _resolvedSelectedRow(list, _selectedRecordingId);
+    if (sel == null) return;
+    await triggerRecordingAssessment(
+      context: context,
+      ref: ref,
+      l10n: l10n,
+      row: sel,
     );
   }
 
@@ -878,6 +902,7 @@ class _RecordingCaptionRow extends StatelessWidget {
 }
 
 const _kDeleteTakeToken = '__shadow_delete_current_take__';
+const _kReassessTakeToken = '__shadow_reassess_current_take__';
 
 Future<void> _confirmDeleteCurrentTake({
   required BuildContext context,
@@ -994,6 +1019,7 @@ class _TakesToolbarActions extends ConsumerWidget {
                 icon: const Icon(Icons.play_arrow_rounded),
                 onPressed: null,
               ),
+        RecordingAssessmentButton(row: row, echoActive: echoActive),
         PopupMenuButton<String>(
           tooltip: l10n.shadowRecordingChooseTake,
           onSelected: (value) {
@@ -1008,6 +1034,18 @@ class _TakesToolbarActions extends ConsumerWidget {
               ));
               return;
             }
+            if (value == _kReassessTakeToken) {
+              unawaited(
+                triggerRecordingAssessment(
+                  context: context,
+                  ref: ref,
+                  l10n: l10n,
+                  row: row,
+                  forceRun: true,
+                ),
+              );
+              return;
+            }
             unawaited(onChooseTake(value));
           },
           itemBuilder: (context) {
@@ -1015,23 +1053,75 @@ class _TakesToolbarActions extends ConsumerWidget {
               for (var i = 0; i < list.length; i++)
                 PopupMenuItem<String>(
                   value: list[i].id,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 28,
-                        child: list[i].id == row.id
-                            ? Icon(Icons.check, size: 20, color: scheme.primary)
-                            : const SizedBox.shrink(),
-                      ),
-                      Expanded(
-                        child: Text(
-                          '${l10n.shadowRecordingTake} ${list.length - i} · '
-                          '${(list[i].duration / 1000).toStringAsFixed(1)} s',
-                        ),
-                      ),
-                    ],
+                  child: Builder(
+                    builder: (ctx) {
+                      final r = list[i];
+                      final score = pronunciationScoreFromRecording(r);
+                      return Row(
+                        children: [
+                          SizedBox(
+                            width: 28,
+                            child: r.id == row.id
+                                ? Icon(Icons.check, size: 20, color: scheme.primary)
+                                : const SizedBox.shrink(),
+                          ),
+                          Expanded(
+                            child: Text(
+                              '${l10n.shadowRecordingTake} ${list.length - i} · '
+                              '${(r.duration / 1000).toStringAsFixed(1)} s',
+                            ),
+                          ),
+                          if (score != null)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: assessmentScoreBackground(
+                                    scheme,
+                                    assessmentScoreLevel(score),
+                                  ),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  child: Text(
+                                    '$score',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: assessmentScoreColor(
+                                        scheme,
+                                        assessmentScoreLevel(score),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
                   ),
                 ),
+              PopupMenuItem<String>(
+                value: _kReassessTakeToken,
+                enabled: echoActive &&
+                    !kIsWeb &&
+                    row.assessmentJson != null &&
+                    row.assessmentJson!.trim().isNotEmpty,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 28,
+                      child: Icon(Icons.refresh_rounded, size: 20, color: scheme.primary),
+                    ),
+                    Expanded(child: Text(l10n.assessmentReassess)),
+                  ],
+                ),
+              ),
               const PopupMenuDivider(),
               PopupMenuItem<String>(
                 value: _kDeleteTakeToken,

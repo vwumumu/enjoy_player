@@ -1,0 +1,88 @@
+/// Shared assessment trigger (toolbar button, hotkey, take menu).
+library;
+
+import 'dart:convert';
+
+import 'package:azure_speech/azure_speech.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/features/shadow_reading/application/recording_assessment_controller.dart';
+import 'package:enjoy_player/features/shadow_reading/presentation/assessment_result_dialog.dart';
+import 'package:enjoy_player/l10n/app_localizations.dart';
+
+String recordingAssessmentFailureMessage(
+  AppLocalizations l10n,
+  RecordingAssessmentFailureKind kind, {
+  String? debugMessage,
+}) {
+  return switch (kind) {
+    RecordingAssessmentFailureKind.webUnsupported => l10n.assessmentWebUnsupported,
+    RecordingAssessmentFailureKind.noRecording => l10n.assessmentNoRecording,
+    RecordingAssessmentFailureKind.emptyReference => l10n.assessmentEmptyReference,
+    RecordingAssessmentFailureKind.fileTooSmall => l10n.assessmentNoRecording,
+    RecordingAssessmentFailureKind.serviceError => l10n.assessmentRunFailed(() {
+        final raw = debugMessage?.replaceAll(RegExp(r'\s+'), ' ').trim();
+        if (raw == null || raw.isEmpty) return '—';
+        if (raw.length > 120) return '${raw.substring(0, 117)}…';
+        return raw;
+      }()),
+  };
+}
+
+/// Opens stored results, or runs assessment when [forceRun] is true or there is
+/// no stored JSON yet.
+Future<void> triggerRecordingAssessment({
+  required BuildContext context,
+  required WidgetRef ref,
+  required AppLocalizations l10n,
+  required RecordingRow row,
+  bool forceRun = false,
+}) async {
+  if (kIsWeb) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.assessmentWebUnsupported)),
+      );
+    }
+    return;
+  }
+
+  if (!forceRun) {
+    final stored = row.assessmentJson?.trim();
+    if (stored != null && stored.isNotEmpty) {
+      try {
+        final parsed = AzurePronunciationAssessmentResult.fromJson(
+          jsonDecode(stored) as Map<String, dynamic>,
+        );
+        if (!context.mounted) return;
+        await showAssessmentResultDialog(context: context, assessment: parsed);
+      } on Object {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.assessmentInvalidStored)),
+        );
+      }
+      return;
+    }
+  }
+
+  final notifier = ref.read(recordingAssessmentControllerProvider(row.id).notifier);
+  final outcome = await notifier.run(row);
+  if (!context.mounted) return;
+
+  switch (outcome) {
+    case RecordingAssessmentSuccess(:final detail):
+      await showAssessmentResultDialog(context: context, assessment: detail);
+    case RecordingAssessmentFailure(:final kind, :final debugMessage):
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            recordingAssessmentFailureMessage(l10n, kind, debugMessage: debugMessage),
+          ),
+        ),
+      );
+  }
+}

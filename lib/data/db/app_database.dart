@@ -412,6 +412,21 @@ class RecordingDao extends DatabaseAccessor<AppDatabase> with _$RecordingDaoMixi
   Future<void> insertRow(RecordingRow row) =>
       into(recordings).insert(row, mode: InsertMode.insertOrReplace);
 
+  Future<void> updateAssessment({
+    required String id,
+    required int? pronunciationScore,
+    required String? assessmentJson,
+    required DateTime updatedAt,
+  }) =>
+      (update(recordings)..where((t) => t.id.equals(id))).write(
+        RecordingsCompanion(
+          pronunciationScore: Value(pronunciationScore),
+          assessmentJson: Value(assessmentJson),
+          updatedAt: Value(updatedAt),
+          syncStatus: const Value('local'),
+        ),
+      );
+
   Future<void> deleteId(String id) =>
       (delete(recordings)..where((t) => t.id.equals(id))).go();
 }

@@ -1,0 +1,129 @@
+/// Toolbar control: run / view pronunciation assessment for a take.
+library;
+
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
+import 'package:enjoy_player/features/shadow_reading/application/recording_assessment_controller.dart';
+import 'package:enjoy_player/features/shadow_reading/presentation/recording_assessment_flow.dart';
+import 'package:enjoy_player/features/shadow_reading/presentation/score_level.dart';
+import 'package:enjoy_player/l10n/app_localizations.dart';
+
+int? pronunciationScoreFromRecording(RecordingRow row) {
+  if (row.pronunciationScore != null) return row.pronunciationScore;
+  return _parsePronScoreFromAssessmentJson(row.assessmentJson);
+}
+
+int? _parsePronScoreFromAssessmentJson(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return null;
+  try {
+    final m = jsonDecode(raw) as Map<String, dynamic>;
+    final nb = m['NBest'] as List<dynamic>?;
+    if (nb == null || nb.isEmpty) return null;
+    final first = nb.first;
+    if (first is! Map<String, dynamic>) return null;
+    final pa = first['PronunciationAssessment'];
+    if (pa is! Map<String, dynamic>) return null;
+    final v = pa['PronScore'];
+    if (v is num) return v.round();
+    return null;
+  } on Object {
+    return null;
+  }
+}
+
+class RecordingAssessmentButton extends ConsumerWidget {
+  const RecordingAssessmentButton({
+    required this.row,
+    required this.echoActive,
+    super.key,
+  });
+
+  final RecordingRow row;
+  final bool echoActive;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (kIsWeb) return const SizedBox.shrink();
+
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final lp = row.localPath;
+    final canInteract = echoActive && lp != null && lp.isNotEmpty;
+
+    final ui = ref.watch(recordingAssessmentControllerProvider(row.id));
+    final isAssessing = ui.isRunning;
+
+    final score = pronunciationScoreFromRecording(row);
+    final hasStored =
+        row.assessmentJson != null && row.assessmentJson!.trim().isNotEmpty;
+
+    final tooltip = hotkeyTooltipLabel(
+      ref,
+      'player.toggleAssessment',
+      hasStored ? l10n.assessmentView : l10n.assessmentRun,
+    );
+
+    final Color? bg = score != null
+        ? assessmentScoreBackground(scheme, assessmentScoreLevel(score))
+        : null;
+    final Color fg = score != null
+        ? assessmentScoreColor(scheme, assessmentScoreLevel(score))
+        : scheme.onSurfaceVariant;
+
+    return Tooltip(
+      message: tooltip,
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: Material(
+          color: bg ?? Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: !canInteract || isAssessing
+                ? null
+                : () => unawaited(
+                      triggerRecordingAssessment(
+                        context: context,
+                        ref: ref,
+                        l10n: l10n,
+                        row: row,
+                      ),
+                    ),
+            child: Center(
+              child: isAssessing
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: scheme.primary,
+                      ),
+                    )
+                  : score != null
+                  ? Text(
+                      '$score',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: fg,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )
+                  : Icon(
+                      Icons.auto_awesome_rounded,
+                      size: 20,
+                      color: canInteract ? scheme.primary : scheme.onSurfaceVariant,
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

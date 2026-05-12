@@ -520,11 +520,116 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hotkeysStubSearch => 'Search is not available yet.';
 
   @override
-  String get hotkeysStubAssessment =>
-      'Pronunciation assessment is not available yet.';
+  String get hotkeysStubDictation => 'Dictation mode is not available yet.';
 
   @override
-  String get hotkeysStubDictation => 'Dictation mode is not available yet.';
+  String get assessmentTitle => 'Pronunciation assessment';
+
+  @override
+  String get assessmentDescription => 'Detailed scoring for your reading.';
+
+  @override
+  String get assessmentRun => 'Run pronunciation assessment';
+
+  @override
+  String get assessmentView => 'View pronunciation assessment';
+
+  @override
+  String get assessmentReassess => 'Re-assess';
+
+  @override
+  String get assessmentOverallScore => 'Overall score';
+
+  @override
+  String get assessmentAccuracy => 'Accuracy';
+
+  @override
+  String get assessmentCompleteness => 'Completeness';
+
+  @override
+  String get assessmentFluency => 'Fluency';
+
+  @override
+  String get assessmentProsody => 'Prosody';
+
+  @override
+  String get assessmentPronunciationAnalysis => 'Pronunciation analysis';
+
+  @override
+  String get assessmentAccuracyScore => 'Accuracy score';
+
+  @override
+  String get assessmentSyllables => 'Syllables';
+
+  @override
+  String get assessmentPhonemes => 'Phonemes';
+
+  @override
+  String get assessmentNoRecording => 'Recording file is missing or empty.';
+
+  @override
+  String assessmentRunFailed(String reason) {
+    return 'Couldn\'t run assessment: $reason';
+  }
+
+  @override
+  String get assessmentErrorTypeOmission => 'Omission';
+
+  @override
+  String get assessmentErrorTypeInsertion => 'Insertion';
+
+  @override
+  String get assessmentErrorTypeMispronunciation => 'Mispronunciation';
+
+  @override
+  String get assessmentErrorTypeUnexpectedBreak => 'Unexpected break';
+
+  @override
+  String get assessmentErrorTypeMissingBreak => 'Missing break';
+
+  @override
+  String get assessmentErrorTypeMonotone => 'Monotone';
+
+  @override
+  String get assessmentErrorTypeCorrect => 'Correct';
+
+  @override
+  String get assessmentErrorExplOmission =>
+      'This word was expected but not detected.';
+
+  @override
+  String get assessmentErrorExplInsertion =>
+      'Extra word detected that wasn\'t in the reference.';
+
+  @override
+  String get assessmentErrorExplMispronunciation =>
+      'This word may have been pronounced incorrectly.';
+
+  @override
+  String get assessmentErrorExplUnexpectedBreak =>
+      'Unexpected pause detected before this word.';
+
+  @override
+  String get assessmentErrorExplMissingBreak =>
+      'Expected pause was not detected before this word.';
+
+  @override
+  String get assessmentErrorExplMonotone =>
+      'Pitch variation was lower than expected.';
+
+  @override
+  String get assessmentErrorExplCorrect => 'No issues detected for this word.';
+
+  @override
+  String get assessmentWebUnsupported =>
+      'Pronunciation assessment is not available on web.';
+
+  @override
+  String get assessmentEmptyReference => 'Reference text is empty.';
+
+  @override
+  String get assessmentInvalidStored =>
+      'Stored assessment data could not be read.';
 
   @override
   String get authSignInTitle => 'Sign in to Enjoy';

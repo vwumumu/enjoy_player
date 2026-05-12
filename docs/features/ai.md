@@ -20,7 +20,7 @@ Enjoy Player calls the same Enjoy / worker HTTP surface as the web `@enjoy/ai` p
 - **Language codes**: [`lib/features/ai/data/azure_language_mapper.dart`](../../lib/features/ai/data/azure_language_mapper.dart) maps short / transcript codes to Azure locales (aligned with the browser extension mapper).
 - **ADR**: [ADR-0017](../decisions/0017-azure-pronunciation-assessment.md)
 
-Assessment is **not available on web** in this app. Shadow-reading hotkey / per-take UI wiring may follow in a separate change.
+Assessment is **not available on web** in this app. **Shadow reading** exposes per-take assess + result dialog (see [echo-mode](echo-mode.md)).
 
 ## Not wired yet
 

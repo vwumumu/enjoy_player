@@ -10,7 +10,7 @@ Keyboard shortcuts mirror the Enjoy web app defaults (`stores/hotkeys.ts`). Cust
 - **Library** `/`: focuses the sidebar search field when the wide layout with sidebar is visible. Narrow layouts without the sidebar have no search focus target yet.
 - **Player** shortcuts apply when a playback session exists (`playerControllerProvider`).
 - **Echo brackets**: expand/shrink apply only when Echo mode is active (handled inside `PlayerInteractions`).
-- **Shadow reading**: `R` / `G` / `P` / `V` pulse a Riverpod bus consumed by `ShadowReadingPanel` / `PitchContourSection`. Assessment (`V`) shows a stub snackbar until pronunciation assessment UI exists. Dictation (`H`) is reserved (no UI yet).
+- **Shadow reading**: `R` / `G` / `P` / `V` pulse a Riverpod bus consumed by `ShadowReadingPanel` / `PitchContourSection`. Assessment (`V`) runs the same flow as the shadow-reading **assess** control (view result if already assessed, otherwise run). Dictation (`H`) is reserved (no UI yet).
 
 ## Customization
 

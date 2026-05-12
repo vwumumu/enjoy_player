@@ -1072,17 +1072,209 @@ abstract class AppLocalizations {
   /// **'Search is not available yet.'**
   String get hotkeysStubSearch;
 
-  /// No description provided for @hotkeysStubAssessment.
-  ///
-  /// In en, this message translates to:
-  /// **'Pronunciation assessment is not available yet.'**
-  String get hotkeysStubAssessment;
-
   /// No description provided for @hotkeysStubDictation.
   ///
   /// In en, this message translates to:
   /// **'Dictation mode is not available yet.'**
   String get hotkeysStubDictation;
+
+  /// No description provided for @assessmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation assessment'**
+  String get assessmentTitle;
+
+  /// No description provided for @assessmentDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed scoring for your reading.'**
+  String get assessmentDescription;
+
+  /// No description provided for @assessmentRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run pronunciation assessment'**
+  String get assessmentRun;
+
+  /// No description provided for @assessmentView.
+  ///
+  /// In en, this message translates to:
+  /// **'View pronunciation assessment'**
+  String get assessmentView;
+
+  /// No description provided for @assessmentReassess.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-assess'**
+  String get assessmentReassess;
+
+  /// No description provided for @assessmentOverallScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall score'**
+  String get assessmentOverallScore;
+
+  /// No description provided for @assessmentAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy'**
+  String get assessmentAccuracy;
+
+  /// No description provided for @assessmentCompleteness.
+  ///
+  /// In en, this message translates to:
+  /// **'Completeness'**
+  String get assessmentCompleteness;
+
+  /// No description provided for @assessmentFluency.
+  ///
+  /// In en, this message translates to:
+  /// **'Fluency'**
+  String get assessmentFluency;
+
+  /// No description provided for @assessmentProsody.
+  ///
+  /// In en, this message translates to:
+  /// **'Prosody'**
+  String get assessmentProsody;
+
+  /// No description provided for @assessmentPronunciationAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation analysis'**
+  String get assessmentPronunciationAnalysis;
+
+  /// No description provided for @assessmentAccuracyScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy score'**
+  String get assessmentAccuracyScore;
+
+  /// No description provided for @assessmentSyllables.
+  ///
+  /// In en, this message translates to:
+  /// **'Syllables'**
+  String get assessmentSyllables;
+
+  /// No description provided for @assessmentPhonemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Phonemes'**
+  String get assessmentPhonemes;
+
+  /// No description provided for @assessmentNoRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording file is missing or empty.'**
+  String get assessmentNoRecording;
+
+  /// No description provided for @assessmentRunFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t run assessment: {reason}'**
+  String assessmentRunFailed(String reason);
+
+  /// No description provided for @assessmentErrorTypeOmission.
+  ///
+  /// In en, this message translates to:
+  /// **'Omission'**
+  String get assessmentErrorTypeOmission;
+
+  /// No description provided for @assessmentErrorTypeInsertion.
+  ///
+  /// In en, this message translates to:
+  /// **'Insertion'**
+  String get assessmentErrorTypeInsertion;
+
+  /// No description provided for @assessmentErrorTypeMispronunciation.
+  ///
+  /// In en, this message translates to:
+  /// **'Mispronunciation'**
+  String get assessmentErrorTypeMispronunciation;
+
+  /// No description provided for @assessmentErrorTypeUnexpectedBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexpected break'**
+  String get assessmentErrorTypeUnexpectedBreak;
+
+  /// No description provided for @assessmentErrorTypeMissingBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing break'**
+  String get assessmentErrorTypeMissingBreak;
+
+  /// No description provided for @assessmentErrorTypeMonotone.
+  ///
+  /// In en, this message translates to:
+  /// **'Monotone'**
+  String get assessmentErrorTypeMonotone;
+
+  /// No description provided for @assessmentErrorTypeCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct'**
+  String get assessmentErrorTypeCorrect;
+
+  /// No description provided for @assessmentErrorExplOmission.
+  ///
+  /// In en, this message translates to:
+  /// **'This word was expected but not detected.'**
+  String get assessmentErrorExplOmission;
+
+  /// No description provided for @assessmentErrorExplInsertion.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra word detected that wasn\'t in the reference.'**
+  String get assessmentErrorExplInsertion;
+
+  /// No description provided for @assessmentErrorExplMispronunciation.
+  ///
+  /// In en, this message translates to:
+  /// **'This word may have been pronounced incorrectly.'**
+  String get assessmentErrorExplMispronunciation;
+
+  /// No description provided for @assessmentErrorExplUnexpectedBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexpected pause detected before this word.'**
+  String get assessmentErrorExplUnexpectedBreak;
+
+  /// No description provided for @assessmentErrorExplMissingBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected pause was not detected before this word.'**
+  String get assessmentErrorExplMissingBreak;
+
+  /// No description provided for @assessmentErrorExplMonotone.
+  ///
+  /// In en, this message translates to:
+  /// **'Pitch variation was lower than expected.'**
+  String get assessmentErrorExplMonotone;
+
+  /// No description provided for @assessmentErrorExplCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'No issues detected for this word.'**
+  String get assessmentErrorExplCorrect;
+
+  /// No description provided for @assessmentWebUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation assessment is not available on web.'**
+  String get assessmentWebUnsupported;
+
+  /// No description provided for @assessmentEmptyReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference text is empty.'**
+  String get assessmentEmptyReference;
+
+  /// No description provided for @assessmentInvalidStored.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored assessment data could not be read.'**
+  String get assessmentInvalidStored;
 
   /// No description provided for @authSignInTitle.
   ///
