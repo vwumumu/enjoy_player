@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:azure_speech/azure_speech.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/data/api/services/ai/azure_token_cache.dart';
+import 'package:enjoy_player/features/ai/data/azure_assessment_wav_normalizer.dart';
 import 'package:enjoy_player/features/ai/data/azure_language_mapper.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/assessment_capability.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_request.dart';
@@ -37,11 +38,23 @@ final class EnjoyAssessmentCapability implements AssessmentCapability {
     final durationSeconds = _estimateDurationSeconds(request);
     final token = await _tokenCache.getToken(durationSeconds: durationSeconds);
 
-    final (wavPath, deleteAfter) = await _materializeWav(request);
+    final (wavPath, deleteMaterialized) = await _materializeWav(request);
+    var pathForSdk = wavPath;
+    var deleteNormalized = false;
     try {
+      final normalized = await tryCreateNormalizedAzureAssessmentWav(wavPath);
+      if (normalized != null) {
+        pathForSdk = normalized;
+        deleteNormalized = true;
+      } else {
+        _log.fine(
+          'Azure assessment: using original WAV (FFmpeg normalize unavailable or failed)',
+        );
+      }
+
       final azureLanguage = mapTranscriptLanguageToAzure(request.language);
       final params = AzurePronunciationAssessmentParams(
-        audioPath: wavPath,
+        audioPath: pathForSdk,
         referenceText: _cleanReferenceText(request.referenceText),
         language: azureLanguage,
         token: token.token,
@@ -56,7 +69,14 @@ final class EnjoyAssessmentCapability implements AssessmentCapability {
       _log.warning('Azure assessment failed', e, st);
       rethrow;
     } finally {
-      if (deleteAfter) {
+      if (deleteNormalized) {
+        try {
+          await File(pathForSdk).delete();
+        } catch (e, st) {
+          _log.fine('normalized wav cleanup failed: $pathForSdk', e, st);
+        }
+      }
+      if (deleteMaterialized) {
         try {
           await File(wavPath).delete();
         } catch (e, st) {

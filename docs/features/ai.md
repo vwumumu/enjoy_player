@@ -16,7 +16,7 @@ Enjoy Player calls the same Enjoy / worker HTTP surface as the web `@enjoy/ai` p
 ### Native pronunciation plugin
 
 - **Package**: [`packages/azure_speech/README.md`](../../packages/azure_speech/README.md) (Speech SDK wrapper; pronunciation assessment implemented first)
-- **Capability**: [`lib/features/ai/data/enjoy/enjoy_assessment_capability.dart`](../../lib/features/ai/data/enjoy/enjoy_assessment_capability.dart) (token cache + WAV path or temp file from bytes).
+- **Capability**: [`lib/features/ai/data/enjoy/enjoy_assessment_capability.dart`](../../lib/features/ai/data/enjoy/enjoy_assessment_capability.dart) (token cache + WAV path or temp file from bytes). Before calling the SDK, recordings are re-encoded via **FFmpeg** to **16 kHz mono 16-bit PCM WAV** ([`azure_assessment_wav_normalizer.dart`](../../lib/features/ai/data/azure_assessment_wav_normalizer.dart)) so `record`-package WAV (float / odd RIFF) does not trigger Azure **SPXERR_UNEXPECTED_EOF**.
 - **Language codes**: [`lib/features/ai/data/azure_language_mapper.dart`](../../lib/features/ai/data/azure_language_mapper.dart) maps short / transcript codes to Azure locales (aligned with the browser extension mapper).
 - **ADR**: [ADR-0017](../decisions/0017-azure-pronunciation-assessment.md)
 

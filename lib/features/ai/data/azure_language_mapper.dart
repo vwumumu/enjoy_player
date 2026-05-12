@@ -14,6 +14,11 @@ String mapTranscriptLanguageToAzure(String? youtubeLanguageCode) {
 
   final code = youtubeLanguageCode.toLowerCase();
 
+  // ISO 639-2 / YouTube "undetermined" — treat as English for assessment ASR.
+  if (code == 'und' || code == 'mul' || code == 'zxx') {
+    return 'en-US';
+  }
+
   const languageMap = <String, String>{
     'en': 'en-US',
     'en-us': 'en-US',
