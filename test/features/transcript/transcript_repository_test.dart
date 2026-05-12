@@ -1,10 +1,16 @@
 import 'dart:convert';
 
 import 'package:drift/native.dart';
+import 'package:enjoy_player/core/ids/enjoy_ids.dart';
+import 'package:enjoy_player/data/api/api_client.dart';
+import 'package:enjoy_player/data/api/services/ai/youtube_transcripts_api.dart';
+import 'package:enjoy_player/data/api/services/transcript_api.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 void main() {
   group('TranscriptRepository', () {
@@ -377,4 +383,214 @@ void main() {
       expect(s?.secondaryTranscriptId, isNull);
     });
   });
+
+  group('fetchCloudTranscripts', () {
+    late AppDatabase db;
+
+    setUp(() {
+      db = AppDatabase(executor: NativeDatabase.memory());
+    });
+
+    tearDown(() async {
+      await db.close();
+    });
+
+    Future<void> insertYoutubeVideo({
+      required String mediaId,
+      required String vid,
+    }) async {
+      final now = DateTime.now();
+      await db.videoDao.insertRow(
+        VideoRow(
+          id: mediaId,
+          vid: vid,
+          provider: 'youtube',
+          title: 'Test',
+          description: null,
+          thumbnailUrl: null,
+          durationSeconds: 0,
+          language: 'und',
+          source: 'youtube',
+          localUri: null,
+          md5: null,
+          size: null,
+          mediaUrl: 'https://www.youtube.com/watch?v=$vid',
+          syncStatus: null,
+          serverUpdatedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+    }
+
+    test('YouTube worker poll sends videoId equal to VideoRow.vid', () async {
+      const vid = 'abcdefghijk';
+      final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
+      await insertYoutubeVideo(mediaId: mediaId, vid: vid);
+
+      final client = _CapturingYoutubeClient(
+        response: {
+          'status': 'ready',
+          'language': 'en',
+          'source': 'official',
+          'timeline': [
+            {'text': 'a', 'start': 1000, 'duration': 200},
+          ],
+          'metadata': {'title': 'VT'},
+        },
+      );
+      final repo = TranscriptRepository(db, null, client);
+      await repo.fetchCloudTranscripts(mediaId);
+
+      expect(client.lastVideoId, vid);
+      expect(client.lastVideoId, isNot(mediaId));
+
+      final tid = enjoyTranscriptId(
+        targetType: 'Video',
+        targetId: mediaId,
+        language: 'en',
+        source: 'official',
+      );
+      final row = await db.transcriptDao.getById(tid);
+      expect(row, isNotNull);
+      expect(row!.targetType, 'Video');
+      expect(row.targetId, mediaId);
+      expect(row.label, 'VT');
+      expect(repo.linesForRow(row).single.startMs, 1000);
+      expect(repo.linesForRow(row).single.durationMs, 200);
+
+      final st = await db.transcriptFetchStateDao.getForTarget('Video', mediaId);
+      expect(st, isNotNull);
+    });
+
+    test('YouTube generating responses do not record transcript_fetch_states',
+        () async {
+      const vid = 'abcdefghijk';
+      final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
+      await insertYoutubeVideo(mediaId: mediaId, vid: vid);
+
+      final client = _SequencedYoutubeClient([
+        {
+          'status': 'generating',
+          'jobId': 'j',
+          'stage': 'running',
+          'created': true,
+        },
+        {
+          'status': 'generating',
+          'jobId': 'j',
+          'stage': 'running',
+          'created': false,
+        },
+      ]);
+      final repo = TranscriptRepository(db, null, client, 2, Duration.zero);
+      await repo.fetchCloudTranscripts(mediaId);
+
+      expect(
+        await db.transcriptFetchStateDao.getForTarget('Video', mediaId),
+        isNull,
+      );
+    });
+
+    test('non-YouTube uses Rails TranscriptApi', () async {
+      final now = DateTime.now();
+      await db.audioDao.insertRow(
+        AudioRow(
+          id: 'audio1',
+          aid: 'f',
+          provider: 'user',
+          title: 't',
+          description: null,
+          thumbnailUrl: null,
+          durationSeconds: 0,
+          language: 'und',
+          translationKey: null,
+          sourceText: null,
+          voice: null,
+          source: null,
+          localUri: 'file:///a.mp3',
+          md5: null,
+          size: 1,
+          mediaUrl: null,
+          syncStatus: null,
+          serverUpdatedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      http.Request? captured;
+      final mock = MockClient((request) async {
+        captured = request;
+        return http.Response('[]', 200, headers: {'content-type': 'application/json'});
+      });
+
+      final rails = TranscriptApi(
+        ApiClient(
+          httpClient: mock,
+          getBaseUrl: () async => 'https://api.example.com',
+          getAccessToken: () async => 'tok',
+        ),
+      );
+
+      final repo = TranscriptRepository(db, rails, _ThrowingYoutubeClient());
+      await repo.fetchCloudTranscripts('audio1');
+
+      expect(captured, isNotNull);
+      final uri = captured!.url;
+      expect(uri.path, '/api/v1/transcripts');
+      expect(uri.queryParameters['target_id'], 'audio1');
+      expect(uri.queryParameters['target_type'], 'Audio');
+    });
+  });
+}
+
+class _CapturingYoutubeClient implements YoutubeTranscriptsClient {
+  _CapturingYoutubeClient({required this.response});
+
+  final Map<String, dynamic> response;
+  String? lastVideoId;
+
+  @override
+  Future<Map<String, dynamic>> pollTranscript({
+    required String videoId,
+    required String language,
+    String? captionFetch,
+    bool? forceRefresh,
+  }) async {
+    lastVideoId = videoId;
+    return Map<String, dynamic>.from(response);
+  }
+}
+
+class _SequencedYoutubeClient implements YoutubeTranscriptsClient {
+  _SequencedYoutubeClient(this._responses);
+
+  final List<Map<String, dynamic>> _responses;
+  var _i = 0;
+
+  @override
+  Future<Map<String, dynamic>> pollTranscript({
+    required String videoId,
+    required String language,
+    String? captionFetch,
+    bool? forceRefresh,
+  }) async {
+    final idx =
+        _i < _responses.length ? _i : _responses.length - 1;
+    final m = _responses[idx];
+    _i++;
+    return Map<String, dynamic>.from(m);
+  }
+}
+
+class _ThrowingYoutubeClient implements YoutubeTranscriptsClient {
+  @override
+  Future<Map<String, dynamic>> pollTranscript({
+    required String videoId,
+    required String language,
+    String? captionFetch,
+    bool? forceRefresh,
+  }) =>
+      throw StateError('YouTube client must not be used for non-YouTube media');
 }

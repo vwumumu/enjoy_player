@@ -212,3 +212,51 @@ final class AzureTokenApiProvider
 }
 
 String _$azureTokenApiHash() => r'ebaf3ff19fa0ea2ca31dec25c094786212f86d60';
+
+@ProviderFor(youtubeTranscriptsClient)
+final youtubeTranscriptsClientProvider = YoutubeTranscriptsClientProvider._();
+
+final class YoutubeTranscriptsClientProvider
+    extends
+        $FunctionalProvider<
+          YoutubeTranscriptsClient,
+          YoutubeTranscriptsClient,
+          YoutubeTranscriptsClient
+        >
+    with $Provider<YoutubeTranscriptsClient> {
+  YoutubeTranscriptsClientProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'youtubeTranscriptsClientProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$youtubeTranscriptsClientHash();
+
+  @$internal
+  @override
+  $ProviderElement<YoutubeTranscriptsClient> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  YoutubeTranscriptsClient create(Ref ref) {
+    return youtubeTranscriptsClient(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(YoutubeTranscriptsClient value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<YoutubeTranscriptsClient>(value),
+    );
+  }
+}
+
+String _$youtubeTranscriptsClientHash() =>
+    r'2de255835ddccd89829bfd9eb2c15cb4ede8c5fd';

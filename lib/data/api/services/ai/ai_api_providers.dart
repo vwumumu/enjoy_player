@@ -9,6 +9,7 @@ import 'package:enjoy_player/data/api/services/ai/azure_token_api.dart';
 import 'package:enjoy_player/data/api/services/ai/chat_api.dart';
 import 'package:enjoy_player/data/api/services/ai/dictionary_api.dart';
 import 'package:enjoy_player/data/api/services/ai/translation_api.dart';
+import 'package:enjoy_player/data/api/services/ai/youtube_transcripts_api.dart';
 
 part 'ai_api_providers.g.dart';
 
@@ -29,3 +30,7 @@ DictionaryApi dictionaryApi(Ref ref) =>
 @Riverpod(keepAlive: true)
 AzureTokenApi azureTokenApi(Ref ref) =>
     AzureTokenApi(ref.watch(aiApiClientProvider));
+
+@Riverpod(keepAlive: true)
+YoutubeTranscriptsClient youtubeTranscriptsClient(Ref ref) =>
+    YoutubeTranscriptsApi(ref.watch(aiApiClientProvider));

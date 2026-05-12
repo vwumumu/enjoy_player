@@ -10,6 +10,8 @@ import 'package:path/path.dart' as p;
 
 import '../../../core/ids/enjoy_ids.dart';
 import '../../../core/logging/log.dart';
+import '../../../core/utils/youtube_video_identity.dart';
+import '../../../data/api/services/ai/youtube_transcripts_api.dart';
 import '../../../data/api/services/transcript_api.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/db/media_target_resolver.dart';
@@ -88,11 +90,26 @@ DateTime _parseServerDate(dynamic v, DateTime fallback) {
 
 final Logger _log = logNamed('TranscriptRepository');
 
+/// Matches Worker `YOUTUBE_ID_RE` / `VideoRow.vid` for canonical imports.
+final RegExp _youtubeWorkerVideoIdRe = RegExp(r'^[a-zA-Z0-9_-]{11}$');
+
 class TranscriptRepository {
-  TranscriptRepository(this._db, [this._transcriptApi]);
+  TranscriptRepository(
+    this._db, [
+    this._transcriptApi,
+    this._youtubeTranscripts,
+    int? maxYoutubeWorkerPollAttempts,
+    Duration? youtubeWorkerPollDelay,
+  ]) : _maxYoutubeWorkerPollAttempts = maxYoutubeWorkerPollAttempts ?? 30,
+       _youtubeWorkerPollDelay =
+           youtubeWorkerPollDelay ?? const Duration(seconds: 2);
 
   final AppDatabase _db;
   final TranscriptApi? _transcriptApi;
+  final YoutubeTranscriptsClient? _youtubeTranscripts;
+
+  final int _maxYoutubeWorkerPollAttempts;
+  final Duration _youtubeWorkerPollDelay;
 
   final Map<String, _LinesCacheEntry> _linesCache = {};
 
@@ -137,13 +154,38 @@ class TranscriptRepository {
   }) async {
     final tt = await dexieTargetTypeForId(_db, mediaId);
     if (tt == null) return;
-    final api = _transcriptApi;
-    if (api == null) return;
 
     if (!force) {
       final state = await _db.transcriptFetchStateDao.getForTarget(tt, mediaId);
       if (state != null) return;
     }
+
+    if (tt == 'Video') {
+      final video = await _db.videoDao.getById(mediaId);
+      if (video != null) {
+        final ytPlayback = youtubePlaybackVideoId(
+          provider: video.provider,
+          vid: video.vid,
+          mediaUrl: video.mediaUrl,
+          source: video.source,
+        );
+        if (ytPlayback != null && _youtubeTranscripts != null) {
+          try {
+            await _fetchYoutubeWorkerTranscripts(
+              mediaId: mediaId,
+              video: video,
+              force: force,
+            );
+          } on Object catch (e, st) {
+            _log.warning('fetchCloudTranscripts (YouTube worker) failed for $mediaId', e, st);
+          }
+          return;
+        }
+      }
+    }
+
+    final api = _transcriptApi;
+    if (api == null) return;
 
     try {
       final list = await api.transcripts(targetId: mediaId, targetType: tt);
@@ -162,21 +204,152 @@ class TranscriptRepository {
         await _db.transcriptFetchStateDao.upsertFetched(tt, mediaId, now);
       }
 
-      final session = await _db.echoSessionDao.getLatestForTarget(tt, mediaId);
-      if (session?.transcriptId == null && storedCount > 0) {
-        final rows = await _db.transcriptDao.listForTarget(tt, mediaId);
-        _sortTranscriptRows(rows);
-        if (rows.isNotEmpty) {
-          await _db.echoSessionDao.updatePrimaryTranscriptForTarget(
-            tt,
-            mediaId,
-            rows.first.id,
-          );
-        }
-      }
+      await _maybeSetPrimaryTranscript(tt, mediaId, storedCount);
     } on Object catch (e, st) {
       _log.warning('fetchCloudTranscripts failed for $mediaId', e, st);
     }
+  }
+
+  /// Worker body `video_id` / `videoId`: prefer [VideoRow.vid] when it is an
+  /// 11-character YouTube id; otherwise fall back to [youtubePlaybackVideoId].
+  String _workerYoutubeVideoId(VideoRow video) {
+    final v = video.vid.trim();
+    if (_youtubeWorkerVideoIdRe.hasMatch(v)) return v;
+    final pb = youtubePlaybackVideoId(
+      provider: video.provider,
+      vid: video.vid,
+      mediaUrl: video.mediaUrl,
+      source: video.source,
+    );
+    return pb ?? v;
+  }
+
+  String _workerCaptionLanguage(VideoRow video) {
+    final lang = video.language.trim();
+    if (lang.isEmpty || lang == 'und') return 'en';
+    return lang;
+  }
+
+  Future<void> _fetchYoutubeWorkerTranscripts({
+    required String mediaId,
+    required VideoRow video,
+    required bool force,
+  }) async {
+    final api = _youtubeTranscripts;
+    if (api == null) return;
+
+    final workerVideoId = _workerYoutubeVideoId(video);
+    final language = _workerCaptionLanguage(video);
+    final now = DateTime.now();
+
+    for (var attempt = 0; attempt < _maxYoutubeWorkerPollAttempts; attempt++) {
+      final map = await api.pollTranscript(
+        videoId: workerVideoId,
+        language: language,
+        captionFetch: 'auto',
+        forceRefresh: attempt == 0 && force,
+      );
+
+      final status = map['status'] as String?;
+      if (status == 'ready') {
+        final stored = await _upsertYoutubeWorkerReadyTranscript(
+          mediaId: mediaId,
+          response: map,
+          fallbackNow: now,
+        );
+        if (stored) {
+          await _db.transcriptFetchStateDao.upsertFetched('Video', mediaId, DateTime.now());
+          await _maybeSetPrimaryTranscript('Video', mediaId, 1);
+        }
+        return;
+      }
+
+      if (status == 'failed') {
+        await _db.transcriptFetchStateDao.upsertFetched('Video', mediaId, DateTime.now());
+        _log.warning(
+          'YouTube worker transcript failed for $mediaId: ${map['error']}',
+        );
+        return;
+      }
+
+      if (attempt < _maxYoutubeWorkerPollAttempts - 1) {
+        await Future<void>.delayed(_youtubeWorkerPollDelay);
+      }
+    }
+  }
+
+  /// Returns whether a non-empty transcript row was written.
+  Future<bool> _upsertYoutubeWorkerReadyTranscript({
+    required String mediaId,
+    required Map<String, dynamic> response,
+    required DateTime fallbackNow,
+  }) async {
+    final language = response['language'] as String? ?? 'en';
+    final rawSource = response['source'] as String? ?? 'official';
+    final source = _normalizeSource(rawSource);
+    final lines = transcriptLinesFromApiTimeline(response['timeline']);
+    if (lines.isEmpty) return false;
+
+    final id = enjoyTranscriptId(
+      targetType: 'Video',
+      targetId: mediaId,
+      language: language,
+      source: source,
+    );
+
+    final label = _youtubeWorkerTranscriptLabel(response, language);
+    final rawUrl = response['rawUrl'] as String?;
+    final timelineJson = jsonEncode(lines.map((e) => e.toJson()).toList());
+    final updated = DateTime.now();
+
+    await _db.transcriptDao.upsert(
+      TranscriptRow(
+        id: id,
+        targetType: 'Video',
+        targetId: mediaId,
+        language: language,
+        source: source,
+        timelineJson: timelineJson,
+        referenceId: rawUrl,
+        label: label,
+        trackIndex: null,
+        syncStatus: 'synced',
+        serverUpdatedAt: updated,
+        createdAt: fallbackNow,
+        updatedAt: updated,
+      ),
+    );
+    return true;
+  }
+
+  String _youtubeWorkerTranscriptLabel(
+    Map<String, dynamic> response,
+    String language,
+  ) {
+    final meta = response['metadata'];
+    if (meta is Map) {
+      final title = meta['title'];
+      if (title is String && title.trim().isNotEmpty) return title.trim();
+    }
+    return 'YouTube captions ($language)';
+  }
+
+  Future<void> _maybeSetPrimaryTranscript(
+    String targetType,
+    String mediaId,
+    int storedCount,
+  ) async {
+    if (storedCount <= 0) return;
+    final session = await _db.echoSessionDao.getLatestForTarget(targetType, mediaId);
+    if (session?.transcriptId != null) return;
+    final rows = await _db.transcriptDao.listForTarget(targetType, mediaId);
+    _sortTranscriptRows(rows);
+    if (rows.isEmpty) return;
+    await _db.echoSessionDao.updatePrimaryTranscriptForTarget(
+      targetType,
+      mediaId,
+      rows.first.id,
+    );
   }
 
   TranscriptRow? _transcriptRowFromServerMap(
