@@ -1,0 +1,48 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter_version
+        shell: bash
+        run: echo "version=$(tr -d ' \n\r' < .github/flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_version.outputs.version }}
+          cache: true
+
+      - name: Ensure NuGet feed (WebView2 / flutter_inappwebview)
+        shell: pwsh
+        run: |
+          $sources = nuget sources list 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "nuget not on PATH; install NuGet CLI for Windows builds per README."
+            exit 1
+          }
+          if ($sources -notmatch "nuget\.org") {
+            nuget sources Add -Name "nuget.org" -Source "https://api.nuget.org/v3/index.json" -NonInteractive
+          }
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Flutter build windows (debug)
+        run: flutter build windows --debug

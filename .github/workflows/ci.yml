@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter_version
+        run: echo "version=$(tr -d ' \n\r' < .github/flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Linux tooling
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            clang cmake curl git ninja-build pkg-config unzip xz-utils zip \
+            libgtk-3-dev liblzma-dev
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_version.outputs.version }}
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Dart format
+        run: |
+          set -euo pipefail
+          paths=(lib test)
+          for pkg in packages/*/; do
+            [ -d "${pkg}lib" ] && paths+=("${pkg}lib")
+            [ -d "${pkg}test" ] && paths+=("${pkg}test")
+          done
+          dart format --output=none --set-exit-if-changed "${paths[@]}"
+
+      - name: Flutter analyze
+        run: flutter analyze
+
+      - name: Custom lint
+        run: dart run custom_lint
+
+      - name: Flutter test (app)
+        run: flutter test
+
+      - name: Flutter test (path packages)
+        run: |
+          set -euo pipefail
+          for pkg in packages/*/; do
+            if [ -d "${pkg}test" ]; then
+              (cd "$pkg" && flutter pub get && flutter test)
+            fi
+          done
