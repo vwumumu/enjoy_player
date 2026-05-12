@@ -15,6 +15,9 @@ import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 
 part 'app_preferences_provider.g.dart';
 
+/// Default UI locale when none is stored and not overridden by profile.
+const Locale kAppDefaultDisplayLocale = Locale('zh', 'CN');
+
 final Logger _prefsLog = logNamed('prefs');
 
 class AppPreferencesState {
@@ -29,7 +32,7 @@ class AppPreferencesState {
   final String? nativeLanguage;
 
   static const initial = AppPreferencesState(
-    locale: Locale('en'),
+    locale: kAppDefaultDisplayLocale,
     learningLanguage: null,
     nativeLanguage: null,
   );
@@ -95,7 +98,7 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
   Future<void> setLocale(Locale? locale) async {
     final next = (await future).copyWith(locale: locale);
     state = AsyncData(next);
-    final tag = locale?.toLanguageTag() ?? 'en';
+    final tag = locale?.toLanguageTag() ?? kAppDefaultDisplayLocale.toLanguageTag();
     await ref
         .read(appDatabaseProvider)
         .settingsDao
@@ -118,7 +121,7 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
     final db = ref.read(appDatabaseProvider);
     await db.settingsDao.setValue(
       SettingsKeys.prefsLocale,
-      nextLocale?.toLanguageTag() ?? 'en',
+      nextLocale?.toLanguageTag() ?? kAppDefaultDisplayLocale.toLanguageTag(),
     );
     if (profile.learningLanguage != null) {
       await db.settingsDao.setValue(
@@ -135,7 +138,7 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
   }
 
   static Locale _decodeLocale(String? raw) {
-    if (raw == null || raw.isEmpty) return const Locale('en');
+    if (raw == null || raw.isEmpty) return kAppDefaultDisplayLocale;
     final parts = raw.split(RegExp(r'[-_]'));
     if (parts.length >= 2) {
       return Locale(parts[0], parts[1]);

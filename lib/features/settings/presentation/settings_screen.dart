@@ -351,7 +351,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       return prefs.when(
                         data: (state) {
                           final displayLang =
-                              state.locale?.toLanguageTag() ?? 'en';
+                              state.locale?.toLanguageTag() ??
+                              kAppDefaultDisplayLocale.toLanguageTag();
                           final learn = state.learningLanguage ?? '—';
                           final native = state.nativeLanguage ?? '—';
                           return Column(

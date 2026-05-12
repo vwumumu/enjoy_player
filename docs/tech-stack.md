@@ -14,7 +14,7 @@
 | Networking | `http` | Enjoy API client under `lib/data/api/` |
 | Secure storage | `flutter_secure_storage` | Access token only |
 | Browser / deep links | `url_launcher` | OAuth `start_auth` browser step |
-| i18n | `flutter_localizations` + ARB | MVP English only (`lib/l10n/app_en.arb`) |
+| i18n | `flutter_localizations` + ARB | `lib/l10n/app_en.arb`, `app_zh.arb`, `app_zh_CN.arb`; default display locale `zh-CN` ([`kAppDefaultDisplayLocale`](../lib/core/application/app_preferences_provider.dart)) |
 | Codegen | `build_runner`, `drift_dev`, `riverpod_generator` | Run after schema/provider edits |
 | Lint | `flutter_lints` | `analysis_options.yaml` (no `custom_lint`: incompatible analyzer range vs `drift_dev` / codegen) |
 

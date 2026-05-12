@@ -1,0 +1,516 @@
+{
+  "@@locale": "zh",
+  "appTitle": "Enjoy 播放器",
+  "libraryTitle": "资料库",
+  "homeTitle": "首页",
+  "homeRecentMedia": "最近媒体",
+  "homeEmptyTitle": "暂无最近媒体",
+  "homeEmptyHint": "导入媒体或将文件拖放到此处开始。",
+  "libraryTabAudio": "音频",
+  "libraryTabVideo": "视频",
+  "libraryEmptyAudioTitle": "未找到任何音频",
+  "libraryEmptyAudioHint": "你的资料库中没有任何音频内容。",
+  "libraryEmptyVideoTitle": "未找到任何视频",
+  "libraryEmptyVideoHint": "你的资料库中没有任何视频内容。",
+  "actionOpenFiles": "打开文件",
+  "actionImport": "导入",
+  "importFromFile": "从文件…",
+  "importFromYoutube": "从 YouTube 链接…",
+  "youtubeImportTitle": "导入 YouTube 视频",
+  "youtubeImportHint": "粘贴 YouTube 链接或视频 ID",
+  "youtubeImportInvalid": "无法识别有效的 YouTube 视频 ID。",
+  "youtubeImporting": "正在添加视频…",
+  "youtubeBadge": "YouTube",
+  "youtubeLoginTooltip": "YouTube 账号",
+  "youtubeLoginClose": "关闭",
+  "youtubeLoginScreenTitle": "YouTube 登录",
+  "youtubeLogout": "退出登录（清除 Cookie）",
+  "searchHint": "搜索",
+  "transportRepeat": "循环",
+  "transportFullscreen": "全屏",
+  "transportExitFullscreen": "退出全屏",
+  "transportMore": "更多",
+  "transportCollapse": "收起播放器",
+  "transportExpand": "展开播放器",
+  "settingsTitle": "设置",
+  "importMedia": "导入媒体",
+  "importingMedia": "正在导入媒体…",
+  "importMediaFailed": "无法导入此文件。",
+  "noMediaYet": "暂无媒体",
+  "tapImportToAdd": "从工具栏导入音频或视频。",
+  "navMainLabel": "主导航",
+  "miniPlayerMediaVideo": "视频",
+  "miniPlayerMediaAudio": "音频",
+  "retry": "重试",
+  "settingsSectionAppearance": "外观",
+  "settingsAppearanceSubtitle": "主题跟随系统设置。",
+  "settingsSectionAbout": "关于",
+  "settingsAboutSubtitle": "Enjoy 播放器 — 本地字幕与跟读练习。",
+  "settingsThemeRowTitle": "主题",
+  "settingsThemeDarkLocked": "跟随系统外观。",
+  "settingsThemeSystem": "系统",
+  "settingsThemeLight": "浅色",
+  "settingsThemeDark": "深色",
+  "play": "播放",
+  "pause": "暂停",
+  "previousLine": "上一句",
+  "nextLine": "下一句",
+  "replayLine": "重播本句",
+  "echoMode": "回声模式",
+  "exitEchoMode": "退出回声模式",
+  "transcript": "字幕稿",
+  "transcriptNowReading": "正在朗读",
+  "playerTranscriptResizeHint": "拖动以调整字幕稿面板大小",
+  "importSubtitle": "导入字幕",
+  "noTranscript": "无字幕稿",
+  "importSrtOrVtt": "导入 .srt 或 .vtt 文件。",
+  "miniPlayerOpen": "打开播放器",
+  "loading": "加载中…",
+  "error": "错误",
+  "playerOpenGenericError": "无法打开此项目。",
+  "playbackRateTimes": "{rate} 倍",
+  "@playbackRateTimes": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "speed": "速度",
+  "volume": "音量",
+  "transportMute": "静音",
+  "transportUnmute": "取消静音",
+  "repeatNone": "关闭循环",
+  "repeatSegment": "循环片段",
+  "settingsPlaceholder": "播放器偏好将显示在此处。",
+  "subtitles": "字幕",
+  "subtitlesPrimary": "主字幕",
+  "subtitlesTranslation": "翻译（可选）",
+  "subtitlesNone": "无",
+  "subtitlesImportFile": "导入字幕文件…",
+  "subtitlesDeleteTrack": "删除轨道",
+  "importSubtitleSuccess": "字幕已导入",
+  "noTranscriptHint": "打开媒体时云端字幕会在后台加载（每项在刷新前仅一次）。本地视频请使用提取或添加字幕（.srt/.vtt）。",
+  "transcriptEmptyExtract": "提取",
+  "transcriptEmptyAddSubtitle": "添加字幕",
+  "subtitlesExtractEmbedded": "提取内嵌字幕",
+  "subtitlesRefreshCloud": "从云端刷新字幕稿",
+  "subtitlesImportLanguageTitle": "字幕语言",
+  "subtitlesImportLanguageHint": "BCP-47 代码（如 en、zh-TW）。未知请填 und。",
+  "subtitlesProviderOfficial": "官方",
+  "subtitlesProviderAuto": "自动",
+  "subtitlesProviderAi": "AI",
+  "subtitlesProviderUser": "用户",
+  "subtitlesExtractNoTracks": "此文件中无内嵌字幕轨道（仅有视频与音频）。若有单独的 .srt 或 .vtt，请使用导入文件。",
+  "subtitlesExtractedCount": "已提取 {count} 条字幕轨道。",
+  "@subtitlesExtractedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subtitlesRefreshDone": "已从云端更新字幕稿。",
+  "subtitlesNoPlayableUri": "无法解析此项目的可播放文件。",
+  "expandEchoBackward": "向后扩展回声",
+  "expandEchoForward": "向前扩展回声",
+  "shrinkEchoBackward": "向后收缩回声",
+  "shrinkEchoForward": "向前收缩回声",
+  "shadowReadingTitle": "跟读",
+  "shadowReadingHint": "跟读本段并练习口语。录制你的声音并与参考音高对比。",
+  "shadowReadingReferenceSnippet": "参考",
+  "pitchContourTitle": "音高曲线",
+  "pitchContourError": "无法分析本段的音高。",
+  "pitchContourWaveform": "波形",
+  "pitchContourReference": "参考音高",
+  "pitchContourUser": "你的音高",
+  "pitchContourAnalyzing": "正在分析音高…",
+  "shadowRecordingExisting": "已保存的录音",
+  "shadowRecordingEmpty": "本段尚无录音。",
+  "shadowRecordingTake": "录音",
+  "shadowRecordingPlay": "播放",
+  "shadowRecordingPause": "暂停",
+  "shadowRecordingChooseTake": "切换录音",
+  "shadowRecordingDelete": "删除",
+  "shadowRecordingDeleteConfirmTitle": "删除此条录音？",
+  "shadowRecordingDeleteConfirmMessage": "将永久删除 {takeLabel}，无法撤销。",
+  "@shadowRecordingDeleteConfirmMessage": {
+    "placeholders": {
+      "takeLabel": {
+        "type": "String",
+        "example": "Take 4 · 4.1 s"
+      }
+    }
+  },
+  "shadowRecordingRecord": "录音",
+  "shadowRecordingStop": "停止",
+  "shadowRecordingMicDenied": "需要麦克风权限才能录音。",
+  "shadowRecordingSaveFailed": "无法保存录音：{reason}",
+  "@shadowRecordingSaveFailed": {
+    "description": "Save failed after recording stopped; reason is a short technical detail.",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "Duration probe failed"
+      }
+    }
+  },
+  "settingsSectionRecording": "录音",
+  "@settingsSectionRecording": {
+    "description": "Header for the recording settings section."
+  },
+  "settingsSectionRecordingHint": "跟读录音所使用的麦克风。",
+  "@settingsSectionRecordingHint": {
+    "description": "Subtitle under the recording section header."
+  },
+  "settingsRecordingMicTitle": "麦克风",
+  "@settingsRecordingMicTitle": {
+    "description": "Title of the microphone picker tile in settings."
+  },
+  "settingsRecordingMicAuto": "自动 · {label}",
+  "@settingsRecordingMicAuto": {
+    "description": "Subtitle of the mic tile when auto-picking. The label is the resolved device.",
+    "placeholders": {
+      "label": {
+        "type": "String",
+        "example": "Realtek Microphone Array"
+      }
+    }
+  },
+  "settingsRecordingMicAutoNoDevice": "自动 · 系统默认",
+  "@settingsRecordingMicAutoNoDevice": {
+    "description": "Subtitle of the mic tile when auto-picking and no devices were enumerated yet."
+  },
+  "settingsRecordingMicEmpty": "未检测到麦克风",
+  "@settingsRecordingMicEmpty": {
+    "description": "Subtitle / empty state when the OS reports no input devices."
+  },
+  "settingsRecordingMicAutoOption": "自动（跳过虚拟麦克风）",
+  "@settingsRecordingMicAutoOption": {
+    "description": "Menu/dialog option that lets the heuristic pick the first non-virtual device."
+  },
+  "settingsRecordingMicDialogTitle": "选择麦克风",
+  "@settingsRecordingMicDialogTitle": {
+    "description": "Title of the modal dialog used to pick a recording input device."
+  },
+  "shadowRecordingSilentWarning": "未检测到麦克风信号。请打开「设置 → 录音」选择其他麦克风。",
+  "@shadowRecordingSilentWarning": {
+    "description": "Warning shown right after a take when the captured WAV has no signal energy (e.g. Windows captured a virtual loopback device)."
+  },
+  "shadowRecordingPlaybackFailed": "无法播放此条录音。",
+  "shadowRecordingOverTarget": "超出目标 +{seconds} 秒",
+  "@shadowRecordingOverTarget": {
+    "description": "Shown while recording after elapsed time exceeds the reference segment duration.",
+    "placeholders": {
+      "seconds": {
+        "type": "String",
+        "example": "0.3"
+      }
+    }
+  },
+  "hotkeysTitle": "键盘快捷键",
+  "hotkeysHintFooter": "按 Shift+/（?）打开此列表。",
+  "hotkeysCustomizedBadge": "已自定义",
+  "hotkeysSectionKeyboard": "键盘快捷键",
+  "hotkeysResetBinding": "重置",
+  "hotkeysResetAll": "重置全部快捷键",
+  "hotkeysCaptureTitle": "按下新快捷键",
+  "hotkeysCaptureHint": "按下组合键。Esc 取消。",
+  "hotkeysConflictError": "该快捷键已被使用。",
+  "hotkeysScopeGlobal": "全局",
+  "hotkeysScopePlayer": "播放器",
+  "hotkeysScopeLibrary": "资料库",
+  "hotkeysScopeModal": "弹窗",
+  "hotkeysDescHelp": "显示键盘快捷键",
+  "hotkeysDescSearch": "打开搜索",
+  "hotkeysDescSettings": "打开设置",
+  "hotkeysDescTogglePlay": "播放 / 暂停",
+  "hotkeysDescToggleExpand": "切换播放器展开/收起",
+  "hotkeysDescToggleFullscreen": "切换全屏",
+  "hotkeysDescPrevLine": "播放上一句",
+  "hotkeysDescNextLine": "播放下一句",
+  "hotkeysDescReplayLine": "重播当前句",
+  "hotkeysDescToggleEchoMode": "切换回声模式",
+  "hotkeysDescToggleDictationMode": "切换听写模式",
+  "hotkeysDescToggleRecording": "开始/停止录音",
+  "hotkeysDescToggleAssessment": "显示/隐藏发音评测",
+  "hotkeysDescTogglePitchContour": "显示/隐藏音高曲线",
+  "hotkeysDescPlayRecording": "播放/暂停录音",
+  "hotkeysDescSlowDown": "减慢播放速度",
+  "hotkeysDescSpeedUp": "加快播放速度",
+  "hotkeysDescExpandEchoBackward": "向后扩展回声区域",
+  "hotkeysDescExpandEchoForward": "向前扩展回声区域",
+  "hotkeysDescShrinkEchoBackward": "向后收缩回声区域",
+  "hotkeysDescShrinkEchoForward": "向前收缩回声区域",
+  "hotkeysDescLibrarySearch": "聚焦搜索框",
+  "hotkeysDescCloseModal": "关闭弹窗",
+  "hotkeysStubSearch": "搜索功能尚未提供。",
+  "hotkeysStubDictation": "听写模式尚未提供。",
+  "assessmentTitle": "发音评测",
+  "assessmentDescription": "为你的朗读提供详细评分。",
+  "assessmentRun": "运行发音评测",
+  "assessmentView": "查看发音评测",
+  "assessmentReassess": "重新评测",
+  "assessmentOverallScore": "总分",
+  "assessmentAccuracy": "准确度",
+  "assessmentCompleteness": "完整度",
+  "assessmentFluency": "流利度",
+  "assessmentProsody": "韵律",
+  "assessmentPronunciationAnalysis": "发音分析",
+  "assessmentAccuracyScore": "准确度分数",
+  "assessmentSyllables": "音节",
+  "assessmentPhonemes": "音素",
+  "assessmentNoRecording": "录音文件缺失或为空。",
+  "assessmentRunFailed": "无法运行评测：{reason}",
+  "@assessmentRunFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "assessmentErrorTypeOmission": "遗漏",
+  "assessmentErrorTypeInsertion": "插入",
+  "assessmentErrorTypeMispronunciation": "发音错误",
+  "assessmentErrorTypeUnexpectedBreak": "意外停顿",
+  "assessmentErrorTypeMissingBreak": "缺少停顿",
+  "assessmentErrorTypeMonotone": "单调",
+  "assessmentErrorTypeCorrect": "正确",
+  "assessmentErrorExplOmission": "预期应有此词但未检测到。",
+  "assessmentErrorExplInsertion": "检测到参考中不存在的额外词语。",
+  "assessmentErrorExplMispronunciation": "此词发音可能不正确。",
+  "assessmentErrorExplUnexpectedBreak": "在此词前检测到意外停顿。",
+  "assessmentErrorExplMissingBreak": "在此词前未检测到应有的停顿。",
+  "assessmentErrorExplMonotone": "音高变化低于预期。",
+  "assessmentErrorExplCorrect": "此词未发现问题。",
+  "assessmentWebUnsupported": "Web 上暂不支持发音评测。",
+  "assessmentEmptyReference": "参考文本为空。",
+  "assessmentInvalidStored": "无法读取已保存的评测数据。",
+  "authSignInTitle": "登录 Enjoy",
+  "authSignInSubtitle": "应用内将打开安全登录页。完成步骤后我们会自动检测登录结果。",
+  "authSignInCta": "继续",
+  "authWaitingForApproval": "正在完成登录…",
+  "authCancel": "取消",
+  "authSignedInSuccess": "登录成功",
+  "authReloadSignInPage": "重新加载登录页",
+  "authOpenInSystemBrowser": "在系统浏览器中打开",
+  "authSignOut": "退出登录",
+  "profileTitle": "个人资料",
+  "profileFieldName": "姓名",
+  "profileFieldEmail": "邮箱",
+  "profileFieldGoal": "每日目标（分钟）",
+  "profileFieldLearningLanguage": "学习语言",
+  "profileFieldNativeLanguage": "母语",
+  "profileFieldRequired": "必填",
+  "profileSave": "保存",
+  "profileSaveSuccess": "资料已保存",
+  "profileSubscriptionFree": "免费",
+  "profileSubscriptionPro": "专业版",
+  "profileBalance": "余额：{value}",
+  "@profileBalance": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "profileStatLibraryTitle": "资料库",
+  "profileStatLibrarySubtitle": "保存在本机的项目数",
+  "profileStatEchoTitle": "回声练习次数",
+  "profileStatEchoSubtitle": "本地记录的练习行数",
+  "profileStatRecordTitle": "已录音",
+  "profileStatRecordSubtitle": "跟读练习分钟数",
+  "settingsSectionAccount": "账号",
+  "settingsSectionAccountHint": "个人资料、订阅与退出登录",
+  "settingsSectionDataMigrationHint": "登录后迁移访客数据",
+  "settingsSectionSyncHint": "上传队列、离线状态与手动同步",
+  "settingsSectionAppearanceLanguageHint": "主题密度、字幕稿字体与区域设置",
+  "hotkeysSectionKeyboardHint": "查看并自定义快捷键",
+  "settingsSectionAdvancedHint": "API 地址与实验性开关",
+  "settingsSectionDeveloperHint": "诊断与内部工具",
+  "settingsSectionAboutHint": "版本、许可与链接",
+  "settingsSectionSync": "云端同步",
+  "settingsSectionDataMigration": "本地数据",
+  "syncSettingsTileTitle": "同步状态",
+  "syncSettingsTileSubtitleSignedOut": "登录后可同步资料库与录音",
+  "syncSettingsTileSubtitleUpToDate": "已是最新",
+  "syncSettingsTileSubtitleCounts": "{retryable} 项等待中 · {failed} 项失败",
+  "@syncSettingsTileSubtitleCounts": {
+    "description": "Subtitle on Settings → Sync status when there are queue items.",
+    "placeholders": {
+      "retryable": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "syncScreenTitle": "同步状态",
+  "syncScreenLastSyncLabel": "上次成功同步",
+  "syncScreenLastSyncNever": "从未",
+  "syncScreenStatRetryable": "等待上传",
+  "syncScreenStatFailed": "永久失败",
+  "syncScreenSyncNow": "立即同步",
+  "syncScreenRetryFailed": "重试失败项",
+  "syncScreenSignedOutBody": "使用 Enjoy 账号登录以在设备间同步元数据。",
+  "syncScreenGoSignIn": "登录",
+  "syncPendingRekeyLabel": "导入待关联账号",
+  "syncPendingRekeyHint": "这些项目在退出登录状态下添加。登录后将关联到你的账号并排队上传。",
+  "cloudScreenTitle": "云端",
+  "cloudTabAudio": "音频",
+  "cloudTabVideo": "视频",
+  "cloudSignedOutBody": "登录后可浏览保存到 Enjoy 账号的媒体。",
+  "cloudAddToLibrary": "添加到资料库",
+  "cloudAlreadyInLibrary": "已在资料库中",
+  "cloudAddedToLibrary": "已添加到本地资料库。",
+  "cloudEmpty": "此列表为空。",
+  "cloudHasMediaUrlHint": "打开时从已保存的 URL 流式播放。",
+  "cloudNoMediaUrlHint": "无远程文件 URL — 打开此项目时请在播放器中使用「定位文件」。",
+  "cloudRefreshTooltip": "刷新此标签页",
+  "cloudAddToLibraryTooltip": "添加到资料库",
+  "cloudEmptyAudioTitle": "暂无云端音频",
+  "cloudEmptyAudioSubtitle": "登录后保存的项目将显示在此处。",
+  "cloudEmptyVideoTitle": "暂无云端视频",
+  "cloudEmptyVideoSubtitle": "登录后保存的项目将显示在此处。",
+  "syncSnackSuccess": "同步已成功完成。",
+  "syncSnackIssues": "同步结束：{synced} 项成功，{failed} 项失败。",
+  "@syncSnackIssues": {
+    "placeholders": {
+      "synced": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "syncQueueDetails": "队列详情",
+  "syncQueueEmpty": "队列为空。",
+  "settingsSectionAdvanced": "高级",
+  "settingsApiBaseUrl": "API 基础地址",
+  "settingsApiBaseUrlHint": "示例：https://enjoy.bot",
+  "settingsApiBaseUrlSave": "保存 API 地址",
+  "settingsAiApiBaseUrl": "AI API 基础地址",
+  "settingsAiApiBaseUrlHint": "示例：https://worker.enjoy.bot",
+  "settingsAiApiBaseUrlSave": "保存 AI API 地址",
+  "settingsAccountSignedOut": "未登录",
+  "settingsAccountOpenProfile": "打开个人资料",
+  "settingsAccountSignIn": "登录",
+  "errorNetwork": "网络错误",
+  "errorUnauthorized": "会话已过期 — 请重新登录",
+  "communityActivity": "社区动态",
+  "communityToday": "今日社区",
+  "homeRecordingsToday": "录音",
+  "homePracticeTime": "练习时长",
+  "homeActiveLearners": "活跃学习者",
+  "homePeopleLearning": "{count, plural, one{{count} 人正在学习} other{{count} 人正在学习}}",
+  "@homePeopleLearning": {
+    "description": "Headline for how many people are learning in the community.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeNoActiveUsers": "暂无活跃用户",
+  "homeTodaysGoal": "今日目标",
+  "homeMinutes": "分钟",
+  "homeCompleted": "已完成",
+  "homeGoalCompleted": "目标完成！太棒了！",
+  "homeGoalAlmostThere": "快完成了！继续加油！",
+  "homeGoalHalfway": "已经完成一半！你可以的！",
+  "homeGoalGoodStart": "不错的开始！坚持练习！",
+  "homeGoalJustStarted": "刚刚开始！每一分钟都很重要！",
+  "homeGoalStartNow": "现在开始练习吧！",
+  "mediaLocateTitle": "定位媒体文件",
+  "mediaLocateBody": "此项目是在其他设备上添加的。请在本机选择同一文件。我们会通过安全指纹校验是否与资料库匹配。",
+  "mediaLocateChooseFile": "选择文件",
+  "mediaLocateHashMismatch": "该文件与此项目不匹配。请确认选择了正确文件。",
+  "mediaLocateExpectedSize": "预期大小：{sizeLabel}",
+  "@mediaLocateExpectedSize": {
+    "placeholders": {
+      "sizeLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "mediaLocateSizeUnknown": "预期大小：未知",
+  "migrationBannerTitle": "迁移本地数据",
+  "migrationBannerBody": "检测到你本地保存了媒体与学习记录。是否迁移到你的账号？",
+  "migrationBannerActionMove": "迁移数据",
+  "migrationBannerActionDismiss": "暂不",
+  "settingsMigrationTitle": "迁移本地数据",
+  "settingsMigrationSubtitle": "将访客媒体与记录迁移到当前账号",
+  "migrationSuccess": "数据迁移成功",
+  "migrationMigrationFailed": "无法迁移数据，请稍后重试。",
+  "libraryDeleteMediaTitle": "从资料库删除？",
+  "libraryDeleteMediaMessage": "从本机移除「{title}」。此操作无法撤销。",
+  "@libraryDeleteMediaMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryDeleteMediaTooltip": "从资料库删除",
+  "libraryMediaDeleted": "已从资料库移除。",
+  "libraryDeleteMediaFailed": "无法移除此项目。",
+  "settingsSectionDeveloper": "开发者",
+  "settingsAiPlaygroundTileTitle": "AI 试验台",
+  "settingsAiPlaygroundTileSubtitle": "调用 ASR、聊天、翻译与词典 API",
+  "aiPlaygroundTitle": "AI 试验台",
+  "aiPlaygroundIntro": "使用已保存的基础地址与访问令牌调用 Enjoy API。Flutter 上尚未接入 TTS；登录后发音评测通过原生插件使用 Azure Speech。",
+  "aiPlaygroundPickAudio": "选择音频文件",
+  "aiPlaygroundTranscribe": "转写",
+  "aiPlaygroundChatSystem": "系统（可选）",
+  "aiPlaygroundChatUser": "用户消息",
+  "aiPlaygroundSendChat": "发送聊天",
+  "aiPlaygroundTranslateSource": "源语言",
+  "aiPlaygroundTranslateTarget": "目标语言",
+  "aiPlaygroundTranslateText": "待翻译文本",
+  "aiPlaygroundTranslate": "翻译",
+  "aiPlaygroundDictWord": "单词",
+  "aiPlaygroundDictSource": "源语言",
+  "aiPlaygroundDictTarget": "目标语言",
+  "aiPlaygroundDictLookup": "词典查询",
+  "aiPlaygroundAssessmentReference": "参考文本（你所说的内容）",
+  "aiPlaygroundAssessmentLanguage": "语言（如 en、en-US）",
+  "aiPlaygroundAssess": "运行发音评测",
+  "aiPlaygroundAssessmentTtsNote": "本版本暂不提供 TTS（Azure Speech 集成进行中）。",
+  "aiPlaygroundOutput": "输出",
+  "aiPlaygroundClearOutput": "清空输出",
+  "aiPlaygroundSectionAsr": "语音识别",
+  "aiPlaygroundSectionChat": "聊天",
+  "aiPlaygroundSectionTranslation": "翻译",
+  "aiPlaygroundSectionDictionary": "词典",
+  "aiPlaygroundSectionTtsAssessment": "TTS / 评测",
+  "youtubePasteFromClipboard": "粘贴",
+  "settingsSubtitle": "按你的学习方式调整 Enjoy。",
+  "settingsSectionAppearanceLanguage": "外观与语言",
+  "settingsAppearanceTheme": "主题",
+  "settingsAppearanceThemeValue": "深色 · 影院风",
+  "settingsAppearanceDisplayLanguage": "显示语言",
+  "settingsAppearanceLearningLanguage": "学习语言",
+  "settingsAppearanceNativeLanguage": "母语",
+  "settingsAppearanceSyncedFromProfile": "与账号个人资料同步",
+  "settingsKeyboardOpenCheatsheet": "打开快捷键速查",
+  "settingsKeyboardOpenCheatsheetSubtitle": "浏览并自定义所有快捷键",
+  "hotkeysHelpSubtitle": "随时按 {key} 打开此列表。",
+  "@hotkeysHelpSubtitle": {
+    "placeholders": {
+      "key": {
+        "type": "String",
+        "example": "?"
+      }
+    }
+  },
+  "hotkeysHelpSearchHint": "搜索快捷键",
+  "hotkeysHelpEmpty": "无匹配的快捷键",
+  "hotkeysHelpCustomize": "在设置中自定义",
+  "hotkeysSettingsSubtitle": "点按一行即可修改。随时按 {key}。",
+  "@hotkeysSettingsSubtitle": {
+    "placeholders": {
+      "key": {
+        "type": "String",
+        "example": "?"
+      }
+    }
+  },
+  "hotkeysFilterHint": "筛选快捷键",
+  "hotkeysResetTooltip": "重置此快捷键",
+  "hotkeysEditTooltip": "更改快捷键",
+  "settingsAboutMadeWithCare": "为语言学习者用心打造。"
+}
