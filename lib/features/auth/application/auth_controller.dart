@@ -6,7 +6,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
@@ -32,7 +31,8 @@ class AuthCtrl extends _$AuthCtrl {
     final sw = Stopwatch()..start();
     _log.info('auth: loadInitialAuthState start');
     try {
-      final state = await ref.read(authRepositoryProvider).loadInitialAuthState();
+      final state =
+          await ref.read(authRepositoryProvider).loadInitialAuthState();
       _log.info(
         'auth: loadInitialAuthState done in ${sw.elapsedMilliseconds}ms '
         '(${state.runtimeType})',
@@ -61,14 +61,6 @@ class AuthCtrl extends _$AuthCtrl {
         startedAt: DateTime.now(),
       ),
     );
-    final uri = Uri.parse(start.verificationUrl);
-    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!ok) {
-      _pollTimer?.cancel();
-      state = const AsyncData(AuthSignedOut());
-      _log.warning('launchUrl failed for $uri');
-      return;
-    }
 
     // [Timer.periodic] waits one full period before the first tick — run an
     // immediate poll so HTTP logs and approval appear without a 2s gap.
@@ -138,8 +130,9 @@ class AuthCtrl extends _$AuthCtrl {
   Future<void> updateProfile(UpdateProfileRequest request) async {
     final cur = state.valueOrNull;
     if (cur is! AuthSignedIn) return;
-    final profile =
-        await ref.read(authRepositoryProvider).updateProfile(request);
+    final profile = await ref
+        .read(authRepositoryProvider)
+        .updateProfile(request);
     state = AsyncData(AuthSignedIn(profile: profile));
     // AppPreferencesCtrl picks up the new profile via its auth listener.
   }

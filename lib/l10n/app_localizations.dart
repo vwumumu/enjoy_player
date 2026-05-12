@@ -1081,19 +1081,19 @@ abstract class AppLocalizations {
   /// No description provided for @authSignInSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'We will open your browser to sign in. When you are done, return here — we will detect completion automatically.'**
+  /// **'A secure sign-in page opens in the app. Complete the steps and we will detect when you are done.'**
   String get authSignInSubtitle;
 
   /// No description provided for @authSignInCta.
   ///
   /// In en, this message translates to:
-  /// **'Continue in browser'**
+  /// **'Continue'**
   String get authSignInCta;
 
   /// No description provided for @authWaitingForApproval.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for approval in your browser…'**
+  /// **'Finishing sign-in…'**
   String get authWaitingForApproval;
 
   /// No description provided for @authCancel.
@@ -1108,11 +1108,17 @@ abstract class AppLocalizations {
   /// **'Signed in successfully'**
   String get authSignedInSuccess;
 
-  /// No description provided for @authReOpenBrowser.
+  /// No description provided for @authReloadSignInPage.
   ///
   /// In en, this message translates to:
-  /// **'Re-open browser'**
-  String get authReOpenBrowser;
+  /// **'Reload sign-in page'**
+  String get authReloadSignInPage;
+
+  /// No description provided for @authOpenInSystemBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in system browser'**
+  String get authOpenInSystemBrowser;
 
   /// No description provided for @authSignOut.
   ///

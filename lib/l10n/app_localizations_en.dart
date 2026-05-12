@@ -525,13 +525,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authSignInSubtitle =>
-      'We will open your browser to sign in. When you are done, return here — we will detect completion automatically.';
+      'A secure sign-in page opens in the app. Complete the steps and we will detect when you are done.';
 
   @override
-  String get authSignInCta => 'Continue in browser';
+  String get authSignInCta => 'Continue';
 
   @override
-  String get authWaitingForApproval => 'Waiting for approval in your browser…';
+  String get authWaitingForApproval => 'Finishing sign-in…';
 
   @override
   String get authCancel => 'Cancel';
@@ -540,7 +540,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authSignedInSuccess => 'Signed in successfully';
 
   @override
-  String get authReOpenBrowser => 'Re-open browser';
+  String get authReloadSignInPage => 'Reload sign-in page';
+
+  @override
+  String get authOpenInSystemBrowser => 'Open in system browser';
 
   @override
   String get authSignOut => 'Sign out';

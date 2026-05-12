@@ -2,8 +2,8 @@
 
 ## Behavior
 
-- Optional sign-in via **browser redirect**: `POST /api/v1/sessions/start_auth`, then the user completes auth in the system browser; the app polls `GET /api/v1/sessions/poll` until `approved` or timeout (~5 minutes).
-- **Sign-in screen**: After approval the shell navigates **home** automatically; while polling, the user can **re-open browser** or **cancel**; failed loads show **network error** UI with **retry**.
+- Optional sign-in: `POST /api/v1/sessions/start_auth`, then the user completes auth in an **in-app WebView** (`flutter_inappwebview`) loading `verificationUrl`; the app polls `GET /api/v1/sessions/poll` until `approved` or timeout (~5 minutes). **Open in system browser** is available from the overflow menu if an IdP blocks embedded WebViews or the user prefers the OS browser (polling unchanged).
+- **Sign-in screen**: After approval the shell navigates **home** automatically; while polling, the user can **reload the sign-in page**, open the system browser, or **cancel**; failed loads show **network error** UI with **retry**.
 - **Bearer token** is stored in **flutter_secure_storage** (not in Drift).
 - Last **profile snapshot** is cached in **flutter_secure_storage** (JSON) for fast cold start when a token exists — avoids coupling auth init to the session-scoped Drift DB ([ADR-0012](../decisions/0012-per-user-sqlite-isolation.md)).
 - **Profile** screen calls `GET/PATCH /api/v1/profile` with camelCase JSON; the HTTP client maps camelCase ↔ snake_case like the web `@enjoy/api` client.
@@ -13,9 +13,10 @@
 
 ## REST clients
 
-Typed list/object helpers live under `lib/data/api/services/` for audios, videos, transcripts, and recordings. **Metadata sync** uses the mine endpoints for audios/videos/recordings when signed in ([features/sync.md](features/sync.md)).
+Typed list/object helpers live under `lib/data/api/services/` for audios, videos, transcripts, and recordings. **Metadata sync** uses the mine endpoints for audios/videos/recordings when signed in ([features/sync.md](sync.md)).
 
 ## Related ADR
 
 - [ADR-0006](../decisions/0006-auth-and-profile-sync.md)
 - [ADR-0012](../decisions/0012-per-user-sqlite-isolation.md) — per-user SQLite + profile cache
+- [ADR-0016](../decisions/0016-enjoy-account-webview-sign-in.md) — in-app WebView for Enjoy account verification URL (partial supersession of 0006 delivery)

@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -23,6 +24,7 @@ class SignInScreen extends ConsumerWidget {
     final auth = ref.watch(authCtrlProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final signingIn = auth.valueOrNull is AuthSigningIn;
 
     ref.listen(authCtrlProvider, (_, next) {
       if (next.valueOrNull is AuthSignedIn && context.mounted) {
@@ -31,24 +33,27 @@ class SignInScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
-          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-          onPressed: () {
-            final cur = ref.read(authCtrlProvider).valueOrNull;
-            if (cur is AuthSigningIn) {
-              ref.read(authCtrlProvider.notifier).cancelSignIn();
-            }
-            if (!context.mounted) return;
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/');
-            }
-          },
-        ),
-      ),
+      appBar:
+          signingIn
+              ? null
+              : AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  onPressed: () {
+                    final cur = ref.read(authCtrlProvider).valueOrNull;
+                    if (cur is AuthSigningIn) {
+                      ref.read(authCtrlProvider.notifier).cancelSignIn();
+                    }
+                    if (!context.mounted) return;
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/');
+                    }
+                  },
+                ),
+              ),
       body: auth.when(
         data: (state) {
           // ── Signed in ───────────────────────────────────────────────────
@@ -76,65 +81,9 @@ class SignInScreen extends ConsumerWidget {
             );
           }
 
-          // ── Awaiting browser approval ────────────────────────────────────
+          // ── In-app WebView sign-in + polling ────────────────────────────
           if (state is AuthSigningIn) {
-            return Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Padding(
-                  padding: EdgeInsets.all(t.space32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: cs.primary,
-                        ),
-                      ),
-                      SizedBox(height: t.space24),
-                      Text(
-                        l10n.authWaitingForApproval,
-                        textAlign: TextAlign.center,
-                        style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      SizedBox(height: t.space8),
-                      Text(
-                        l10n.authSignInSubtitle,
-                        textAlign: TextAlign.center,
-                        style: tt.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          height: 1.5,
-                        ),
-                      ),
-                      SizedBox(height: t.space32),
-                      FilledButton(
-                        onPressed: () async {
-                          final uri = Uri.parse(state.verificationUrl);
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
-                        },
-                        child: Text(l10n.authReOpenBrowser),
-                      ),
-                      SizedBox(height: t.space12),
-                      TextButton(
-                        onPressed: () {
-                          ref.read(authCtrlProvider.notifier).cancelSignIn();
-                          if (!context.mounted) return;
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/');
-                          }
-                        },
-                        child: Text(l10n.authCancel),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
+            return _SigningInWebPane(verificationUrl: state.verificationUrl);
           }
 
           // ── Default: sign in prompt ──────────────────────────────────────
@@ -188,9 +137,11 @@ class SignInScreen extends ConsumerWidget {
                       width: double.infinity,
                       child: FilledButton.icon(
                         onPressed: () async {
-                          await ref.read(authCtrlProvider.notifier).startSignIn();
+                          await ref
+                              .read(authCtrlProvider.notifier)
+                              .startSignIn();
                         },
-                        icon: const Icon(Icons.open_in_browser_rounded),
+                        icon: const Icon(Icons.login_rounded),
                         label: Text(l10n.authSignInCta),
                       ),
                     ),
@@ -251,6 +202,167 @@ class SignInScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _SigningInWebPane extends ConsumerStatefulWidget {
+  const _SigningInWebPane({required this.verificationUrl});
+
+  final String verificationUrl;
+
+  @override
+  ConsumerState<_SigningInWebPane> createState() => _SigningInWebPaneState();
+}
+
+class _SigningInWebPaneState extends ConsumerState<_SigningInWebPane> {
+  InAppWebViewController? _controller;
+  bool _isLoading = true;
+  String? _pageTitle;
+
+  /// Matches [YoutubeLoginScreen] — many IdPs reject default WebView UAs.
+  static const _chromeMobileUserAgent =
+      'Mozilla/5.0 (Linux; Android 14; Pixel 8) '
+      'AppleWebKit/537.36 (KHTML, like Gecko) '
+      'Chrome/134.0.0.0 Mobile Safari/537.36';
+
+  void _onClosePressed() {
+    ref.read(authCtrlProvider.notifier).cancelSignIn();
+    final ctx = context;
+    if (!ctx.mounted) return;
+    if (ctx.canPop()) {
+      ctx.pop();
+    } else {
+      ctx.go('/');
+    }
+  }
+
+  Future<void> _reloadVerificationPage() async {
+    await _controller?.loadUrl(
+      urlRequest: URLRequest(url: WebUri(widget.verificationUrl)),
+    );
+  }
+
+  Future<void> _openInSystemBrowser() async {
+    final uri = Uri.parse(widget.verificationUrl);
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.playerOpenGenericError),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: 48,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 24),
+                  color: colorScheme.onSurface,
+                  onPressed: _onClosePressed,
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                ),
+                Expanded(
+                  child: Text(
+                    _pageTitle ?? l10n.authSignInTitle,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded, size: 22),
+                  color: colorScheme.onSurface,
+                  onPressed: _reloadVerificationPage,
+                  tooltip: l10n.authReloadSignInPage,
+                ),
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert_rounded,
+                    color: colorScheme.onSurface,
+                  ),
+                  tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
+                  onSelected: (value) {
+                    if (value == 'browser') {
+                      _openInSystemBrowser();
+                    }
+                  },
+                  itemBuilder:
+                      (context) => [
+                        PopupMenuItem<String>(
+                          value: 'browser',
+                          child: Text(l10n.authOpenInSystemBrowser),
+                        ),
+                      ],
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text(
+              l10n.authWaitingForApproval,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          if (_isLoading)
+            LinearProgressIndicator(
+              color: colorScheme.primary,
+              backgroundColor: Colors.transparent,
+            ),
+          Expanded(
+            child: InAppWebView(
+              initialUrlRequest: URLRequest(
+                url: WebUri(widget.verificationUrl),
+              ),
+              initialSettings: InAppWebViewSettings(
+                javaScriptEnabled: true,
+                thirdPartyCookiesEnabled: true,
+                userAgent: _chromeMobileUserAgent,
+              ),
+              onWebViewCreated: (controller) {
+                _controller = controller;
+              },
+              onLoadStart: (_, _) {
+                if (mounted) setState(() => _isLoading = true);
+              },
+              onLoadStop: (controller, _) async {
+                if (!mounted) return;
+                final title = await controller.getTitle();
+                setState(() {
+                  _isLoading = false;
+                  _pageTitle = title;
+                });
+              },
+              onTitleChanged: (_, title) {
+                if (mounted && title != null) {
+                  setState(() => _pageTitle = title);
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

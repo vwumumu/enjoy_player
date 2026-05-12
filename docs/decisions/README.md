@@ -39,3 +39,4 @@ Trade-offs, follow-up work, risks.
 | [0013](0013-local-first-sync.md) | Local-first cloud sync + Cloud index (supersedes 0010 download behavior on player) |
 | [0014](0014-ai-capabilities-layer.md) | AI capabilities layer (Enjoy worker + capability pattern; BYOK/local placeholders) |
 | [0015](0015-youtube-playback.md) | YouTube playback via WebView + HTML5 video (dual engine with media_kit) |
+| [0016](0016-enjoy-account-webview-sign-in.md) | Enjoy account sign-in via in-app WebView (partial supersession of 0006) |
