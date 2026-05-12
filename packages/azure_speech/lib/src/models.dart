@@ -2,6 +2,155 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'models.g.dart';
 
+const _azureEmptyPronunciationScores = AzurePronunciationAssessmentScores(
+  accuracyScore: 0,
+  fluencyScore: 0,
+  completenessScore: 0,
+  pronScore: 0,
+  prosodyScore: null,
+);
+
+const _azureEmptyWordPronunciation = AzureWordPronunciationAssessment(
+  accuracyScore: 0,
+  errorType: 'None',
+);
+
+const _azureEmptySyllablePronunciation = AzureSyllablePronunciationAssessment(
+  accuracyScore: 0,
+);
+
+const _azureEmptyPhonemePronunciation = AzurePhonemePronunciationAssessment(
+  accuracyScore: 0,
+  nBestPhonemes: null,
+);
+
+/// Azure may omit tick fields for some word / error types (e.g. omission).
+int _azureJsonIntTick(Object? json) {
+  if (json == null) return 0;
+  if (json is int) return json;
+  if (json is num) return json.toInt();
+  if (json is String) {
+    final i = int.tryParse(json);
+    if (i != null) return i;
+    final d = double.tryParse(json);
+    if (d != null) return d.toInt();
+  }
+  return 0;
+}
+
+double _azureJsonDoubleScore(Object? json) {
+  if (json == null) return 0;
+  if (json is double) return json;
+  if (json is num) return json.toDouble();
+  if (json is String) {
+    final d = double.tryParse(json);
+    if (d != null) return d;
+  }
+  return 0;
+}
+
+double? _azureJsonDoubleScoreOpt(Object? json) {
+  if (json == null) return null;
+  if (json is double) return json;
+  if (json is num) return json.toDouble();
+  if (json is String) {
+    return double.tryParse(json);
+  }
+  return null;
+}
+
+String _azureJsonString(Object? json) {
+  if (json == null) return '';
+  if (json is String) return json;
+  return json.toString();
+}
+
+String _azureJsonErrorType(Object? json) {
+  if (json == null) return 'None';
+  if (json is! String || json.isEmpty) return 'None';
+  return json;
+}
+
+List<AzureNBestResult> _azureJsonNBestList(Object? json) {
+  if (json is! List<dynamic>) return const [];
+  final out = <AzureNBestResult>[];
+  for (final e in json) {
+    if (e is Map<String, dynamic>) {
+      out.add(AzureNBestResult.fromJson(e));
+    } else if (e is Map) {
+      out.add(AzureNBestResult.fromJson(Map<String, dynamic>.from(e)));
+    }
+  }
+  return out;
+}
+
+List<AzureWordAssessment> _azureJsonWordsList(Object? json) {
+  if (json is! List<dynamic>) return const [];
+  final out = <AzureWordAssessment>[];
+  for (final e in json) {
+    if (e is Map<String, dynamic>) {
+      out.add(AzureWordAssessment.fromJson(e));
+    } else if (e is Map) {
+      out.add(AzureWordAssessment.fromJson(Map<String, dynamic>.from(e)));
+    }
+  }
+  return out;
+}
+
+AzurePronunciationAssessmentScores _azureJsonPronunciationScores(
+  Object? json,
+) {
+  if (json is Map<String, dynamic>) {
+    return AzurePronunciationAssessmentScores.fromJson(json);
+  }
+  if (json is Map) {
+    return AzurePronunciationAssessmentScores.fromJson(
+      Map<String, dynamic>.from(json),
+    );
+  }
+  return _azureEmptyPronunciationScores;
+}
+
+AzureWordPronunciationAssessment _azureJsonWordPronunciation(Object? json) {
+  if (json is Map<String, dynamic>) {
+    return AzureWordPronunciationAssessment.fromJson(json);
+  }
+  if (json is Map) {
+    return AzureWordPronunciationAssessment.fromJson(
+      Map<String, dynamic>.from(json),
+    );
+  }
+  return _azureEmptyWordPronunciation;
+}
+
+AzureSyllablePronunciationAssessment _azureJsonSyllablePronunciation(
+  Object? json,
+) {
+  if (json is Map<String, dynamic>) {
+    return AzureSyllablePronunciationAssessment.fromJson(json);
+  }
+  if (json is Map) {
+    return AzureSyllablePronunciationAssessment.fromJson(
+      Map<String, dynamic>.from(json),
+    );
+  }
+  return _azureEmptySyllablePronunciation;
+}
+
+AzurePhonemePronunciationAssessment _azureJsonPhonemePronunciation(
+  Object? json,
+) {
+  if (json is Map<String, dynamic>) {
+    return AzurePhonemePronunciationAssessment.fromJson(json);
+  }
+  if (json is Map) {
+    return AzurePhonemePronunciationAssessment.fromJson(
+      Map<String, dynamic>.from(json),
+    );
+  }
+  return _azureEmptyPhonemePronunciation;
+}
+
 /// Root JSON from [SpeechServiceResponse_JsonResult] (Azure Speech SDK).
 @JsonSerializable()
 final class AzurePronunciationAssessmentResult {
@@ -13,19 +162,19 @@ final class AzurePronunciationAssessmentResult {
     required this.nBest,
   });
 
-  @JsonKey(name: 'RecognitionStatus')
+  @JsonKey(name: 'RecognitionStatus', fromJson: _azureJsonString)
   final String recognitionStatus;
 
-  @JsonKey(name: 'Offset')
+  @JsonKey(name: 'Offset', fromJson: _azureJsonIntTick)
   final int offset;
 
-  @JsonKey(name: 'Duration')
+  @JsonKey(name: 'Duration', fromJson: _azureJsonIntTick)
   final int duration;
 
-  @JsonKey(name: 'DisplayText')
+  @JsonKey(name: 'DisplayText', fromJson: _azureJsonString)
   final String displayText;
 
-  @JsonKey(name: 'NBest')
+  @JsonKey(name: 'NBest', fromJson: _azureJsonNBestList)
   final List<AzureNBestResult> nBest;
 
   factory AzurePronunciationAssessmentResult.fromJson(
@@ -52,25 +201,28 @@ final class AzureNBestResult {
     required this.words,
   });
 
-  @JsonKey(name: 'Confidence')
+  @JsonKey(name: 'Confidence', fromJson: _azureJsonDoubleScore)
   final double confidence;
 
-  @JsonKey(name: 'Lexical')
+  @JsonKey(name: 'Lexical', fromJson: _azureJsonString)
   final String lexical;
 
-  @JsonKey(name: 'ITN')
+  @JsonKey(name: 'ITN', fromJson: _azureJsonString)
   final String itn;
 
-  @JsonKey(name: 'MaskedITN')
+  @JsonKey(name: 'MaskedITN', fromJson: _azureJsonString)
   final String maskedItn;
 
-  @JsonKey(name: 'Display')
+  @JsonKey(name: 'Display', fromJson: _azureJsonString)
   final String display;
 
-  @JsonKey(name: 'PronunciationAssessment')
+  @JsonKey(
+    name: 'PronunciationAssessment',
+    fromJson: _azureJsonPronunciationScores,
+  )
   final AzurePronunciationAssessmentScores pronunciationAssessment;
 
-  @JsonKey(name: 'Words')
+  @JsonKey(name: 'Words', fromJson: _azureJsonWordsList)
   final List<AzureWordAssessment> words;
 
   factory AzureNBestResult.fromJson(Map<String, dynamic> json) =>
@@ -89,19 +241,19 @@ final class AzurePronunciationAssessmentScores {
     this.prosodyScore,
   });
 
-  @JsonKey(name: 'AccuracyScore')
+  @JsonKey(name: 'AccuracyScore', fromJson: _azureJsonDoubleScore)
   final double accuracyScore;
 
-  @JsonKey(name: 'FluencyScore')
+  @JsonKey(name: 'FluencyScore', fromJson: _azureJsonDoubleScore)
   final double fluencyScore;
 
-  @JsonKey(name: 'CompletenessScore')
+  @JsonKey(name: 'CompletenessScore', fromJson: _azureJsonDoubleScore)
   final double completenessScore;
 
-  @JsonKey(name: 'PronScore')
+  @JsonKey(name: 'PronScore', fromJson: _azureJsonDoubleScore)
   final double pronScore;
 
-  @JsonKey(name: 'ProsodyScore')
+  @JsonKey(name: 'ProsodyScore', fromJson: _azureJsonDoubleScoreOpt)
   final double? prosodyScore;
 
   factory AzurePronunciationAssessmentScores.fromJson(
@@ -123,16 +275,19 @@ final class AzureWordAssessment {
     this.phonemes,
   });
 
-  @JsonKey(name: 'Word')
+  @JsonKey(name: 'Word', fromJson: _azureJsonString)
   final String word;
 
-  @JsonKey(name: 'Offset')
+  @JsonKey(name: 'Offset', fromJson: _azureJsonIntTick)
   final int offset;
 
-  @JsonKey(name: 'Duration')
+  @JsonKey(name: 'Duration', fromJson: _azureJsonIntTick)
   final int duration;
 
-  @JsonKey(name: 'PronunciationAssessment')
+  @JsonKey(
+    name: 'PronunciationAssessment',
+    fromJson: _azureJsonWordPronunciation,
+  )
   final AzureWordPronunciationAssessment pronunciationAssessment;
 
   @JsonKey(name: 'Syllables')
@@ -154,10 +309,10 @@ final class AzureWordPronunciationAssessment {
     required this.errorType,
   });
 
-  @JsonKey(name: 'AccuracyScore')
+  @JsonKey(name: 'AccuracyScore', fromJson: _azureJsonDoubleScore)
   final double accuracyScore;
 
-  @JsonKey(name: 'ErrorType')
+  @JsonKey(name: 'ErrorType', fromJson: _azureJsonErrorType)
   final String errorType;
 
   factory AzureWordPronunciationAssessment.fromJson(
@@ -178,16 +333,19 @@ final class AzureSyllableAssessment {
     this.phonemes,
   });
 
-  @JsonKey(name: 'Syllable')
+  @JsonKey(name: 'Syllable', fromJson: _azureJsonString)
   final String syllable;
 
-  @JsonKey(name: 'Offset')
+  @JsonKey(name: 'Offset', fromJson: _azureJsonIntTick)
   final int offset;
 
-  @JsonKey(name: 'Duration')
+  @JsonKey(name: 'Duration', fromJson: _azureJsonIntTick)
   final int duration;
 
-  @JsonKey(name: 'PronunciationAssessment')
+  @JsonKey(
+    name: 'PronunciationAssessment',
+    fromJson: _azureJsonSyllablePronunciation,
+  )
   final AzureSyllablePronunciationAssessment pronunciationAssessment;
 
   @JsonKey(name: 'Phonemes')
@@ -203,7 +361,7 @@ final class AzureSyllableAssessment {
 final class AzureSyllablePronunciationAssessment {
   const AzureSyllablePronunciationAssessment({required this.accuracyScore});
 
-  @JsonKey(name: 'AccuracyScore')
+  @JsonKey(name: 'AccuracyScore', fromJson: _azureJsonDoubleScore)
   final double accuracyScore;
 
   factory AzureSyllablePronunciationAssessment.fromJson(
@@ -223,16 +381,19 @@ final class AzurePhonemeAssessment {
     required this.pronunciationAssessment,
   });
 
-  @JsonKey(name: 'Phoneme')
+  @JsonKey(name: 'Phoneme', fromJson: _azureJsonString)
   final String phoneme;
 
-  @JsonKey(name: 'Offset')
+  @JsonKey(name: 'Offset', fromJson: _azureJsonIntTick)
   final int offset;
 
-  @JsonKey(name: 'Duration')
+  @JsonKey(name: 'Duration', fromJson: _azureJsonIntTick)
   final int duration;
 
-  @JsonKey(name: 'PronunciationAssessment')
+  @JsonKey(
+    name: 'PronunciationAssessment',
+    fromJson: _azureJsonPhonemePronunciation,
+  )
   final AzurePhonemePronunciationAssessment pronunciationAssessment;
 
   factory AzurePhonemeAssessment.fromJson(Map<String, dynamic> json) =>
@@ -248,7 +409,7 @@ final class AzurePhonemePronunciationAssessment {
     this.nBestPhonemes,
   });
 
-  @JsonKey(name: 'AccuracyScore')
+  @JsonKey(name: 'AccuracyScore', fromJson: _azureJsonDoubleScore)
   final double accuracyScore;
 
   @JsonKey(name: 'NBestPhonemes')
@@ -266,10 +427,10 @@ final class AzurePhonemePronunciationAssessment {
 final class AzureNBestPhoneme {
   const AzureNBestPhoneme({required this.phoneme, required this.score});
 
-  @JsonKey(name: 'Phoneme')
+  @JsonKey(name: 'Phoneme', fromJson: _azureJsonString)
   final String phoneme;
 
-  @JsonKey(name: 'Score')
+  @JsonKey(name: 'Score', fromJson: _azureJsonDoubleScore)
   final double score;
 
   factory AzureNBestPhoneme.fromJson(Map<String, dynamic> json) =>
