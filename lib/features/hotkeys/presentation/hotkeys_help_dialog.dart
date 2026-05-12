@@ -259,7 +259,7 @@ class _HotkeysHelpList extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(width: t.space12),
+                SizedBox(width: t.space16),
                 KbdChordRow(binding: ctrl.effectiveKeys(def.id)),
               ],
             ),
@@ -278,7 +278,11 @@ class _HotkeysHelpList extends StatelessWidget {
       );
     }
 
+    // Reserve trailing space so desktop scrollbars do not paint over key caps.
+    final trailingPad = t.space16 + 12;
+
     return SingleChildScrollView(
+      padding: EdgeInsetsDirectional.only(end: trailingPad),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: children,
