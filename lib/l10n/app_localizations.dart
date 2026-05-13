@@ -2283,6 +2283,66 @@ abstract class AppLocalizations {
   /// **'Synced from your account profile'**
   String get settingsAppearanceSyncedFromProfile;
 
+  /// No description provided for @settingsLanguageSubtitleSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Also updates your Enjoy profile when online.'**
+  String get settingsLanguageSubtitleSignedIn;
+
+  /// No description provided for @settingsLanguageSubtitleDeviceOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored on this device until you sign in.'**
+  String get settingsLanguageSubtitleDeviceOnly;
+
+  /// No description provided for @settingsLanguageOptionEnUs.
+  ///
+  /// In en, this message translates to:
+  /// **'English (United States)'**
+  String get settingsLanguageOptionEnUs;
+
+  /// No description provided for @settingsLanguageOptionZhCn.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese (Simplified, China)'**
+  String get settingsLanguageOptionZhCn;
+
+  /// No description provided for @settingsLearningLanguageFixedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'English (US) only for now.'**
+  String get settingsLearningLanguageFixedSubtitle;
+
+  /// No description provided for @settingsNativeMustDifferHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Must differ from your learning language.'**
+  String get settingsNativeMustDifferHint;
+
+  /// No description provided for @settingsLanguagePickerTitleDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Display language'**
+  String get settingsLanguagePickerTitleDisplay;
+
+  /// No description provided for @settingsLanguagePickerTitleNative.
+  ///
+  /// In en, this message translates to:
+  /// **'Native language'**
+  String get settingsLanguagePickerTitleNative;
+
+  /// No description provided for @profileFieldDisplayLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Display language'**
+  String get profileFieldDisplayLanguage;
+
+  /// No description provided for @profileLearningLanguageReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning language is English (US) in this version.'**
+  String get profileLearningLanguageReadOnly;
+
   /// No description provided for @settingsKeyboardOpenCheatsheet.
   ///
   /// In en, this message translates to:

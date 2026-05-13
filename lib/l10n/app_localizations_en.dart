@@ -1178,6 +1178,41 @@ class AppLocalizationsEn extends AppLocalizations {
       'Synced from your account profile';
 
   @override
+  String get settingsLanguageSubtitleSignedIn =>
+      'Also updates your Enjoy profile when online.';
+
+  @override
+  String get settingsLanguageSubtitleDeviceOnly =>
+      'Stored on this device until you sign in.';
+
+  @override
+  String get settingsLanguageOptionEnUs => 'English (United States)';
+
+  @override
+  String get settingsLanguageOptionZhCn => 'Chinese (Simplified, China)';
+
+  @override
+  String get settingsLearningLanguageFixedSubtitle =>
+      'English (US) only for now.';
+
+  @override
+  String get settingsNativeMustDifferHint =>
+      'Must differ from your learning language.';
+
+  @override
+  String get settingsLanguagePickerTitleDisplay => 'Display language';
+
+  @override
+  String get settingsLanguagePickerTitleNative => 'Native language';
+
+  @override
+  String get profileFieldDisplayLanguage => 'Display language';
+
+  @override
+  String get profileLearningLanguageReadOnly =>
+      'Learning language is English (US) in this version.';
+
+  @override
   String get settingsKeyboardOpenCheatsheet => 'Open shortcuts cheatsheet';
 
   @override

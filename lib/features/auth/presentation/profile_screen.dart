@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
+import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -29,8 +31,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _name;
   late final TextEditingController _goal;
-  late final TextEditingController _learning;
-  late final TextEditingController _native;
   bool _saving = false;
   String? _hydratedForProfileId;
 
@@ -39,24 +39,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.initState();
     _name = TextEditingController();
     _goal = TextEditingController();
-    _learning = TextEditingController();
-    _native = TextEditingController();
   }
 
   @override
   void dispose() {
     _name.dispose();
     _goal.dispose();
-    _learning.dispose();
-    _native.dispose();
     super.dispose();
   }
 
   void _applyProfile(UserProfile p) {
     _name.text = p.name;
     _goal.text = p.goal?.toString() ?? '';
-    _learning.text = p.learningLanguage ?? '';
-    _native.text = p.nativeLanguage ?? '';
+  }
+
+  String _languageOptionLabel(AppLocalizations l10n, String tag) {
+    if (tagsEqual(tag, 'en-US')) return l10n.settingsLanguageOptionEnUs;
+    return l10n.settingsLanguageOptionZhCn;
   }
 
   @override
@@ -247,21 +246,130 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ),
                         SizedBox(height: t.space16),
-                        TextFormField(
-                          controller: _learning,
-                          decoration: InputDecoration(
-                            labelText: l10n.profileFieldLearningLanguage,
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
-                        SizedBox(height: t.space16),
-                        TextFormField(
-                          controller: _native,
-                          decoration: InputDecoration(
-                            labelText: l10n.profileFieldNativeLanguage,
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
+                        ref.watch(appPreferencesCtrlProvider).when(
+                              data: (pref) {
+                                final displayTag =
+                                    localeToBcp47(pref.effectiveDisplayLocale);
+                                final learnTag = pref.effectiveLearningLanguage;
+                                final nativeTag = pref.effectiveNativeLanguage;
+                                final nativeAllowed = allowedNativeTags(learnTag);
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    DropdownButtonFormField<String>(
+                                      key: ValueKey<String>('profile-locale-$displayTag'),
+                                      initialValue: displayTag,
+                                      decoration: InputDecoration(
+                                        labelText: l10n.profileFieldDisplayLanguage,
+                                        border: const OutlineInputBorder(),
+                                      ),
+                                      items: [
+                                        for (final loc in kAppDisplayLocales)
+                                          DropdownMenuItem(
+                                            value: localeToBcp47(loc),
+                                            child: Text(
+                                              _languageOptionLabel(
+                                                l10n,
+                                                localeToBcp47(loc),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                      onChanged: _saving
+                                          ? null
+                                          : (v) async {
+                                              if (v == null) return;
+                                              await ref
+                                                  .read(
+                                                    appPreferencesCtrlProvider
+                                                        .notifier,
+                                                  )
+                                                  .setLocale(
+                                                    displayLocaleFromRawOrDefault(
+                                                      v,
+                                                    ),
+                                                  );
+                                            },
+                                    ),
+                                    SizedBox(height: t.space16),
+                                    DropdownButtonFormField<String>(
+                                      key: ValueKey<String>(
+                                        'profile-learn-$learnTag',
+                                      ),
+                                      initialValue: learnTag,
+                                      decoration: InputDecoration(
+                                        labelText:
+                                            l10n.profileFieldLearningLanguage,
+                                        helperText: l10n
+                                            .profileLearningLanguageReadOnly,
+                                        border: const OutlineInputBorder(),
+                                      ),
+                                      items: [
+                                        DropdownMenuItem(
+                                          value: learnTag,
+                                          child: Text(
+                                            _languageOptionLabel(
+                                              l10n,
+                                              learnTag,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                      onChanged: null,
+                                    ),
+                                    SizedBox(height: t.space16),
+                                    DropdownButtonFormField<String>(
+                                      key: ValueKey<String>(
+                                        'profile-native-$nativeTag',
+                                      ),
+                                      initialValue: nativeAllowed.any(
+                                              (t) => tagsEqual(t, nativeTag),
+                                            )
+                                          ? nativeTag
+                                          : nativeAllowed.first,
+                                      decoration: InputDecoration(
+                                        labelText:
+                                            l10n.profileFieldNativeLanguage,
+                                        helperText:
+                                            l10n.settingsNativeMustDifferHint,
+                                        border: const OutlineInputBorder(),
+                                      ),
+                                      items: [
+                                        for (final tag in nativeAllowed)
+                                          DropdownMenuItem(
+                                            value: tag,
+                                            child: Text(
+                                              _languageOptionLabel(
+                                                l10n,
+                                                tag,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                      onChanged: _saving || nativeAllowed.length <= 1
+                                          ? null
+                                          : (v) async {
+                                              if (v == null) return;
+                                              await ref
+                                                  .read(
+                                                    appPreferencesCtrlProvider
+                                                        .notifier,
+                                                  )
+                                                  .setNativeLanguage(v);
+                                            },
+                                    ),
+                                  ],
+                                );
+                              },
+                              loading: () => Padding(
+                                padding: EdgeInsets.only(bottom: t.space16),
+                                child: Skeleton.line(
+                                  width: double.infinity,
+                                  height: 56,
+                                ),
+                              ),
+                              error: (_, _) => const SizedBox.shrink(),
+                            ),
                         SizedBox(height: t.space24),
                         EnjoyButton.primary(
                           onPressed: _saving
@@ -283,14 +391,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                           UpdateProfileRequest(
                                             name: _name.text.trim(),
                                             goal: goal,
-                                            learningLanguage:
-                                                _learning.text.trim().isEmpty
-                                                ? null
-                                                : _learning.text.trim(),
-                                            nativeLanguage:
-                                                _native.text.trim().isEmpty
-                                                ? null
-                                                : _native.text.trim(),
                                           ),
                                         );
                                     final after = ref

@@ -1137,6 +1137,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAppearanceSyncedFromProfile => '与账号个人资料同步';
 
   @override
+  String get settingsLanguageSubtitleSignedIn => '联网时会同步到你的 Enjoy 账号。';
+
+  @override
+  String get settingsLanguageSubtitleDeviceOnly => '保存在本机，登录账号后可同步。';
+
+  @override
+  String get settingsLanguageOptionEnUs => '英语（美国）';
+
+  @override
+  String get settingsLanguageOptionZhCn => '中文（简体，中国）';
+
+  @override
+  String get settingsLearningLanguageFixedSubtitle => '当前版本仅支持美式英语。';
+
+  @override
+  String get settingsNativeMustDifferHint => '不能与学习语言相同。';
+
+  @override
+  String get settingsLanguagePickerTitleDisplay => '显示语言';
+
+  @override
+  String get settingsLanguagePickerTitleNative => '母语';
+
+  @override
+  String get profileFieldDisplayLanguage => '显示语言';
+
+  @override
+  String get profileLearningLanguageReadOnly => '当前版本学习语言固定为英语（美国）。';
+
+  @override
   String get settingsKeyboardOpenCheatsheet => '打开快捷键速查';
 
   @override
@@ -2305,6 +2335,36 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsAppearanceSyncedFromProfile => '与账号个人资料同步';
+
+  @override
+  String get settingsLanguageSubtitleSignedIn => '联网时会同步到你的 Enjoy 账号。';
+
+  @override
+  String get settingsLanguageSubtitleDeviceOnly => '保存在本机，登录账号后可同步。';
+
+  @override
+  String get settingsLanguageOptionEnUs => '英语（美国）';
+
+  @override
+  String get settingsLanguageOptionZhCn => '中文（简体，中国）';
+
+  @override
+  String get settingsLearningLanguageFixedSubtitle => '当前版本仅支持美式英语。';
+
+  @override
+  String get settingsNativeMustDifferHint => '不能与学习语言相同。';
+
+  @override
+  String get settingsLanguagePickerTitleDisplay => '显示语言';
+
+  @override
+  String get settingsLanguagePickerTitleNative => '母语';
+
+  @override
+  String get profileFieldDisplayLanguage => '显示语言';
+
+  @override
+  String get profileLearningLanguageReadOnly => '当前版本学习语言固定为英语（美国）。';
 
   @override
   String get settingsKeyboardOpenCheatsheet => '打开快捷键速查';

@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:enjoy_player/core/interaction/haptics.dart';
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
+import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
@@ -23,6 +24,7 @@ import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_help_dialog.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_settings_section.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/widgets/kbd_chip.dart';
+import 'package:enjoy_player/features/settings/presentation/widgets/language_choice_sheet.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
@@ -348,13 +350,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: Consumer(
                     builder: (context, ref, _) {
                       final prefs = ref.watch(appPreferencesCtrlProvider);
+                      final auth = ref.watch(authCtrlProvider);
+                      final signedIn = auth.maybeWhen(
+                        data: (s) => s is AuthSignedIn,
+                        orElse: () => false,
+                      );
+                      final langSubtitle = signedIn
+                          ? l10n.settingsLanguageSubtitleSignedIn
+                          : l10n.settingsLanguageSubtitleDeviceOnly;
                       return prefs.when(
                         data: (state) {
                           final displayLang =
-                              state.locale?.toLanguageTag() ??
-                              kAppDefaultDisplayLocale.toLanguageTag();
-                          final learn = state.learningLanguage ?? '—';
-                          final native = state.nativeLanguage ?? '—';
+                              localeToBcp47(state.effectiveDisplayLocale);
+                          final learn = state.effectiveLearningLanguage;
+                          final native = state.effectiveNativeLanguage;
+                          final nativeChoices = allowedNativeTags(
+                            kDefaultLearningLanguageTag,
+                          );
+                          String labelForTag(String tag) {
+                            if (tagsEqual(tag, 'en-US')) {
+                              return l10n.settingsLanguageOptionEnUs;
+                            }
+                            return l10n.settingsLanguageOptionZhCn;
+                          }
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -400,19 +418,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   alpha: 0.35,
                                 ),
                               ),
-                              Tooltip(
-                                message:
-                                    l10n.settingsAppearanceSyncedFromProfile,
-                                child: _SettingsTile(
-                                  leadingIcon: Icons.language_rounded,
-                                  title: l10n.settingsAppearanceDisplayLanguage,
-                                  subtitle:
-                                      l10n.settingsAppearanceSyncedFromProfile,
-                                  valueBadge: _SettingsValuePill(
-                                    label: displayLang,
-                                  ),
-                                  showChevron: false,
+                              _SettingsTile(
+                                leadingIcon: Icons.language_rounded,
+                                title: l10n.settingsAppearanceDisplayLanguage,
+                                subtitle: langSubtitle,
+                                valueBadge: _SettingsValuePill(
+                                  label: labelForTag(displayLang),
                                 ),
+                                showChevron: true,
+                                onTap: () async {
+                                  final opts = <LanguageChoiceOption>[
+                                    for (final loc in kAppDisplayLocales)
+                                      LanguageChoiceOption(
+                                        value: localeToBcp47(loc),
+                                        label: labelForTag(localeToBcp47(loc)),
+                                      ),
+                                  ];
+                                  final picked = await showLanguageChoiceSheet(
+                                    context: context,
+                                    title: l10n
+                                        .settingsLanguagePickerTitleDisplay,
+                                    options: opts,
+                                    selectedValue: displayLang,
+                                  );
+                                  if (picked == null || !context.mounted) {
+                                    return;
+                                  }
+                                  await ref
+                                      .read(
+                                        appPreferencesCtrlProvider.notifier,
+                                      )
+                                      .setLocale(
+                                        displayLocaleFromRawOrDefault(
+                                          picked,
+                                        ),
+                                      );
+                                },
                               ),
                               Divider(
                                 height: 1,
@@ -420,18 +461,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   alpha: 0.35,
                                 ),
                               ),
-                              Tooltip(
-                                message:
-                                    l10n.settingsAppearanceSyncedFromProfile,
-                                child: _SettingsTile(
-                                  leadingIcon: Icons.translate_rounded,
-                                  title:
-                                      l10n.settingsAppearanceLearningLanguage,
-                                  subtitle:
-                                      l10n.settingsAppearanceSyncedFromProfile,
-                                  valueBadge: _SettingsValuePill(label: learn),
-                                  showChevron: false,
-                                ),
+                              _SettingsTile(
+                                leadingIcon: Icons.translate_rounded,
+                                title:
+                                    l10n.settingsAppearanceLearningLanguage,
+                                subtitle:
+                                    l10n.settingsLearningLanguageFixedSubtitle,
+                                valueBadge: _SettingsValuePill(label: learn),
+                                showChevron: false,
                               ),
                               Divider(
                                 height: 1,
@@ -439,17 +476,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   alpha: 0.35,
                                 ),
                               ),
-                              Tooltip(
-                                message:
-                                    l10n.settingsAppearanceSyncedFromProfile,
-                                child: _SettingsTile(
-                                  leadingIcon: Icons.record_voice_over_outlined,
-                                  title: l10n.settingsAppearanceNativeLanguage,
-                                  subtitle:
-                                      l10n.settingsAppearanceSyncedFromProfile,
-                                  valueBadge: _SettingsValuePill(label: native),
-                                  showChevron: false,
+                              _SettingsTile(
+                                leadingIcon: Icons.record_voice_over_outlined,
+                                title: l10n.settingsAppearanceNativeLanguage,
+                                subtitle: langSubtitle,
+                                valueBadge: _SettingsValuePill(
+                                  label: labelForTag(native),
                                 ),
+                                showChevron: nativeChoices.length > 1,
+                                onTap: nativeChoices.length > 1
+                                    ? () async {
+                                        final opts = <LanguageChoiceOption>[
+                                          for (final tag in nativeChoices)
+                                            LanguageChoiceOption(
+                                              value: tag,
+                                              label: labelForTag(tag),
+                                            ),
+                                        ];
+                                        final picked =
+                                            await showLanguageChoiceSheet(
+                                          context: context,
+                                          title: l10n
+                                              .settingsLanguagePickerTitleNative,
+                                          options: opts,
+                                          selectedValue: native,
+                                        );
+                                        if (picked == null ||
+                                            !context.mounted) {
+                                          return;
+                                        }
+                                        await ref
+                                            .read(
+                                              appPreferencesCtrlProvider
+                                                  .notifier,
+                                            )
+                                            .setNativeLanguage(picked);
+                                      }
+                                    : null,
                               ),
                             ],
                           );
