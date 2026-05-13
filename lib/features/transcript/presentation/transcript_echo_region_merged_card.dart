@@ -106,43 +106,45 @@ class EchoRegionMergedCard extends ConsumerWidget {
         // Neutral card with 8px warm orange left rail
         ClipRRect(
           borderRadius: BorderRadius.circular(tok.radiusMd),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Orange rail
-              Container(
-                width: 8,
-                decoration: BoxDecoration(color: tok.echoActive),
-              ),
-              // Content
-              Expanded(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: shell,
-                    border: Border(
-                      top: BorderSide(
-                        color: scheme.outlineVariant.withValues(alpha: 0.18),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Orange rail
+                Container(
+                  width: 8,
+                  decoration: BoxDecoration(color: tok.echoActive),
+                ),
+                // Content
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: shell,
+                      border: Border(
+                        top: BorderSide(
+                          color: scheme.outlineVariant.withValues(alpha: 0.18),
+                        ),
+                        right: BorderSide(
+                          color: scheme.outlineVariant.withValues(alpha: 0.18),
+                        ),
+                        bottom: BorderSide(
+                          color: scheme.outlineVariant.withValues(alpha: 0.18),
+                        ),
                       ),
-                      right: BorderSide(
-                        color: scheme.outlineVariant.withValues(alpha: 0.18),
-                      ),
-                      bottom: BorderSide(
-                        color: scheme.outlineVariant.withValues(alpha: 0.18),
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
                       ),
                     ),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: lineWidgets,
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: lineWidgets,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         SizedBox(height: tok.space8),
