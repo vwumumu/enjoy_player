@@ -14,7 +14,6 @@ import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
-import 'package:enjoy_player/core/theme/widgets/enjoy_card.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
@@ -360,8 +359,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           : l10n.settingsLanguageSubtitleDeviceOnly;
                       return prefs.when(
                         data: (state) {
-                          final displayLang =
-                              localeToBcp47(state.effectiveDisplayLocale);
+                          final displayLang = localeToBcp47(
+                            state.effectiveDisplayLocale,
+                          );
                           final learn = state.effectiveLearningLanguage;
                           final native = state.effectiveNativeLanguage;
                           final nativeChoices = allowedNativeTags(
@@ -373,6 +373,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             }
                             return l10n.settingsLanguageOptionZhCn;
                           }
+
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -381,19 +382,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     l10n.settingsAppearanceSyncedFromProfile,
                                 child: _SettingsTile(
                                   leading: Container(
-                                    width: 48,
-                                    height: 48,
+                                    width: 44,
+                                    height: 44,
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(
-                                        t.radiusMd,
+                                        t.radiusLg,
                                       ),
                                       gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
                                         colors: [
-                                          t.gradientStart,
-                                          t.gradientEnd,
+                                          t.gradientStart.withValues(
+                                            alpha: 0.82,
+                                          ),
+                                          t.gradientEnd.withValues(alpha: 0.74),
                                         ],
                                       ),
+                                      border: Border.all(
+                                        color: cs.primary.withValues(
+                                          alpha: 0.22,
+                                        ),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: t.gradientEnd.withValues(
+                                            alpha: 0.22,
+                                          ),
+                                          blurRadius: 18,
+                                          offset: const Offset(0, 8),
+                                        ),
+                                      ],
                                     ),
                                     child: Icon(
                                       Icons.palette_outlined,
@@ -412,12 +431,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   showChevron: false,
                                 ),
                               ),
-                              Divider(
-                                height: 1,
-                                color: cs.outlineVariant.withValues(
-                                  alpha: 0.35,
-                                ),
-                              ),
+                              const _SettingsDivider(),
                               _SettingsTile(
                                 leadingIcon: Icons.language_rounded,
                                 title: l10n.settingsAppearanceDisplayLanguage,
@@ -436,8 +450,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   ];
                                   final picked = await showLanguageChoiceSheet(
                                     context: context,
-                                    title: l10n
-                                        .settingsLanguagePickerTitleDisplay,
+                                    title:
+                                        l10n.settingsLanguagePickerTitleDisplay,
                                     options: opts,
                                     selectedValue: displayLang,
                                   );
@@ -445,37 +459,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     return;
                                   }
                                   await ref
-                                      .read(
-                                        appPreferencesCtrlProvider.notifier,
-                                      )
+                                      .read(appPreferencesCtrlProvider.notifier)
                                       .setLocale(
-                                        displayLocaleFromRawOrDefault(
-                                          picked,
-                                        ),
+                                        displayLocaleFromRawOrDefault(picked),
                                       );
                                 },
                               ),
-                              Divider(
-                                height: 1,
-                                color: cs.outlineVariant.withValues(
-                                  alpha: 0.35,
-                                ),
-                              ),
+                              const _SettingsDivider(),
                               _SettingsTile(
                                 leadingIcon: Icons.translate_rounded,
-                                title:
-                                    l10n.settingsAppearanceLearningLanguage,
+                                title: l10n.settingsAppearanceLearningLanguage,
                                 subtitle:
                                     l10n.settingsLearningLanguageFixedSubtitle,
                                 valueBadge: _SettingsValuePill(label: learn),
                                 showChevron: false,
                               ),
-                              Divider(
-                                height: 1,
-                                color: cs.outlineVariant.withValues(
-                                  alpha: 0.35,
-                                ),
-                              ),
+                              const _SettingsDivider(),
                               _SettingsTile(
                                 leadingIcon: Icons.record_voice_over_outlined,
                                 title: l10n.settingsAppearanceNativeLanguage,
@@ -495,12 +494,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         ];
                                         final picked =
                                             await showLanguageChoiceSheet(
-                                          context: context,
-                                          title: l10n
-                                              .settingsLanguagePickerTitleNative,
-                                          options: opts,
-                                          selectedValue: native,
-                                        );
+                                              context: context,
+                                              title: l10n
+                                                  .settingsLanguagePickerTitleNative,
+                                              options: opts,
+                                              selectedValue: native,
+                                            );
                                         if (picked == null ||
                                             !context.mounted) {
                                           return;
@@ -592,10 +591,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             );
                           },
                         ),
-                        Divider(
-                          height: 1,
-                          color: cs.outlineVariant.withValues(alpha: 0.35),
-                        ),
+                        const _SettingsDivider(),
                         Padding(
                           padding: EdgeInsets.all(t.space16),
                           child: const HotkeysSettingsSection(),
@@ -655,12 +651,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           children: const [_ApiBaseUrlEditor()],
                         ),
                       ),
-                      Divider(
-                        height: 1,
-                        indent: t.space16,
-                        endIndent: t.space16,
-                        color: cs.outlineVariant.withValues(alpha: 0.35),
-                      ),
+                      const _SettingsDivider(insetForLeading: false),
                       Theme(
                         data: Theme.of(
                           context,
@@ -857,31 +848,47 @@ class _SettingsTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final interactive = onTap != null;
+    final iconTint = leadingIconTint ?? cs.primary;
 
     final Widget? leadWidget;
     if (leading != null) {
       leadWidget = SizedBox(
-        width: 48,
-        height: 48,
+        width: 44,
+        height: 44,
         child: Center(child: leading!),
       );
     } else if (leadingIcon != null) {
       leadWidget = Container(
-        width: 48,
-        height: 48,
+        width: 44,
+        height: 44,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh.withValues(
-            alpha: interactive ? 1.0 : 0.65,
+          borderRadius: BorderRadius.circular(t.radiusLg),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              iconTint.withValues(alpha: interactive ? 0.20 : 0.11),
+              cs.surfaceContainerHighest.withValues(
+                alpha: interactive ? 0.58 : 0.38,
+              ),
+            ],
           ),
-          borderRadius: BorderRadius.circular(t.radiusMd),
+          border: Border.all(
+            color: iconTint.withValues(alpha: interactive ? 0.17 : 0.10),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Icon(
           leadingIcon,
-          color: (leadingIconTint ?? cs.primary).withValues(
-            alpha: interactive ? 1.0 : 0.65,
-          ),
-          size: 22,
+          color: iconTint.withValues(alpha: interactive ? 0.96 : 0.66),
+          size: 21,
         ),
       );
     } else {
@@ -892,12 +899,22 @@ class _SettingsTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap == null ? null : Haptics.wrapTap(context, onTap!),
-        borderRadius: BorderRadius.circular(t.radiusLg),
+        borderRadius: BorderRadius.circular(t.radiusXl),
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) {
+            return cs.primary.withValues(alpha: 0.08);
+          }
+          if (states.contains(WidgetState.hovered) ||
+              states.contains(WidgetState.focused)) {
+            return cs.onSurface.withValues(alpha: 0.045);
+          }
+          return null;
+        }),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 56),
+          constraints: const BoxConstraints(minHeight: 76),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: t.space16,
+              horizontal: t.space20,
               vertical: t.space12,
             ),
             child: Row(
@@ -905,7 +922,7 @@ class _SettingsTile extends StatelessWidget {
               children: [
                 if (leadWidget != null) ...[
                   leadWidget,
-                  SizedBox(width: t.space12),
+                  SizedBox(width: t.space16),
                 ],
                 Expanded(
                   child: Column(
@@ -914,12 +931,12 @@ class _SettingsTile extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.15,
+                        style: tt.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.2,
                           color: interactive
                               ? null
-                              : cs.onSurface.withValues(alpha: 0.82),
+                              : cs.onSurface.withValues(alpha: 0.78),
                         ),
                       ),
                       if (subtitle != null && subtitle!.isNotEmpty) ...[
@@ -927,8 +944,8 @@ class _SettingsTile extends StatelessWidget {
                         Text(
                           subtitle!,
                           style: tt.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                            height: 1.4,
+                            color: cs.onSurfaceVariant.withValues(alpha: 0.86),
+                            height: 1.35,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -938,19 +955,54 @@ class _SettingsTile extends StatelessWidget {
                   ),
                 ),
                 if (valueBadge != null) ...[
-                  SizedBox(width: t.space8),
+                  SizedBox(width: t.space12),
                   valueBadge!,
                 ],
-                if (trailing != null) ...[SizedBox(width: t.space8), trailing!],
+                if (trailing != null) ...[
+                  SizedBox(width: t.space12),
+                  trailing!,
+                ],
                 if (showChevron && onTap != null) ...[
-                  SizedBox(width: t.space4),
-                  Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+                  SizedBox(width: t.space8),
+                  Container(
+                    width: 24,
+                    height: 24,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHighest.withValues(alpha: 0.42),
+                      borderRadius: BorderRadius.circular(t.radiusFull),
+                    ),
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+                      size: 18,
+                    ),
+                  ),
                 ],
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SettingsDivider extends StatelessWidget {
+  const _SettingsDivider({this.insetForLeading = true});
+
+  final bool insetForLeading;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+
+    return Divider(
+      height: 1,
+      indent: insetForLeading ? t.space20 + 44 + t.space16 : t.space20,
+      endIndent: t.space20,
+      color: cs.outlineVariant.withValues(alpha: 0.18),
     );
   }
 }
@@ -1037,12 +1089,35 @@ class _SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: t.space16),
-      child: EnjoyCard(
-        padding: padding ?? EdgeInsets.all(t.space16),
-        child: child,
+      child: Material(
+        color: cs.surfaceContainerLow.withValues(alpha: 0.88),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(t.radiusXl),
+          side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.18)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                cs.surfaceContainerHigh.withValues(alpha: 0.38),
+                cs.surfaceContainerLow.withValues(alpha: 0.08),
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: padding ?? EdgeInsets.all(t.space16),
+            child: child,
+          ),
+        ),
       ),
     );
   }
@@ -1120,13 +1195,13 @@ class _SettingsValuePill extends StatelessWidget {
     final fg = foregroundColor ?? cs.onSurface;
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 160),
+      constraints: const BoxConstraints(maxWidth: 148, minHeight: 30),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: t.space12, vertical: 5),
+        padding: EdgeInsets.symmetric(horizontal: t.space12, vertical: 6),
         decoration: BoxDecoration(
-          color: cs.surfaceContainerHighest.withValues(alpha: 0.72),
+          color: cs.surfaceContainerHighest.withValues(alpha: 0.58),
           borderRadius: BorderRadius.circular(t.radiusFull),
-          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.24)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1135,16 +1210,16 @@ class _SettingsValuePill extends StatelessWidget {
               Icon(icon, size: 16, color: fg),
               SizedBox(width: t.space4),
             ],
-            Expanded(
+            Flexible(
               child: Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: icon != null ? TextAlign.start : TextAlign.center,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: fg,
-                  letterSpacing: 0.12,
+                  letterSpacing: 0.04,
                 ),
               ),
             ),
