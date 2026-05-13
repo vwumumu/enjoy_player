@@ -726,6 +726,109 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileStatRecordSubtitle => '跟读练习分钟数';
 
   @override
+  String get profileCreditsUsageTile => '积分使用记录';
+
+  @override
+  String get profileCreditsUsageSubtitle => '查看 Enjoy AI Worker 上的积分消耗';
+
+  @override
+  String get creditsUsageTitle => '积分使用';
+
+  @override
+  String get creditsUsageDescription => 'Enjoy AI Worker 上的积分校验记录（UTC 日期）。';
+
+  @override
+  String get creditsUsageStartDate => '开始日期';
+
+  @override
+  String get creditsUsageEndDate => '结束日期';
+
+  @override
+  String get creditsUsageServiceType => '服务';
+
+  @override
+  String get creditsUsageClearFilters => '清除筛选';
+
+  @override
+  String get creditsUsageError => '无法加载记录';
+
+  @override
+  String get creditsUsageErrorDescription => '请检查网络与设置中的 AI API 地址。';
+
+  @override
+  String get creditsUsageRetry => '重试';
+
+  @override
+  String get creditsUsageNoRecords => '暂无记录';
+
+  @override
+  String get creditsUsageNoRecordsWithFilters => '请尝试调整或清除筛选条件。';
+
+  @override
+  String get creditsUsageNoRecordsDescription => '登录后使用 AI 功能，记录将显示在此处。';
+
+  @override
+  String get creditsUsageTableDate => '日期';
+
+  @override
+  String get creditsUsageTableTime => '时间';
+
+  @override
+  String get creditsUsageTableService => '服务';
+
+  @override
+  String get creditsUsageTableTier => '档位';
+
+  @override
+  String get creditsUsageTableRequired => '需要';
+
+  @override
+  String get creditsUsageTableUsedAfter => '用后';
+
+  @override
+  String get creditsUsageTableStatus => '状态';
+
+  @override
+  String get creditsUsageAllowed => '允许';
+
+  @override
+  String get creditsUsageDenied => '拒绝';
+
+  @override
+  String creditsUsagePageInfo(int page) {
+    return '第 $page 页';
+  }
+
+  @override
+  String creditsUsageTotalRecords(int count) {
+    return '共 $count 条';
+  }
+
+  @override
+  String get creditsUsagePrevious => '上一页';
+
+  @override
+  String get creditsUsageNext => '下一页';
+
+  @override
+  String get creditsServiceTypeAll => '全部';
+
+  @override
+  String get creditsServiceTypeTts => '语音合成';
+
+  @override
+  String get creditsServiceTypeAsr => '语音识别';
+
+  @override
+  String get creditsServiceTypeTranslation => '翻译';
+
+  @override
+  String get creditsServiceTypeLlm => '大模型';
+
+  @override
+  String get creditsServiceTypeAssessment => '发音评估';
+
+  @override
   String get settingsSectionAccount => '账号';
 
   @override
@@ -1241,6 +1344,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get lookupTapToExpand => '展开以加载';
+
+  @override
+  String get lookupSourceLanguage => '原文语言';
+
+  @override
+  String get lookupTargetLanguage => '目标语言';
+
+  @override
+  String get lookupSwapLanguages => '交换语言';
+
+  @override
+  String get lookupPickSourceTitle => '选择原文语言';
+
+  @override
+  String get lookupPickTargetTitle => '选择目标语言';
 }
 
 /// The translations for Chinese, as used in China (`zh_CN`).
@@ -1965,6 +2083,109 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get profileStatRecordSubtitle => '跟读练习分钟数';
 
   @override
+  String get profileCreditsUsageTile => '积分使用记录';
+
+  @override
+  String get profileCreditsUsageSubtitle => '查看 Enjoy AI Worker 上的积分消耗';
+
+  @override
+  String get creditsUsageTitle => '积分使用';
+
+  @override
+  String get creditsUsageDescription => 'Enjoy AI Worker 上的积分校验记录（UTC 日期）。';
+
+  @override
+  String get creditsUsageStartDate => '开始日期';
+
+  @override
+  String get creditsUsageEndDate => '结束日期';
+
+  @override
+  String get creditsUsageServiceType => '服务';
+
+  @override
+  String get creditsUsageClearFilters => '清除筛选';
+
+  @override
+  String get creditsUsageError => '无法加载记录';
+
+  @override
+  String get creditsUsageErrorDescription => '请检查网络与设置中的 AI API 地址。';
+
+  @override
+  String get creditsUsageRetry => '重试';
+
+  @override
+  String get creditsUsageNoRecords => '暂无记录';
+
+  @override
+  String get creditsUsageNoRecordsWithFilters => '请尝试调整或清除筛选条件。';
+
+  @override
+  String get creditsUsageNoRecordsDescription => '登录后使用 AI 功能，记录将显示在此处。';
+
+  @override
+  String get creditsUsageTableDate => '日期';
+
+  @override
+  String get creditsUsageTableTime => '时间';
+
+  @override
+  String get creditsUsageTableService => '服务';
+
+  @override
+  String get creditsUsageTableTier => '档位';
+
+  @override
+  String get creditsUsageTableRequired => '需要';
+
+  @override
+  String get creditsUsageTableUsedAfter => '用后';
+
+  @override
+  String get creditsUsageTableStatus => '状态';
+
+  @override
+  String get creditsUsageAllowed => '允许';
+
+  @override
+  String get creditsUsageDenied => '拒绝';
+
+  @override
+  String creditsUsagePageInfo(int page) {
+    return '第 $page 页';
+  }
+
+  @override
+  String creditsUsageTotalRecords(int count) {
+    return '共 $count 条';
+  }
+
+  @override
+  String get creditsUsagePrevious => '上一页';
+
+  @override
+  String get creditsUsageNext => '下一页';
+
+  @override
+  String get creditsServiceTypeAll => '全部';
+
+  @override
+  String get creditsServiceTypeTts => '语音合成';
+
+  @override
+  String get creditsServiceTypeAsr => '语音识别';
+
+  @override
+  String get creditsServiceTypeTranslation => '翻译';
+
+  @override
+  String get creditsServiceTypeLlm => '大模型';
+
+  @override
+  String get creditsServiceTypeAssessment => '发音评估';
+
+  @override
   String get settingsSectionAccount => '账号';
 
   @override
@@ -2480,4 +2701,19 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get lookupTapToExpand => '展开以加载';
+
+  @override
+  String get lookupSourceLanguage => '原文语言';
+
+  @override
+  String get lookupTargetLanguage => '目标语言';
+
+  @override
+  String get lookupSwapLanguages => '交换语言';
+
+  @override
+  String get lookupPickSourceTitle => '选择原文语言';
+
+  @override
+  String get lookupPickTargetTitle => '选择目标语言';
 }

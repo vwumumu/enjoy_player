@@ -747,6 +747,114 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileStatRecordSubtitle => 'Shadow-reading minutes';
 
   @override
+  String get profileCreditsUsageTile => 'Credits usage';
+
+  @override
+  String get profileCreditsUsageSubtitle =>
+      'View AI credits consumption from your account';
+
+  @override
+  String get creditsUsageTitle => 'Credits usage';
+
+  @override
+  String get creditsUsageDescription =>
+      'Records of credits checks on the Enjoy AI worker (UTC dates).';
+
+  @override
+  String get creditsUsageStartDate => 'Start date';
+
+  @override
+  String get creditsUsageEndDate => 'End date';
+
+  @override
+  String get creditsUsageServiceType => 'Service';
+
+  @override
+  String get creditsUsageClearFilters => 'Clear filters';
+
+  @override
+  String get creditsUsageError => 'Could not load usage';
+
+  @override
+  String get creditsUsageErrorDescription =>
+      'Check your network and AI API base URL in Settings.';
+
+  @override
+  String get creditsUsageRetry => 'Retry';
+
+  @override
+  String get creditsUsageNoRecords => 'No records';
+
+  @override
+  String get creditsUsageNoRecordsWithFilters =>
+      'Try changing or clearing filters.';
+
+  @override
+  String get creditsUsageNoRecordsDescription =>
+      'Usage will appear here after you use AI features while signed in.';
+
+  @override
+  String get creditsUsageTableDate => 'Date';
+
+  @override
+  String get creditsUsageTableTime => 'Time';
+
+  @override
+  String get creditsUsageTableService => 'Service';
+
+  @override
+  String get creditsUsageTableTier => 'Tier';
+
+  @override
+  String get creditsUsageTableRequired => 'Required';
+
+  @override
+  String get creditsUsageTableUsedAfter => 'Used after';
+
+  @override
+  String get creditsUsageTableStatus => 'Status';
+
+  @override
+  String get creditsUsageAllowed => 'Allowed';
+
+  @override
+  String get creditsUsageDenied => 'Denied';
+
+  @override
+  String creditsUsagePageInfo(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String creditsUsageTotalRecords(int count) {
+    return '$count shown';
+  }
+
+  @override
+  String get creditsUsagePrevious => 'Previous';
+
+  @override
+  String get creditsUsageNext => 'Next';
+
+  @override
+  String get creditsServiceTypeAll => 'All';
+
+  @override
+  String get creditsServiceTypeTts => 'TTS';
+
+  @override
+  String get creditsServiceTypeAsr => 'ASR';
+
+  @override
+  String get creditsServiceTypeTranslation => 'Translation';
+
+  @override
+  String get creditsServiceTypeLlm => 'LLM';
+
+  @override
+  String get creditsServiceTypeAssessment => 'Assessment';
+
+  @override
   String get settingsSectionAccount => 'Account';
 
   @override
@@ -1289,4 +1397,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lookupTapToExpand => 'Expand to load';
+
+  @override
+  String get lookupSourceLanguage => 'Source language';
+
+  @override
+  String get lookupTargetLanguage => 'Target language';
+
+  @override
+  String get lookupSwapLanguages => 'Swap languages';
+
+  @override
+  String get lookupPickSourceTitle => 'Choose source language';
+
+  @override
+  String get lookupPickTargetTitle => 'Choose target language';
 }

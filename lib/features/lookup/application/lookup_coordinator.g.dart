@@ -41,7 +41,7 @@ final class LookupCoordinatorProvider
   }
 }
 
-String _$lookupCoordinatorHash() => r'91a81ab2a910465198bc28e9c80abc8ee572e3c8';
+String _$lookupCoordinatorHash() => r'a8a4dda4c3fec7c9d74be2211783a81ecc283407';
 
 abstract class _$LookupCoordinator extends $Notifier<int> {
   int build();

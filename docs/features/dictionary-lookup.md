@@ -8,6 +8,13 @@ While playback is open, the user can **select 1–100 characters** on the **acti
 2. **Contextual translation** — LLM markdown via `POST /chat/completions` through `contextualTranslationServiceProvider` (system prompts aligned with web `contextual-translation`); includes optional **surrounding transcript context** from `buildVocabularyContext`.
 3. **Dictionary** — `POST /dictionary/query` via `dictionaryServiceProvider` (word = selected text only).
 
+## Languages
+
+- **Default source** comes from the **active primary transcript** track’s `language` field (not the media row / `PlaybackSession.language`, which may be `und`).
+- **Validation** — `canonicalLookupTag` maps supported tags to `en-US` / `zh-CN`; `und`, empty, and other unsupported values fall back to the **learning language** for source; target uses the stored native tag with the same canonicalization plus **never-native-equals-learning** coercion.
+- **In-sheet override** — Source / target can be changed per lookup via the picker row (`LookupLanguagePickerRow`); choices are **not** persisted (web parity).
+- **Worker payloads** — Translation, dictionary, and contextual system prompts use **stripped base** language codes (`workerLanguageBase`) so the backend never receives regioned `und` or full BCP-47 where the worker expects `en` / `zh`.
+
 ## UX rules
 
 - **Tap-to-seek** is **disabled** on selectable rows (active + echo cues); other rows behave as before.
@@ -19,8 +26,11 @@ While playback is open, the user can **select 1–100 characters** on the **acti
 | Area | Path |
 |------|------|
 | Open sheet from transcript | [`lib/features/lookup/application/transcript_lookup_open.dart`](../../lib/features/lookup/application/transcript_lookup_open.dart) |
+| Source/target resolution | [`lib/features/lookup/application/lookup_target_languages.dart`](../../lib/features/lookup/application/lookup_target_languages.dart) |
+| Language catalog + worker base | [`lib/core/application/app_language_catalog.dart`](../../lib/core/application/app_language_catalog.dart) |
 | Context builder | [`lib/features/lookup/application/vocabulary_context_builder.dart`](../../lib/features/lookup/application/vocabulary_context_builder.dart) |
 | Sheet UI | [`lib/features/lookup/presentation/dictionary_lookup_sheet.dart`](../../lib/features/lookup/presentation/dictionary_lookup_sheet.dart) |
+| Language picker row | [`lib/features/lookup/presentation/widgets/lookup_language_picker_row.dart`](../../lib/features/lookup/presentation/widgets/lookup_language_picker_row.dart) |
 | Section async providers | [`lib/features/lookup/application/lookup_section_providers.dart`](../../lib/features/lookup/application/lookup_section_providers.dart) |
 | Selectable cue row | [`lib/features/transcript/presentation/transcript_line_tile.dart`](../../lib/features/transcript/presentation/transcript_line_tile.dart) |
 

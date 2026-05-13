@@ -1497,6 +1497,204 @@ abstract class AppLocalizations {
   /// **'Shadow-reading minutes'**
   String get profileStatRecordSubtitle;
 
+  /// No description provided for @profileCreditsUsageTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits usage'**
+  String get profileCreditsUsageTile;
+
+  /// No description provided for @profileCreditsUsageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View AI credits consumption from your account'**
+  String get profileCreditsUsageSubtitle;
+
+  /// No description provided for @creditsUsageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits usage'**
+  String get creditsUsageTitle;
+
+  /// No description provided for @creditsUsageDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Records of credits checks on the Enjoy AI worker (UTC dates).'**
+  String get creditsUsageDescription;
+
+  /// No description provided for @creditsUsageStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get creditsUsageStartDate;
+
+  /// No description provided for @creditsUsageEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get creditsUsageEndDate;
+
+  /// No description provided for @creditsUsageServiceType.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get creditsUsageServiceType;
+
+  /// No description provided for @creditsUsageClearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get creditsUsageClearFilters;
+
+  /// No description provided for @creditsUsageError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load usage'**
+  String get creditsUsageError;
+
+  /// No description provided for @creditsUsageErrorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your network and AI API base URL in Settings.'**
+  String get creditsUsageErrorDescription;
+
+  /// No description provided for @creditsUsageRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get creditsUsageRetry;
+
+  /// No description provided for @creditsUsageNoRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'No records'**
+  String get creditsUsageNoRecords;
+
+  /// No description provided for @creditsUsageNoRecordsWithFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Try changing or clearing filters.'**
+  String get creditsUsageNoRecordsWithFilters;
+
+  /// No description provided for @creditsUsageNoRecordsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage will appear here after you use AI features while signed in.'**
+  String get creditsUsageNoRecordsDescription;
+
+  /// No description provided for @creditsUsageTableDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get creditsUsageTableDate;
+
+  /// No description provided for @creditsUsageTableTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get creditsUsageTableTime;
+
+  /// No description provided for @creditsUsageTableService.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get creditsUsageTableService;
+
+  /// No description provided for @creditsUsageTableTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Tier'**
+  String get creditsUsageTableTier;
+
+  /// No description provided for @creditsUsageTableRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get creditsUsageTableRequired;
+
+  /// No description provided for @creditsUsageTableUsedAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Used after'**
+  String get creditsUsageTableUsedAfter;
+
+  /// No description provided for @creditsUsageTableStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get creditsUsageTableStatus;
+
+  /// No description provided for @creditsUsageAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get creditsUsageAllowed;
+
+  /// No description provided for @creditsUsageDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Denied'**
+  String get creditsUsageDenied;
+
+  /// No description provided for @creditsUsagePageInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String creditsUsagePageInfo(int page);
+
+  /// No description provided for @creditsUsageTotalRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} shown'**
+  String creditsUsageTotalRecords(int count);
+
+  /// No description provided for @creditsUsagePrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get creditsUsagePrevious;
+
+  /// No description provided for @creditsUsageNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get creditsUsageNext;
+
+  /// No description provided for @creditsServiceTypeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get creditsServiceTypeAll;
+
+  /// No description provided for @creditsServiceTypeTts.
+  ///
+  /// In en, this message translates to:
+  /// **'TTS'**
+  String get creditsServiceTypeTts;
+
+  /// No description provided for @creditsServiceTypeAsr.
+  ///
+  /// In en, this message translates to:
+  /// **'ASR'**
+  String get creditsServiceTypeAsr;
+
+  /// No description provided for @creditsServiceTypeTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get creditsServiceTypeTranslation;
+
+  /// No description provided for @creditsServiceTypeLlm.
+  ///
+  /// In en, this message translates to:
+  /// **'LLM'**
+  String get creditsServiceTypeLlm;
+
+  /// No description provided for @creditsServiceTypeAssessment.
+  ///
+  /// In en, this message translates to:
+  /// **'Assessment'**
+  String get creditsServiceTypeAssessment;
+
   /// No description provided for @settingsSectionAccount.
   ///
   /// In en, this message translates to:
@@ -2486,6 +2684,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expand to load'**
   String get lookupTapToExpand;
+
+  /// No description provided for @lookupSourceLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Source language'**
+  String get lookupSourceLanguage;
+
+  /// No description provided for @lookupTargetLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Target language'**
+  String get lookupTargetLanguage;
+
+  /// No description provided for @lookupSwapLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap languages'**
+  String get lookupSwapLanguages;
+
+  /// No description provided for @lookupPickSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose source language'**
+  String get lookupPickSourceTitle;
+
+  /// No description provided for @lookupPickTargetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose target language'**
+  String get lookupPickTargetTitle;
 }
 
 class _AppLocalizationsDelegate

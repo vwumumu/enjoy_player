@@ -1,9 +1,8 @@
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/llm_capability.dart';
 import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/prompts/contextual_translation_prompt.dart';
-
-void _keepSourceLanguage(String _) {}
 
 final class EnjoyContextualTranslationCapability
     implements ContextualTranslationCapability {
@@ -18,8 +17,13 @@ final class EnjoyContextualTranslationCapability
     required String targetLanguage,
     String? context,
   }) async {
-    _keepSourceLanguage(sourceLanguage);
-    final systemPrompt = getContextualTranslationSystemPrompt(targetLanguage);
+    assert(() {
+      workerLanguageBase(sourceLanguage);
+      return true;
+    }());
+    final systemPrompt = getContextualTranslationSystemPrompt(
+      workerLanguageBase(targetLanguage),
+    );
     final userPrompt = buildContextualTranslationUserPrompt(
       text: text,
       context: context,

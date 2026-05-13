@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
 import 'package:enjoy_player/features/lookup/presentation/dictionary_lookup_sheet.dart';
 
@@ -26,6 +27,11 @@ class LookupCoordinator extends _$LookupCoordinator {
       isScrollControlled: true,
       showDragHandle: false,
       useSafeArea: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(EnjoyThemeTokens.of(context).radiusLg),
+        ),
+      ),
       builder: (sheetContext) => DictionaryLookupSheet(request: request),
     );
   }

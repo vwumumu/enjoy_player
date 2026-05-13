@@ -1,3 +1,4 @@
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/data/api/services/ai/dictionary_api.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
@@ -16,8 +17,8 @@ final class EnjoyDictionaryCapability implements DictionaryCapability {
   }) async {
     final map = await _api.query(
       word: word,
-      sourceLanguage: sourceLanguage,
-      targetLanguage: targetLanguage,
+      sourceLanguage: workerLanguageBase(sourceLanguage),
+      targetLanguage: workerLanguageBase(targetLanguage),
       forceRefresh: forceRefresh,
     );
     return DictionaryResult.fromJson(map);

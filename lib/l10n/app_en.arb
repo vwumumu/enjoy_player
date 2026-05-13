@@ -320,6 +320,49 @@
   "profileStatEchoSubtitle": "Practice rows tracked locally",
   "profileStatRecordTitle": "Recorded",
   "profileStatRecordSubtitle": "Shadow-reading minutes",
+  "profileCreditsUsageTile": "Credits usage",
+  "profileCreditsUsageSubtitle": "View AI credits consumption from your account",
+  "creditsUsageTitle": "Credits usage",
+  "creditsUsageDescription": "Records of credits checks on the Enjoy AI worker (UTC dates).",
+  "creditsUsageStartDate": "Start date",
+  "creditsUsageEndDate": "End date",
+  "creditsUsageServiceType": "Service",
+  "creditsUsageClearFilters": "Clear filters",
+  "creditsUsageError": "Could not load usage",
+  "creditsUsageErrorDescription": "Check your network and AI API base URL in Settings.",
+  "creditsUsageRetry": "Retry",
+  "creditsUsageNoRecords": "No records",
+  "creditsUsageNoRecordsWithFilters": "Try changing or clearing filters.",
+  "creditsUsageNoRecordsDescription": "Usage will appear here after you use AI features while signed in.",
+  "creditsUsageTableDate": "Date",
+  "creditsUsageTableTime": "Time",
+  "creditsUsageTableService": "Service",
+  "creditsUsageTableTier": "Tier",
+  "creditsUsageTableRequired": "Required",
+  "creditsUsageTableUsedAfter": "Used after",
+  "creditsUsageTableStatus": "Status",
+  "creditsUsageAllowed": "Allowed",
+  "creditsUsageDenied": "Denied",
+  "creditsUsagePageInfo": "Page {page}",
+  "@creditsUsagePageInfo": {
+    "placeholders": {
+      "page": {"type": "int"}
+    }
+  },
+  "creditsUsageTotalRecords": "{count} shown",
+  "@creditsUsageTotalRecords": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "creditsUsagePrevious": "Previous",
+  "creditsUsageNext": "Next",
+  "creditsServiceTypeAll": "All",
+  "creditsServiceTypeTts": "TTS",
+  "creditsServiceTypeAsr": "ASR",
+  "creditsServiceTypeTranslation": "Translation",
+  "creditsServiceTypeLlm": "LLM",
+  "creditsServiceTypeAssessment": "Assessment",
   "settingsSectionAccount": "Account",
   "settingsSectionAccountHint": "Profile, subscription, and sign out",
   "settingsSectionDataMigrationHint": "Move guest data after you sign in",
@@ -535,5 +578,10 @@
   "lookupExamples": "Examples",
   "lookupClose": "Close",
   "lookupCopy": "Copy",
-  "lookupTapToExpand": "Expand to load"
+  "lookupTapToExpand": "Expand to load",
+  "lookupSourceLanguage": "Source language",
+  "lookupTargetLanguage": "Target language",
+  "lookupSwapLanguages": "Swap languages",
+  "lookupPickSourceTitle": "Choose source language",
+  "lookupPickTargetTitle": "Choose target language"
 }

@@ -1,3 +1,4 @@
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/data/api/services/ai/translation_api.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
@@ -16,8 +17,8 @@ final class EnjoyTranslationCapability implements TranslationCapability {
   }) async {
     final map = await _api.translate(
       text: text,
-      sourceLanguage: sourceLanguage,
-      targetLanguage: targetLanguage,
+      sourceLanguage: workerLanguageBase(sourceLanguage),
+      targetLanguage: workerLanguageBase(targetLanguage),
       forceRefresh: forceRefresh,
     );
     final translated =

@@ -16,10 +16,57 @@ const String kDefaultLearningLanguageTag = 'en-US';
 
 const String kDefaultNativeLanguageTag = 'zh-CN';
 
-const List<String> kSupportedNativeLanguageTags = <String>[
-  'en-US',
-  'zh-CN',
-];
+const List<String> kSupportedNativeLanguageTags = <String>['en-US', 'zh-CN'];
+
+/// ISO 639 / BCP-47 language subtags that must not be used for lookup or worker calls.
+const Set<String> kInvalidLanguageTags = <String>{
+  '',
+  'und',
+  'mul',
+  'mis',
+  'zxx',
+};
+
+/// Short UI labels for [kSupportedNativeLanguageTags] (lookup sheet pills / picker).
+const Map<String, String> kLookupLanguageLabels = <String, String>{
+  'en-US': 'English',
+  'zh-CN': '中文',
+};
+
+/// True when [tag] has a non-empty primary subtag not in [kInvalidLanguageTags].
+bool isValidLanguageTag(String? tag) {
+  if (tag == null) return false;
+  final trimmed = tag.trim();
+  if (trimmed.isEmpty) return false;
+  final primary = trimmed.split(RegExp(r'[-_]')).first.toLowerCase();
+  if (primary.isEmpty) return false;
+  return !kInvalidLanguageTags.contains(primary);
+}
+
+/// Maps a tag to a supported native tag (`en-US` / `zh-CN`), or `null` if unknown/invalid.
+String? canonicalLookupTag(String? tag) {
+  if (!isValidLanguageTag(tag)) return null;
+  final trimmed = tag!.trim();
+  final primary = trimmed.split(RegExp(r'[-_]')).first.toLowerCase();
+  if (primary == 'en') return 'en-US';
+  if (primary == 'zh') return 'zh-CN';
+  final n = normalizeBcp47Tag(trimmed);
+  for (final supported in kSupportedNativeLanguageTags) {
+    if (tagsEqual(n, supported)) return supported;
+  }
+  return null;
+}
+
+/// Fallback when transcript language is missing or unsupported (learning language).
+String coerceLookupSource(String? transcriptLanguage) =>
+    canonicalLookupTag(transcriptLanguage) ?? kDefaultLearningLanguageTag;
+
+/// Worker / web short language code: first subtag lowercased (`en-US` → `en`).
+String workerLanguageBase(String tag) {
+  final t = tag.trim();
+  if (t.isEmpty) return 'en';
+  return t.split(RegExp(r'[-_]')).first.toLowerCase();
+}
 
 String normalizeBcp47Tag(String tag) {
   final t = tag.trim();

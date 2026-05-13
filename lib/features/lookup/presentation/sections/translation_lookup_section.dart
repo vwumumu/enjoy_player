@@ -9,6 +9,7 @@ import 'package:enjoy_player/features/lookup/application/lookup_section_provider
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_error_row.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_expansion_card.dart';
+import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_section_shimmer.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class TranslationLookupSection extends ConsumerWidget {
@@ -29,6 +30,7 @@ class TranslationLookupSection extends ConsumerWidget {
     return LookupExpansionCard(
       title: l10n.lookupSectionTranslation,
       initiallyExpanded: true,
+      leading: const Icon(Icons.translate_rounded),
       bodyBuilder: (ctx) {
         final async = ref.watch(lookupSheetTranslationProvider(params));
         return async.when(
@@ -38,16 +40,17 @@ class TranslationLookupSection extends ConsumerWidget {
             }
             return SelectableText(
               d.translatedText,
-              style: theme.textTheme.bodyLarge,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.primary,
+              ),
             );
           },
-          loading: () => const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(child: CircularProgressIndicator()),
-          ),
+          loading: () => const LookupSectionShimmer(),
           error: (e, _) => LookupErrorRow(
             message: e is AppFailure ? e.message : e.toString(),
-            onRetry: () => ref.invalidate(lookupSheetTranslationProvider(params)),
+            onRetry: () =>
+                ref.invalidate(lookupSheetTranslationProvider(params)),
           ),
         );
       },

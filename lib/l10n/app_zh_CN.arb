@@ -320,6 +320,49 @@
   "profileStatEchoSubtitle": "本地记录的练习行数",
   "profileStatRecordTitle": "已录音",
   "profileStatRecordSubtitle": "跟读练习分钟数",
+  "profileCreditsUsageTile": "积分使用记录",
+  "profileCreditsUsageSubtitle": "查看 Enjoy AI Worker 上的积分消耗",
+  "creditsUsageTitle": "积分使用",
+  "creditsUsageDescription": "Enjoy AI Worker 上的积分校验记录（UTC 日期）。",
+  "creditsUsageStartDate": "开始日期",
+  "creditsUsageEndDate": "结束日期",
+  "creditsUsageServiceType": "服务",
+  "creditsUsageClearFilters": "清除筛选",
+  "creditsUsageError": "无法加载记录",
+  "creditsUsageErrorDescription": "请检查网络与设置中的 AI API 地址。",
+  "creditsUsageRetry": "重试",
+  "creditsUsageNoRecords": "暂无记录",
+  "creditsUsageNoRecordsWithFilters": "请尝试调整或清除筛选条件。",
+  "creditsUsageNoRecordsDescription": "登录后使用 AI 功能，记录将显示在此处。",
+  "creditsUsageTableDate": "日期",
+  "creditsUsageTableTime": "时间",
+  "creditsUsageTableService": "服务",
+  "creditsUsageTableTier": "档位",
+  "creditsUsageTableRequired": "需要",
+  "creditsUsageTableUsedAfter": "用后",
+  "creditsUsageTableStatus": "状态",
+  "creditsUsageAllowed": "允许",
+  "creditsUsageDenied": "拒绝",
+  "creditsUsagePageInfo": "第 {page} 页",
+  "@creditsUsagePageInfo": {
+    "placeholders": {
+      "page": {"type": "int"}
+    }
+  },
+  "creditsUsageTotalRecords": "共 {count} 条",
+  "@creditsUsageTotalRecords": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "creditsUsagePrevious": "上一页",
+  "creditsUsageNext": "下一页",
+  "creditsServiceTypeAll": "全部",
+  "creditsServiceTypeTts": "语音合成",
+  "creditsServiceTypeAsr": "语音识别",
+  "creditsServiceTypeTranslation": "翻译",
+  "creditsServiceTypeLlm": "大模型",
+  "creditsServiceTypeAssessment": "发音评估",
   "settingsSectionAccount": "账号",
   "settingsSectionAccountHint": "个人资料、订阅与退出登录",
   "settingsSectionDataMigrationHint": "登录后迁移访客数据",
@@ -535,5 +578,10 @@
   "lookupExamples": "例句",
   "lookupClose": "关闭",
   "lookupCopy": "复制",
-  "lookupTapToExpand": "展开以加载"
+  "lookupTapToExpand": "展开以加载",
+  "lookupSourceLanguage": "原文语言",
+  "lookupTargetLanguage": "目标语言",
+  "lookupSwapLanguages": "交换语言",
+  "lookupPickSourceTitle": "选择原文语言",
+  "lookupPickTargetTitle": "选择目标语言"
 }
