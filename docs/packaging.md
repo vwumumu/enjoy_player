@@ -2,21 +2,42 @@
 
 ## Android
 
-### Gradle cannot download from `dl.google.com` (TLS handshake)
+### Application ID
 
-Symptoms: configuring `:file_picker` (or other plugins) fails resolving `com.android.tools.build:*` from Google Maven, with “TLS protocol versions” or “Remote host terminated the handshake”. That is almost always **network path** to Google (firewall, proxy, region, or broken WSL2 DNS), not a wrong Flutter version. Follow-on errors like `Configuration with name 'implementation' not found` are **cascading** after classpath resolution failed.
+Production **`applicationId`** / **`namespace`**: `ai.enjoy.player` (see [ADR-0020](decisions/0020-android-windows-release-identity.md)). `MainActivity` lives under `android/app/src/main/kotlin/ai/enjoy/player/`.
 
-Mitigations:
+### `minSdk` / toolchain
 
-1. **Already in repo**: [`settings.gradle.kts`](../android/settings.gradle.kts) and [`build.gradle.kts`](../android/build.gradle.kts) list **Aliyun mirrors** before `google()` so Gradle can fetch AGP artifacts without hitting `dl.google.com` first.
-2. Fix the underlying network: VPN, correct proxy `gradle.properties`, or on WSL2 try a reliable DNS (e.g. `8.8.8.8` in `/etc/resolv.conf`).
-3. Ensure the JDK Gradle uses is current (Java **17** matches this project).
+- **`minSdk`**: at least **26** (Azure / `media_kit` plugin baseline) — see [`android/app/build.gradle.kts`](../android/app/build.gradle.kts).
+- **Java 17** for Gradle compile options.
+
+### Release signing (Play + sideload)
+
+1. Create an upload keystore (once) and keep it **out of git**.
+2. Copy [`android/key.properties.example`](../android/key.properties.example) to **`android/key.properties`** (gitignored) and fill `storePassword`, `keyPassword`, `keyAlias`, `storeFile` (`storeFile` is relative to the **`android/`** directory).
+3. Build:
+   - **Google Play (AAB):** `flutter build appbundle --release`
+   - **Direct APK:** `flutter build apk --release`
+
+If **`android/key.properties` is missing**, release builds still compile but use the **debug keystore** — **do not upload** those artifacts to Play.
+
+### Gradle / network (`dl.google.com`)
+
+Symptoms: configuring plugins fails with TLS handshake to Google Maven. Mitigations:
+
+1. **Already in repo**: [`settings.gradle.kts`](../android/settings.gradle.kts) lists mirrors before `google()`.
+2. Fix VPN/proxy/DNS (especially WSL2).
+3. Use JDK **17** for Gradle.
+
+### Permissions
+
+[`AndroidManifest.xml`](../android/app/src/main/AndroidManifest.xml): `INTERNET`, `RECORD_AUDIO`. After adding plugins, inspect the **merged manifest** for transitive permissions and complete Play **Data safety** / microphone declarations.
+
+### R8 (release shrinker)
+
+Release builds enable R8. [`proguard-rules.pro`](../android/app/proguard-rules.pro) includes `-dontwarn` entries for optional Azure / Reactor classpath references. If `flutter build appbundle` fails with new missing-class errors, follow Gradle’s suggested `missing_rules.txt` and extend that file.
 
 ---
-
-- `minSdk 21` set in [`android/app/build.gradle.kts`](../android/app/build.gradle.kts).
-- `INTERNET` permission declared for `media_kit` / plugin baseline ([`AndroidManifest.xml`](../android/app/src/main/AndroidManifest.xml)).
-- Java 17 toolchain already configured.
 
 ## iOS
 
@@ -25,23 +46,52 @@ Mitigations:
 
 ## macOS
 
-- Sandbox **on**; entitlements include:
-  - `com.apple.security.files.user-selected.read-write` (file picker)
-  - `com.apple.security.network.client` (future streaming)
+- Sandbox **on**; entitlements include user-selected files and network client.
 - Files: [`macos/Runner/DebugProfile.entitlements`](../macos/Runner/DebugProfile.entitlements), [`Release.entitlements`](../macos/Runner/Release.entitlements).
 
 ## Windows
 
-- Default Flutter Windows runner; `media_kit_libs_video` ships native libs.
-- **Embedded subtitle extraction**: Place **`ffmpeg.exe`** at [`windows/ffmpeg/ffmpeg.exe`](../windows/ffmpeg/ffmpeg.exe) before `flutter build windows` so CMake installs it beside the executable, or install FFmpeg so **`ffmpeg`** is on `PATH`. See [`windows/ffmpeg/README.md`](../windows/ffmpeg/README.md) (download source, licensing).
-
-## Release builds
+### Runner build
 
 ```bash
-flutter build apk
-flutter build ios
-flutter build macos
-flutter build windows
+flutter build windows --release
 ```
 
-Signing & store listings are project-specific — document secrets outside this repo.
+Output: `build/windows/x64/runner/Release/` (executable `enjoy_player.exe` plus `data/`, plugin DLLs).
+
+### Prerequisites (developers)
+
+- **NuGet CLI** on `PATH` for `flutter_inappwebview` / WebView2 native restore — see [README](../README.md).
+- **WebView2 Runtime** is required at runtime for YouTube / in-app WebView flows; document for end users if you ship a bare zip.
+
+### FFmpeg (feature parity)
+
+Place **`windows/ffmpeg/ffmpeg.exe`** before the build so CMake copies it next to the executable, or put `ffmpeg` on **PATH**. See [`windows/ffmpeg/README.md`](../windows/ffmpeg/README.md). Without it, embedded subtitle probe/extract, some duration probes, echo PCM extraction, and poster extraction paths that rely on subprocess FFmpeg are degraded — see [architecture.md](architecture.md).
+
+### Signed installer (Inno Setup)
+
+Use the script under [`windows/installer/`](../windows/installer/README.md):
+
+```bash
+flutter build windows --release
+iscc windows\installer\enjoy_player.iss
+```
+
+Installer output: `build/windows/installer/EnjoyPlayerSetup.exe`. **Code signing** (Authenticode) is configured outside this repo.
+
+### Version / legal strings
+
+File/product version comes from **`pubspec.yaml`** via Flutter’s `Runner.rc` injection. **Company / copyright** strings are in [`windows/runner/Runner.rc`](../windows/runner/Runner.rc); align with your legal entity before public release.
+
+---
+
+## Release verification (local)
+
+```bash
+dart format --output=none --set-exit-if-changed .
+flutter analyze
+flutter test
+dart run build_runner build --delete-conflicting-outputs
+```
+
+Then platform release builds as above. CI runs analyze/tests and debug smoke builds; **release** APK/AAB/Windows builds are recommended before tagging a release.

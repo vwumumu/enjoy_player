@@ -34,3 +34,5 @@ dart run build_runner build
 flutter analyze
 flutter test
 ```
+
+Release packaging (Android signing, AAB/APK, Windows installer, FFmpeg): [docs/packaging.md](docs/packaging.md) and [ADR-0020](docs/decisions/0020-android-windows-release-identity.md).

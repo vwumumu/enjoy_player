@@ -51,6 +51,10 @@ sequenceDiagram
 | `sync_queue` | Offline-first outbound sync queue (`SyncCtrl` + [`features/sync.md`](features/sync.md)) |
 | `settings` | Key/value JSON blobs (player prefs, hotkeys, **main API base URL**, **AI/Worker API base URL**, **auth profile cache**, app locale prefs) |
 
+### Schema upgrades (release note)
+
+[`AppDatabase`](../lib/data/db/app_database.dart) currently uses a **destructive** `onUpgrade`: listed tables are dropped and recreated when `schemaVersion` advances. **Any app upgrade that bumps the schema version clears local library data** until incremental migrations replace this strategy. Plan releases accordingly (e.g. avoid shipping a schema bump to users who must keep offline data, or ship a migration before bumping).
+
 ## Optional Enjoy account (auth)
 
 - **HTTP:** `package:http` + small `ApiClient` under `lib/data/api/` (camelCase ↔ snake_case like `@enjoy/api`).

@@ -1,0 +1,10 @@
+# Copy to key.properties (gitignored) in this directory for release signing.
+# Never commit real passwords or keystore files.
+#
+# storeFile is resolved relative to the android/ directory, e.g.:
+#   storeFile=release-keystore.jks
+#
+storePassword=your_store_password
+keyPassword=your_key_password
+keyAlias=upload
+storeFile=release-keystore.jks

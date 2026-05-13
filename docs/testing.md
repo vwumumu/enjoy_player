@@ -20,6 +20,18 @@ flutter analyze
 | Subtitle parsers | `test/data/subtitle/subtitle_parser_test.dart` |
 | Drift smoke | `test/data/db/app_database_test.dart` |
 
+## Pre-release (platform compile)
+
+CI runs debug smoke builds plus **release compile** for Android (`apk` + `appbundle`) and Windows (`--release`) — see `.github/workflows/`. Locally, before tagging:
+
+```bash
+flutter build appbundle --release   # with android/key.properties for real signing
+flutter build apk --release
+flutter build windows --release
+```
+
+See [packaging.md](packaging.md) for signing, FFmpeg, and Inno Setup installer steps.
+
 ## Guidelines
 
 - Prefer **fast, deterministic** unit tests (no real `Player` in CI unless using integration harness).

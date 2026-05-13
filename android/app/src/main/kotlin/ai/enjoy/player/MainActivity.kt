@@ -1,4 +1,4 @@
-package com.example.enjoy_player
+package ai.enjoy.player
 
 import io.flutter.embedding.android.FlutterActivity
 

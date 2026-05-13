@@ -43,3 +43,4 @@ Trade-offs, follow-up work, risks.
 | [0017](0017-azure-pronunciation-assessment.md) | Azure pronunciation assessment via native Flutter plugin (token-only) |
 | [0018](0018-shared-interactive-primitives.md) | Shared interactive primitives — EnjoyTappable, Haptics, EnjoyButton |
 | [0019](0019-transcript-dictionary-lookup.md) | Transcript dictionary lookup — selection scope, bottom sheet, worker APIs |
+| [0020](0020-android-windows-release-identity.md) | Android app ID `ai.enjoy.player`, release signing via `key.properties`, Windows release branding + Inno installer |

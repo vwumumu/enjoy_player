@@ -17,6 +17,8 @@ Optional **YouTube / Google** sign-in opens a dedicated WebView starting at Goog
 
 Only the **Enjoy API** path (`GET /api/v1/transcripts` with local row `targetId`) — same as other videos. The row must sync to the cloud for server-side transcripts to attach. Local subtitle file import is disabled for YouTube rows.
 
+When the **worker** transcript poll returns `status: failed`, the app records a **fetched** state so the UI does not spin forever; users can retry later (e.g. after captions exist or policy changes) without an infinite poll loop. See [`transcript_repository.dart`](../../lib/features/transcript/data/transcript_repository.dart).
+
 ## Limitations
 
 - Position updates while playing are polled (~250 ms); echo clamp may overshoot slightly vs `media_kit`.

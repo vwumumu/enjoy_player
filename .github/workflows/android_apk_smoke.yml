@@ -52,3 +52,9 @@ jobs:
 
       - name: Flutter build apk (debug)
         run: flutter build apk --debug
+
+      - name: Flutter build apk (release, compile-only)
+        run: flutter build apk --release
+
+      - name: Flutter build appbundle (release, compile-only)
+        run: flutter build appbundle --release

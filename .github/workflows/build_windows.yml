@@ -3,6 +3,7 @@ name: Build Windows
 on:
   push:
     branches: [main, master]
+  pull_request:
   workflow_dispatch:
 
 concurrency:
@@ -48,3 +49,6 @@ jobs:
 
       - name: Flutter build windows (debug)
         run: flutter build windows --debug
+
+      - name: Flutter build windows (release)
+        run: flutter build windows --release
