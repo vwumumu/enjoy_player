@@ -83,86 +83,129 @@ class LookupLanguagePickerRow extends StatelessWidget {
         .where((x) => !tagsEqual(x, sourceLanguage))
         .toList(growable: false);
 
-    Widget pill({
+    final outerRadius = BorderRadius.circular(t.radiusMd);
+    final r = t.radiusMd;
+
+    Widget verticalRule() {
+      return Container(
+        width: 1,
+        margin: EdgeInsets.symmetric(vertical: t.space8),
+        color: scheme.outlineVariant.withValues(alpha: 0.28),
+      );
+    }
+
+    Widget segment({
+      required BorderRadius borderRadius,
       required String semanticsLabel,
       required String text,
       required VoidCallback? onTap,
     }) {
       return EnjoyTappableSurface(
-        borderRadius: BorderRadius.circular(t.radiusFull),
+        borderRadius: borderRadius,
         onTap: onTap,
         semanticsLabel: semanticsLabel,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 48),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: t.space16,
+              horizontal: t.space12,
               vertical: t.space8,
             ),
-            child: Center(
-              child: Text(
-                text,
-                style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w600),
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                SizedBox(width: t.space4),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 22,
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.85),
+                ),
+              ],
             ),
           ),
         ),
       );
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(t.radiusFull),
-            ),
-            child: pill(
-              semanticsLabel: l10n.lookupSourceLanguage,
-              text: _label(sourceLanguage),
-              onTap: () => _pickSource(context),
-            ),
-          ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.42),
+        borderRadius: outerRadius,
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.32),
         ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: t.space8),
-          child: Tooltip(
-            message: l10n.lookupSwapLanguages,
-            child: EnjoyTappableSurface(
-              borderRadius: BorderRadius.circular(t.radiusMd),
-              onTap: canSwap ? onSwap : null,
-              semanticsLabel: l10n.lookupSwapLanguages,
-              child: SizedBox(
-                width: 48,
-                height: 48,
-                child: Center(
-                  child: Icon(
-                    Icons.swap_horiz_rounded,
-                    color: canSwap
-                        ? scheme.onSurfaceVariant
-                        : scheme.onSurfaceVariant.withValues(alpha: 0.38),
+      ),
+      child: ClipRRect(
+        borderRadius: outerRadius,
+        child: SizedBox(
+          height: 52,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: segment(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(r),
+                    bottomLeft: Radius.circular(r),
+                  ),
+                  semanticsLabel: l10n.lookupSourceLanguage,
+                  text: _label(sourceLanguage),
+                  onTap: () => _pickSource(context),
+                ),
+              ),
+              verticalRule(),
+              Tooltip(
+                message: l10n.lookupSwapLanguages,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHigh.withValues(alpha: 0.35),
+                  ),
+                  child: EnjoyTappableSurface(
+                    borderRadius: BorderRadius.circular(t.radiusSm),
+                    onTap: canSwap ? onSwap : null,
+                    semanticsLabel: l10n.lookupSwapLanguages,
+                    child: SizedBox(
+                      width: 52,
+                      child: Center(
+                        child: Icon(
+                          Icons.swap_horiz_rounded,
+                          size: 26,
+                          color: canSwap
+                              ? scheme.primary
+                              : scheme.onSurfaceVariant.withValues(alpha: 0.38),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+              verticalRule(),
+              Expanded(
+                child: segment(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(r),
+                    bottomRight: Radius.circular(r),
+                  ),
+                  semanticsLabel: l10n.lookupTargetLanguage,
+                  text: _label(targetLanguage),
+                  onTap: targetChoices.isEmpty
+                      ? null
+                      : () => _pickTarget(context),
+                ),
+              ),
+            ],
           ),
         ),
-        Expanded(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(t.radiusFull),
-            ),
-            child: pill(
-              semanticsLabel: l10n.lookupTargetLanguage,
-              text: _label(targetLanguage),
-              onTap: targetChoices.isEmpty ? null : () => _pickTarget(context),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

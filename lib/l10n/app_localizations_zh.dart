@@ -1343,6 +1343,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lookupCopy => '复制';
 
   @override
+  String get lookupCopySuccess => '已复制到剪贴板';
+
+  @override
   String get lookupTapToExpand => '展开以加载';
 
   @override
@@ -2698,6 +2701,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get lookupCopy => '复制';
+
+  @override
+  String get lookupCopySuccess => '已复制到剪贴板';
 
   @override
   String get lookupTapToExpand => '展开以加载';

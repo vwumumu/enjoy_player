@@ -1396,6 +1396,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lookupCopy => 'Copy';
 
   @override
+  String get lookupCopySuccess => 'Copied to clipboard';
+
+  @override
   String get lookupTapToExpand => 'Expand to load';
 
   @override

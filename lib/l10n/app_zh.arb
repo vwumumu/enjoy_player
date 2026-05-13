@@ -578,6 +578,7 @@
   "lookupExamples": "例句",
   "lookupClose": "关闭",
   "lookupCopy": "复制",
+  "lookupCopySuccess": "已复制到剪贴板",
   "lookupTapToExpand": "展开以加载",
   "lookupSourceLanguage": "原文语言",
   "lookupTargetLanguage": "目标语言",

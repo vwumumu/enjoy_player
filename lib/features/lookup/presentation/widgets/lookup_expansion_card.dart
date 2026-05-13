@@ -46,52 +46,73 @@ class _LookupExpansionCardState extends State<LookupExpansionCard> {
 
     return Material(
       color: scheme.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(t.radiusMd),
+      elevation: t.elevationCard,
+      shadowColor: Colors.black.withValues(alpha: 0.38),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(t.radiusLg),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.22)),
+      ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          InkWell(
-            onTap: _toggle,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48),
-              child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  t.space12,
-                  t.space4,
-                  t.space8,
-                  t.space4,
-                ),
-                child: Row(
-                  children: [
-                    if (widget.leading != null) ...[
-                      IconTheme(
-                        data: IconThemeData(
+          Semantics(
+            expanded: _expanded,
+            button: true,
+            label: widget.title,
+            child: InkWell(
+              onTap: _toggle,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 52),
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    t.space12,
+                    t.space8,
+                    t.space8,
+                    t.space8,
+                  ),
+                  child: Row(
+                    children: [
+                      if (widget.leading != null) ...[
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: scheme.primary.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: IconTheme(
+                              data: IconThemeData(
+                                color: scheme.primary.withValues(alpha: 0.95),
+                                size: 20,
+                              ),
+                              child: widget.leading!,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: t.space12),
+                      ],
+                      Expanded(
+                        child: Text(
+                          widget.title,
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.15,
+                          ),
+                        ),
+                      ),
+                      AnimatedRotation(
+                        turns: _expanded ? 0.5 : 0,
+                        duration: t.motionFast,
+                        curve: Curves.easeOutCubic,
+                        child: Icon(
+                          Icons.expand_more_rounded,
                           color: scheme.onSurfaceVariant,
-                          size: 22,
+                          size: 26,
                         ),
-                        child: widget.leading!,
                       ),
-                      SizedBox(width: t.space8),
                     ],
-                    Expanded(
-                      child: Text(
-                        widget.title,
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    AnimatedRotation(
-                      turns: _expanded ? 0.5 : 0,
-                      duration: t.motionFast,
-                      curve: Curves.easeOutCubic,
-                      child: Icon(
-                        Icons.expand_more_rounded,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -108,25 +129,39 @@ class _LookupExpansionCardState extends State<LookupExpansionCard> {
                       t.space12,
                       t.space12,
                     ),
-                    child: AnimatedSwitcher(
-                      duration: t.motionFast,
-                      child: _shouldLoad
-                          ? KeyedSubtree(
-                              key: const ValueKey<String>('body'),
-                              child: widget.bodyBuilder(context),
-                            )
-                          : KeyedSubtree(
-                              key: const ValueKey<String>('hint'),
-                              child: Align(
-                                alignment: AlignmentDirectional.centerStart,
-                                child: Text(
-                                  l10n.lookupTapToExpand,
-                                  style: tt.bodySmall?.copyWith(
-                                    color: scheme.onSurfaceVariant,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHighest.withValues(
+                          alpha: 0.22,
+                        ),
+                        borderRadius: BorderRadius.circular(t.radiusMd),
+                        border: Border.all(
+                          color: scheme.outlineVariant.withValues(alpha: 0.12),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(t.space12),
+                        child: AnimatedSwitcher(
+                          duration: t.motionFast,
+                          child: _shouldLoad
+                              ? KeyedSubtree(
+                                  key: const ValueKey<String>('body'),
+                                  child: widget.bodyBuilder(context),
+                                )
+                              : KeyedSubtree(
+                                  key: const ValueKey<String>('hint'),
+                                  child: Align(
+                                    alignment: AlignmentDirectional.centerStart,
+                                    child: Text(
+                                      l10n.lookupTapToExpand,
+                                      style: tt.bodySmall?.copyWith(
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
+                        ),
+                      ),
                     ),
                   )
                 : const SizedBox.shrink(),

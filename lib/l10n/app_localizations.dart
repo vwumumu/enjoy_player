@@ -2679,6 +2679,12 @@ abstract class AppLocalizations {
   /// **'Copy'**
   String get lookupCopy;
 
+  /// No description provided for @lookupCopySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get lookupCopySuccess;
+
   /// No description provided for @lookupTapToExpand.
   ///
   /// In en, this message translates to:

@@ -19,34 +19,56 @@ class LookupErrorRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final t = EnjoyThemeTokens.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.error.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(t.radiusMd),
+        border: Border.all(color: scheme.error.withValues(alpha: 0.28)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(t.space12),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.error_outline_rounded, color: scheme.error, size: 22),
-            SizedBox(width: t.space8),
-            Expanded(
-              child: Text(
-                message,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  color: scheme.error,
+                  size: 24,
+                ),
+                SizedBox(width: t.space8),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: tt.bodySmall?.copyWith(
+                      color: scheme.onSurface,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: t.space12),
+            FilledButton.tonalIcon(
+              style: FilledButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.symmetric(
+                  horizontal: t.space16,
+                  vertical: t.space8,
+                ),
               ),
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+              label: Text(l10n.lookupErrorRetry),
             ),
           ],
         ),
-        SizedBox(height: t.space8),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: onRetry,
-            child: Text(l10n.lookupErrorRetry),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

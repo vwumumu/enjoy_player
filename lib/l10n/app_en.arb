@@ -578,6 +578,7 @@
   "lookupExamples": "Examples",
   "lookupClose": "Close",
   "lookupCopy": "Copy",
+  "lookupCopySuccess": "Copied to clipboard",
   "lookupTapToExpand": "Expand to load",
   "lookupSourceLanguage": "Source language",
   "lookupTargetLanguage": "Target language",

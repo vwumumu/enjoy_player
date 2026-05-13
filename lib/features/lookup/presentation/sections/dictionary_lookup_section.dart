@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/errors/app_failure.dart';
+import 'package:enjoy_player/core/theme/colors.dart';
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_section_providers.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
-import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_error_row.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_expansion_card.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_section_shimmer.dart';
@@ -62,44 +63,65 @@ class _DictionaryBody extends StatelessWidget {
     final lemmaTrim = d.lemma?.trim();
     final showLemma =
         lemmaTrim != null && lemmaTrim.isNotEmpty && lemmaTrim != d.word.trim();
+    final ipaTrim = d.ipa?.trim();
+    final hasIpa = ipaTrim != null && ipaTrim.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           d.word,
-          style: tt.displaySmall?.copyWith(fontWeight: FontWeight.w700),
+          style: tt.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            height: 1.2,
+            letterSpacing: -0.25,
+          ),
         ),
-        if (d.ipa != null && d.ipa!.trim().isNotEmpty) ...[
+        if (hasIpa || showLemma) ...[
           SizedBox(height: t.space8),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(t.radiusSm),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: t.space12,
-                vertical: t.space4,
-              ),
-              child: Text(
-                d.ipa!,
-                style: tt.bodySmall?.copyWith(
-                  fontFamily: 'monospace',
-                  color: scheme.onSurfaceVariant,
+          Wrap(
+            spacing: t.space8,
+            runSpacing: t.space8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (hasIpa)
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest.withValues(
+                      alpha: 0.65,
+                    ),
+                    borderRadius: BorderRadius.circular(t.radiusFull),
+                    border: Border.all(
+                      color: scheme.outlineVariant.withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: t.space12,
+                      vertical: t.space4 + 1,
+                    ),
+                    child: Text(
+                      ipaTrim,
+                      style: tt.labelMedium?.copyWith(
+                        fontFamily: 'monospace',
+                        color: scheme.onSurfaceVariant,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              if (showLemma)
+                Text(
+                  '${l10n.lookupLemma} · $lemmaTrim',
+                  style: tt.labelMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+            ],
           ),
         ],
-        if (showLemma) ...[
-          SizedBox(height: t.space4),
-          Text(
-            '${l10n.lookupLemma} · $lemmaTrim',
-            style: tt.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
-          ),
-        ],
-        SizedBox(height: t.space12),
+        SizedBox(height: t.space16),
         for (var i = 0; i < d.senses.length; i++) ...[
           if (i > 0) SizedBox(height: t.space12),
           _SenseTile(sense: d.senses[i], l10n: l10n),
@@ -122,76 +144,118 @@ class _SenseTile extends StatelessWidget {
     final tt = theme.textTheme;
     final t = EnjoyThemeTokens.of(context);
     final pos = sense.partOfSpeech?.trim();
+    final isDark = theme.brightness == Brightness.dark;
+    final translationColor = isDark ? AppColors.brandOnDark : scheme.primary;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(t.radiusSm),
+    return Material(
+      color: scheme.surfaceContainerHigh.withValues(alpha: 0.35),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(t.radiusMd),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.2)),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: EdgeInsets.all(t.space12),
+        padding: EdgeInsets.all(t.space16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (pos != null && pos.isNotEmpty) ...[
-              Chip(
-                label: Text(
-                  pos,
-                  style: tt.labelMedium?.copyWith(color: scheme.primary),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: scheme.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(t.radiusFull),
+                  border: Border.all(
+                    color: scheme.primary.withValues(alpha: 0.35),
+                  ),
                 ),
-                side: BorderSide(color: scheme.outline.withValues(alpha: 0.45)),
-                backgroundColor: scheme.primary.withValues(alpha: 0.06),
-                visualDensity: VisualDensity.compact,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: EdgeInsets.symmetric(horizontal: t.space8),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: t.space12,
+                    vertical: t.space4 + 1,
+                  ),
+                  child: Text(
+                    pos,
+                    style: tt.labelMedium?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
-              SizedBox(height: t.space8),
+              SizedBox(height: t.space12),
             ],
             if (sense.definition.trim().isNotEmpty)
-              SelectableText(sense.definition, style: tt.bodyMedium),
+              SelectableText(
+                sense.definition,
+                style: tt.bodyLarge?.copyWith(
+                  height: 1.45,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
             if (sense.translation != null &&
                 sense.translation!.trim().isNotEmpty) ...[
               SizedBox(height: t.space8),
               SelectableText(
                 sense.translation!,
-                style: tt.bodyMedium?.copyWith(color: scheme.primary),
+                style: tt.bodyLarge?.copyWith(
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                  color: translationColor,
+                ),
               ),
             ],
             if (sense.examples != null && sense.examples!.isNotEmpty) ...[
-              SizedBox(height: t.space8),
+              SizedBox(height: t.space12),
               Text(
                 l10n.lookupExamples,
-                style: tt.labelLarge?.copyWith(color: scheme.onSurfaceVariant),
+                style: tt.labelLarge?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              SizedBox(height: t.space4),
+              SizedBox(height: t.space8),
               for (final ex in sense.examples!)
                 Padding(
                   padding: EdgeInsets.only(bottom: t.space8),
-                  child: Container(
+                  child: DecoratedBox(
                     decoration: BoxDecoration(
+                      color: scheme.surfaceContainerLow.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(t.radiusSm),
                       border: Border(
                         left: BorderSide(
                           width: 3,
-                          color: scheme.primary.withValues(alpha: 0.4),
+                          color: scheme.primary.withValues(alpha: 0.55),
                         ),
                       ),
                     ),
-                    padding: EdgeInsets.only(left: t.space8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SelectableText(ex.source, style: tt.bodySmall),
-                        if (ex.target != null &&
-                            ex.target!.trim().isNotEmpty) ...[
-                          SizedBox(height: t.space4),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        t.space12,
+                        t.space8,
+                        t.space12,
+                        t.space8,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           SelectableText(
-                            ex.target!,
-                            style: tt.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
+                            ex.source,
+                            style: tt.bodyMedium?.copyWith(height: 1.45),
                           ),
+                          if (ex.target != null &&
+                              ex.target!.trim().isNotEmpty) ...[
+                            SizedBox(height: t.space4),
+                            SelectableText(
+                              ex.target!,
+                              style: tt.bodyMedium?.copyWith(
+                                height: 1.4,
+                                color: scheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -200,7 +264,10 @@ class _SenseTile extends StatelessWidget {
               SizedBox(height: t.space8),
               Text(
                 sense.notes!,
-                style: tt.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                style: tt.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
               ),
             ],
           ],

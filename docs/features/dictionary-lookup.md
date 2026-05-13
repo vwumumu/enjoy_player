@@ -20,6 +20,8 @@ While playback is open, the user can **select 1–100 characters** on the **acti
 - **Tap-to-seek** is **disabled** on selectable rows (active + echo cues); other rows behave as before.
 - **Selection toolbar** is suppressed on transcript selections; the sheet is the primary affordance.
 - **Translation** section is expanded on first open and fetches immediately. **Contextual** and **Dictionary** start **collapsed** — expand once to fetch (saves credits vs eager triple fetch).
+- **Sheet chrome** — Header, selected term (hero panel with gradient + border), and language row are grouped at the top; scrollable sections use elevated cards (`LookupExpansionCard`) with a nested content well. **Copy** uses a tonal icon button and shows a short **success notice** (`AppNotice` / `lookupCopySuccess`).
+- **Language row** — Single segmented control with chevrons on source/target and a centered swap control.
 
 ## Code map
 
