@@ -11,6 +11,7 @@ import 'package:enjoy_player/features/ai/presentation/ai_playground_screen.dart'
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/presentation/profile_screen.dart';
+import 'package:enjoy_player/features/credits/presentation/credits_usage_screen.dart';
 import 'package:enjoy_player/features/auth/presentation/sign_in_screen.dart';
 import 'package:enjoy_player/features/cloud/presentation/cloud_screen.dart';
 import 'package:enjoy_player/features/library/presentation/home_screen.dart';
@@ -65,6 +66,11 @@ GoRouter appRouter(Ref ref) {
       if (loc.startsWith('/profile')) {
         if (v is AuthSignedOut || v == null) {
           return '/sign-in?from=profile';
+        }
+      }
+      if (loc.startsWith('/credits')) {
+        if (v is AuthSignedOut || v == null) {
+          return '/sign-in?from=credits';
         }
       }
       if (loc.startsWith('/sign-in')) {
@@ -145,6 +151,10 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: '/credits',
+            builder: (context, state) => const CreditsUsageScreen(),
           ),
           GoRoute(
             path: '/sign-in',

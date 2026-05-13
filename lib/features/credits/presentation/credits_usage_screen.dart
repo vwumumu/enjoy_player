@@ -1,0 +1,522 @@
+/// Read-only credits consumption audit (Worker `GET /credits/usages`).
+library;
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_card.dart';
+import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
+import 'package:enjoy_player/features/auth/application/auth_controller.dart';
+import 'package:enjoy_player/features/auth/domain/auth_state.dart';
+import 'package:enjoy_player/features/credits/application/credits_usage_provider.dart';
+import 'package:enjoy_player/features/credits/domain/credits_usage_filters.dart';
+import 'package:enjoy_player/features/credits/domain/credits_usage_log.dart';
+import 'package:enjoy_player/features/credits/domain/credits_usage_page.dart';
+import 'package:enjoy_player/l10n/app_localizations.dart';
+
+/// Service type values accepted by the Worker filter (matches web credits page).
+const List<String> kCreditsUsageServiceTypeValues = [
+  'tts',
+  'asr',
+  'translation',
+  'llm',
+  'assessment',
+];
+
+class CreditsUsageScreen extends ConsumerWidget {
+  const CreditsUsageScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final auth = ref.watch(authCtrlProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.creditsUsageTitle)),
+      body: auth.when(
+        data: (state) {
+          if (state is! AuthSignedIn) {
+            return Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.syncScreenSignedOutBody,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: () => context.push('/sign-in'),
+                    child: Text(l10n.syncScreenGoSignIn),
+                  ),
+                ],
+              ),
+            );
+          }
+          return const _CreditsUsageBody();
+        },
+        loading: () => const SkeletonSettingsList(rowCount: 8),
+        error: (Object e, StackTrace s) => Center(child: Text('$e')),
+      ),
+    );
+  }
+}
+
+class _CreditsUsageBody extends ConsumerWidget {
+  const _CreditsUsageBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
+    final filters = ref.watch(creditsUsageFiltersCtrlProvider);
+    final pageAsync = ref.watch(creditsUsagePageProvider);
+    final ctrl = ref.read(creditsUsageFiltersCtrlProvider.notifier);
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(creditsUsagePageProvider);
+        await ref.read(creditsUsagePageProvider.future);
+      },
+      child: ListView(
+        padding: EdgeInsets.all(t.space16),
+        children: [
+          Text(
+            l10n.creditsUsageDescription,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: t.space16),
+          EnjoyCard(
+            padding: EdgeInsets.all(t.space16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _DateFilterRow(
+                  label: l10n.creditsUsageStartDate,
+                  value: filters.startDate,
+                  onPick: () => pickCreditsUsageDate(
+                    context,
+                    initial: filters.startDate,
+                    onYmd: ctrl.setStartDate,
+                  ),
+                  onClear: filters.startDate != null
+                      ? () => ctrl.setStartDate(null)
+                      : null,
+                ),
+                SizedBox(height: t.space12),
+                _DateFilterRow(
+                  label: l10n.creditsUsageEndDate,
+                  value: filters.endDate,
+                  onPick: () => pickCreditsUsageDate(
+                    context,
+                    initial: filters.endDate,
+                    onYmd: ctrl.setEndDate,
+                  ),
+                  onClear: filters.endDate != null
+                      ? () => ctrl.setEndDate(null)
+                      : null,
+                ),
+                SizedBox(height: t.space12),
+                DropdownButtonFormField<String>(
+                  key: ValueKey<String>(
+                    'credits-svc-${filters.serviceType ?? ''}',
+                  ),
+                  initialValue: filters.serviceType ?? '',
+                  decoration: InputDecoration(
+                    labelText: l10n.creditsUsageServiceType,
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text(l10n.creditsServiceTypeAll),
+                    ),
+                    for (final v in kCreditsUsageServiceTypeValues)
+                      DropdownMenuItem(
+                        value: v,
+                        child: Text(serviceTypeLabel(l10n, v)),
+                      ),
+                  ],
+                  onChanged: (v) {
+                    ctrl.setServiceType(v == null || v.isEmpty ? null : v);
+                  },
+                ),
+                if (_hasActiveFilters(filters)) ...[
+                  SizedBox(height: t.space12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: ctrl.clearFilters,
+                      icon: const Icon(Icons.clear_all_rounded),
+                      label: Text(l10n.creditsUsageClearFilters),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          SizedBox(height: t.space16),
+          pageAsync.when(
+            data: (CreditsUsagePage page) {
+              if (page.logs.isEmpty) {
+                return _EmptyState(hasFilters: _hasActiveFilters(filters));
+              }
+              final currentPage = (filters.offset ~/ filters.limit) + 1;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final wide = constraints.maxWidth >= 720;
+                      if (wide) {
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: constraints.maxWidth,
+                            ),
+                            child: _UsageTable(
+                              logs: page.logs,
+                              localeName: Localizations.localeOf(
+                                context,
+                              ).toString(),
+                            ),
+                          ),
+                        );
+                      }
+                      return Column(
+                        children: [
+                          for (final log in page.logs)
+                            Padding(
+                              padding: EdgeInsets.only(bottom: t.space8),
+                              child: _UsageLogCard(
+                                log: log,
+                                localeName: Localizations.localeOf(
+                                  context,
+                                ).toString(),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  SizedBox(height: t.space12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${l10n.creditsUsagePageInfo(currentPage)}'
+                          '${!page.hasMore && page.logs.isNotEmpty ? ' · ${l10n.creditsUsageTotalRecords(filters.offset + page.logs.length)}' : ''}',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                      EnjoyButton.secondary(
+                        onPressed: filters.offset == 0
+                            ? null
+                            : ctrl.goToPreviousPage,
+                        child: Text(l10n.creditsUsagePrevious),
+                      ),
+                      SizedBox(width: t.space8),
+                      EnjoyButton.secondary(
+                        onPressed: !page.hasMore ? null : ctrl.goToNextPage,
+                        child: Text(l10n.creditsUsageNext),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+            loading: () => Padding(
+              padding: EdgeInsets.symmetric(vertical: t.space24),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+            error: (Object e, StackTrace s) => Padding(
+              padding: EdgeInsets.symmetric(vertical: t.space24),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.error_outline_rounded,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  SizedBox(height: t.space12),
+                  Text(
+                    l10n.creditsUsageError,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  SizedBox(height: t.space8),
+                  Text(
+                    l10n.creditsUsageErrorDescription,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(height: t.space16),
+                  EnjoyButton.primary(
+                    onPressed: () {
+                      ref.invalidate(creditsUsagePageProvider);
+                    },
+                    child: Text(l10n.creditsUsageRetry),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static bool _hasActiveFilters(CreditsUsageFilters f) {
+    return (f.startDate != null && f.startDate!.isNotEmpty) ||
+        (f.endDate != null && f.endDate!.isNotEmpty) ||
+        (f.serviceType != null && f.serviceType!.isNotEmpty);
+  }
+}
+
+Future<void> pickCreditsUsageDate(
+  BuildContext context, {
+  required String? initial,
+  required void Function(String?) onYmd,
+}) async {
+  final now = DateTime.now();
+  final parsed = initial != null ? DateTime.tryParse(initial) : null;
+  final picked = await showDatePicker(
+    context: context,
+    initialDate: parsed ?? now,
+    firstDate: DateTime.utc(2020),
+    lastDate: DateTime.utc(now.year + 1, 12, 31),
+  );
+  if (picked == null || !context.mounted) return;
+  onYmd(DateFormat('yyyy-MM-dd').format(picked.toUtc()));
+}
+
+String serviceTypeLabel(AppLocalizations l10n, String type) {
+  return switch (type) {
+    'tts' => l10n.creditsServiceTypeTts,
+    'asr' => l10n.creditsServiceTypeAsr,
+    'translation' => l10n.creditsServiceTypeTranslation,
+    'llm' => l10n.creditsServiceTypeLlm,
+    'assessment' => l10n.creditsServiceTypeAssessment,
+    _ => type,
+  };
+}
+
+class _DateFilterRow extends StatelessWidget {
+  const _DateFilterRow({
+    required this.label,
+    required this.value,
+    required this.onPick,
+    this.onClear,
+  });
+
+  final String label;
+  final String? value;
+  final VoidCallback onPick;
+  final VoidCallback? onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final display = value == null || value!.isEmpty ? '—' : value!;
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: onPick,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text('$label: $display'),
+            ),
+          ),
+        ),
+        if (onClear != null) ...[
+          SizedBox(width: t.space8),
+          IconButton(
+            tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+            onPressed: onClear,
+            icon: const Icon(Icons.close_rounded),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.hasFilters});
+
+  final bool hasFilters;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: t.space32),
+      child: Column(
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 56,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          SizedBox(height: t.space12),
+          Text(
+            l10n.creditsUsageNoRecords,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          SizedBox(height: t.space8),
+          Text(
+            hasFilters
+                ? l10n.creditsUsageNoRecordsWithFilters
+                : l10n.creditsUsageNoRecordsDescription,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UsageTable extends StatelessWidget {
+  const _UsageTable({required this.logs, required this.localeName});
+
+  final List<CreditsUsageLog> logs;
+  final String localeName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final df = DateFormat.yMMMd(localeName);
+    final tf = DateFormat.yMMMd().add_jm();
+
+    return DataTable(
+      columns: [
+        DataColumn(label: Text(l10n.creditsUsageTableDate)),
+        DataColumn(label: Text(l10n.creditsUsageTableTime)),
+        DataColumn(label: Text(l10n.creditsUsageTableService)),
+        DataColumn(label: Text(l10n.creditsUsageTableTier)),
+        DataColumn(numeric: true, label: Text(l10n.creditsUsageTableRequired)),
+        DataColumn(numeric: true, label: Text(l10n.creditsUsageTableUsedAfter)),
+        DataColumn(label: Text(l10n.creditsUsageTableStatus)),
+      ],
+      rows: [
+        for (final log in logs)
+          DataRow(
+            cells: [
+              DataCell(
+                Text(df.format(DateTime.parse('${log.date}T00:00:00Z'))),
+              ),
+              DataCell(
+                Text(
+                  tf.format(
+                    DateTime.fromMillisecondsSinceEpoch(
+                      log.timestampMs,
+                      isUtc: true,
+                    ).toLocal(),
+                  ),
+                ),
+              ),
+              DataCell(Text(serviceTypeLabel(l10n, log.serviceType))),
+              DataCell(Text(log.tier)),
+              DataCell(Text('${log.creditsRequired}')),
+              DataCell(Text('${log.usedAfter}')),
+              DataCell(
+                Text(
+                  log.allowed
+                      ? l10n.creditsUsageAllowed
+                      : l10n.creditsUsageDenied,
+                  style: tt.labelMedium?.copyWith(
+                    color: log.allowed ? cs.primary : cs.error,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _UsageLogCard extends StatelessWidget {
+  const _UsageLogCard({required this.log, required this.localeName});
+
+  final CreditsUsageLog log;
+  final String localeName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final df = DateFormat.yMMMd(localeName);
+    final tf = DateFormat.yMMMd().add_jm();
+    final when = DateTime.fromMillisecondsSinceEpoch(
+      log.timestampMs,
+      isUtc: true,
+    ).toLocal();
+
+    return EnjoyCard(
+      padding: EdgeInsets.all(t.space12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            tf.format(when),
+            style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: t.space4),
+          Text(
+            df.format(DateTime.parse('${log.date}T00:00:00Z')),
+            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+          ),
+          SizedBox(height: t.space8),
+          Wrap(
+            spacing: t.space8,
+            runSpacing: t.space4,
+            children: [
+              Chip(label: Text(serviceTypeLabel(l10n, log.serviceType))),
+              Chip(label: Text(log.tier)),
+              Chip(
+                label: Text(
+                  log.allowed
+                      ? l10n.creditsUsageAllowed
+                      : l10n.creditsUsageDenied,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: t.space8),
+          Text(
+            '${l10n.creditsUsageTableRequired}: ${log.creditsRequired} · '
+            '${l10n.creditsUsageTableUsedAfter}: ${log.usedAfter}',
+            style: tt.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+}

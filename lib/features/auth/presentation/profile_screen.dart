@@ -218,6 +218,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
+                SizedBox(height: t.space8),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.receipt_long_rounded, color: cs.primary),
+                  title: Text(l10n.profileCreditsUsageTile),
+                  subtitle: Text(
+                    l10n.profileCreditsUsageSubtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right_rounded,
+                    color: cs.onSurfaceVariant,
+                  ),
+                  onTap: () => context.push('/credits'),
+                ),
                 SizedBox(height: t.space24),
                 EnjoyCard(
                   padding: EdgeInsets.all(t.space16),

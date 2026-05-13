@@ -172,6 +172,47 @@ final class DictionaryApiProvider
 
 String _$dictionaryApiHash() => r'056b887a54ea630e793c66a8d23f52cdbcbe91c7';
 
+@ProviderFor(creditsApi)
+final creditsApiProvider = CreditsApiProvider._();
+
+final class CreditsApiProvider
+    extends $FunctionalProvider<CreditsApi, CreditsApi, CreditsApi>
+    with $Provider<CreditsApi> {
+  CreditsApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'creditsApiProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$creditsApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<CreditsApi> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CreditsApi create(Ref ref) {
+    return creditsApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CreditsApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CreditsApi>(value),
+    );
+  }
+}
+
+String _$creditsApiHash() => r'7805878ae7f447edad3b4355bd44ec0c7fb71cc5';
+
 @ProviderFor(azureTokenApi)
 final azureTokenApiProvider = AzureTokenApiProvider._();
 
