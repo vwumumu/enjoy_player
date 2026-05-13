@@ -69,12 +69,8 @@ class _RootShellState extends ConsumerState<RootShell> {
           final useSidebar =
               constraints.maxWidth >= tokens.breakpointRail && !onPlayer;
 
-          final pageColumn = Column(
-            children: [
-              Expanded(child: widget.child),
-              if (sessionActive) const GlobalTransportBar(),
-              if (!useSidebar && !onPlayer)
-                EnjoyBottomNav(
+          final bottomNav = (!useSidebar && !onPlayer)
+              ? EnjoyBottomNav(
                   selectedIndex: _navIndexForPath(path),
                   onDestinationSelected: (i) => _goNavIndex(context, i),
                   destinations: [
@@ -99,7 +95,21 @@ class _RootShellState extends ConsumerState<RootShell> {
                       label: l10n.settingsTitle,
                     ),
                   ],
-                ),
+                )
+              : null;
+
+          /// `/player/...` nests a [Scaffold] inside the route. Keeping transport in a
+          /// [Column] + [Expanded] sibling can yield **zero** body height on some mobile
+          /// frames (nested scaffold / safe-area constraint propagation), which pins the
+          /// bar under the status bar and hides video + transcript. [Scaffold] reserves
+          /// space via [bottomNavigationBar] instead.
+          final playerWithTransport = sessionActive && onPlayer;
+
+          final pageColumn = Column(
+            children: [
+              Expanded(child: widget.child),
+              if (sessionActive && !playerWithTransport) const GlobalTransportBar(),
+              ?bottomNav,
             ],
           );
 
@@ -108,6 +118,24 @@ class _RootShellState extends ConsumerState<RootShell> {
               (!useSidebar && !onPlayer
                   ? rootShellBottomNavClearance(context)
                   : 0.0);
+
+          Widget mobileShellScaffold() {
+            if (playerWithTransport) {
+              return Scaffold(
+                body: SafeArea(
+                  bottom: false,
+                  child: SizedBox.expand(child: widget.child),
+                ),
+                bottomNavigationBar: const SafeArea(
+                  top: false,
+                  left: false,
+                  right: false,
+                  child: GlobalTransportBar(),
+                ),
+              );
+            }
+            return Scaffold(body: SafeArea(child: pageColumn));
+          }
 
           if (useSidebar) {
             return RootShellBottomInset(
@@ -132,7 +160,7 @@ class _RootShellState extends ConsumerState<RootShell> {
 
           return RootShellBottomInset(
             bottomClearance: bottomClearance,
-            child: Scaffold(body: SafeArea(child: pageColumn)),
+            child: mobileShellScaffold(),
           );
         },
       ),

@@ -18,7 +18,10 @@ class ConstrainedAppViewport extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final h = constraints.maxHeight.isFinite ? constraints.maxHeight : 0.0;
+        final mq = MediaQuery.sizeOf(context);
+        final h = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : mq.height;
         final w = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : kMinAppViewportWidth;
