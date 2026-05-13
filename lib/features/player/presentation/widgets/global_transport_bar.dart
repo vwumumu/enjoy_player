@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/glass_surface.dart';
@@ -165,19 +166,20 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
 
     if (chrome == null) return const SizedBox.shrink();
 
-    final primaryTransport = <Widget>[
-      TransportPlayRingButton(
-        playing: isPlaying,
-        buffering: isBuffering,
-        tooltip: ttPlayPause,
-        accentColor: playAccent,
-        onPressed: isBuffering
-            ? null
-            : Haptics.wrapTap(
-                context,
-                () => ref.read(playerControllerProvider.notifier).togglePlay(),
-              ),
-      ),
+    final playRing = TransportPlayRingButton(
+      playing: isPlaying,
+      buffering: isBuffering,
+      tooltip: ttPlayPause,
+      accentColor: playAccent,
+      onPressed: isBuffering
+          ? null
+          : Haptics.wrapTap(
+              context,
+              () => ref.read(playerControllerProvider.notifier).togglePlay(),
+            ),
+    );
+
+    final transcriptControls = <Widget>[
       IconButton(
         tooltip: ttPrev,
         iconSize: 22,
@@ -214,7 +216,9 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
       ),
     ];
 
-    final secondaryTransport = <Widget>[
+    final primaryTransport = <Widget>[playRing, ...transcriptControls];
+
+    final secondaryEssentials = <Widget>[
       IconButton(
         tooltip: ttEcho,
         color: echo.active ? t.echoActive : null,
@@ -276,6 +280,9 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
         ),
     ];
 
+    final showFullscreenTransport =
+        isDesktop && chrome.mediaType == 'video';
+
     final inner = Theme(
       data: Theme.of(context).copyWith(
         iconButtonTheme: IconButtonThemeData(
@@ -333,28 +340,31 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                   child: hideBottomMediaInfo
                       ? LayoutBuilder(
                           builder: (context, paddedConstraints) {
-                            return SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  minWidth: paddedConstraints.maxWidth,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: primaryTransport,
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: secondaryTransport,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                            const playRingWidth = 56.0;
+                            const iconBtnWidth = 40.0;
+                            final secondaryCount =
+                                4 +
+                                (showFullscreenTransport ? 1 : 0) +
+                                (onPlayer ? 0 : 1);
+                            final secondaryWidth =
+                                secondaryCount * iconBtnWidth;
+                            final remaining =
+                                paddedConstraints.maxWidth -
+                                playRingWidth -
+                                secondaryWidth -
+                                8;
+                            final showTranscriptControls =
+                                remaining >= iconBtnWidth * 3;
+
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                playRing,
+                                if (showTranscriptControls)
+                                  ...transcriptControls,
+                                const Spacer(),
+                                ...secondaryEssentials,
+                              ],
                             );
                           },
                         )
@@ -422,7 +432,7 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
-                                    children: secondaryTransport,
+                                    children: secondaryEssentials,
                                   ),
                                 ),
                               ),
