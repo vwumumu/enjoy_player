@@ -92,4 +92,43 @@ void main() {
 
     expect(tapped, isTrue);
   });
+
+  testWidgets('lookup runs from selection toolbar after explicit tap', (
+    tester,
+  ) async {
+    String? lookedUp;
+    await tester.pumpWidget(
+      transcriptTileHarness(
+        TranscriptLineTile(
+          line: const TranscriptLine(
+            text: 'Hello world',
+            startMs: 0,
+            durationMs: 2000,
+          ),
+          secondaryText: null,
+          isActive: true,
+          inEcho: false,
+          groupedInEcho: false,
+          selectable: true,
+          onLookupRequested: (t) => lookedUp = t,
+          onTap: () {},
+        ),
+      ),
+    );
+
+    final textCenter = tester.getCenter(find.text('Hello world'));
+    await tester.tapAt(textCenter);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textCenter);
+    await tester.pumpAndSettle();
+
+    expect(lookedUp, isNull);
+
+    final lookUp = find.text('Look up');
+    expect(lookUp, findsOneWidget);
+    await tester.tap(lookUp);
+    await tester.pumpAndSettle();
+
+    expect(lookedUp, equals('Hello'));
+  });
 }

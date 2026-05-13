@@ -1,11 +1,11 @@
 /// Single transcript cue row with timestamp, markup, and tap target.
 library;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:enjoy_player/core/interaction/haptics.dart';
+import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
@@ -36,7 +36,8 @@ class TranscriptLineTile extends StatefulWidget {
   /// When true, cue text is selectable and tap-to-seek is disabled (active / echo lines).
   final bool selectable;
 
-  /// Invoked after the user selects 1–100 characters (debounced).
+  /// Invoked when the user chooses **Look up** in the text selection toolbar
+  /// (1–100 characters after trim).
   final ValueChanged<String>? onLookupRequested;
 
   final VoidCallback onTap;
@@ -47,73 +48,130 @@ class TranscriptLineTile extends StatefulWidget {
 
 class _TranscriptLineTileState extends State<TranscriptLineTile> {
   bool _hover = false;
-  Timer? _primaryLookupDebounce;
-  Timer? _secondaryLookupDebounce;
 
-  @override
-  void dispose() {
-    _primaryLookupDebounce?.cancel();
-    _secondaryLookupDebounce?.cancel();
-    super.dispose();
+  /// Raw substring for the current [selection] (no trim), or `null` if invalid.
+  static String? _rawSelectedSlice(String plain, TextSelection selection) {
+    if (!selection.isValid || selection.isCollapsed) return null;
+    final max = plain.length;
+    final start = selection.start.clamp(0, max);
+    final end = selection.end.clamp(0, max);
+    if (end <= start) return null;
+    return plain.substring(start, end);
   }
 
-  @override
-  void didUpdateWidget(TranscriptLineTile oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.line.text != widget.line.text ||
-        oldWidget.secondaryText != widget.secondaryText) {
-      _primaryLookupDebounce?.cancel();
-      _secondaryLookupDebounce?.cancel();
-    }
+  /// Trimmed slice suitable for lookup, max 100 characters, or `null`.
+  static String? _lookupSlice(String plain, TextSelection selection) {
+    final raw = _rawSelectedSlice(plain, selection);
+    if (raw == null) return null;
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty || trimmed.length > 100) return null;
+    return trimmed;
   }
 
-  void _scheduleLookup({
-    required String plain,
-    required TextSelection selection,
-    required bool isSecondary,
+  List<ContextMenuButtonItem> _selectionToolbarItems({
+    required BuildContext menuContext,
+    required EditableTextState editableTextState,
+    required String plainForSelection,
+    required AppLocalizations l10n,
   }) {
-    // Do not filter by [SelectionChangedCause]: double-tap / tap word selection
-    // uses [doubleTap] / [tap], not only [drag] / [longPress].
-    if (!widget.selectable || widget.onLookupRequested == null) return;
+    final selection = editableTextState.textEditingValue.selection;
+    final items = <ContextMenuButtonItem>[];
 
-    final debounce = isSecondary
-        ? _secondaryLookupDebounce
-        : _primaryLookupDebounce;
-    debounce?.cancel();
-
-    void run() {
-      if (!mounted) return;
-      if (!selection.isValid || selection.isCollapsed) return;
-      final max = plain.length;
-      final start = selection.start.clamp(0, max);
-      final end = selection.end.clamp(0, max);
-      if (end <= start) return;
-      final slice = plain.substring(start, end).trim();
-      if (slice.isEmpty || slice.length > 100) return;
-      widget.onLookupRequested!(slice);
+    final lookupText = widget.onLookupRequested == null
+        ? null
+        : _lookupSlice(plainForSelection, selection);
+    if (lookupText != null) {
+      items.add(
+        ContextMenuButtonItem(
+          label: l10n.lookupSheetTitle,
+          onPressed: () {
+            Haptics.selection(menuContext);
+            editableTextState.hideToolbar();
+            widget.onLookupRequested!(lookupText);
+          },
+        ),
+      );
     }
 
-    final t = Timer(const Duration(milliseconds: 200), run);
-    if (isSecondary) {
-      _secondaryLookupDebounce = t;
-    } else {
-      _primaryLookupDebounce = t;
+    if (editableTextState.copyEnabled) {
+      items.add(
+        ContextMenuButtonItem(
+          type: ContextMenuButtonType.copy,
+          label: l10n.lookupCopy,
+          onPressed: () async {
+            Haptics.selection(menuContext);
+            final raw = _rawSelectedSlice(
+              plainForSelection,
+              editableTextState.textEditingValue.selection,
+            );
+            if (raw != null && raw.isNotEmpty) {
+              await Clipboard.setData(ClipboardData(text: raw));
+            } else {
+              editableTextState.copySelection(SelectionChangedCause.toolbar);
+            }
+            editableTextState.hideToolbar();
+            if (menuContext.mounted) {
+              AppNotice.success(menuContext, l10n.lookupCopySuccess);
+            }
+          },
+        ),
+      );
     }
+
+    if (editableTextState.selectAllEnabled) {
+      items.add(
+        ContextMenuButtonItem(
+          type: ContextMenuButtonType.selectAll,
+          onPressed: () {
+            Haptics.selection(menuContext);
+            editableTextState.selectAll(SelectionChangedCause.toolbar);
+          },
+        ),
+      );
+    }
+
+    return items;
+  }
+
+  Widget _selectionToolbar(
+    BuildContext menuContext,
+    EditableTextState editableTextState, {
+    required String plainForSelection,
+  }) {
+    final l10n = AppLocalizations.of(menuContext);
+    if (l10n == null) {
+      return AdaptiveTextSelectionToolbar.editableText(
+        editableTextState: editableTextState,
+      );
+    }
+    final items = _selectionToolbarItems(
+      menuContext: menuContext,
+      editableTextState: editableTextState,
+      plainForSelection: plainForSelection,
+      l10n: l10n,
+    );
+    if (items.isEmpty) {
+      return AdaptiveTextSelectionToolbar.editableText(
+        editableTextState: editableTextState,
+      );
+    }
+    return AdaptiveTextSelectionToolbar.buttonItems(
+      anchors: editableTextState.contextMenuAnchors,
+      buttonItems: items,
+    );
   }
 
   Widget _richSelectable({
     required TextSpan span,
     required String plainForSelection,
-    required bool isSecondary,
   }) {
     return SelectableText.rich(
       span,
-      contextMenuBuilder: (context, _) => const SizedBox.shrink(),
-      onSelectionChanged: (sel, _) {
-        _scheduleLookup(
-          plain: plainForSelection,
-          selection: sel,
-          isSecondary: isSecondary,
+      contextMenuBuilder: (menuContext, editableTextState) {
+        return _selectionToolbar(
+          menuContext,
+          editableTextState,
+          plainForSelection: plainForSelection,
         );
       },
     );
@@ -193,7 +251,6 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
               emphasize: widget.isActive,
             ),
             plainForSelection: primaryPlain,
-            isSecondary: false,
           )
         : Text.rich(
             transcriptMarkupToTextSpan(
@@ -215,7 +272,6 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
                 emphasize: false,
               ),
               plainForSelection: secondaryPlain,
-              isSecondary: true,
             )
           : Text.rich(
               transcriptMarkupToTextSpan(
