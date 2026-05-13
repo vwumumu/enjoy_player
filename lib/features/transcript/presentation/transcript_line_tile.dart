@@ -10,6 +10,7 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_markup.dart';
+import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class TranscriptLineTile extends StatefulWidget {
   const TranscriptLineTile({
@@ -118,11 +119,18 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
     );
   }
 
+  String _snippet(String plain) {
+    final t = plain.replaceAll('\n', ' ').trim();
+    if (t.length <= 120) return t;
+    return '${t.substring(0, 120)}…';
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final tok = EnjoyThemeTokens.of(context);
     final typography = TranscriptTypographyTokens.of(context);
+    final l10n = AppLocalizations.of(context);
     final baseBody = typography.bodyStyle;
     final defaultFg = scheme.onSurface;
 
@@ -155,6 +163,26 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
     final secondaryPlain = widget.secondaryText == null
         ? ''
         : transcriptPlainForSelection(widget.secondaryText!);
+
+    String statePrefix = '';
+    if (l10n != null) {
+      if (echoCurrent) {
+        statePrefix = l10n.transcriptAccessibilityEchoCurrentLine;
+      } else if (widget.isActive) {
+        statePrefix = l10n.transcriptAccessibilityCurrentLine;
+      } else if (widget.inEcho) {
+        statePrefix = l10n.transcriptAccessibilityEchoRegion;
+      }
+    }
+    final cueLabel = l10n != null
+        ? l10n.transcriptAccessibilityCue(
+            formatTranscriptTimestampMs(widget.line.startMs),
+            _snippet(primaryPlain),
+          )
+        : '${formatTranscriptTimestampMs(widget.line.startMs)}. ${_snippet(primaryPlain)}';
+    final semanticsLabel = statePrefix.isEmpty
+        ? cueLabel
+        : '$statePrefix $cueLabel';
 
     final primaryWidget = widget.selectable
         ? _richSelectable(
@@ -238,43 +266,58 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
         : textBody;
 
     if (widget.selectable) {
-      return Material(color: bg ?? Colors.transparent, child: content);
+      return Semantics(
+        container: true,
+        label: semanticsLabel,
+        focusable: true,
+        child: Material(color: bg ?? Colors.transparent, child: content),
+      );
     }
 
     if (widget.groupedInEcho) {
-      return Material(
-        color: bg ?? Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Haptics.selection(context);
-            widget.onTap();
-          },
-          highlightColor: scheme.onSurface.withValues(alpha: 0.04),
-          splashColor: scheme.primary.withValues(alpha: 0.06),
-          child: content,
+      return Semantics(
+        container: true,
+        label: semanticsLabel,
+        button: true,
+        child: Material(
+          color: bg ?? Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Haptics.selection(context);
+              widget.onTap();
+            },
+            highlightColor: scheme.onSurface.withValues(alpha: 0.04),
+            splashColor: scheme.primary.withValues(alpha: 0.06),
+            child: content,
+          ),
         ),
       );
     }
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: Material(
-        color: bg ?? Colors.transparent,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(tok.radiusSm),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(tok.radiusSm),
-          onTap: () {
-            Haptics.selection(context);
-            widget.onTap();
-          },
-          hoverColor: Colors.transparent,
-          highlightColor: scheme.primary.withValues(alpha: 0.06),
-          splashColor: scheme.primary.withValues(alpha: 0.10),
-          child: content,
+    return Semantics(
+      container: true,
+      label: semanticsLabel,
+      button: true,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: Material(
+          color: bg ?? Colors.transparent,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tok.radiusSm),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(tok.radiusSm),
+            onTap: () {
+              Haptics.selection(context);
+              widget.onTap();
+            },
+            hoverColor: Colors.transparent,
+            highlightColor: scheme.primary.withValues(alpha: 0.06),
+            splashColor: scheme.primary.withValues(alpha: 0.10),
+            child: content,
+          ),
         ),
       ),
     );

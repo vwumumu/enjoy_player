@@ -47,6 +47,43 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your library doesn\'t contain any video content.';
 
   @override
+  String get librarySearchNoMatchesTitle => 'No matches';
+
+  @override
+  String get librarySearchNoMatchesHint =>
+      'Nothing in your library matches this search.';
+
+  @override
+  String get librarySearchClear => 'Clear search';
+
+  @override
+  String get libraryDeleteFailed => 'Could not remove this item. Try again.';
+
+  @override
+  String get transcriptAccessibilityTranscriptList => 'Transcript';
+
+  @override
+  String transcriptAccessibilityCue(String time, String snippet) {
+    return '$time. $snippet';
+  }
+
+  @override
+  String get transcriptAccessibilityCurrentLine => 'Current playback line.';
+
+  @override
+  String get transcriptAccessibilityEchoRegion => 'Echo practice region.';
+
+  @override
+  String get transcriptAccessibilityEchoCurrentLine => 'Current echo line.';
+
+  @override
+  String get transcriptErrorFriendlyTitle => 'Transcript unavailable';
+
+  @override
+  String get transcriptErrorFriendlyHint =>
+      'Try choosing another subtitle track or importing a file.';
+
+  @override
   String get actionOpenFiles => 'Open file(s)';
 
   @override
@@ -286,6 +323,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get subtitlesImportLanguageHint =>
       'BCP-47 code (e.g. en, zh-TW). Use und if unknown.';
+
+  @override
+  String get subtitlesImportLanguageFieldLabel => 'Language code';
 
   @override
   String get subtitlesProviderOfficial => 'Official';
@@ -597,6 +637,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assessmentNoRecording => 'Recording file is missing or empty.';
+
+  @override
+  String get assessmentNoResultSummary =>
+      'No detailed scores are available for this take.';
 
   @override
   String assessmentRunFailed(String reason) {
@@ -1262,6 +1306,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSubtitle => 'Tune Enjoy to fit how you study.';
+
+  @override
+  String get settingsAuthLoadFailed =>
+      'We couldn\'t refresh your account. Check your connection and try again.';
 
   @override
   String get settingsSectionAppearanceLanguage => 'Appearance & Language';

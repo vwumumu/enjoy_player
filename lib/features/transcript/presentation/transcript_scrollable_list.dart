@@ -9,12 +9,14 @@ import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
+import 'package:enjoy_player/features/transcript/application/echo_region_bounds.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_alignment.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_playback_highlight_provider.dart';
 import 'package:enjoy_player/features/lookup/application/transcript_lookup_open.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_echo_region_merged_card.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_line_tile.dart';
+import 'package:enjoy_player/l10n/app_localizations.dart';
 
 sealed class _TranscriptVirtualItem {
   const _TranscriptVirtualItem();
@@ -119,7 +121,8 @@ class _TranscriptScrollableListState
   }
 
   TranscriptSecondaryMatcher _matcherFor(List<TranscriptLine> secondary) {
-    if (!identical(secondary, _cachedSecondaryRef) || _secondaryMatcher == null) {
+    if (!identical(secondary, _cachedSecondaryRef) ||
+        _secondaryMatcher == null) {
       _cachedSecondaryRef = secondary;
       _secondaryMatcher = TranscriptSecondaryMatcher.from(secondary);
     }
@@ -134,7 +137,12 @@ class _TranscriptScrollableListState
     };
     if (!playing) return;
 
-    final echo = ref.read(echoModeProvider);
+    final echo =
+        activeEchoForTranscript(
+          ref.read(echoModeProvider),
+          widget.lines.length,
+        ) ??
+        EchoState.inactive;
     final activeForUi = ref.read(
       transcriptPlaybackHighlightProvider(widget.mediaId),
     );
@@ -155,7 +163,12 @@ class _TranscriptScrollableListState
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final echoNow = ref.read(echoModeProvider);
+      final echoNow =
+          activeEchoForTranscript(
+            ref.read(echoModeProvider),
+            widget.lines.length,
+          ) ??
+          EchoState.inactive;
       final tok = EnjoyThemeTokens.of(context);
 
       if (echoNow.active) {
@@ -175,7 +188,8 @@ class _TranscriptScrollableListState
         final items = _virtualItems(echoNow);
         final len = items.length;
         final echoItemIndex = items.indexWhere(
-          (e) => e is _VirtualEcho && e.startLineIndex == echoNow.startLineIndex,
+          (e) =>
+              e is _VirtualEcho && e.startLineIndex == echoNow.startLineIndex,
         );
         final ratio = len > 0 && echoItemIndex >= 0 ? echoItemIndex / len : 0.0;
         final estimated = ratio * pos.maxScrollExtent;
@@ -238,7 +252,12 @@ class _TranscriptScrollableListState
 
   @override
   Widget build(BuildContext context) {
-    final echo = ref.watch(echoModeProvider);
+    final echo =
+        activeEchoForTranscript(
+          ref.watch(echoModeProvider),
+          widget.lines.length,
+        ) ??
+        EchoState.inactive;
     final activeForUi = ref.watch(
       transcriptPlaybackHighlightProvider(widget.mediaId).select((i) => i),
     );
@@ -270,76 +289,84 @@ class _TranscriptScrollableListState
       },
     );
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: EdgeInsets.symmetric(
-        horizontal: tok.space12,
-        vertical: tok.space8,
-      ),
-      // Keep active cue / echo card buildable for [GlobalKey] + ensureVisible.
-      cacheExtent: 1400,
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        switch (item) {
-          case _VirtualEcho e:
-            return Padding(
-              key: ValueKey<String>('echo-${e.startLineIndex}-${e.endLineIndex}'),
-              padding: EdgeInsets.only(bottom: tok.space8),
-              child: KeyedSubtree(
-                key: _echoRegionKey,
-                child: EchoRegionMergedCard(
-                  mediaId: widget.mediaId,
-                  lines: widget.lines,
-                  echo: echo,
-                  activeCueIndex: activeForUi,
-                  secondaryLines: secondaryLines,
-                  secondaryMatcher: secondaryMatcher,
+    return Semantics(
+      explicitChildNodes: true,
+      label:
+          AppLocalizations.of(context)?.transcriptAccessibilityTranscriptList ??
+          'Transcript',
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: EdgeInsets.symmetric(
+          horizontal: tok.space12,
+          vertical: tok.space8,
+        ),
+        // Keep active cue / echo card buildable for [GlobalKey] + ensureVisible.
+        cacheExtent: 1400,
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          final item = items[index];
+          switch (item) {
+            case _VirtualEcho e:
+              return Padding(
+                key: ValueKey<String>(
+                  'echo-${e.startLineIndex}-${e.endLineIndex}',
                 ),
-              ),
-            );
-          case _VirtualLine vl:
-            final lineIndex = vl.lineIndex;
-            final line = widget.lines[lineIndex];
-            final isActive = lineIndex == activeForUi;
-            final inEcho =
-                echo.active &&
-                lineIndex >= echo.startLineIndex &&
-                lineIndex <= echo.endLineIndex;
-            final secondaryText = secondaryMatcher.match(line)?.text;
+                padding: EdgeInsets.only(bottom: tok.space8),
+                child: KeyedSubtree(
+                  key: _echoRegionKey,
+                  child: EchoRegionMergedCard(
+                    mediaId: widget.mediaId,
+                    lines: widget.lines,
+                    echo: echo,
+                    activeCueIndex: activeForUi,
+                    secondaryLines: secondaryLines,
+                    secondaryMatcher: secondaryMatcher,
+                  ),
+                ),
+              );
+            case _VirtualLine vl:
+              final lineIndex = vl.lineIndex;
+              final line = widget.lines[lineIndex];
+              final isActive = lineIndex == activeForUi;
+              final inEcho =
+                  echo.active &&
+                  lineIndex >= echo.startLineIndex &&
+                  lineIndex <= echo.endLineIndex;
+              final secondaryText = secondaryMatcher.match(line)?.text;
 
-            final selectable = isActive || inEcho;
-            Widget tile = TranscriptLineTile(
-              line: line,
-              secondaryText: secondaryText,
-              isActive: isActive,
-              inEcho: inEcho,
-              groupedInEcho: false,
-              selectable: selectable,
-              onLookupRequested: selectable
-                  ? (t) => openTranscriptLookup(
-                      ref: ref,
-                      context: context,
-                      selectedText: t,
-                      lines: widget.lines,
-                    )
-                  : null,
-              onTap: () => ref
-                  .read(playerInteractionsProvider.notifier)
-                  .seekToLine(line, lineIndex),
-            );
+              final selectable = isActive;
+              Widget tile = TranscriptLineTile(
+                line: line,
+                secondaryText: secondaryText,
+                isActive: isActive,
+                inEcho: inEcho,
+                groupedInEcho: false,
+                selectable: selectable,
+                onLookupRequested: selectable
+                    ? (t) => openTranscriptLookup(
+                        ref: ref,
+                        context: context,
+                        selectedText: t,
+                        lines: widget.lines,
+                      )
+                    : null,
+                onTap: () => ref
+                    .read(playerInteractionsProvider.notifier)
+                    .seekToLine(line, lineIndex),
+              );
 
-            if (isActive) {
-              tile = KeyedSubtree(key: _activeLineKey, child: tile);
-            }
+              if (isActive) {
+                tile = KeyedSubtree(key: _activeLineKey, child: tile);
+              }
 
-            return Padding(
-              key: ValueKey<String>('line-$lineIndex'),
-              padding: EdgeInsets.only(bottom: tok.space8),
-              child: tile,
-            );
-        }
-      },
+              return Padding(
+                key: ValueKey<String>('line-$lineIndex'),
+                padding: EdgeInsets.only(bottom: tok.space8),
+                child: tile,
+              );
+          }
+        },
+      ),
     );
   }
 }

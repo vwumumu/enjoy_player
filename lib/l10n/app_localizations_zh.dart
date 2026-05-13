@@ -45,6 +45,41 @@ class AppLocalizationsZh extends AppLocalizations {
   String get libraryEmptyVideoHint => '你的资料库中没有任何视频内容。';
 
   @override
+  String get librarySearchNoMatchesTitle => '没有匹配结果';
+
+  @override
+  String get librarySearchNoMatchesHint => '资料库中没有符合此搜索的内容。';
+
+  @override
+  String get librarySearchClear => '清除搜索';
+
+  @override
+  String get libraryDeleteFailed => '无法删除该项目，请重试。';
+
+  @override
+  String get transcriptAccessibilityTranscriptList => '字幕';
+
+  @override
+  String transcriptAccessibilityCue(String time, String snippet) {
+    return '$time。$snippet';
+  }
+
+  @override
+  String get transcriptAccessibilityCurrentLine => '当前播放行。';
+
+  @override
+  String get transcriptAccessibilityEchoRegion => '跟读练习区域。';
+
+  @override
+  String get transcriptAccessibilityEchoCurrentLine => '当前跟读行。';
+
+  @override
+  String get transcriptErrorFriendlyTitle => '字幕暂不可用';
+
+  @override
+  String get transcriptErrorFriendlyHint => '请尝试选择其他字幕轨道或导入字幕文件。';
+
+  @override
   String get actionOpenFiles => '打开文件';
 
   @override
@@ -280,6 +315,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get subtitlesImportLanguageHint => 'BCP-47 代码（如 en、zh-TW）。未知请填 und。';
+
+  @override
+  String get subtitlesImportLanguageFieldLabel => '语言代码';
 
   @override
   String get subtitlesProviderOfficial => '官方';
@@ -585,6 +623,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get assessmentNoRecording => '录音文件缺失或为空。';
+
+  @override
+  String get assessmentNoResultSummary => '此条录音没有可用的详细评分。';
 
   @override
   String assessmentRunFailed(String reason) {
@@ -1217,6 +1258,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsSubtitle => '按你的学习方式调整 Enjoy。';
+
+  @override
+  String get settingsAuthLoadFailed => '无法刷新账户信息，请检查网络后重试。';
 
   @override
   String get settingsSectionAppearanceLanguage => '外观与语言';
@@ -1408,6 +1452,41 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get libraryEmptyVideoHint => '你的资料库中没有任何视频内容。';
 
   @override
+  String get librarySearchNoMatchesTitle => '没有匹配结果';
+
+  @override
+  String get librarySearchNoMatchesHint => '资料库中没有符合此搜索的内容。';
+
+  @override
+  String get librarySearchClear => '清除搜索';
+
+  @override
+  String get libraryDeleteFailed => '无法删除该项目，请重试。';
+
+  @override
+  String get transcriptAccessibilityTranscriptList => '字幕';
+
+  @override
+  String transcriptAccessibilityCue(String time, String snippet) {
+    return '$time。$snippet';
+  }
+
+  @override
+  String get transcriptAccessibilityCurrentLine => '当前播放行。';
+
+  @override
+  String get transcriptAccessibilityEchoRegion => '跟读练习区域。';
+
+  @override
+  String get transcriptAccessibilityEchoCurrentLine => '当前跟读行。';
+
+  @override
+  String get transcriptErrorFriendlyTitle => '字幕暂不可用';
+
+  @override
+  String get transcriptErrorFriendlyHint => '请尝试选择其他字幕轨道或导入字幕文件。';
+
+  @override
   String get actionOpenFiles => '打开文件';
 
   @override
@@ -1643,6 +1722,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get subtitlesImportLanguageHint => 'BCP-47 代码（如 en、zh-TW）。未知请填 und。';
+
+  @override
+  String get subtitlesImportLanguageFieldLabel => '语言代码';
 
   @override
   String get subtitlesProviderOfficial => '官方';
@@ -1948,6 +2030,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get assessmentNoRecording => '录音文件缺失或为空。';
+
+  @override
+  String get assessmentNoResultSummary => '此条录音没有可用的详细评分。';
 
   @override
   String assessmentRunFailed(String reason) {
@@ -2580,6 +2665,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsSubtitle => '按你的学习方式调整 Enjoy。';
+
+  @override
+  String get settingsAuthLoadFailed => '无法刷新账户信息，请检查网络后重试。';
 
   @override
   String get settingsSectionAppearanceLanguage => '外观与语言';

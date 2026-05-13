@@ -18,6 +18,7 @@ class HotkeyCaptureDialog extends StatefulWidget {
 
 class _HotkeyCaptureDialogState extends State<HotkeyCaptureDialog> {
   final FocusNode _focus = FocusNode(debugLabel: 'hotkey-capture');
+  String? _lastChordAttempt;
 
   @override
   void dispose() {
@@ -32,9 +33,12 @@ class _HotkeyCaptureDialogState extends State<HotkeyCaptureDialog> {
       return KeyEventResult.handled;
     }
     final serialized = serializeChordFromKeyEvent(event);
-    if (serialized != null && isValidHotkeyBindingString(serialized)) {
-      Navigator.of(context).pop<String>(serialized);
-      return KeyEventResult.handled;
+    if (serialized != null) {
+      setState(() => _lastChordAttempt = serialized);
+      if (isValidHotkeyBindingString(serialized)) {
+        Navigator.of(context).pop<String>(serialized);
+        return KeyEventResult.handled;
+      }
     }
     return KeyEventResult.handled;
   }
@@ -43,15 +47,35 @@ class _HotkeyCaptureDialogState extends State<HotkeyCaptureDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
+    final tt = Theme.of(context).textTheme;
     return AlertDialog(
       title: Text(l10n.hotkeysCaptureTitle),
       content: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: t.modalMaxWidth),
-        child: Focus(
-          autofocus: true,
-          focusNode: _focus,
-          onKeyEvent: _onKey,
-          child: Text(l10n.hotkeysCaptureHint),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Focus(
+              autofocus: true,
+              focusNode: _focus,
+              onKeyEvent: _onKey,
+              child: Text(l10n.hotkeysCaptureHint),
+            ),
+            if (_lastChordAttempt != null) ...[
+              SizedBox(height: t.space12),
+              Semantics(
+                label: _lastChordAttempt,
+                child: SelectableText(
+                  _lastChordAttempt!,
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
       actions: [

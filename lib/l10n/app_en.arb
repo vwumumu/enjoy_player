@@ -12,6 +12,23 @@
   "libraryEmptyAudioHint": "Your library doesn't contain any audio content.",
   "libraryEmptyVideoTitle": "We couldn't find any videos",
   "libraryEmptyVideoHint": "Your library doesn't contain any video content.",
+  "librarySearchNoMatchesTitle": "No matches",
+  "librarySearchNoMatchesHint": "Nothing in your library matches this search.",
+  "librarySearchClear": "Clear search",
+  "libraryDeleteFailed": "Could not remove this item. Try again.",
+  "transcriptAccessibilityTranscriptList": "Transcript",
+  "transcriptAccessibilityCue": "{time}. {snippet}",
+  "@transcriptAccessibilityCue": {
+    "placeholders": {
+      "time": {"type": "String"},
+      "snippet": {"type": "String"}
+    }
+  },
+  "transcriptAccessibilityCurrentLine": "Current playback line.",
+  "transcriptAccessibilityEchoRegion": "Echo practice region.",
+  "transcriptAccessibilityEchoCurrentLine": "Current echo line.",
+  "transcriptErrorFriendlyTitle": "Transcript unavailable",
+  "transcriptErrorFriendlyHint": "Try choosing another subtitle track or importing a file.",
   "actionOpenFiles": "Open file(s)",
   "actionImport": "Import",
   "importFromFile": "From file…",
@@ -97,6 +114,7 @@
   "subtitlesRefreshCloud": "Refresh transcripts from cloud",
   "subtitlesImportLanguageTitle": "Subtitle language",
   "subtitlesImportLanguageHint": "BCP-47 code (e.g. en, zh-TW). Use und if unknown.",
+  "subtitlesImportLanguageFieldLabel": "Language code",
   "subtitlesProviderOfficial": "Official",
   "subtitlesProviderAuto": "Auto",
   "subtitlesProviderAi": "AI",
@@ -261,6 +279,7 @@
   "assessmentSyllables": "Syllables",
   "assessmentPhonemes": "Phonemes",
   "assessmentNoRecording": "Recording file is missing or empty.",
+  "assessmentNoResultSummary": "No detailed scores are available for this take.",
   "assessmentRunFailed": "Couldn't run assessment: {reason}",
   "@assessmentRunFailed": {
     "placeholders": {
@@ -522,6 +541,7 @@
   "aiPlaygroundSectionTtsAssessment": "TTS / Assessment",
   "youtubePasteFromClipboard": "Paste",
   "settingsSubtitle": "Tune Enjoy to fit how you study.",
+  "settingsAuthLoadFailed": "We couldn't refresh your account. Check your connection and try again.",
   "settingsSectionAppearanceLanguage": "Appearance & Language",
   "settingsAppearanceTheme": "Theme",
   "settingsAppearanceThemeValue": "Dark · Cinematic",

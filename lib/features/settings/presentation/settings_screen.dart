@@ -157,8 +157,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           );
                         },
                         loading: () => const _AccountHeroSkeleton(),
-                        error: (Object e, StackTrace s) =>
-                            const SizedBox.shrink(),
+                        error: (Object e, StackTrace s) => Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            t.space24,
+                            0,
+                            t.space24,
+                            t.space8,
+                          ),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: cs.errorContainer.withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(t.radiusLg),
+                              border: Border.all(
+                                color: cs.error.withValues(alpha: 0.25),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(t.space16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    l10n.settingsAuthLoadFailed,
+                                    style: tt.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  SizedBox(height: t.space12),
+                                  FilledButton.tonal(
+                                    onPressed: () =>
+                                        ref.invalidate(authCtrlProvider),
+                                    child: Text(l10n.retry),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -326,8 +362,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           title: l10n.syncSettingsTileTitle,
                           showChevron: false,
                         ),
-                        error: (Object e, StackTrace s) =>
-                            const SizedBox.shrink(),
+                        error: (Object e, StackTrace s) => Padding(
+                          padding: EdgeInsets.symmetric(horizontal: t.space24),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: cs.errorContainer.withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(t.radiusLg),
+                              border: Border.all(
+                                color: cs.error.withValues(alpha: 0.25),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(t.space16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    l10n.settingsAuthLoadFailed,
+                                    style: tt.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  SizedBox(height: t.space12),
+                                  FilledButton.tonal(
+                                    onPressed: () =>
+                                        ref.invalidate(authCtrlProvider),
+                                    child: Text(l10n.retry),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),

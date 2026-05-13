@@ -36,6 +36,7 @@ class PlayerPreferencesCtrl extends _$PlayerPreferencesCtrl {
         playbackRate: ((map['rate'] as num?)?.toDouble() ?? 1).clamp(0.25, 2),
         repeatMode:
             RepeatMode.values[repeatIdx.clamp(0, RepeatMode.values.length - 1)],
+        videoTranscriptSplitWidthPx: (map['splitPx'] as num?)?.toDouble(),
       );
       final v = state.volume;
       _lastNonZeroVolume = v > 0.01 ? v : 1;
@@ -53,6 +54,8 @@ class PlayerPreferencesCtrl extends _$PlayerPreferencesCtrl {
         'volume': state.volume,
         'rate': state.playbackRate,
         'repeat': state.repeatMode.index,
+        if (state.videoTranscriptSplitWidthPx != null)
+          'splitPx': state.videoTranscriptSplitWidthPx,
       }),
     );
   }
@@ -90,6 +93,14 @@ class PlayerPreferencesCtrl extends _$PlayerPreferencesCtrl {
 
   Future<void> setRepeatMode(RepeatMode m) async {
     state = state.copyWith(repeatMode: m);
+    await _persist();
+  }
+
+  /// Persists the video + transcript side-by-side split width (logical px).
+  Future<void> setVideoTranscriptSplitWidthPx(double? widthPx) async {
+    state = widthPx == null
+        ? state.copyWith(clearVideoTranscriptSplitWidthPx: true)
+        : state.copyWith(videoTranscriptSplitWidthPx: widthPx);
     await _persist();
   }
 }

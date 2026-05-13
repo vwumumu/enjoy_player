@@ -171,6 +171,72 @@ abstract class AppLocalizations {
   /// **'Your library doesn\'t contain any video content.'**
   String get libraryEmptyVideoHint;
 
+  /// No description provided for @librarySearchNoMatchesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get librarySearchNoMatchesTitle;
+
+  /// No description provided for @librarySearchNoMatchesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in your library matches this search.'**
+  String get librarySearchNoMatchesHint;
+
+  /// No description provided for @librarySearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get librarySearchClear;
+
+  /// No description provided for @libraryDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not remove this item. Try again.'**
+  String get libraryDeleteFailed;
+
+  /// No description provided for @transcriptAccessibilityTranscriptList.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript'**
+  String get transcriptAccessibilityTranscriptList;
+
+  /// No description provided for @transcriptAccessibilityCue.
+  ///
+  /// In en, this message translates to:
+  /// **'{time}. {snippet}'**
+  String transcriptAccessibilityCue(String time, String snippet);
+
+  /// No description provided for @transcriptAccessibilityCurrentLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Current playback line.'**
+  String get transcriptAccessibilityCurrentLine;
+
+  /// No description provided for @transcriptAccessibilityEchoRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Echo practice region.'**
+  String get transcriptAccessibilityEchoRegion;
+
+  /// No description provided for @transcriptAccessibilityEchoCurrentLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Current echo line.'**
+  String get transcriptAccessibilityEchoCurrentLine;
+
+  /// No description provided for @transcriptErrorFriendlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript unavailable'**
+  String get transcriptErrorFriendlyTitle;
+
+  /// No description provided for @transcriptErrorFriendlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try choosing another subtitle track or importing a file.'**
+  String get transcriptErrorFriendlyHint;
+
   /// No description provided for @actionOpenFiles.
   ///
   /// In en, this message translates to:
@@ -638,6 +704,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'BCP-47 code (e.g. en, zh-TW). Use und if unknown.'**
   String get subtitlesImportLanguageHint;
+
+  /// No description provided for @subtitlesImportLanguageFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Language code'**
+  String get subtitlesImportLanguageFieldLabel;
 
   /// No description provided for @subtitlesProviderOfficial.
   ///
@@ -1226,6 +1298,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recording file is missing or empty.'**
   String get assessmentNoRecording;
+
+  /// No description provided for @assessmentNoResultSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'No detailed scores are available for this take.'**
+  String get assessmentNoResultSummary;
 
   /// No description provided for @assessmentRunFailed.
   ///
@@ -2438,6 +2516,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tune Enjoy to fit how you study.'**
   String get settingsSubtitle;
+
+  /// No description provided for @settingsAuthLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t refresh your account. Check your connection and try again.'**
+  String get settingsAuthLoadFailed;
 
   /// No description provided for @settingsSectionAppearanceLanguage.
   ///

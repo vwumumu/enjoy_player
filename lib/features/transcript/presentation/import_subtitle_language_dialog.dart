@@ -44,7 +44,10 @@ Future<String?> showImportSubtitleLanguageDialog(
           controller: ctrl,
           autofocus: true,
           textCapitalization: TextCapitalization.none,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
+          decoration: InputDecoration(
+            labelText: l10n.subtitlesImportLanguageFieldLabel,
+            border: const OutlineInputBorder(),
+          ),
         ),
       ],
     ),

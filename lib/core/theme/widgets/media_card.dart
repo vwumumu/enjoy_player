@@ -124,6 +124,7 @@ class MediaCardTile extends StatefulWidget {
 
 class _MediaCardTileState extends State<MediaCardTile> {
   bool _hover = false;
+  bool _deleteFocused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -252,38 +253,45 @@ class _MediaCardTileState extends State<MediaCardTile> {
                           Positioned(
                             top: t.space8,
                             right: t.space8,
-                            child: AnimatedOpacity(
-                              opacity: _hover ? 1 : 0,
-                              duration: t.motionFast,
-                              curve: Curves.easeOut,
-                              child: IgnorePointer(
-                                ignoring: !_hover,
-                                child: IconButton(
-                                  visualDensity: VisualDensity.compact,
-                                  iconSize: 20,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 36,
-                                    minHeight: 36,
-                                  ),
-                                  tooltip:
-                                      (widget.deleteTooltip != null &&
-                                          widget.deleteTooltip!.isNotEmpty)
-                                      ? widget.deleteTooltip!
-                                      : MaterialLocalizations.of(
-                                          context,
-                                        ).deleteButtonTooltip,
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: cs.surfaceContainerHighest
-                                        .withValues(alpha: 0.92),
-                                    foregroundColor: cs.onSurfaceVariant,
-                                    shape: const CircleBorder(),
-                                  ),
-                                  icon: const Icon(
-                                    Icons.delete_outline_rounded,
-                                  ),
-                                  onPressed: widget.onDelete,
-                                ),
+                            child: Focus(
+                              onFocusChange: (f) =>
+                                  setState(() => _deleteFocused = f),
+                              child: Builder(
+                                builder: (context) {
+                                  final strong = _hover || _deleteFocused;
+                                  return AnimatedOpacity(
+                                    opacity: strong ? 1 : 0.45,
+                                    duration: t.motionFast,
+                                    curve: Curves.easeOut,
+                                    child: IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      iconSize: 20,
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(
+                                        minWidth: 40,
+                                        minHeight: 40,
+                                      ),
+                                      tooltip:
+                                          (widget.deleteTooltip != null &&
+                                              widget.deleteTooltip!.isNotEmpty)
+                                          ? widget.deleteTooltip!
+                                          : MaterialLocalizations.of(
+                                              context,
+                                            ).deleteButtonTooltip,
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: cs
+                                            .surfaceContainerHighest
+                                            .withValues(alpha: 0.92),
+                                        foregroundColor: cs.onSurfaceVariant,
+                                        shape: const CircleBorder(),
+                                      ),
+                                      icon: const Icon(
+                                        Icons.delete_outline_rounded,
+                                      ),
+                                      onPressed: widget.onDelete,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
@@ -388,6 +396,7 @@ class MediaCardRow extends StatefulWidget {
 
 class _MediaCardRowState extends State<MediaCardRow> {
   bool _hover = false;
+  bool _deleteFocused = false;
 
   Widget _buildTrailing(ColorScheme cs, EnjoyThemeTokens t) {
     if (widget.trailing != null) return widget.trailing!;
@@ -395,26 +404,35 @@ class _MediaCardRowState extends State<MediaCardRow> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedOpacity(
-            opacity: _hover ? 1 : 0,
-            duration: t.motionFast,
-            curve: Curves.easeOut,
-            child: IgnorePointer(
-              ignoring: !_hover,
-              child: IconButton(
-                visualDensity: VisualDensity.compact,
-                iconSize: 22,
-                tooltip:
-                    (widget.deleteTooltip != null &&
-                        widget.deleteTooltip!.isNotEmpty)
-                    ? widget.deleteTooltip!
-                    : MaterialLocalizations.of(context).deleteButtonTooltip,
-                onPressed: widget.onDelete,
-                icon: Icon(
-                  Icons.delete_outline_rounded,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
+          Focus(
+            onFocusChange: (f) => setState(() => _deleteFocused = f),
+            child: Builder(
+              builder: (context) {
+                final strong = _hover || _deleteFocused;
+                return AnimatedOpacity(
+                  opacity: strong ? 1 : 0.45,
+                  duration: t.motionFast,
+                  curve: Curves.easeOut,
+                  child: IconButton(
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 22,
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                    tooltip:
+                        (widget.deleteTooltip != null &&
+                            widget.deleteTooltip!.isNotEmpty)
+                        ? widget.deleteTooltip!
+                        : MaterialLocalizations.of(context).deleteButtonTooltip,
+                    onPressed: widget.onDelete,
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),

@@ -803,6 +803,7 @@ class _ShadowReadingToolbarRow extends StatelessWidget {
                     onPressed: onPitchTap,
                     style: IconButton.styleFrom(
                       visualDensity: VisualDensity.compact,
+                      minimumSize: const Size(44, 44),
                     ),
                     icon: pitchIcon,
                   )
@@ -810,12 +811,16 @@ class _ShadowReadingToolbarRow extends StatelessWidget {
                     onPressed: onPitchTap,
                     style: IconButton.styleFrom(
                       visualDensity: VisualDensity.compact,
+                      minimumSize: const Size(44, 44),
                     ),
                     icon: pitchIcon,
                   )
           : IconButton(
               onPressed: null,
-              style: IconButton.styleFrom(visualDensity: VisualDensity.compact),
+              style: IconButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                minimumSize: const Size(44, 44),
+              ),
               icon: pitchIcon,
             ),
     );
@@ -1169,6 +1174,7 @@ class _TakesToolbarActions extends ConsumerWidget {
                   return IconButton(
                     style: IconButton.styleFrom(
                       visualDensity: VisualDensity.compact,
+                      minimumSize: const Size(44, 44),
                     ),
                     tooltip: takeSummary,
                     icon: Icon(
@@ -1183,6 +1189,7 @@ class _TakesToolbarActions extends ConsumerWidget {
             : IconButton(
                 style: IconButton.styleFrom(
                   visualDensity: VisualDensity.compact,
+                  minimumSize: const Size(44, 44),
                 ),
                 tooltip: takeSummary,
                 icon: const Icon(Icons.play_arrow_rounded),

@@ -17,6 +17,7 @@ import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import '../application/library_media_provider.dart';
+import '../application/library_search_provider.dart';
 import '../domain/media.dart';
 import 'library_actions.dart';
 
@@ -46,126 +47,240 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   @override
   Widget build(BuildContext context) {
     final listsAsync = ref.watch(libraryFilteredListsProvider);
+    final allMediaAsync = ref.watch(libraryMediaProvider);
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final query = ref.watch(librarySearchProvider);
 
-    return Scaffold(
-      body: listsAsync.when(
-        data: (lists) {
-          final audioItems = lists.audio;
-          final videoItems = lists.video;
+    final allItems = allMediaAsync.asData?.value ?? const <Media>[];
+    final totalAudio =
+        allItems.where((m) => m.kind == MediaKind.audio).length;
+    final totalVideo =
+        allItems.where((m) => m.kind == MediaKind.video).length;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Editorial header
-              EditorialHeader(
-                title: l10n.libraryTitle,
-                trailing: FilledButton.icon(
-                  onPressed: () => showImportChooser(context, ref),
-                  icon: const Icon(Icons.add_rounded, size: 18),
-                  label: Text(l10n.actionImport),
-                ),
-              ),
-
-              // Tab segment
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  t.space24,
-                  0,
-                  t.space24,
-                  t.space12,
-                ),
-                child: AnimatedBuilder(
-                  animation: _tabController,
-                  builder: (context, _) {
-                    return SegmentedButton<String>(
-                      style: SegmentedButton.styleFrom(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                        backgroundColor: cs.surfaceContainerHighest.withValues(
-                          alpha: 0.45,
-                        ),
-                        foregroundColor: cs.onSurfaceVariant,
-                        selectedForegroundColor: cs.onPrimaryContainer,
-                        selectedBackgroundColor: cs.primaryContainer.withValues(
-                          alpha: 0.65,
-                        ),
-                        side: BorderSide(
-                          color: cs.outlineVariant.withValues(alpha: 0.3),
-                        ),
-                        splashFactory: NoSplash.splashFactory,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(t.radiusFull),
-                        ),
-                        textStyle: tt.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      showSelectedIcon: false,
-                      emptySelectionAllowed: false,
-                      segments: [
-                        ButtonSegment<String>(
-                          value: 'audio',
-                          icon: const Icon(Icons.graphic_eq_rounded, size: 16),
-                          label: Text(l10n.libraryTabAudio),
-                        ),
-                        ButtonSegment<String>(
-                          value: 'video',
-                          icon: const Icon(Icons.movie_outlined, size: 16),
-                          label: Text(l10n.libraryTabVideo),
-                        ),
-                      ],
-                      selected: {_tabController.index == 0 ? 'audio' : 'video'},
-                      onSelectionChanged: (next) {
-                        final v = next.single;
-                        final i = v == 'audio' ? 0 : 1;
-                        if (_tabController.index != i) {
-                          _tabController.animateTo(i);
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-
-              // Content
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _AudioLibraryBody(items: audioItems),
-                    _VideoLibraryBody(items: videoItems),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-        loading: () => const SkeletonMediaList(),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: EdgeInsets.all(t.space24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline_rounded, size: 48, color: cs.error),
-                SizedBox(height: t.space16),
-                Text(
-                  '${l10n.error}: $e',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                SizedBox(height: t.space16),
-                FilledButton.tonal(
-                  onPressed: () => ref.invalidate(libraryFilteredListsProvider),
-                  child: Text(l10n.retry),
-                ),
-              ],
+    Widget shell({
+      required bool showCompactSearch,
+      required Widget tabBody,
+    }) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          EditorialHeader(
+            title: l10n.libraryTitle,
+            trailing: FilledButton.icon(
+              onPressed: () => showImportChooser(context, ref),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: Text(l10n.actionImport),
             ),
           ),
+          if (showCompactSearch) const _CompactLibrarySearchBar(),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              t.space24,
+              0,
+              t.space24,
+              t.space12,
+            ),
+            child: AnimatedBuilder(
+              animation: _tabController,
+              builder: (context, _) {
+                return SegmentedButton<String>(
+                  style: SegmentedButton.styleFrom(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: cs.surfaceContainerHighest.withValues(
+                      alpha: 0.45,
+                    ),
+                    foregroundColor: cs.onSurfaceVariant,
+                    selectedForegroundColor: cs.onPrimaryContainer,
+                    selectedBackgroundColor: cs.primaryContainer.withValues(
+                      alpha: 0.65,
+                    ),
+                    side: BorderSide(
+                      color: cs.outlineVariant.withValues(alpha: 0.3),
+                    ),
+                    splashFactory: NoSplash.splashFactory,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(t.radiusFull),
+                    ),
+                    textStyle: tt.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  showSelectedIcon: false,
+                  emptySelectionAllowed: false,
+                  segments: [
+                    ButtonSegment<String>(
+                      value: 'audio',
+                      icon: const Icon(Icons.graphic_eq_rounded, size: 16),
+                      label: Text(l10n.libraryTabAudio),
+                    ),
+                    ButtonSegment<String>(
+                      value: 'video',
+                      icon: const Icon(Icons.movie_outlined, size: 16),
+                      label: Text(l10n.libraryTabVideo),
+                    ),
+                  ],
+                  selected: {_tabController.index == 0 ? 'audio' : 'video'},
+                  onSelectionChanged: (next) {
+                    final v = next.single;
+                    final i = v == 'audio' ? 0 : 1;
+                    if (_tabController.index != i) {
+                      _tabController.animateTo(i);
+                    }
+                  },
+                );
+              },
+            ),
+          ),
+          Expanded(child: tabBody),
+        ],
+      );
+    }
+
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final showCompactSearch =
+              constraints.maxWidth < t.breakpointRail;
+
+          return listsAsync.when(
+            data: (lists) {
+              return shell(
+                showCompactSearch: showCompactSearch,
+                tabBody: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _AudioLibraryBody(
+                      items: lists.audio,
+                      searchQuery: query,
+                      totalInLibraryOfKind: totalAudio,
+                    ),
+                    _VideoLibraryBody(
+                      items: lists.video,
+                      searchQuery: query,
+                      totalInLibraryOfKind: totalVideo,
+                    ),
+                  ],
+                ),
+              );
+            },
+            loading: () => shell(
+              showCompactSearch: showCompactSearch,
+              tabBody: TabBarView(
+                controller: _tabController,
+                children: const [
+                  SkeletonMediaList(),
+                  SkeletonMediaGrid(),
+                ],
+              ),
+            ),
+            error: (e, _) => shell(
+              showCompactSearch: showCompactSearch,
+              tabBody: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(t.space24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 48,
+                        color: cs.error,
+                      ),
+                      SizedBox(height: t.space16),
+                      Text(
+                        '${l10n.error}: $e',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      SizedBox(height: t.space16),
+                      FilledButton.tonal(
+                        onPressed: () =>
+                            ref.invalidate(libraryFilteredListsProvider),
+                        child: Text(l10n.retry),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Search field for narrow layouts (sidebar search is hidden below rail width).
+class _CompactLibrarySearchBar extends ConsumerStatefulWidget {
+  const _CompactLibrarySearchBar();
+
+  @override
+  ConsumerState<_CompactLibrarySearchBar> createState() =>
+      _CompactLibrarySearchBarState();
+}
+
+class _CompactLibrarySearchBarState
+    extends ConsumerState<_CompactLibrarySearchBar> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: ref.read(librarySearchProvider));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(librarySearchProvider, (previous, next) {
+      if (_controller.text != next) {
+        _controller.value = TextEditingValue(
+          text: next,
+          selection: TextSelection.collapsed(offset: next.length),
+        );
+      }
+    });
+
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, t.space8),
+      child: TextField(
+        controller: _controller,
+        onChanged: (v) =>
+            ref.read(librarySearchProvider.notifier).setQuery(v),
+        style: tt.bodyMedium,
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          hintText: l10n.searchHint,
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: cs.onSurfaceVariant,
+            size: 20,
+          ),
+          filled: true,
+          fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(t.radiusSm),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: t.space12,
+            vertical: t.space8,
+          ),
+          isDense: true,
         ),
       ),
     );
@@ -175,9 +290,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 // ── Audio tab ───────────────────────────────────────────────────────────────
 
 class _AudioLibraryBody extends StatelessWidget {
-  const _AudioLibraryBody({required this.items});
+  const _AudioLibraryBody({
+    required this.items,
+    required this.searchQuery,
+    required this.totalInLibraryOfKind,
+  });
 
   final List<Media> items;
+  final String searchQuery;
+  final int totalInLibraryOfKind;
 
   @override
   Widget build(BuildContext context) {
@@ -185,6 +306,20 @@ class _AudioLibraryBody extends StatelessWidget {
     final t = EnjoyThemeTokens.of(context);
 
     if (items.isEmpty) {
+      final filteredBySearch =
+          searchQuery.isNotEmpty && totalInLibraryOfKind > 0;
+      if (filteredBySearch) {
+        return EmptyState(
+          icon: Icons.search_off_rounded,
+          illustrationAsset: EnjoyIllustrations.emptyLibrary,
+          title: l10n.librarySearchNoMatchesTitle,
+          subtitle: l10n.librarySearchNoMatchesHint,
+          action: () => ProviderScope.containerOf(context)
+              .read(librarySearchProvider.notifier)
+              .setQuery(''),
+          actionLabel: l10n.librarySearchClear,
+        );
+      }
       return EmptyState(
         icon: Icons.graphic_eq_rounded,
         illustrationAsset: EnjoyIllustrations.emptyLibrary,
@@ -244,9 +379,15 @@ class _AudioRow extends ConsumerWidget {
 // ── Video tab ───────────────────────────────────────────────────────────────
 
 class _VideoLibraryBody extends StatelessWidget {
-  const _VideoLibraryBody({required this.items});
+  const _VideoLibraryBody({
+    required this.items,
+    required this.searchQuery,
+    required this.totalInLibraryOfKind,
+  });
 
   final List<Media> items;
+  final String searchQuery;
+  final int totalInLibraryOfKind;
 
   @override
   Widget build(BuildContext context) {
@@ -254,6 +395,20 @@ class _VideoLibraryBody extends StatelessWidget {
     final t = EnjoyThemeTokens.of(context);
 
     if (items.isEmpty) {
+      final filteredBySearch =
+          searchQuery.isNotEmpty && totalInLibraryOfKind > 0;
+      if (filteredBySearch) {
+        return EmptyState(
+          icon: Icons.search_off_rounded,
+          illustrationAsset: EnjoyIllustrations.emptyRecordings,
+          title: l10n.librarySearchNoMatchesTitle,
+          subtitle: l10n.librarySearchNoMatchesHint,
+          action: () => ProviderScope.containerOf(context)
+              .read(librarySearchProvider.notifier)
+              .setQuery(''),
+          actionLabel: l10n.librarySearchClear,
+        );
+      }
       return EmptyState(
         icon: Icons.movie_outlined,
         illustrationAsset: EnjoyIllustrations.emptyRecordings,

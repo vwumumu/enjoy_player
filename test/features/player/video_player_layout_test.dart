@@ -57,4 +57,30 @@ void main() {
     expect(find.text('TR_STUB'), findsOneWidget);
     expect(find.byType(Column), findsWidgets);
   });
+
+  testWidgets('VideoPlayerLayout uses 16:9 stacked stage below transcript breakpoint', (
+    tester,
+  ) async {
+    await pumpLayout(tester, width: 719, height: 700);
+    final layout = find.byType(VideoPlayerLayout);
+    expect(
+      find.descendant(of: layout, matching: find.byType(AspectRatio)),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('VideoPlayerLayout uses side-by-side above transcript breakpoint', (
+    tester,
+  ) async {
+    await pumpLayout(tester, width: 721, height: 700);
+    final layout = find.byType(VideoPlayerLayout);
+    expect(
+      find.descendant(of: layout, matching: find.byType(AspectRatio)),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: layout, matching: find.byType(Row)),
+      findsWidgets,
+    );
+  });
 }

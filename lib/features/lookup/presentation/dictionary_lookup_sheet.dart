@@ -1,4 +1,4 @@
-/// Bottom sheet: translation, definition (dictionary), contextual translation.
+/// Bottom sheet or wide dialog: translation, definition (dictionary), contextual translation.
 library;
 
 import 'dart:math' as math;
@@ -17,10 +17,18 @@ import 'package:enjoy_player/features/lookup/presentation/sections/translation_l
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_language_picker_row.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
+/// [bottomSheet] uses [DraggableScrollableSheet]; [dialog] uses a scroll view with bounded height.
+enum DictionaryLookupPresentation { bottomSheet, dialog }
+
 class DictionaryLookupSheet extends ConsumerStatefulWidget {
-  const DictionaryLookupSheet({required this.request, super.key});
+  const DictionaryLookupSheet({
+    required this.request,
+    this.presentation = DictionaryLookupPresentation.bottomSheet,
+    super.key,
+  });
 
   final LookupRequest request;
+  final DictionaryLookupPresentation presentation;
 
   @override
   ConsumerState<DictionaryLookupSheet> createState() =>
@@ -30,15 +38,25 @@ class DictionaryLookupSheet extends ConsumerStatefulWidget {
 class _DictionaryLookupSheetState extends ConsumerState<DictionaryLookupSheet> {
   late String _sourceLanguage;
   late String _targetLanguage;
+  ScrollController? _dialogScroll;
+
+  static const double _hPad = 20;
 
   @override
   void initState() {
     super.initState();
     _sourceLanguage = widget.request.sourceLanguage;
     _targetLanguage = widget.request.targetLanguage;
+    if (widget.presentation == DictionaryLookupPresentation.dialog) {
+      _dialogScroll = ScrollController();
+    }
   }
 
-  static const double _hPad = 20;
+  @override
+  void dispose() {
+    _dialogScroll?.dispose();
+    super.dispose();
+  }
 
   LookupRequest get _effectiveRequest => LookupRequest(
     selectedText: widget.request.selectedText,
@@ -54,158 +72,153 @@ class _DictionaryLookupSheetState extends ConsumerState<DictionaryLookupSheet> {
     AppNotice.success(context, l10n.lookupCopySuccess);
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _mainColumn(ScrollController scrollCtrl) {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
     final scheme = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return SafeArea(
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.35,
-        maxChildSize: 0.92,
-        expand: false,
-        builder: (ctx, scrollCtrl) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final maxWidth = math.min(
-                constraints.maxWidth,
-                t.contentMaxWidth + 2 * _hPad,
-              );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = math.min(
+          constraints.maxWidth,
+          t.contentMaxWidth + 2 * _hPad,
+        );
 
-              Widget constrain(Widget child) => Align(
-                alignment: Alignment.topCenter,
-                child: SizedBox(width: maxWidth, child: child),
-              );
+        Widget constrain(Widget child) => Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(width: maxWidth, child: child),
+        );
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (widget.presentation == DictionaryLookupPresentation.bottomSheet)
+              const PaddedSheetDragHandle()
+            else
+              SizedBox(height: t.space8),
+            constrain(
+              Padding(
+                padding: const EdgeInsets.only(left: _hPad, right: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.lookupSheetTitle,
+                        style: tt.labelLarge?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(44, 44),
+                        fixedSize: const Size(44, 44),
+                        foregroundColor: scheme.onSurfaceVariant,
+                      ),
+                      tooltip: l10n.lookupCopy,
+                      onPressed: () => _copySelection(context),
+                      icon: const Icon(Icons.copy_all_rounded, size: 18),
+                    ),
+                    IconButton(
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(44, 44),
+                        fixedSize: const Size(44, 44),
+                        foregroundColor: scheme.onSurfaceVariant,
+                      ),
+                      tooltip: l10n.lookupClose,
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded, size: 20),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            constrain(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(_hPad, 2, _hPad, 8),
+                child: SelectableText(
+                  widget.request.selectedText,
+                  style: tt.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    height: 1.15,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ),
+            ),
+            constrain(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(_hPad, 6, _hPad, 8),
+                child: LookupLanguagePickerRow(
+                  sourceLanguage: _sourceLanguage,
+                  targetLanguage: _targetLanguage,
+                  onSourceChanged: (v) => setState(() => _sourceLanguage = v),
+                  onTargetChanged: (v) => setState(() => _targetLanguage = v),
+                  onSwap: () {
+                    setState(() {
+                      final s = _sourceLanguage;
+                      _sourceLanguage = _targetLanguage;
+                      _targetLanguage = s;
+                    });
+                  },
+                ),
+              ),
+            ),
+            Divider(
+              height: 1,
+              color: scheme.outlineVariant.withValues(alpha: 0.2),
+            ),
+            Expanded(
+              child: ListView(
+                controller: scrollCtrl,
+                padding: EdgeInsets.fromLTRB(
+                  _hPad,
+                  t.space12,
+                  _hPad,
+                  t.space24,
+                ),
                 children: [
-                  const PaddedSheetDragHandle(),
-                  // ── Title row (label + copy + close) ──────────────────
-                  constrain(
-                    Padding(
-                      padding: const EdgeInsets.only(left: _hPad, right: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: t.contentMaxWidth),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(
-                            child: Text(
-                              l10n.lookupSheetTitle,
-                              style: tt.labelLarge?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            style: IconButton.styleFrom(
-                              minimumSize: const Size(44, 44),
-                              fixedSize: const Size(44, 44),
-                              foregroundColor: scheme.onSurfaceVariant,
-                            ),
-                            tooltip: l10n.lookupCopy,
-                            onPressed: () => _copySelection(context),
-                            icon: const Icon(Icons.copy_all_rounded, size: 18),
-                          ),
-                          IconButton(
-                            style: IconButton.styleFrom(
-                              minimumSize: const Size(44, 44),
-                              fixedSize: const Size(44, 44),
-                              foregroundColor: scheme.onSurfaceVariant,
-                            ),
-                            tooltip: l10n.lookupClose,
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.close_rounded, size: 20),
+                          TranslationLookupSection(request: _effectiveRequest),
+                          SizedBox(height: t.space8),
+                          DictionaryLookupSection(request: _effectiveRequest),
+                          SizedBox(height: t.space8),
+                          ContextualTranslationLookupSection(
+                            request: _effectiveRequest,
                           ),
                         ],
                       ),
                     ),
                   ),
-                  // ── Selected word ──────────────────────────────────────
-                  constrain(
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(_hPad, 2, _hPad, 8),
-                      child: SelectableText(
-                        widget.request.selectedText,
-                        style: tt.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          height: 1.15,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // ── Language picker ────────────────────────────────────
-                  constrain(
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(_hPad, 6, _hPad, 8),
-                      child: LookupLanguagePickerRow(
-                        sourceLanguage: _sourceLanguage,
-                        targetLanguage: _targetLanguage,
-                        onSourceChanged: (v) =>
-                            setState(() => _sourceLanguage = v),
-                        onTargetChanged: (v) =>
-                            setState(() => _targetLanguage = v),
-                        onSwap: () {
-                          setState(() {
-                            final s = _sourceLanguage;
-                            _sourceLanguage = _targetLanguage;
-                            _targetLanguage = s;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  Divider(
-                    height: 1,
-                    color: scheme.outlineVariant.withValues(alpha: 0.2),
-                  ),
-                  // ── Scrollable sections ────────────────────────────────
-                  Expanded(
-                    child: ListView(
-                      controller: scrollCtrl,
-                      padding: EdgeInsets.fromLTRB(
-                        _hPad,
-                        t.space12,
-                        _hPad,
-                        t.space24,
-                      ),
-                      children: [
-                        Center(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: t.contentMaxWidth,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                TranslationLookupSection(
-                                  request: _effectiveRequest,
-                                ),
-                                SizedBox(height: t.space8),
-                                DictionaryLookupSection(
-                                  request: _effectiveRequest,
-                                ),
-                                SizedBox(height: t.space8),
-                                ContextualTranslationLookupSection(
-                                  request: _effectiveRequest,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
-              );
-            },
-          );
-        },
-      ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.presentation == DictionaryLookupPresentation.dialog) {
+      return _mainColumn(_dialogScroll!);
+    }
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.35,
+      maxChildSize: 0.92,
+      expand: false,
+      builder: (ctx, scrollCtrl) => _mainColumn(scrollCtrl),
     );
   }
 }

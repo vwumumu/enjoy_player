@@ -14,10 +14,18 @@ class VideoPlayerLayout extends StatefulWidget {
     required this.engine,
     required this.transcript,
     super.key,
+    this.initialTranscriptSplitWidthPx,
+    this.onTranscriptSplitWidthCommitted,
   });
 
   final PlayerEngine engine;
   final Widget transcript;
+
+  /// Restored persisted split width; `null` uses default fraction.
+  final double? initialTranscriptSplitWidthPx;
+
+  /// Called once when the user finishes dragging the resize handle.
+  final ValueChanged<double>? onTranscriptSplitWidthCommitted;
 
   @override
   State<VideoPlayerLayout> createState() => _VideoPlayerLayoutState();
@@ -26,6 +34,23 @@ class VideoPlayerLayout extends StatefulWidget {
 class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
   /// Minimum transcript column width when layout allows it.
   static const double _kMinTranscriptWidth = 360;
+
+  @override
+  void initState() {
+    super.initState();
+    _transcriptWidthPx = widget.initialTranscriptSplitWidthPx;
+  }
+
+  @override
+  void didUpdateWidget(covariant VideoPlayerLayout oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialTranscriptSplitWidthPx !=
+            oldWidget.initialTranscriptSplitWidthPx &&
+        widget.initialTranscriptSplitWidthPx != null &&
+        _transcriptWidthPx == null) {
+      _transcriptWidthPx = widget.initialTranscriptSplitWidthPx;
+    }
+  }
 
   /// Transcript may use at most this fraction of total width (video keeps ≥50%).
   static const double _kMaxTranscriptFraction = 0.5;
@@ -71,8 +96,7 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final useSideBySide =
-            constraints.maxWidth > t.breakpointTranscriptSideBySide &&
-            MediaQuery.orientationOf(context) == Orientation.landscape;
+            constraints.maxWidth > t.breakpointTranscriptSideBySide;
 
         if (useSideBySide) {
           final total = constraints.maxWidth;
@@ -84,16 +108,22 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
             children: [
               SizedBox(
                 width: vw,
-                child: ColoredBox(
-                  color: Colors.black,
-                  child: LayoutBuilder(
-                    builder: (context, c) {
-                      return widget.engine.buildVideoStage(
-                        context: context,
-                        maxWidth: c.maxWidth,
-                        maxHeight: c.maxHeight,
-                      );
-                    },
+                child: SafeArea(
+                  top: true,
+                  bottom: false,
+                  left: false,
+                  right: false,
+                  child: ColoredBox(
+                    color: Colors.black,
+                    child: LayoutBuilder(
+                      builder: (context, c) {
+                        return widget.engine.buildVideoStage(
+                          context: context,
+                          maxWidth: c.maxWidth,
+                          maxHeight: c.maxHeight,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -105,6 +135,9 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
                   context,
                 )!.playerTranscriptResizeHint,
                 onDragDelta: (dx) => _applyDragDelta(total, dx),
+                onDragEnd: () => widget.onTranscriptSplitWidthCommitted?.call(
+                  _transcriptWidthForTotal(total),
+                ),
               ),
               SizedBox(
                 width: tw,
@@ -128,18 +161,24 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AspectRatio(
-              aspectRatio: _kMobileVideoAspectWidth / _kMobileVideoAspectHeight,
-              child: ColoredBox(
-                color: Colors.black,
-                child: LayoutBuilder(
-                  builder: (context, c) {
-                    return widget.engine.buildVideoStage(
-                      context: context,
-                      maxWidth: c.maxWidth,
-                      maxHeight: c.maxHeight,
-                    );
-                  },
+            SafeArea(
+              top: true,
+              bottom: false,
+              left: false,
+              right: false,
+              child: AspectRatio(
+                aspectRatio: _kMobileVideoAspectWidth / _kMobileVideoAspectHeight,
+                child: ColoredBox(
+                  color: Colors.black,
+                  child: LayoutBuilder(
+                    builder: (context, c) {
+                      return widget.engine.buildVideoStage(
+                        context: context,
+                        maxWidth: c.maxWidth,
+                        maxHeight: c.maxHeight,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -159,6 +198,7 @@ class _ResizeSplitter extends StatelessWidget {
     required this.hovered,
     required this.onHover,
     required this.onDragDelta,
+    required this.onDragEnd,
     required this.semanticLabel,
   });
 
@@ -166,6 +206,7 @@ class _ResizeSplitter extends StatelessWidget {
   final bool hovered;
   final ValueChanged<bool> onHover;
   final ValueChanged<double> onDragDelta;
+  final VoidCallback onDragEnd;
   final String semanticLabel;
 
   @override
@@ -182,6 +223,7 @@ class _ResizeSplitter extends StatelessWidget {
           onHorizontalDragUpdate: (details) {
             onDragDelta(details.delta.dx);
           },
+          onHorizontalDragEnd: (_) => onDragEnd(),
           child: Tooltip(
             message: semanticLabel,
             child: Center(

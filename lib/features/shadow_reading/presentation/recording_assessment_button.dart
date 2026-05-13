@@ -79,10 +79,14 @@ class RecordingAssessmentButton extends ConsumerWidget {
 
     return Tooltip(
       message: tooltip,
-      child: SizedBox(
-        width: 36,
-        height: 36,
-        child: Material(
+      child: Semantics(
+        button: true,
+        enabled: canInteract && !isAssessing,
+        label: tooltip,
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Material(
           color: bg ?? Colors.transparent,
           shape: const CircleBorder(),
           child: InkWell(
@@ -126,6 +130,7 @@ class RecordingAssessmentButton extends ConsumerWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

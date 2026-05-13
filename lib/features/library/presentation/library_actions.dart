@@ -115,7 +115,9 @@ Future<void> confirmAndDeleteMedia(
     if (!context.mounted) return;
     AppNotice.success(context, l10n.libraryMediaDeleted);
   } catch (_) {
-    if (context.mounted) {}
+    if (context.mounted) {
+      AppNotice.error(context, l10n.libraryDeleteFailed);
+    }
   }
 }
 

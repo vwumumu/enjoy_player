@@ -34,6 +34,8 @@ EdgeInsetsDirectional _sheetRowPadding(EnjoyThemeTokens t) =>
       t.space4,
     );
 
+enum SubtitleTrackPickerPresentation { sheet, dialog }
+
 String _providerLabel(AppLocalizations l10n, String source) {
   switch (source) {
     case 'official':
@@ -64,23 +66,65 @@ String _providerLabel(AppLocalizations l10n, String source) {
   }
 }
 
-/// Shows a modal bottom sheet for picking primary + secondary subtitles.
+/// Shows a modal bottom sheet (narrow) or centered dialog (wide) for picking subtitles.
 Future<void> showSubtitleTrackPicker(
   BuildContext context,
   WidgetRef ref,
   String mediaId,
 ) {
+  final w = MediaQuery.sizeOf(context).width;
+  final tokens = EnjoyThemeTokens.of(context);
+  if (w >= tokens.breakpointRail) {
+    return showEnjoyDialog<void>(
+      context: context,
+      builder: (ctx) {
+        final cs = Theme.of(ctx).colorScheme;
+        final t = EnjoyThemeTokens.of(ctx);
+        return Dialog(
+          backgroundColor: cs.surfaceContainerHigh,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(t.radiusXl),
+          ),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 32,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 560,
+              maxHeight: MediaQuery.sizeOf(ctx).height * 0.88,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(t.radiusXl),
+              child: SubtitleTrackPickerSheet(
+                mediaId: mediaId,
+                presentation: SubtitleTrackPickerPresentation.dialog,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
   return showEnjoySheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (_) => SubtitleTrackPickerSheet(mediaId: mediaId),
+    builder: (_) => SubtitleTrackPickerSheet(
+      mediaId: mediaId,
+      presentation: SubtitleTrackPickerPresentation.sheet,
+    ),
   );
 }
 
 class SubtitleTrackPickerSheet extends ConsumerStatefulWidget {
-  const SubtitleTrackPickerSheet({required this.mediaId, super.key});
+  const SubtitleTrackPickerSheet({
+    required this.mediaId,
+    this.presentation = SubtitleTrackPickerPresentation.sheet,
+    super.key,
+  });
 
   final String mediaId;
+  final SubtitleTrackPickerPresentation presentation;
 
   @override
   ConsumerState<SubtitleTrackPickerSheet> createState() =>
@@ -92,6 +136,21 @@ class _SubtitleTrackPickerSheetState
   bool _importing = false;
   bool _extractingEmbedded = false;
   bool _refreshingCloud = false;
+  ScrollController? _dialogScroll;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.presentation == SubtitleTrackPickerPresentation.dialog) {
+      _dialogScroll = ScrollController();
+    }
+  }
+
+  @override
+  void dispose() {
+    _dialogScroll?.dispose();
+    super.dispose();
+  }
 
   Future<void> _importFile() async {
     final pick = await FilePicker.pickFiles(
@@ -341,97 +400,105 @@ class _SubtitleTrackPickerSheetState
     final showExtractEmbedded =
         session != null && session.dexieTargetType == 'Video' && !isYoutube;
 
-    return SafeArea(
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.92,
-        expand: false,
-        builder: (ctx, scrollCtrl) {
-          return Column(
-            children: [
-              const PaddedSheetDragHandle(),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: _sheetHorizontalPadding(t),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      l10n.subtitles,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      style: IconButton.styleFrom(
-                        minimumSize: const Size(48, 48),
-                        fixedSize: const Size(48, 48),
-                      ),
-                      icon: const Icon(Icons.close_rounded),
-                      tooltip: MaterialLocalizations.of(
-                        context,
-                      ).closeButtonLabel,
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(),
-              Expanded(
-                child: tracksAsync.when(
-                  data: (tracks) => _buildTrackList(
-                    context: context,
-                    scrollCtrl: scrollCtrl,
-                    t: t,
-                    l10n: l10n,
-                    tracks: tracks,
-                    primaryId: primaryId,
-                    secondaryId: secondaryId,
-                    showExtractEmbedded: showExtractEmbedded,
-                    showImportFile: !isYoutube,
-                  ),
-                  loading: () =>
-                      SkeletonTranscript(lineCount: 12, controller: scrollCtrl),
-                  error: (error, _) => ListView(
-                    controller: scrollCtrl,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.all(_sheetHorizontalPadding(t)),
-                    children: [
-                      SizedBox(height: t.space24),
-                      Icon(
-                        Icons.error_outline_rounded,
-                        size: 40,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      SizedBox(height: t.space12),
-                      Text(
-                        l10n.error,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      SizedBox(height: t.space8),
-                      Text(
-                        error.toString(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      SizedBox(height: t.space16),
-                      FilledButton.tonal(
-                        onPressed: () => ref.invalidate(
-                          allTranscriptsForMediaProvider(widget.mediaId),
-                        ),
-                        child: Text(l10n.retry),
-                      ),
-                    ],
+    Widget columnBody(ScrollController sc) {
+      return Column(
+        children: [
+          if (widget.presentation == SubtitleTrackPickerPresentation.sheet)
+            const PaddedSheetDragHandle()
+          else
+            SizedBox(height: t.space8),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: _sheetHorizontalPadding(t),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  l10n.subtitles,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+                const Spacer(),
+                IconButton(
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    fixedSize: const Size(48, 48),
+                  ),
+                  icon: const Icon(Icons.close_rounded),
+                  tooltip: MaterialLocalizations.of(
+                    context,
+                  ).closeButtonLabel,
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
+          Expanded(
+            child: tracksAsync.when(
+              data: (tracks) => _buildTrackList(
+                context: context,
+                scrollCtrl: sc,
+                t: t,
+                l10n: l10n,
+                tracks: tracks,
+                primaryId: primaryId,
+                secondaryId: secondaryId,
+                showExtractEmbedded: showExtractEmbedded,
+                showImportFile: !isYoutube,
               ),
-            ],
-          );
-        },
-      ),
+              loading: () =>
+                  SkeletonTranscript(lineCount: 12, controller: sc),
+              error: (error, _) => ListView(
+                controller: sc,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.all(_sheetHorizontalPadding(t)),
+                children: [
+                  SizedBox(height: t.space24),
+                  Icon(
+                    Icons.error_outline_rounded,
+                    size: 40,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  SizedBox(height: t.space12),
+                  Text(
+                    l10n.transcriptErrorFriendlyTitle,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  SizedBox(height: t.space8),
+                  Text(
+                    l10n.transcriptErrorFriendlyHint,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(height: t.space16),
+                  FilledButton.tonal(
+                    onPressed: () => ref.invalidate(
+                      allTranscriptsForMediaProvider(widget.mediaId),
+                    ),
+                    child: Text(l10n.retry),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (widget.presentation == SubtitleTrackPickerPresentation.dialog) {
+      return columnBody(_dialogScroll!);
+    }
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.92,
+      expand: false,
+      builder: (ctx, sc) => columnBody(sc),
     );
   }
 }

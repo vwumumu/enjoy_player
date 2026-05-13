@@ -10,6 +10,7 @@ import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_engine_capabilities_provider.dart';
+import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/features/player/application/player_ui_provider.dart';
 import 'package:enjoy_player/features/player/application/youtube_auth_provider.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
@@ -78,6 +79,9 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
     final engine = ref.read(playerControllerProvider.notifier).engine;
     final ytSignedIn = ref.watch(youtubeLoginStateProvider).value ?? false;
     final ytLoginChrome = ref.watch(playerYoutubeLoginChromeSupportedProvider);
+    final splitPx = ref.watch(
+      playerPreferencesCtrlProvider.select((p) => p.videoTranscriptSplitWidthPx),
+    );
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -150,6 +154,10 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
             ? VideoPlayerLayout(
                 engine: engine,
                 transcript: TranscriptPanel(mediaId: mediaId),
+                initialTranscriptSplitWidthPx: splitPx,
+                onTranscriptSplitWidthCommitted: (w) => ref
+                    .read(playerPreferencesCtrlProvider.notifier)
+                    .setVideoTranscriptSplitWidthPx(w),
               )
             : AudioPlayerLayout(transcript: TranscriptPanel(mediaId: mediaId)),
       ),

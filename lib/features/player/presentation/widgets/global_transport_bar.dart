@@ -10,6 +10,8 @@ import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/core/theme/dynamic_color/dynamic_color_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/glass_surface.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
+import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
@@ -42,6 +44,59 @@ class GlobalTransportBar extends ConsumerStatefulWidget {
 
 class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
   bool _sliderHovered = false;
+
+  void _openPlaybackRateSheet() {
+    final t = EnjoyThemeTokens.of(context);
+    showEnjoySheet<void>(
+      context: context,
+      builder: (sheetCtx) {
+        final prefs = ref.read(playerPreferencesCtrlProvider);
+        final rate = prefs.playbackRate;
+        final l10n = AppLocalizations.of(sheetCtx)!;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const PaddedSheetDragHandle(),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  t.space20,
+                  t.space4,
+                  t.space20,
+                  t.space8,
+                ),
+                child: Text(
+                  l10n.speed,
+                  style: Theme.of(sheetCtx).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              for (final r in kPlaybackRatePresets)
+                ListTile(
+                  leading: Icon(
+                    playbackRatesEqual(rate, r)
+                        ? Icons.check_rounded
+                        : Icons.speed_rounded,
+                    color: playbackRatesEqual(rate, r)
+                        ? Theme.of(sheetCtx).colorScheme.primary
+                        : Theme.of(sheetCtx).colorScheme.onSurfaceVariant,
+                  ),
+                  title: Text(l10n.playbackRateTimes(_formatRateCore(r))),
+                  onTap: () {
+                    Haptics.selection(sheetCtx);
+                    ref.read(playerPreferencesCtrlProvider.notifier).setPlaybackRate(r);
+                    Navigator.pop(sheetCtx);
+                  },
+                ),
+              SizedBox(height: t.space8),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -178,22 +233,10 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
         icon: const Icon(Icons.mic_none_rounded),
       ),
       TransportCcButton(mediaId: chrome.mediaId),
-      PopupMenuButton<double>(
+      IconButton(
         tooltip: ttSpeed,
-        onSelected: (rate) => ref
-            .read(playerPreferencesCtrlProvider.notifier)
-            .setPlaybackRate(rate),
-        itemBuilder: (ctx) => [
-          for (final r in kPlaybackRatePresets)
-            CheckedPopupMenuItem<double>(
-              value: r,
-              checked: playbackRatesEqual(playbackRate, r),
-              child: Text(
-                AppLocalizations.of(ctx)!.playbackRateTimes(_formatRateCore(r)),
-              ),
-            ),
-        ],
-        child: Padding(
+        onPressed: Haptics.wrapTap(context, _openPlaybackRateSheet),
+        icon: Padding(
           padding: EdgeInsets.all(t.space8),
           child: Stack(
             clipBehavior: Clip.none,

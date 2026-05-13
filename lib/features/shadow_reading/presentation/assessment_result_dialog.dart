@@ -1,6 +1,8 @@
 /// Detailed pronunciation assessment (ported from web `AssessmentResultDialog`).
 library;
 
+import 'dart:math' as math;
+
 import 'package:azure_speech/azure_speech.dart';
 import 'package:flutter/material.dart';
 
@@ -22,19 +24,18 @@ Future<void> showAssessmentResultDialog({
     return showEnjoyAlertDialog<void>(
       context: context,
       title: Text(l10n.assessmentTitle),
-      content: const Text('—'),
+      content: Text(l10n.assessmentNoResultSummary),
       actionsBuilder: (ctx) => [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(),
-          child: const Text('OK'),
+          child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
         ),
       ],
     );
   }
 
   final tokens = EnjoyThemeTokens.of(context);
-  final wide =
-      MediaQuery.sizeOf(context).width >= tokens.breakpointTranscriptSideBySide;
+  final wide = MediaQuery.sizeOf(context).width >= tokens.breakpointRail;
   if (wide) {
     return showEnjoyDialog<void>(
       context: context,
@@ -73,11 +74,11 @@ class _AssessmentResultDialogState extends State<AssessmentResultDialog> {
     if (nBest == null) {
       return AlertDialog(
         title: Text(l10n.assessmentTitle),
-        content: const Text('—'),
+        content: Text(l10n.assessmentNoResultSummary),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(MaterialLocalizations.of(context).okButtonLabel),
           ),
         ],
       );
@@ -85,7 +86,13 @@ class _AssessmentResultDialogState extends State<AssessmentResultDialog> {
 
     return Dialog(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560, maxHeight: 640),
+        constraints: BoxConstraints(
+          maxWidth: 560,
+          maxHeight: math.min(
+            640,
+            MediaQuery.sizeOf(context).height * 0.88,
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
