@@ -2408,6 +2408,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Made with care for language learners.'**
   String get settingsAboutMadeWithCare;
+
+  /// No description provided for @lookupSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up'**
+  String get lookupSheetTitle;
+
+  /// No description provided for @lookupSectionTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get lookupSectionTranslation;
+
+  /// No description provided for @lookupSectionContextualTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Contextual translation'**
+  String get lookupSectionContextualTranslation;
+
+  /// No description provided for @lookupSectionDictionary.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictionary'**
+  String get lookupSectionDictionary;
+
+  /// No description provided for @lookupLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get lookupLoading;
+
+  /// No description provided for @lookupErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get lookupErrorRetry;
+
+  /// No description provided for @lookupEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No result.'**
+  String get lookupEmpty;
+
+  /// No description provided for @lookupLemma.
+  ///
+  /// In en, this message translates to:
+  /// **'Lemma'**
+  String get lookupLemma;
+
+  /// No description provided for @lookupIpa.
+  ///
+  /// In en, this message translates to:
+  /// **'IPA'**
+  String get lookupIpa;
+
+  /// No description provided for @lookupExamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Examples'**
+  String get lookupExamples;
+
+  /// No description provided for @lookupClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get lookupClose;
+
+  /// No description provided for @lookupCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get lookupCopy;
+
+  /// No description provided for @lookupTapToExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand to load'**
+  String get lookupTapToExpand;
 }
 
 class _AppLocalizationsDelegate

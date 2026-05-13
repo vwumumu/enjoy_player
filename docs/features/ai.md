@@ -9,6 +9,7 @@ Enjoy Player calls the same Enjoy / worker HTTP surface as the web `@enjoy/ai` p
 | ASR | `POST /audio/transcriptions` | `asrServiceProvider` → `AsrCapability` |
 | LLM / chat | `POST /chat/completions` | `chatServiceProvider` → `LlmCapability` |
 | Translation | `POST /translations` | `translationServiceProvider` → `TranslationCapability` |
+| Contextual translation | `POST /chat/completions` (learner markdown) | `contextualTranslationServiceProvider` → `ContextualTranslationCapability` → `LlmCapability` |
 | Dictionary | `POST /dictionary/query` | `dictionaryServiceProvider` → `DictionaryCapability` |
 | Azure token | `POST /azure/tokens` | `azureTokenApiProvider` + `azureTokenCacheProvider` (9 min TTL) |
 | Pronunciation assessment | `POST /azure/tokens` + **native Azure Speech SDK** | `assessmentServiceProvider` → `EnjoyAssessmentCapability` → [`packages/azure_speech`](../../packages/azure_speech/) |
@@ -38,4 +39,4 @@ Assessment is **not available on web** in this app. **Shadow reading** exposes p
 
 ## Consumers
 
-Feature screens should depend on `*ServiceProvider` types in `application/`, not on `ApiClient` directly, so modality and provider selection stay in one place.
+Feature screens should depend on `*ServiceProvider` types in `application/`, not on `ApiClient` directly, so modality and provider selection stay in one place. Transcript dictionary lookup uses the same services — see [dictionary-lookup](features/dictionary-lookup.md).

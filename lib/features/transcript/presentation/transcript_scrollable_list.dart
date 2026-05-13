@@ -12,6 +12,7 @@ import 'package:enjoy_player/features/player/application/player_state_providers.
 import 'package:enjoy_player/features/transcript/application/transcript_line_alignment.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_playback_highlight_provider.dart';
+import 'package:enjoy_player/features/lookup/application/transcript_lookup_open.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_echo_region_merged_card.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_line_tile.dart';
 
@@ -229,12 +230,22 @@ class _TranscriptScrollableListState
         secondaryLines,
       )?.text;
 
+      final selectable = isActive || inEcho;
       Widget tile = TranscriptLineTile(
         line: line,
         secondaryText: secondaryText,
         isActive: isActive,
         inEcho: inEcho,
         groupedInEcho: false,
+        selectable: selectable,
+        onLookupRequested: selectable
+            ? (t) => openTranscriptLookup(
+                  ref: ref,
+                  context: context,
+                  selectedText: t,
+                  lines: lines,
+                )
+            : null,
         onTap: () => ref
             .read(playerInteractionsProvider.notifier)
             .seekToLine(line, lineIndex),

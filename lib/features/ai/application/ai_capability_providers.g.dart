@@ -234,6 +234,57 @@ final class DictionaryCapabilityProvider
 String _$dictionaryCapabilityHash() =>
     r'abab887c2098a8cec4fb1285e39cde54c961e77d';
 
+@ProviderFor(contextualTranslationCapability)
+final contextualTranslationCapabilityProvider =
+    ContextualTranslationCapabilityProvider._();
+
+final class ContextualTranslationCapabilityProvider
+    extends
+        $FunctionalProvider<
+          ContextualTranslationCapability,
+          ContextualTranslationCapability,
+          ContextualTranslationCapability
+        >
+    with $Provider<ContextualTranslationCapability> {
+  ContextualTranslationCapabilityProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'contextualTranslationCapabilityProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$contextualTranslationCapabilityHash();
+
+  @$internal
+  @override
+  $ProviderElement<ContextualTranslationCapability> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ContextualTranslationCapability create(Ref ref) {
+    return contextualTranslationCapability(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ContextualTranslationCapability value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ContextualTranslationCapability>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$contextualTranslationCapabilityHash() =>
+    r'b765040dfc95c726897602749154e184edb339d7';
+
 @ProviderFor(ttsCapability)
 final ttsCapabilityProvider = TtsCapabilityProvider._();
 

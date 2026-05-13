@@ -1202,6 +1202,45 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsAboutMadeWithCare => '为语言学习者用心打造。';
+
+  @override
+  String get lookupSheetTitle => '查词';
+
+  @override
+  String get lookupSectionTranslation => '翻译';
+
+  @override
+  String get lookupSectionContextualTranslation => '语境翻译';
+
+  @override
+  String get lookupSectionDictionary => '词典';
+
+  @override
+  String get lookupLoading => '加载中…';
+
+  @override
+  String get lookupErrorRetry => '重试';
+
+  @override
+  String get lookupEmpty => '暂无结果。';
+
+  @override
+  String get lookupLemma => '词干';
+
+  @override
+  String get lookupIpa => '音标';
+
+  @override
+  String get lookupExamples => '例句';
+
+  @override
+  String get lookupClose => '关闭';
+
+  @override
+  String get lookupCopy => '复制';
+
+  @override
+  String get lookupTapToExpand => '展开以加载';
 }
 
 /// The translations for Chinese, as used in China (`zh_CN`).
@@ -2402,4 +2441,43 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsAboutMadeWithCare => '为语言学习者用心打造。';
+
+  @override
+  String get lookupSheetTitle => '查词';
+
+  @override
+  String get lookupSectionTranslation => '翻译';
+
+  @override
+  String get lookupSectionContextualTranslation => '语境翻译';
+
+  @override
+  String get lookupSectionDictionary => '词典';
+
+  @override
+  String get lookupLoading => '加载中…';
+
+  @override
+  String get lookupErrorRetry => '重试';
+
+  @override
+  String get lookupEmpty => '暂无结果。';
+
+  @override
+  String get lookupLemma => '词干';
+
+  @override
+  String get lookupIpa => '音标';
+
+  @override
+  String get lookupExamples => '例句';
+
+  @override
+  String get lookupClose => '关闭';
+
+  @override
+  String get lookupCopy => '复制';
+
+  @override
+  String get lookupTapToExpand => '展开以加载';
 }

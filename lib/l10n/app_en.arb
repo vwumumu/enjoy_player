@@ -522,5 +522,18 @@
   "hotkeysFilterHint": "Filter shortcuts",
   "hotkeysResetTooltip": "Reset this shortcut",
   "hotkeysEditTooltip": "Change shortcut",
-  "settingsAboutMadeWithCare": "Made with care for language learners."
+  "settingsAboutMadeWithCare": "Made with care for language learners.",
+  "lookupSheetTitle": "Look up",
+  "lookupSectionTranslation": "Translation",
+  "lookupSectionContextualTranslation": "Contextual translation",
+  "lookupSectionDictionary": "Dictionary",
+  "lookupLoading": "Loading…",
+  "lookupErrorRetry": "Retry",
+  "lookupEmpty": "No result.",
+  "lookupLemma": "Lemma",
+  "lookupIpa": "IPA",
+  "lookupExamples": "Examples",
+  "lookupClose": "Close",
+  "lookupCopy": "Copy",
+  "lookupTapToExpand": "Expand to load"
 }

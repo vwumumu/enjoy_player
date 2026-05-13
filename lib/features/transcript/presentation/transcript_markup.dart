@@ -5,6 +5,16 @@ import 'package:flutter/material.dart';
 
 import 'package:enjoy_player/data/subtitle/subtitle_markup_parser.dart';
 
+/// Plain text as rendered by [transcriptMarkupToTextSpan] (for selection indices).
+String transcriptPlainForSelection(String raw) {
+  final segments = parseSubtitleMarkup(raw);
+  if (segments.isEmpty) {
+    final plain = raw.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+    return plain.isEmpty ? raw : plain;
+  }
+  return segments.map((s) => s.text).join();
+}
+
 /// Formats [startMs] as `M:SS` or `H:MM:SS` when over one hour.
 String formatTranscriptTimestampMs(int startMs) {
   final totalSec = (startMs / 1000).floor().clamp(0, 1 << 30);

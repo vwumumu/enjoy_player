@@ -1,5 +1,6 @@
 import 'package:enjoy_player/features/ai/domain/capabilities/asr_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/assessment_capability.dart';
+import 'package:enjoy_player/features/ai/domain/capabilities/contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/llm_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/translation_capability.dart';
@@ -10,6 +11,7 @@ import 'package:enjoy_player/features/ai/domain/models/asr_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
+import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/tts_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/tts_result.dart';
@@ -67,6 +69,23 @@ final class UnimplementedTranslationCapability
   }) {
     throw UnimplementedError(
       'Translation with BYOK or local models is not implemented yet.',
+    );
+  }
+}
+
+final class UnimplementedContextualTranslationCapability
+    implements ContextualTranslationCapability {
+  const UnimplementedContextualTranslationCapability();
+
+  @override
+  Future<ContextualTranslationResult> translate({
+    required String text,
+    required String sourceLanguage,
+    required String targetLanguage,
+    String? context,
+  }) {
+    throw UnimplementedError(
+      'Contextual translation with BYOK or local models is not implemented yet.',
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:enjoy_player/features/ai/domain/models/asr_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_result.dart';
+import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/tts_request.dart';
@@ -72,6 +73,32 @@ final class TranslationService {
             sourceLanguage: sourceLanguage,
             targetLanguage: targetLanguage,
             forceRefresh: forceRefresh,
+          );
+    } on ApiException catch (e) {
+      throw mapApiExceptionToAppFailure(e);
+    }
+  }
+}
+
+final class ContextualTranslationService {
+  ContextualTranslationService(this._ref);
+
+  final Ref _ref;
+
+  Future<ContextualTranslationResult> translate({
+    required String text,
+    required String sourceLanguage,
+    required String targetLanguage,
+    String? context,
+  }) async {
+    try {
+      return await _ref
+          .read(contextualTranslationCapabilityProvider)
+          .translate(
+            text: text,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+            context: context,
           );
     } on ApiException catch (e) {
       throw mapApiExceptionToAppFailure(e);
@@ -144,6 +171,10 @@ TranslationService translationService(Ref ref) => TranslationService(ref);
 
 @Riverpod(keepAlive: true)
 DictionaryService dictionaryService(Ref ref) => DictionaryService(ref);
+
+@Riverpod(keepAlive: true)
+ContextualTranslationService contextualTranslationService(Ref ref) =>
+    ContextualTranslationService(ref);
 
 @Riverpod(keepAlive: true)
 TtsService ttsService(Ref ref) => TtsService(ref);

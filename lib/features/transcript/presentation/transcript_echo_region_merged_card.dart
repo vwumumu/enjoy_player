@@ -12,6 +12,7 @@ import 'package:enjoy_player/features/player/application/player_controller.dart'
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/shadow_reading/presentation/shadow_reading_panel.dart';
+import 'package:enjoy_player/features/lookup/application/transcript_lookup_open.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_alignment.dart';
 import 'package:enjoy_player/features/transcript/presentation/echo_region_controls_bar.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_line_tile.dart';
@@ -75,6 +76,13 @@ class EchoRegionMergedCard extends ConsumerWidget {
         isActive: isActive,
         inEcho: true,
         groupedInEcho: true,
+        selectable: true,
+        onLookupRequested: (t) => openTranscriptLookup(
+          ref: ref,
+          context: context,
+          selectedText: t,
+          lines: lines,
+        ),
         onTap: () =>
             ref.read(playerInteractionsProvider.notifier).seekToLine(line, i),
       );

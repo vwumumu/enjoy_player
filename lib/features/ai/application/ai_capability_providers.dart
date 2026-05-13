@@ -4,6 +4,7 @@ import 'package:enjoy_player/data/api/services/ai/ai_api_providers.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_configs.dart';
 import 'package:enjoy_player/features/ai/data/enjoy/enjoy_asr_capability.dart';
 import 'package:enjoy_player/features/ai/data/enjoy/enjoy_assessment_capability.dart';
+import 'package:enjoy_player/features/ai/data/enjoy/enjoy_contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/enjoy/enjoy_dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/data/enjoy/enjoy_llm_capability.dart';
 import 'package:enjoy_player/features/ai/data/enjoy/enjoy_translation_capability.dart';
@@ -13,6 +14,7 @@ import 'package:enjoy_player/features/ai/domain/ai_provider.dart';
 import 'package:enjoy_player/features/ai/domain/ai_service_config.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/asr_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/assessment_capability.dart';
+import 'package:enjoy_player/features/ai/domain/capabilities/contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/llm_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/translation_capability.dart';
@@ -66,6 +68,19 @@ DictionaryCapability resolveDictionaryCapability(
   }
 }
 
+ContextualTranslationCapability resolveContextualTranslationCapability(
+  Ref ref,
+  AIServiceConfig config,
+) {
+  switch (config.provider) {
+    case AIProvider.enjoy:
+      return EnjoyContextualTranslationCapability(ref.read(llmCapabilityProvider));
+    case AIProvider.byok:
+    case AIProvider.local:
+      return const UnimplementedContextualTranslationCapability();
+  }
+}
+
 TtsCapability resolveTtsCapability(Ref ref, AIServiceConfig config) {
   switch (config.provider) {
     case AIProvider.enjoy:
@@ -116,6 +131,12 @@ TranslationCapability translationCapability(Ref ref) {
 DictionaryCapability dictionaryCapability(Ref ref) {
   final c = ref.watch(aiModalityConfigsProvider);
   return resolveDictionaryCapability(ref, c.dictionary);
+}
+
+@Riverpod(keepAlive: true)
+ContextualTranslationCapability contextualTranslationCapability(Ref ref) {
+  final c = ref.watch(aiModalityConfigsProvider);
+  return resolveContextualTranslationCapability(ref, c.llm);
 }
 
 @Riverpod(keepAlive: true)

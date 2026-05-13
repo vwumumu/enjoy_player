@@ -522,5 +522,18 @@
   "hotkeysFilterHint": "筛选快捷键",
   "hotkeysResetTooltip": "重置此快捷键",
   "hotkeysEditTooltip": "更改快捷键",
-  "settingsAboutMadeWithCare": "为语言学习者用心打造。"
+  "settingsAboutMadeWithCare": "为语言学习者用心打造。",
+  "lookupSheetTitle": "查词",
+  "lookupSectionTranslation": "翻译",
+  "lookupSectionContextualTranslation": "语境翻译",
+  "lookupSectionDictionary": "词典",
+  "lookupLoading": "加载中…",
+  "lookupErrorRetry": "重试",
+  "lookupEmpty": "暂无结果。",
+  "lookupLemma": "词干",
+  "lookupIpa": "音标",
+  "lookupExamples": "例句",
+  "lookupClose": "关闭",
+  "lookupCopy": "复制",
+  "lookupTapToExpand": "展开以加载"
 }

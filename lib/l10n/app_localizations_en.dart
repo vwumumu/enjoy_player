@@ -1250,4 +1250,43 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsAboutMadeWithCare =>
       'Made with care for language learners.';
+
+  @override
+  String get lookupSheetTitle => 'Look up';
+
+  @override
+  String get lookupSectionTranslation => 'Translation';
+
+  @override
+  String get lookupSectionContextualTranslation => 'Contextual translation';
+
+  @override
+  String get lookupSectionDictionary => 'Dictionary';
+
+  @override
+  String get lookupLoading => 'Loading…';
+
+  @override
+  String get lookupErrorRetry => 'Retry';
+
+  @override
+  String get lookupEmpty => 'No result.';
+
+  @override
+  String get lookupLemma => 'Lemma';
+
+  @override
+  String get lookupIpa => 'IPA';
+
+  @override
+  String get lookupExamples => 'Examples';
+
+  @override
+  String get lookupClose => 'Close';
+
+  @override
+  String get lookupCopy => 'Copy';
+
+  @override
+  String get lookupTapToExpand => 'Expand to load';
 }

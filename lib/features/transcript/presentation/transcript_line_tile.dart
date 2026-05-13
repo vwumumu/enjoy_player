@@ -1,6 +1,8 @@
 /// Single transcript cue row with timestamp, markup, and tap target.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:enjoy_player/core/interaction/haptics.dart';
@@ -17,6 +19,8 @@ class TranscriptLineTile extends StatefulWidget {
     required this.inEcho,
     required this.onTap,
     this.groupedInEcho = false,
+    this.selectable = false,
+    this.onLookupRequested,
     super.key,
   });
 
@@ -27,6 +31,13 @@ class TranscriptLineTile extends StatefulWidget {
 
   /// Echo cues rendered inside the echo-region transcript shell: flat rows.
   final bool groupedInEcho;
+
+  /// When true, cue text is selectable and tap-to-seek is disabled (active / echo lines).
+  final bool selectable;
+
+  /// Invoked after the user selects 1–100 characters (debounced).
+  final ValueChanged<String>? onLookupRequested;
+
   final VoidCallback onTap;
 
   @override
@@ -35,6 +46,81 @@ class TranscriptLineTile extends StatefulWidget {
 
 class _TranscriptLineTileState extends State<TranscriptLineTile> {
   bool _hover = false;
+  Timer? _primaryLookupDebounce;
+  Timer? _secondaryLookupDebounce;
+
+  @override
+  void dispose() {
+    _primaryLookupDebounce?.cancel();
+    _secondaryLookupDebounce?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(TranscriptLineTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.line.text != widget.line.text ||
+        oldWidget.secondaryText != widget.secondaryText) {
+      _primaryLookupDebounce?.cancel();
+      _secondaryLookupDebounce?.cancel();
+    }
+  }
+
+  bool _shouldFinalizeLookup(SelectionChangedCause? cause) {
+    return cause == SelectionChangedCause.drag ||
+        cause == SelectionChangedCause.longPress;
+  }
+
+  void _scheduleLookup({
+    required String plain,
+    required TextSelection selection,
+    required SelectionChangedCause? cause,
+    required bool isSecondary,
+  }) {
+    if (!widget.selectable || widget.onLookupRequested == null) return;
+    if (!_shouldFinalizeLookup(cause)) return;
+
+    final debounce = isSecondary ? _secondaryLookupDebounce : _primaryLookupDebounce;
+    debounce?.cancel();
+
+    void run() {
+      if (!mounted) return;
+      if (!selection.isValid || selection.isCollapsed) return;
+      final max = plain.length;
+      final start = selection.start.clamp(0, max);
+      final end = selection.end.clamp(0, max);
+      if (end <= start) return;
+      final slice = plain.substring(start, end).trim();
+      if (slice.isEmpty || slice.length > 100) return;
+      widget.onLookupRequested!(slice);
+    }
+
+    final t = Timer(const Duration(milliseconds: 200), run);
+    if (isSecondary) {
+      _secondaryLookupDebounce = t;
+    } else {
+      _primaryLookupDebounce = t;
+    }
+  }
+
+  Widget _richSelectable({
+    required TextSpan span,
+    required String plainForSelection,
+    required bool isSecondary,
+  }) {
+    return SelectableText.rich(
+      span,
+      contextMenuBuilder: (context, _) => const SizedBox.shrink(),
+      onSelectionChanged: (sel, cause) {
+        _scheduleLookup(
+          plain: plainForSelection,
+          selection: sel,
+          cause: cause,
+          isSecondary: isSecondary,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,14 +132,11 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
 
     final echoCurrent = widget.isActive && widget.inEcho;
 
-    // Editorial active-line: soft fill + left rail instead of heavy background.
     Color? bg;
     Color? railColor;
     if (widget.groupedInEcho) {
       if (echoCurrent) {
         bg = tok.echoActive.withValues(alpha: 0.06);
-        // Parent [EchoRegionMergedCard] already paints an 8px echo rail; do not add
-        // a second inner rail or the active row reads as a wider orange stripe.
         railColor = null;
       } else if (widget.inEcho) {
         bg = Colors.transparent;
@@ -72,6 +155,54 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
 
     final timestampStyle = typography.timestampStyle;
 
+    final primaryPlain = transcriptPlainForSelection(widget.line.text);
+    final secondaryPlain = widget.secondaryText == null
+        ? ''
+        : transcriptPlainForSelection(widget.secondaryText!);
+
+    final primaryWidget = widget.selectable
+        ? _richSelectable(
+            span: transcriptMarkupToTextSpan(
+              widget.line.text,
+              baseBody,
+              defaultColor: defaultFg,
+              emphasize: widget.isActive,
+            ),
+            plainForSelection: primaryPlain,
+            isSecondary: false,
+          )
+        : Text.rich(
+            transcriptMarkupToTextSpan(
+              widget.line.text,
+              baseBody,
+              defaultColor: defaultFg,
+              emphasize: widget.isActive,
+            ),
+          );
+
+    Widget? secondaryWidget;
+    if (widget.secondaryText != null) {
+      secondaryWidget = widget.selectable
+          ? _richSelectable(
+              span: transcriptMarkupToTextSpan(
+                widget.secondaryText!,
+                typography.secondaryStyle,
+                defaultColor: scheme.onSurfaceVariant,
+                emphasize: false,
+              ),
+              plainForSelection: secondaryPlain,
+              isSecondary: true,
+            )
+          : Text.rich(
+              transcriptMarkupToTextSpan(
+                widget.secondaryText!,
+                typography.secondaryStyle,
+                defaultColor: scheme.onSurfaceVariant,
+                emphasize: false,
+              ),
+            );
+    }
+
     final textBody = Padding(
       padding: tok.transcriptLinePadding,
       child: Column(
@@ -82,30 +213,15 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
             style: timestampStyle,
           ),
           SizedBox(height: tok.space4),
-          Text.rich(
-            transcriptMarkupToTextSpan(
-              widget.line.text,
-              baseBody,
-              defaultColor: defaultFg,
-              emphasize: widget.isActive,
-            ),
-          ),
-          if (widget.secondaryText != null) ...[
+          primaryWidget,
+          if (secondaryWidget != null) ...[
             SizedBox(height: tok.space4),
-            Text.rich(
-              transcriptMarkupToTextSpan(
-                widget.secondaryText!,
-                typography.secondaryStyle,
-                defaultColor: scheme.onSurfaceVariant,
-                emphasize: false,
-              ),
-            ),
+            secondaryWidget,
           ],
         ],
       ),
     );
 
-    // Left rail for active lines
     final content = railColor != null
         ? IntrinsicHeight(
             child: Row(
@@ -124,6 +240,13 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
             ),
           )
         : textBody;
+
+    if (widget.selectable) {
+      return Material(
+        color: bg ?? Colors.transparent,
+        child: content,
+      );
+    }
 
     if (widget.groupedInEcho) {
       return Material(
