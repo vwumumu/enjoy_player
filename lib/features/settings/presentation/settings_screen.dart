@@ -14,6 +14,7 @@ import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
@@ -1630,9 +1631,12 @@ Future<void> _showRecordingMicPicker(
   // The dialog applies the choice itself (via the controller) and then pops.
   // Barrier-dismiss is a no-op, no need to disambiguate the result.
   final groupValue = autoPicked ? null : selectedId;
-  await showDialog<void>(
+  await showEnjoyDialog<void>(
     context: context,
     builder: (dialogCtx) {
+      final t = EnjoyThemeTokens.of(dialogCtx);
+      final mq = MediaQuery.sizeOf(dialogCtx);
+
       Future<void> apply(String? deviceId) async {
         await ref
             .read(recordingInputDeviceCtrlProvider.notifier)
@@ -1640,34 +1644,58 @@ Future<void> _showRecordingMicPicker(
         if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
       }
 
-      return SimpleDialog(
-        title: Text(l10n.settingsRecordingMicDialogTitle),
-        children: [
-          RadioGroup<String?>(
-            groupValue: groupValue,
-            onChanged: apply,
+      return Dialog(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: t.modalMaxWidthLarge),
+          child: Padding(
+            padding: EdgeInsets.all(t.space24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                RadioListTile<String?>(
-                  value: null,
-                  title: Text(l10n.settingsRecordingMicAutoOption),
+                Text(
+                  l10n.settingsRecordingMicDialogTitle,
+                  style: Theme.of(dialogCtx).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                if (devices.isEmpty)
-                  ListTile(
-                    enabled: false,
-                    title: Text(l10n.settingsRecordingMicEmpty),
-                  )
-                else
-                  for (final d in devices)
-                    RadioListTile<String?>(
-                      value: d.id,
-                      title: Text(d.label, overflow: TextOverflow.ellipsis),
+                SizedBox(height: t.space16),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: mq.height * 0.5),
+                  child: SingleChildScrollView(
+                    child: RadioGroup<String?>(
+                      groupValue: groupValue,
+                      onChanged: apply,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          RadioListTile<String?>(
+                            value: null,
+                            title: Text(l10n.settingsRecordingMicAutoOption),
+                          ),
+                          if (devices.isEmpty)
+                            ListTile(
+                              enabled: false,
+                              title: Text(l10n.settingsRecordingMicEmpty),
+                            )
+                          else
+                            for (final d in devices)
+                              RadioListTile<String?>(
+                                value: d.id,
+                                title: Text(
+                                  d.label,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                        ],
+                      ),
                     ),
+                  ),
+                ),
               ],
             ),
           ),
-        ],
+        ),
       );
     },
   );

@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/notices/root_shell_bottom_inset.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/app_background.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_bottom_nav.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -74,33 +74,28 @@ class _RootShellState extends ConsumerState<RootShell> {
               Expanded(child: widget.child),
               if (sessionActive) const GlobalTransportBar(),
               if (!useSidebar && !onPlayer)
-                NavigationBar(
+                EnjoyBottomNav(
                   selectedIndex: _navIndexForPath(path),
-                  onDestinationSelected: (i) {
-                    Haptics.selection(context);
-                    _goNavIndex(context, i);
-                  },
+                  onDestinationSelected: (i) => _goNavIndex(context, i),
                   destinations: [
-                    NavigationDestination(
-                      icon: const Icon(Icons.home_outlined),
-                      selectedIcon: const Icon(Icons.home_rounded),
+                    EnjoyBottomNavDestination(
+                      icon: Icons.home_outlined,
+                      selectedIcon: Icons.home_rounded,
                       label: l10n.homeTitle,
                     ),
-                    NavigationDestination(
-                      icon: const Icon(Icons.collections_bookmark_outlined),
-                      selectedIcon: const Icon(
-                        Icons.collections_bookmark_rounded,
-                      ),
+                    EnjoyBottomNavDestination(
+                      icon: Icons.collections_bookmark_outlined,
+                      selectedIcon: Icons.collections_bookmark_rounded,
                       label: l10n.libraryTitle,
                     ),
-                    NavigationDestination(
-                      icon: const Icon(Icons.cloud_outlined),
-                      selectedIcon: const Icon(Icons.cloud_rounded),
+                    EnjoyBottomNavDestination(
+                      icon: Icons.cloud_outlined,
+                      selectedIcon: Icons.cloud_rounded,
                       label: l10n.cloudScreenTitle,
                     ),
-                    NavigationDestination(
-                      icon: const Icon(Icons.settings_outlined),
-                      selectedIcon: const Icon(Icons.settings_rounded),
+                    EnjoyBottomNavDestination(
+                      icon: Icons.settings_outlined,
+                      selectedIcon: Icons.settings_rounded,
                       label: l10n.settingsTitle,
                     ),
                   ],
@@ -111,7 +106,7 @@ class _RootShellState extends ConsumerState<RootShell> {
           final bottomClearance =
               (sessionActive ? kRootShellTransportSnackClearance : 0.0) +
               (!useSidebar && !onPlayer
-                  ? kRootShellBottomNavSnackClearance
+                  ? rootShellBottomNavClearance(context)
                   : 0.0);
 
           if (useSidebar) {

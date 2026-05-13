@@ -60,6 +60,12 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     required this.gradientEnd,
     // ── Glass scope flag ───────────────────────────────────────────
     required this.useGlassOnSidebar,
+    // ── Shell / modal layout ───────────────────────────────────────
+    required this.bottomNavHeight,
+    required this.desktopGutter,
+    required this.modalMaxWidth,
+    required this.modalMaxWidthLarge,
+    required this.focusRingWidth,
   });
 
   // ── Spacing (4pt grid) ─────────────────────────────────────────────────
@@ -140,6 +146,21 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
   /// Transport bar always uses glass regardless of this flag.
   final bool useGlassOnSidebar;
 
+  /// Mobile bottom nav content height (excluding system home-indicator inset).
+  final double bottomNavHeight;
+
+  /// Horizontal inset for wide layouts (sidebar + content rhythm).
+  final double desktopGutter;
+
+  /// Typical alert / form dialog max width.
+  final double modalMaxWidth;
+
+  /// Wide modals (e.g. assessment summary).
+  final double modalMaxWidthLarge;
+
+  /// Keyboard focus ring stroke width for custom controls.
+  final double focusRingWidth;
+
   // ── Static accessor ────────────────────────────────────────────────────
   static EnjoyThemeTokens of(BuildContext context) {
     return Theme.of(context).extension<EnjoyThemeTokens>() ??
@@ -192,6 +213,11 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       gradientStart: AppColors.gradientStartDark,
       gradientEnd: AppColors.gradientEndDark,
       useGlassOnSidebar: false,
+      bottomNavHeight: 68,
+      desktopGutter: 24,
+      modalMaxWidth: 400,
+      modalMaxWidthLarge: 560,
+      focusRingWidth: 2,
     );
   }
 
@@ -238,6 +264,11 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     Color? gradientStart,
     Color? gradientEnd,
     bool? useGlassOnSidebar,
+    double? bottomNavHeight,
+    double? desktopGutter,
+    double? modalMaxWidth,
+    double? modalMaxWidthLarge,
+    double? focusRingWidth,
   }) {
     return EnjoyThemeTokens(
       space4: space4 ?? this.space4,
@@ -283,6 +314,11 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       gradientStart: gradientStart ?? this.gradientStart,
       gradientEnd: gradientEnd ?? this.gradientEnd,
       useGlassOnSidebar: useGlassOnSidebar ?? this.useGlassOnSidebar,
+      bottomNavHeight: bottomNavHeight ?? this.bottomNavHeight,
+      desktopGutter: desktopGutter ?? this.desktopGutter,
+      modalMaxWidth: modalMaxWidth ?? this.modalMaxWidth,
+      modalMaxWidthLarge: modalMaxWidthLarge ?? this.modalMaxWidthLarge,
+      focusRingWidth: focusRingWidth ?? this.focusRingWidth,
     );
   }
 
@@ -377,6 +413,15 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
       gradientStart: Color.lerp(gradientStart, other.gradientStart, t)!,
       gradientEnd: Color.lerp(gradientEnd, other.gradientEnd, t)!,
       useGlassOnSidebar: t < 0.5 ? useGlassOnSidebar : other.useGlassOnSidebar,
+      bottomNavHeight: lerpDouble(bottomNavHeight, other.bottomNavHeight, t)!,
+      desktopGutter: lerpDouble(desktopGutter, other.desktopGutter, t)!,
+      modalMaxWidth: lerpDouble(modalMaxWidth, other.modalMaxWidth, t)!,
+      modalMaxWidthLarge: lerpDouble(
+        modalMaxWidthLarge,
+        other.modalMaxWidthLarge,
+        t,
+      )!,
+      focusRingWidth: lerpDouble(focusRingWidth, other.focusRingWidth, t)!,
     );
   }
 }

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
+import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 
 /// One row in [showLanguageChoiceSheet].
 class LanguageChoiceOption {
@@ -21,9 +23,8 @@ Future<String?> showLanguageChoiceSheet({
   required List<LanguageChoiceOption> options,
   required String selectedValue,
 }) {
-  return showModalBottomSheet<String>(
+  return showEnjoySheet<String>(
     context: context,
-    showDragHandle: true,
     builder: (ctx) {
       final t = EnjoyThemeTokens.of(ctx);
       final cs = Theme.of(ctx).colorScheme;
@@ -34,6 +35,7 @@ Future<String?> showLanguageChoiceSheet({
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const PaddedSheetDragHandle(),
               Padding(
                 padding: EdgeInsets.fromLTRB(
                   t.space20,

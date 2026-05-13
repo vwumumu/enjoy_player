@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
+import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 
 import '../enjoy_tokens.dart';
 import '../generative_media_cover.dart';
@@ -33,15 +35,15 @@ void _showMobileDeleteMenu(
   final title = (label != null && label.isNotEmpty)
       ? label
       : ml.deleteButtonTooltip;
-  showModalBottomSheet<void>(
+  showEnjoySheet<void>(
     context: context,
-    showDragHandle: true,
     builder: (sheetContext) {
       final cs = Theme.of(sheetContext).colorScheme;
       return SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const PaddedSheetDragHandle(),
             ListTile(
               leading: Icon(Icons.delete_outline_rounded, color: cs.error),
               title: Text(

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -69,16 +70,9 @@ Future<void> showSubtitleTrackPicker(
   WidgetRef ref,
   String mediaId,
 ) {
-  return showModalBottomSheet<void>(
+  return showEnjoySheet<void>(
     context: context,
     isScrollControlled: true,
-    // Theme sets [BottomSheetThemeData.showDragHandle]; we draw our own handle.
-    showDragHandle: false,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(EnjoyThemeTokens.of(context).radiusLg),
-      ),
-    ),
     builder: (_) => SubtitleTrackPickerSheet(mediaId: mediaId),
   );
 }
@@ -168,22 +162,20 @@ class _SubtitleTrackPickerSheetState
 
   Future<void> _deleteTrack(TranscriptTrack track) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showEnjoyAlertDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.subtitlesDeleteTrack),
-        content: Text(track.label.isEmpty ? track.id : track.label),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(MaterialLocalizations.of(ctx).deleteButtonTooltip),
-          ),
-        ],
-      ),
+      title: Text(l10n.subtitlesDeleteTrack),
+      content: Text(track.label.isEmpty ? track.id : track.label),
+      actionsBuilder: (ctx) => [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(MaterialLocalizations.of(ctx).deleteButtonTooltip),
+        ),
+      ],
     );
     if (confirmed != true) return;
     await ref.read(transcriptRepositoryProvider).deleteTranscript(track.id);

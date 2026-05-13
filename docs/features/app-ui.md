@@ -1,6 +1,6 @@
 # App UI — Cinematic Editorial Design System
 
-**Status**: Implemented (Phase 1-6 complete, 2026-05-09)
+**Status**: Implemented (Phase 1-6 complete, 2026-05-09; premium foundation pass 2026-05-13)
 
 ## Design direction
 
@@ -24,6 +24,7 @@
 - Radius scale: `8 / 12 / 16 / 20 / ∞`. `20` is the new default for cards and hero artwork.
 - Ambient backdrop: very-low-opacity (~7%) radial tint from artwork dominant color behind player content.
 - Motion: 180ms fast, **220ms medium** (transport layout morphs), 260ms standard, 240ms enter, 160ms exit. `prefers-reduced-motion` respected via `MediaQuery.disableAnimations`.
+- Global theme polish: tuned `splashColor` / `highlightColor` / `hoverColor` / `focusColor`, `scrollbarTheme`, `dialogTheme.insetPadding`, `NavigationBarTheme` height aligned to token (for any residual Material nav).
 - Shared interaction kit: `EnjoyTappable*`, `Haptics`, `EnjoyButton` — see [ADR-0018](../decisions/0018-shared-interactive-primitives.md).
 
 ## Theme mode
@@ -32,10 +33,15 @@ Single dark `ThemeData` only (`buildAppTheme()`). No light theme and no Settings
 
 ## Navigation
 
-- **Mobile**: `NavigationBar` bottom (64pt) with primary-tinted indicator pill.
-- **Desktop (≥ 900 px)**: `AppSidebar` — flat tonal panel (`surfaceContainerLow`), hairline right border, pill nav items, account chip at bottom.
+- **Mobile**: custom `EnjoyBottomNav` (68pt content height + system home-indicator inset via `SafeArea`). Pill selection, editorial typography, keyboard focus ring on items; haptics on change. Implemented in `lib/core/theme/widgets/enjoy_bottom_nav.dart`, used from `RootShell`.
+- **Desktop (≥ 900 px)**: `AppSidebar` — flat tonal panel (`surfaceContainerLow`), hairline right border, pill nav items with hover/splash/focus, `FocusTraversalGroup` for keyboard order; extra top breathing room on **macOS** desktop for traffic-light clearance.
 - **No glass on sidebar**: `EnjoyThemeTokens.useGlassOnSidebar = false`.
 - Platform-adaptive transitions: Cupertino on iOS/macOS, ZoomPage on Android, FadeUpwards on Windows/Linux.
+
+## System chrome
+
+- **Mobile**: `MaterialApp.router` builder wraps content in `AnnotatedRegion<SystemUiOverlayStyle>` — transparent status bar, light status/nav icons, dark system navigation bar (`#09090B`).
+- **Desktop**: `window_manager.setMinimumSize(880×560)` after init (Windows / macOS / Linux) for a usable minimum layout.
 
 ## Screen registry
 
@@ -62,6 +68,10 @@ Motion:   180ms fast / 260ms standard / 240ms enter / 160ms exit
 Sidebar:  248px wide, useGlassOnSidebar: false
 Transport: 88px height
 ContentMaxWidth: 720px
+BottomNav: 68px content height (+ safe area)
+DesktopGutter: 24px (wide layout rhythm)
+Modal max: 400px (alerts) / 560px (wide pickers)
+Focus ring: 2px (custom nav / sidebars)
 ```
 
 ## Widgets reference
@@ -70,7 +80,9 @@ ContentMaxWidth: 720px
 |--------|------|---------|
 | `AppBackground` | `core/theme/widgets/app_background.dart` | Dark gradient scaffold BG |
 | `PlayerAmbientBackdrop` | same | Artwork color tint overlay (player only) |
-| `EditorialHeader` | `core/theme/widgets/editorial_header.dart` | Large title + subtitle + trailing |
+| `EditorialHeader` | `core/theme/widgets/editorial_header.dart` | Large title + subtitle + trailing; wide screens center within `contentMaxWidth`; optional `compact` |
+| `EnjoyBottomNav` | `core/theme/widgets/enjoy_bottom_nav.dart` | Mobile shell bottom navigation (replaces stock `NavigationBar`) |
+| `showEnjoySheet` / `showEnjoyAlertDialog` / `showEnjoyDialog` | `core/theme/widgets/enjoy_modal.dart` | Shared modal scrim + sheet shape; alert content max width |
 | `MediaCardTile` | `core/theme/widgets/media_card.dart` | Grid tile (video/home) |
 | `MediaCardRow` | `core/theme/widgets/media_card.dart` | List row (audio) |
 | `HeroArtwork` | `core/theme/widgets/hero_artwork.dart` | Artwork + rim light + shadow |

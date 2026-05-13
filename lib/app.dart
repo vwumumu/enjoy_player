@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -68,8 +69,18 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp> {
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
       builder: (context, child) {
+        const overlayStyle = SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: Color(0xFF09090B),
+          systemNavigationBarIconBrightness: Brightness.light,
+          systemNavigationBarContrastEnforced: false,
+        );
         final viewport = ConstrainedAppViewport(
-          child: child ?? const SizedBox.shrink(),
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: overlayStyle,
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
         return isDesktop
             ? AppHotkeysKeyboardListener(child: viewport)

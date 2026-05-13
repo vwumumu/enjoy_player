@@ -22,6 +22,7 @@ Future<void> main() async {
       defaultTargetPlatform == TargetPlatform.macOS ||
       defaultTargetPlatform == TargetPlatform.linux) {
     await windowManager.ensureInitialized();
+    await windowManager.setMinimumSize(const Size(880, 560));
     await windowManager.waitUntilReadyToShow(const WindowOptions(), () async {
       await windowManager.show();
       await windowManager.focus();

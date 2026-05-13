@@ -22,6 +22,7 @@ import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
@@ -1091,28 +1092,24 @@ Future<void> _confirmDeleteCurrentTake({
 }) async {
   if (!context.mounted) return;
   final cancelLabel = MaterialLocalizations.of(context).cancelButtonLabel;
-  final confirmed = await showDialog<bool>(
+  final confirmed = await showEnjoyAlertDialog<bool>(
     context: context,
-    builder: (ctx) {
-      return AlertDialog(
-        title: Text(l10n.shadowRecordingDeleteConfirmTitle),
-        content: Text(l10n.shadowRecordingDeleteConfirmMessage(takeSummary)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(cancelLabel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              foregroundColor: scheme.onError,
-              backgroundColor: scheme.error,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.shadowRecordingDelete),
-          ),
-        ],
-      );
-    },
+    title: Text(l10n.shadowRecordingDeleteConfirmTitle),
+    content: Text(l10n.shadowRecordingDeleteConfirmMessage(takeSummary)),
+    actionsBuilder: (ctx) => [
+      TextButton(
+        onPressed: () => Navigator.of(ctx).pop(false),
+        child: Text(cancelLabel),
+      ),
+      FilledButton(
+        style: FilledButton.styleFrom(
+          foregroundColor: scheme.onError,
+          backgroundColor: scheme.error,
+        ),
+        onPressed: () => Navigator.of(ctx).pop(true),
+        child: Text(l10n.shadowRecordingDelete),
+      ),
+    ],
   );
   if (confirmed == true && context.mounted) {
     onConfirmed();

@@ -2,6 +2,7 @@
 /// Glass is intentionally absent here; it lives only on the transport bar.
 library;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,6 +10,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/features/auth/presentation/widgets/sidebar_account_chip.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -63,46 +65,51 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
             ),
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Brand row
-            SizedBox(
-              height: t.sidebarBrandHeight,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: t.space20),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: cs.primaryContainer,
-                        borderRadius: BorderRadius.circular(t.radiusSm),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: SvgPicture.asset(
-                          'assets/logo-light.svg',
-                          fit: BoxFit.contain,
+        child: FocusTraversalGroup(
+          policy: WidgetOrderTraversalPolicy(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isDesktop &&
+                  defaultTargetPlatform == TargetPlatform.macOS)
+                SizedBox(height: t.space8),
+              // Brand row
+              SizedBox(
+                height: t.sidebarBrandHeight,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: t.space20),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer,
+                          borderRadius: BorderRadius.circular(t.radiusSm),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: SvgPicture.asset(
+                            'assets/logo-light.svg',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: t.space12),
-                    Expanded(
-                      child: Text(
-                        l10n.appTitle,
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.2,
+                      SizedBox(width: t.space12),
+                      Expanded(
+                        child: Text(
+                          l10n.appTitle,
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
 
             // Search
             Padding(
@@ -179,6 +186,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -207,50 +215,73 @@ class _SidebarNavItem extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: t.space8, vertical: 2),
-      child: Material(
-        color: Colors.transparent,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(t.radiusFull),
-        ),
-        child: InkWell(
-          onTap: () {
-            Haptics.selection(context);
-            onTap();
-          },
-          borderRadius: BorderRadius.circular(t.radiusFull),
-          hoverColor: cs.onSurface.withValues(alpha: 0.05),
-          splashColor: cs.primary.withValues(alpha: 0.08),
-          child: AnimatedContainer(
-            duration: t.motionFast,
-            curve: Curves.easeOutCubic,
-            padding: EdgeInsets.symmetric(horizontal: t.space16, vertical: 10),
-            decoration: BoxDecoration(
-              color: selected
-                  ? cs.primaryContainer.withValues(alpha: 0.6)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(t.radiusFull),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  selected ? selectedIcon : icon,
-                  size: 22,
-                  color: selected ? cs.onPrimaryContainer : cs.onSurfaceVariant,
-                ),
-                SizedBox(width: t.space12),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: tt.labelLarge?.copyWith(
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                      color: selected ? cs.onSurface : cs.onSurfaceVariant,
-                    ),
+      child: Focus(
+        child: Builder(
+          builder: (focusContext) {
+            final focused = Focus.of(focusContext).hasFocus;
+            return Material(
+              color: Colors.transparent,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(t.radiusFull),
+                side: focused && !selected
+                    ? BorderSide(
+                        color: cs.primary.withValues(alpha: 0.55),
+                        width: t.focusRingWidth,
+                      )
+                    : BorderSide.none,
+              ),
+              child: InkWell(
+                onTap: () {
+                  Haptics.selection(context);
+                  onTap();
+                },
+                borderRadius: BorderRadius.circular(t.radiusFull),
+                hoverColor: cs.onSurface.withValues(alpha: 0.06),
+                splashColor: cs.primary.withValues(alpha: 0.10),
+                highlightColor: cs.primary.withValues(alpha: 0.05),
+                child: AnimatedContainer(
+                  duration: t.motionFast,
+                  curve: Curves.easeOutCubic,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: t.space16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? cs.primaryContainer.withValues(alpha: 0.6)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(t.radiusFull),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        selected ? selectedIcon : icon,
+                        size: 22,
+                        color: selected
+                            ? cs.onPrimaryContainer
+                            : cs.onSurfaceVariant,
+                      ),
+                      SizedBox(width: t.space12),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: tt.labelLarge?.copyWith(
+                            fontWeight: selected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
+                            color: selected
+                                ? cs.onSurface
+                                : cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

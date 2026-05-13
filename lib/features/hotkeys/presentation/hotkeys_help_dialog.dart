@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/hotkeys/domain/hotkey_definition.dart';
 import 'package:enjoy_player/features/hotkeys/domain/hotkey_definitions.dart';
@@ -291,7 +292,7 @@ class _HotkeysHelpList extends StatelessWidget {
 /// Opens the cheatsheet and keeps [hotkeysCheatsheetOpen] in sync for `?` toggle.
 Future<void> showHotkeysHelpDialog(BuildContext context) {
   hotkeysCheatsheetOpen.value = true;
-  return showDialog<void>(
+  return showEnjoyDialog<void>(
     context: context,
     builder: (ctx) => const HotkeysHelpDialog(),
   ).whenComplete(() {

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/hotkeys/domain/hotkey_definition.dart';
 import 'package:enjoy_player/features/hotkeys/domain/hotkey_definitions.dart';
@@ -57,7 +58,7 @@ class _HotkeysSettingsSectionState
         hotkeyDefinitionMatchesQuery(d, _filter.text, l10n, effective);
 
     Future<void> editBinding(String id) async {
-      final chord = await showDialog<String>(
+      final chord = await showEnjoyDialog<String>(
         context: context,
         builder: (ctx) => const HotkeyCaptureDialog(),
       );

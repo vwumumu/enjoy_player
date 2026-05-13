@@ -14,6 +14,8 @@ import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
+import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/library_repository_provider.dart';
@@ -29,7 +31,7 @@ Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
 
   final l10n = AppLocalizations.of(context)!;
   unawaited(
-    showDialog<void>(
+    showEnjoyDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
@@ -87,22 +89,20 @@ Future<void> confirmAndDeleteMedia(
   Media media,
 ) async {
   final l10n = AppLocalizations.of(context)!;
-  final confirmed = await showDialog<bool>(
+  final confirmed = await showEnjoyAlertDialog<bool>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(l10n.libraryDeleteMediaTitle),
-      content: Text(l10n.libraryDeleteMediaMessage(media.title)),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: Text(MaterialLocalizations.of(ctx).deleteButtonTooltip),
-        ),
-      ],
-    ),
+    title: Text(l10n.libraryDeleteMediaTitle),
+    content: Text(l10n.libraryDeleteMediaMessage(media.title)),
+    actionsBuilder: (ctx) => [
+      TextButton(
+        onPressed: () => Navigator.pop(ctx, false),
+        child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
+      ),
+      TextButton(
+        onPressed: () => Navigator.pop(ctx, true),
+        child: Text(MaterialLocalizations.of(ctx).deleteButtonTooltip),
+      ),
+    ],
   );
   if (confirmed != true || !context.mounted) return;
   try {
@@ -122,14 +122,14 @@ Future<void> confirmAndDeleteMedia(
 /// Bottom sheet: choose file import vs YouTube URL.
 Future<void> showImportChooser(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context)!;
-  await showModalBottomSheet<void>(
+  await showEnjoySheet<void>(
     context: context,
-    showDragHandle: true,
     builder: (ctx) {
       return SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const PaddedSheetDragHandle(),
             ListTile(
               leading: const Icon(Icons.folder_open_rounded),
               title: Text(l10n.importFromFile),
@@ -160,60 +160,55 @@ Future<void> importYoutubeFromDialog(
   final l10n = AppLocalizations.of(context)!;
   final controller = TextEditingController();
 
-  final submitted = await showDialog<String>(
+  final submitted = await showEnjoyAlertDialog<String>(
     context: context,
-    builder: (ctx) {
-      final d = AppLocalizations.of(ctx)!;
-      return AlertDialog(
-        title: Text(d.youtubeImportTitle),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: controller,
-                decoration: InputDecoration(hintText: d.youtubeImportHint),
-                autofocus: true,
-                maxLines: 3,
-                minLines: 1,
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () async {
-                    final clip = await Clipboard.getData('text/plain');
-                    final t = clip?.text;
-                    if (t != null && t.isNotEmpty) {
-                      controller.text = t;
-                    }
-                  },
-                  icon: const Icon(Icons.paste_rounded, size: 18),
-                  label: Text(d.youtubePasteFromClipboard),
-                ),
-              ),
-            ],
+    title: Text(l10n.youtubeImportTitle),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(hintText: l10n.youtubeImportHint),
+            autofocus: true,
+            maxLines: 3,
+            minLines: 1,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: Text(d.actionImport),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () async {
+                final clip = await Clipboard.getData('text/plain');
+                final t = clip?.text;
+                if (t != null && t.isNotEmpty) {
+                  controller.text = t;
+                }
+              },
+              icon: const Icon(Icons.paste_rounded, size: 18),
+              label: Text(l10n.youtubePasteFromClipboard),
+            ),
           ),
         ],
-      );
-    },
+      ),
+    ),
+    actionsBuilder: (ctx) => [
+      TextButton(
+        onPressed: () => Navigator.pop(ctx),
+        child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
+      ),
+      FilledButton(
+        onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+        child: Text(l10n.actionImport),
+      ),
+    ],
   );
 
   if (submitted == null || submitted.isEmpty) return;
   if (!context.mounted) return;
 
   unawaited(
-    showDialog<void>(
+    showEnjoyDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {

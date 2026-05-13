@@ -5,6 +5,7 @@ import 'package:azure_speech/azure_speech.dart';
 import 'package:flutter/material.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -18,18 +19,16 @@ Future<void> showAssessmentResultDialog({
   final l10n = AppLocalizations.of(context)!;
   final nBest = assessment.nBest.isEmpty ? null : assessment.nBest.first;
   if (nBest == null) {
-    return showDialog<void>(
+    return showEnjoyAlertDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.assessmentTitle),
-        content: const Text('—'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+      title: Text(l10n.assessmentTitle),
+      content: const Text('—'),
+      actionsBuilder: (ctx) => [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('OK'),
+        ),
+      ],
     );
   }
 
@@ -37,16 +36,15 @@ Future<void> showAssessmentResultDialog({
   final wide =
       MediaQuery.sizeOf(context).width >= tokens.breakpointTranscriptSideBySide;
   if (wide) {
-    return showDialog<void>(
+    return showEnjoyDialog<void>(
       context: context,
       builder: (ctx) => AssessmentResultDialog(assessment: assessment),
     );
   }
-  return showModalBottomSheet<void>(
+  return showEnjoySheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    showDragHandle: false,
     builder: (ctx) => AssessmentResultSheet(assessment: assessment),
   );
 }

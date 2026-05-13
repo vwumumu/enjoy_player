@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -25,39 +26,37 @@ Future<String?> showImportSubtitleLanguageDialog(
 }) async {
   final l10n = AppLocalizations.of(context)!;
   final ctrl = TextEditingController(text: initialLanguage);
-  return showDialog<String>(
+  return showEnjoyAlertDialog<String>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(l10n.subtitlesImportLanguageTitle),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.subtitlesImportLanguageHint,
-            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-              color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-            ),
+    title: Text(l10n.subtitlesImportLanguageTitle),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.subtitlesImportLanguageHint,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          SizedBox(height: EnjoyThemeTokens.of(ctx).space12),
-          TextField(
-            controller: ctrl,
-            autofocus: true,
-            textCapitalization: TextCapitalization.none,
-            decoration: const InputDecoration(border: OutlineInputBorder()),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
         ),
-        FilledButton(
-          onPressed: () => Navigator.pop(ctx, ctrl.text),
-          child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
+        SizedBox(height: EnjoyThemeTokens.of(context).space12),
+        TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.none,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
         ),
       ],
     ),
+    actionsBuilder: (ctx) => [
+      TextButton(
+        onPressed: () => Navigator.pop(ctx),
+        child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
+      ),
+      FilledButton(
+        onPressed: () => Navigator.pop(ctx, ctrl.text),
+        child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
+      ),
+    ],
   );
 }

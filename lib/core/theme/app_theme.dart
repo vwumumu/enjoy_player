@@ -36,7 +36,7 @@ ThemeData buildAppTheme() {
 
   // ── Component themes ────────────────────────────────────────────────────
   final navigationBarTheme = NavigationBarThemeData(
-    height: 64,
+    height: 68,
     backgroundColor: colorScheme.surface,
     indicatorColor: colorScheme.primaryContainer.withValues(alpha: 0.7),
     surfaceTintColor: Colors.transparent,
@@ -157,6 +157,10 @@ ThemeData buildAppTheme() {
     useMaterial3: true,
     brightness: Brightness.dark,
     visualDensity: VisualDensity.adaptivePlatformDensity,
+    splashColor: colorScheme.primary.withValues(alpha: 0.10),
+    highlightColor: colorScheme.primary.withValues(alpha: 0.05),
+    hoverColor: colorScheme.onSurface.withValues(alpha: 0.06),
+    focusColor: colorScheme.primary.withValues(alpha: 0.14),
     extensions: <ThemeExtension<dynamic>>[tokens, transcriptTokens],
     textTheme: textTheme,
     scaffoldBackgroundColor: Colors.transparent,
@@ -230,6 +234,10 @@ ThemeData buildAppTheme() {
       ),
       backgroundColor: colorScheme.surfaceContainerHigh,
       surfaceTintColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: tokens.space24,
+        vertical: tokens.space24,
+      ),
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: colorScheme.surfaceContainerHigh,
@@ -284,6 +292,15 @@ ThemeData buildAppTheme() {
         TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
         TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
       },
+    ),
+    scrollbarTheme: ScrollbarThemeData(
+      thickness: WidgetStateProperty.all(6),
+      radius: Radius.circular(tokens.radiusFull),
+      thumbColor: WidgetStateProperty.all(
+        colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+      ),
+      crossAxisMargin: 2,
+      mainAxisMargin: 4,
     ),
   );
 }
