@@ -1316,7 +1316,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lookupSectionContextualTranslation => '语境翻译';
 
   @override
-  String get lookupSectionDictionary => '词典';
+  String get lookupSectionDictionary => '释义';
 
   @override
   String get lookupLoading => '加载中…';
@@ -2679,7 +2679,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get lookupSectionContextualTranslation => '语境翻译';
 
   @override
-  String get lookupSectionDictionary => '词典';
+  String get lookupSectionDictionary => '释义';
 
   @override
   String get lookupLoading => '加载中…';

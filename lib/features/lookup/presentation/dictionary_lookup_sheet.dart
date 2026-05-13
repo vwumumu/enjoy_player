@@ -1,4 +1,4 @@
-/// Bottom sheet: translation, contextual translation, dictionary for a selection.
+/// Bottom sheet: translation, definition (dictionary), contextual translation.
 library;
 
 import 'dart:math' as math;
@@ -186,11 +186,11 @@ class _DictionaryLookupSheetState extends ConsumerState<DictionaryLookupSheet> {
                                   request: _effectiveRequest,
                                 ),
                                 SizedBox(height: t.space8),
-                                ContextualTranslationLookupSection(
+                                DictionaryLookupSection(
                                   request: _effectiveRequest,
                                 ),
                                 SizedBox(height: t.space8),
-                                DictionaryLookupSection(
+                                ContextualTranslationLookupSection(
                                   request: _effectiveRequest,
                                 ),
                               ],

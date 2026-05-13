@@ -34,7 +34,7 @@ class PaddedSheetDragHandle extends StatelessWidget {
     final t = EnjoyThemeTokens.of(context);
     return Padding(
       padding: EdgeInsets.symmetric(vertical: t.space12),
-      child: const SheetDragHandle(),
+      child: const Center(child: SheetDragHandle()),
     );
   }
 }

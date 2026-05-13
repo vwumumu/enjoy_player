@@ -2628,7 +2628,7 @@ abstract class AppLocalizations {
   /// No description provided for @lookupSectionDictionary.
   ///
   /// In en, this message translates to:
-  /// **'Dictionary'**
+  /// **'Definition'**
   String get lookupSectionDictionary;
 
   /// No description provided for @lookupLoading.

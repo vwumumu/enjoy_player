@@ -1369,7 +1369,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lookupSectionContextualTranslation => 'Contextual translation';
 
   @override
-  String get lookupSectionDictionary => 'Dictionary';
+  String get lookupSectionDictionary => 'Definition';
 
   @override
   String get lookupLoading => 'Loading…';

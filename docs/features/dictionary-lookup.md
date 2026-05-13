@@ -5,8 +5,10 @@
 While playback is open, the user can **select 1–100 characters** on the **active** transcript cue or on any cue inside the **echo window**. A **bottom sheet** opens automatically (debounced) with:
 
 1. **Translation** — `POST /translations` via `translationServiceProvider`.
-2. **Contextual translation** — LLM markdown via `POST /chat/completions` through `contextualTranslationServiceProvider` (system prompts aligned with web `contextual-translation`); includes optional **surrounding transcript context** from `buildVocabularyContext`.
-3. **Dictionary** — `POST /dictionary/query` via `dictionaryServiceProvider` (word = selected text only).
+2. **Definition (dictionary)** — `POST /dictionary/query` via `dictionaryServiceProvider` (word = selected text only). In the sheet UI this section is labeled **Definition** / **释义** (`lookupSectionDictionary`).
+3. **Contextual translation** — LLM markdown via `POST /chat/completions` through `contextualTranslationServiceProvider` (system prompts aligned with web `contextual-translation`); includes optional **surrounding transcript context** from `buildVocabularyContext`.
+
+Sections appear in the sheet in that order: translation, then definition/dictionary, then contextual translation.
 
 ## Languages
 
@@ -19,7 +21,7 @@ While playback is open, the user can **select 1–100 characters** on the **acti
 
 - **Tap-to-seek** is **disabled** on selectable rows (active + echo cues); other rows behave as before.
 - **Selection toolbar** is suppressed on transcript selections; the sheet is the primary affordance.
-- **Translation** section is expanded on first open and fetches immediately. **Contextual** and **Dictionary** start **collapsed** — expand once to fetch (saves credits vs eager triple fetch).
+- **Translation** section is expanded on first open and fetches immediately. **Definition (dictionary)** and **contextual translation** start **collapsed** — expand once to fetch (saves credits vs eager triple fetch).
 - **Sheet chrome** — Header, selected term (hero panel with gradient + border), and language row are grouped at the top; scrollable sections use elevated cards (`LookupExpansionCard`) with a nested content well. **Copy** uses a tonal icon button and shows a short **success notice** (`AppNotice` / `lookupCopySuccess`).
 - **Language row** — Single segmented control with chevrons on source/target and a centered swap control.
 

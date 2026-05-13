@@ -569,7 +569,7 @@
   "lookupSheetTitle": "Look up",
   "lookupSectionTranslation": "Translation",
   "lookupSectionContextualTranslation": "Contextual translation",
-  "lookupSectionDictionary": "Dictionary",
+  "lookupSectionDictionary": "Definition",
   "lookupLoading": "Loading…",
   "lookupErrorRetry": "Retry",
   "lookupEmpty": "No result.",
