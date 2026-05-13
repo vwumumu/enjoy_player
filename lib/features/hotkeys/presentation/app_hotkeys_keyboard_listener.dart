@@ -104,16 +104,25 @@ class _AppHotkeysKeyboardListenerState
             .pulseRecordingCancel();
         return true;
       }
-      if (goRouter.canPop()) {
-        goRouter.pop();
-        return true;
-      }
+      // Dismiss Navigator overlays (bottom sheets, dialogs, etc.) before
+      // GoRouter pops a page — otherwise Escape on e.g. [DictionaryLookupSheet]
+      // hits `goRouter.pop()` first and exits `/player/...` while the sheet
+      // is still open.
       if (navCtx != null) {
+        final leafNav = Navigator.of(navCtx, rootNavigator: false);
+        if (leafNav.canPop()) {
+          leafNav.pop();
+          return true;
+        }
         final rootNav = Navigator.of(navCtx, rootNavigator: true);
-        if (rootNav.canPop()) {
+        if (!identical(leafNav, rootNav) && rootNav.canPop()) {
           rootNav.pop();
           return true;
         }
+      }
+      if (goRouter.canPop()) {
+        goRouter.pop();
+        return true;
       }
     }
 
