@@ -8,8 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:enjoy_player/core/theme/widgets/app_background.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
-import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_engine_capabilities_provider.dart';
+import 'package:enjoy_player/features/player/application/player_engine_provider.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/features/player/application/player_ui_provider.dart';
 import 'package:enjoy_player/features/player/application/youtube_auth_provider.dart';
@@ -73,93 +73,157 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final isVideo = chrome.mediaType == 'video';
-    final engine = ref.read(playerControllerProvider.notifier).engine;
-    final ytSignedIn = ref.watch(youtubeLoginStateProvider).value ?? false;
-    final ytLoginChrome = ref.watch(playerYoutubeLoginChromeSupportedProvider);
+    final engine = ref.read(playerEngineProvider);
     final splitPx = ref.watch(
       playerPreferencesCtrlProvider.select((p) => p.videoTranscriptSplitWidthPx),
     );
 
+    final mediaBody = isVideo
+        ? VideoPlayerLayout(
+            engine: engine,
+            transcript: TranscriptPanel(mediaId: mediaId),
+            initialTranscriptSplitWidthPx: splitPx,
+            onTranscriptSplitWidthCommitted: (w) => ref
+                .read(playerPreferencesCtrlProvider.notifier)
+                .setVideoTranscriptSplitWidthPx(w),
+          )
+        : AudioPlayerLayout(transcript: TranscriptPanel(mediaId: mediaId));
+
     return Scaffold(
       backgroundColor: cs.surface,
       extendBodyBehindAppBar: true,
-      appBar: isPlaying
+      // Video: never reserve an [AppBar] slot — paused title chrome overlays the
+      // body so the video stage geometry does not jump on play/pause.
+      appBar: isVideo
           ? null
-          : AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              surfaceTintColor: Colors.transparent,
-              flexibleSpace: isVideo
-                  ? DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.55),
-                            Colors.black.withValues(alpha: 0.0),
-                          ],
-                        ),
+          : (isPlaying
+                ? null
+                : AppBar(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    scrolledUnderElevation: 0,
+                    surfaceTintColor: Colors.transparent,
+                    leading: IconButton(
+                      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: cs.onSurface,
+                        size: 28,
                       ),
-                    )
-                  : null,
-              leading: IconButton(
-                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                icon: Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: isVideo ? Colors.white : cs.onSurface,
-                  size: 28,
-                ),
-                onPressed: () async {
-                  await ref
-                      .read(windowFullscreenProvider.notifier)
-                      .setFullscreen(false);
-                  ref.read(playerUiProvider.notifier).collapse();
-                  if (context.mounted) context.pop();
-                },
-              ),
-              title: Text(
-                chrome.mediaTitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isVideo ? Colors.white : cs.onSurface,
-                ),
-              ),
-              centerTitle: false,
-              actions: isVideo && ytLoginChrome
-                  ? [
-                      IconButton(
-                        tooltip: l10n.youtubeLoginTooltip,
-                        icon: Icon(
-                          ytSignedIn
-                              ? Icons.person_rounded
-                              : Icons.person_outline_rounded,
-                          color: isVideo ? Colors.white : cs.onSurface,
-                        ),
-                        onPressed: () => context.push('/youtube/login'),
+                      onPressed: () async {
+                        await ref
+                            .read(windowFullscreenProvider.notifier)
+                            .setFullscreen(false);
+                        ref.read(playerUiProvider.notifier).collapse();
+                        if (context.mounted) context.pop();
+                      },
+                    ),
+                    title: Text(
+                      chrome.mediaTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
                       ),
-                    ]
-                  : null,
-            ),
+                    ),
+                    centerTitle: false,
+                  )),
       body: PlayerAmbientBackdrop(
         accentColor: accent,
         intensity: 0.08,
         child: isVideo
-            ? VideoPlayerLayout(
-                engine: engine,
-                transcript: TranscriptPanel(mediaId: mediaId),
-                initialTranscriptSplitWidthPx: splitPx,
-                onTranscriptSplitWidthCommitted: (w) => ref
-                    .read(playerPreferencesCtrlProvider.notifier)
-                    .setVideoTranscriptSplitWidthPx(w),
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  mediaBody,
+                  if (!isPlaying)
+                    _VideoPausedTitleChromeOverlay(mediaTitle: chrome.mediaTitle),
+                ],
               )
-            : AudioPlayerLayout(transcript: TranscriptPanel(mediaId: mediaId)),
+            : mediaBody,
+      ),
+    );
+  }
+}
+
+/// Floating title row over video when paused (does not affect body layout).
+class _VideoPausedTitleChromeOverlay extends ConsumerWidget {
+  const _VideoPausedTitleChromeOverlay({required this.mediaTitle});
+
+  final String mediaTitle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final ytSignedIn = ref.watch(youtubeLoginStateProvider).value ?? false;
+    final ytLoginChrome = ref.watch(playerYoutubeLoginChromeSupportedProvider);
+
+    return Align(
+      alignment: Alignment.topCenter,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.black.withValues(alpha: 0.55),
+              Colors.black.withValues(alpha: 0.0),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
+          left: false,
+          right: false,
+          child: SizedBox(
+            height: kToolbarHeight,
+            child: Row(
+              children: [
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                  onPressed: () async {
+                    await ref
+                        .read(windowFullscreenProvider.notifier)
+                        .setFullscreen(false);
+                    ref.read(playerUiProvider.notifier).collapse();
+                    if (context.mounted) context.pop();
+                  },
+                ),
+                Expanded(
+                  child: Text(
+                    mediaTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                if (ytLoginChrome)
+                  IconButton(
+                    tooltip: l10n.youtubeLoginTooltip,
+                    icon: Icon(
+                      ytSignedIn
+                          ? Icons.person_rounded
+                          : Icons.person_outline_rounded,
+                      color: Colors.white,
+                    ),
+                    onPressed: () => context.push('/youtube/login'),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
