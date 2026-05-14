@@ -46,6 +46,7 @@ class TranslationLookupSection extends ConsumerWidget {
             }
             final async = ref.watch(lookupSheetTranslationProvider(params));
             return async.when(
+              skipLoadingOnReload: true,
               data: (TranslationResult d) {
                 if (d.translatedText.trim().isEmpty) {
                   return Text(
@@ -74,6 +75,7 @@ class TranslationLookupSection extends ConsumerWidget {
                   message: lookupErrorUserMessage(e, l10n),
                   onRetry: () =>
                       ref.invalidate(lookupSheetTranslationProvider(params)),
+                  isRetrying: async.hasError && async.isLoading,
                 );
               },
             );

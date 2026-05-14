@@ -15,15 +15,41 @@ String lookupErrorUserMessage(Object error, AppLocalizations l10n) {
   };
 }
 
-class LookupErrorRow extends StatelessWidget {
+class LookupErrorRow extends StatefulWidget {
   const LookupErrorRow({
     required this.message,
     required this.onRetry,
+    this.isRetrying = false,
     super.key,
   });
 
   final String message;
   final VoidCallback onRetry;
+
+  /// Parent-driven busy state (e.g. [AsyncValue.hasError] && [AsyncValue.isLoading]).
+  final bool isRetrying;
+
+  @override
+  State<LookupErrorRow> createState() => _LookupErrorRowState();
+}
+
+class _LookupErrorRowState extends State<LookupErrorRow> {
+  bool _tapLatched = false;
+
+  @override
+  void didUpdateWidget(covariant LookupErrorRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isRetrying) {
+      if (_tapLatched) setState(() => _tapLatched = false);
+    } else if (oldWidget.isRetrying && !widget.isRetrying) {
+      if (_tapLatched) setState(() => _tapLatched = false);
+    }
+  }
+
+  void _handleRetry() {
+    setState(() => _tapLatched = true);
+    widget.onRetry();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +57,7 @@ class LookupErrorRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final t = EnjoyThemeTokens.of(context);
+    final busy = widget.isRetrying || _tapLatched;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -54,7 +81,7 @@ class LookupErrorRow extends StatelessWidget {
                 SizedBox(width: t.space8),
                 Expanded(
                   child: Text(
-                    message,
+                    widget.message,
                     style: tt.bodySmall?.copyWith(
                       color: scheme.onSurface,
                       height: 1.35,
@@ -72,8 +99,17 @@ class LookupErrorRow extends StatelessWidget {
                   vertical: t.space8,
                 ),
               ),
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 20),
+              onPressed: busy ? null : _handleRetry,
+              icon: busy
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: scheme.primary,
+                      ),
+                    )
+                  : const Icon(Icons.refresh_rounded, size: 20),
               label: Text(l10n.lookupErrorRetry),
             ),
           ],

@@ -122,10 +122,18 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
 
   Future<ContextualTranslationResult>? _future;
 
+  /// Last successful result; kept visible while a refresh is in flight.
+  ContextualTranslationResult? _staleSuccess;
+
+  /// Last error message; shown with a busy retry control until the retry completes.
+  String? _lastErrorUserMessage;
+
+  bool _retryInFlight = false;
+
   @override
   void initState() {
     super.initState();
-    _beginFetch(forceRefresh: false);
+    _beginFetch(forceRefresh: false, notifyPostFrameOnly: true);
   }
 
   @override
@@ -153,11 +161,17 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
   void didUpdateWidget(covariant _ContextualFetchBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.params != widget.params) {
-      _beginFetch(forceRefresh: false);
+      _staleSuccess = null;
+      _lastErrorUserMessage = null;
+      _retryInFlight = false;
+      _beginFetch(forceRefresh: false, notifyPostFrameOnly: false);
     }
   }
 
-  void _beginFetch({required bool forceRefresh}) {
+  void _beginFetch({
+    required bool forceRefresh,
+    bool notifyPostFrameOnly = false,
+  }) {
     _silenceDetachedFuture(_future);
 
     final p = widget.params;
@@ -173,7 +187,13 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
           'src=${p.sourceLanguage} tgt=${p.targetLanguage}',
         );
         _future = Future.value(hit);
-        _deferSetState();
+        if (mounted) {
+          setState(() {
+            _staleSuccess = hit;
+            _lastErrorUserMessage = null;
+            _retryInFlight = false;
+          });
+        }
         return;
       }
     }
@@ -212,7 +232,11 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
         rethrow;
       }
     }();
-    _deferSetState();
+    if (notifyPostFrameOnly) {
+      _deferSetState();
+    } else if (mounted) {
+      setState(() {});
+    }
   }
 
   void _deferSetState() {
@@ -222,7 +246,8 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
   }
 
   void _retryAfterError() {
-    _beginFetch(forceRefresh: true);
+    setState(() => _retryInFlight = true);
+    _beginFetch(forceRefresh: true, notifyPostFrameOnly: false);
   }
 
   @override
@@ -235,28 +260,67 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
+          if (_staleSuccess != null) {
+            final d = _staleSuccess!;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                LookupRefreshIconButton(
+                  l10n: widget.l10n,
+                  isRefreshing: true,
+                  onPressed: () => _beginFetch(forceRefresh: true),
+                ),
+                if (d.translatedText.trim().isEmpty)
+                  Text(
+                    widget.l10n.lookupEmpty,
+                    style: widget.theme.textTheme.bodyMedium,
+                  )
+                else
+                  MarkdownBody(
+                    data: d.translatedText,
+                    selectable: true,
+                    styleSheet: widget.mdStyle,
+                  ),
+              ],
+            );
+          }
+          if (_retryInFlight &&
+              (_lastErrorUserMessage ?? '').trim().isNotEmpty) {
+            return LookupErrorRow(
+              message: _lastErrorUserMessage!,
+              onRetry: _retryAfterError,
+              isRetrying: true,
+            );
+          }
           return const LookupSectionShimmer();
         }
         if (snapshot.hasError) {
           final e = snapshot.error!;
+          _staleSuccess = null;
+          _retryInFlight = false;
           if (e is AuthFailure) {
             return const AuthRequiredCallout(
               surface: AuthRequiredSurface.lookupContextual,
               compact: true,
             );
           }
+          final msg = lookupErrorUserMessage(e, widget.l10n);
+          _lastErrorUserMessage = msg;
           return LookupErrorRow(
-            message: lookupErrorUserMessage(e, widget.l10n),
+            message: msg,
             onRetry: _retryAfterError,
           );
         }
         final d = snapshot.data!;
+        _staleSuccess = d;
+        _retryInFlight = false;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             LookupRefreshIconButton(
               l10n: widget.l10n,
-              onPressed: () => _beginFetch(forceRefresh: true),
+              onPressed: () =>
+                  _beginFetch(forceRefresh: true, notifyPostFrameOnly: false),
             ),
             if (d.translatedText.trim().isEmpty)
               Text(

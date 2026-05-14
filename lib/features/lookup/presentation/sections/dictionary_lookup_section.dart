@@ -54,10 +54,15 @@ class DictionaryLookupSection extends ConsumerWidget {
 
             final async = ref.watch(lookupSheetDictionaryProvider(params));
             return async.when(
+              skipLoadingOnReload: true,
               data: (DictionaryResult d) => Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  LookupRefreshIconButton(l10n: l10n, onPressed: forceRefresh),
+                  LookupRefreshIconButton(
+                    l10n: l10n,
+                    isRefreshing: async.isRefreshing,
+                    onPressed: forceRefresh,
+                  ),
                   _DictionaryBody(d: d, l10n: l10n),
                 ],
               ),
@@ -73,6 +78,7 @@ class DictionaryLookupSection extends ConsumerWidget {
                 return LookupErrorRow(
                   message: lookupErrorUserMessage(e, l10n),
                   onRetry: forceRefresh,
+                  isRetrying: async.hasError && async.isLoading,
                 );
               },
             );
