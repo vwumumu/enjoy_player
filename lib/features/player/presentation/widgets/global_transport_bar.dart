@@ -55,44 +55,48 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
         final rate = prefs.playbackRate;
         final l10n = AppLocalizations.of(sheetCtx)!;
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const PaddedSheetDragHandle(),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  t.space20,
-                  t.space4,
-                  t.space20,
-                  t.space8,
-                ),
-                child: Text(
-                  l10n.speed,
-                  style: Theme.of(sheetCtx).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const PaddedSheetDragHandle(),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    t.space20,
+                    t.space4,
+                    t.space20,
+                    t.space8,
+                  ),
+                  child: Text(
+                    l10n.speed,
+                    style: Theme.of(sheetCtx).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-              for (final r in kPlaybackRatePresets)
-                ListTile(
-                  leading: Icon(
-                    playbackRatesEqual(rate, r)
-                        ? Icons.check_rounded
-                        : Icons.speed_rounded,
-                    color: playbackRatesEqual(rate, r)
-                        ? Theme.of(sheetCtx).colorScheme.primary
-                        : Theme.of(sheetCtx).colorScheme.onSurfaceVariant,
+                for (final r in kPlaybackRatePresets)
+                  ListTile(
+                    leading: Icon(
+                      playbackRatesEqual(rate, r)
+                          ? Icons.check_rounded
+                          : Icons.speed_rounded,
+                      color: playbackRatesEqual(rate, r)
+                          ? Theme.of(sheetCtx).colorScheme.primary
+                          : Theme.of(sheetCtx).colorScheme.onSurfaceVariant,
+                    ),
+                    title: Text(l10n.playbackRateTimes(_formatRateCore(r))),
+                    onTap: () {
+                      Haptics.selection(sheetCtx);
+                      ref
+                          .read(playerPreferencesCtrlProvider.notifier)
+                          .setPlaybackRate(r);
+                      Navigator.pop(sheetCtx);
+                    },
                   ),
-                  title: Text(l10n.playbackRateTimes(_formatRateCore(r))),
-                  onTap: () {
-                    Haptics.selection(sheetCtx);
-                    ref.read(playerPreferencesCtrlProvider.notifier).setPlaybackRate(r);
-                    Navigator.pop(sheetCtx);
-                  },
-                ),
-              SizedBox(height: t.space8),
-            ],
+                SizedBox(height: t.space8),
+              ],
+            ),
           ),
         );
       },
@@ -340,21 +344,26 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                   child: hideBottomMediaInfo
                       ? LayoutBuilder(
                           builder: (context, paddedConstraints) {
-                            const playRingWidth = 56.0;
-                            const iconBtnWidth = 40.0;
+                            // Budget using Material tap targets (~48) — [40] was too
+                            // tight and caused a few px Row overflow on phones.
+                            const playRingWidth = 58.0;
+                            const iconSlotWidth = 48.0;
+                            const layoutSlack = 12.0;
+                            // Speed control wraps the icon in extra padding.
+                            const speedSlotExtra = 16.0;
                             final secondaryCount =
                                 4 +
                                 (showFullscreenTransport ? 1 : 0) +
                                 (onPlayer ? 0 : 1);
                             final secondaryWidth =
-                                secondaryCount * iconBtnWidth;
+                                secondaryCount * iconSlotWidth + speedSlotExtra;
                             final remaining =
                                 paddedConstraints.maxWidth -
                                 playRingWidth -
                                 secondaryWidth -
-                                8;
+                                layoutSlack;
                             final showTranscriptControls =
-                                remaining >= iconBtnWidth * 3;
+                                remaining >= iconSlotWidth * 3;
 
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
