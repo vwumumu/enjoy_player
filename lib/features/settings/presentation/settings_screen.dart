@@ -697,7 +697,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           childrenPadding: EdgeInsets.fromLTRB(
                             t.space16,
-                            0,
+                            t.space16,
                             t.space16,
                             t.space16,
                           ),
@@ -731,7 +731,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           childrenPadding: EdgeInsets.fromLTRB(
                             t.space16,
-                            0,
+                            t.space16,
                             t.space16,
                             t.space16,
                           ),
@@ -963,95 +963,159 @@ class _SettingsTile extends StatelessWidget {
       leadWidget = null;
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap == null ? null : Haptics.wrapTap(context, onTap!),
-        borderRadius: BorderRadius.circular(t.radiusXl),
-        overlayColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.pressed)) {
-            return cs.primary.withValues(alpha: 0.08);
-          }
-          if (states.contains(WidgetState.hovered) ||
-              states.contains(WidgetState.focused)) {
-            return cs.onSurface.withValues(alpha: 0.045);
-          }
-          return null;
-        }),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 76),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: t.space20,
-              vertical: t.space12,
-            ),
-            child: Row(
+    Widget disclosure() {
+      return Container(
+        width: 24,
+        height: 24,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest.withValues(alpha: 0.42),
+          borderRadius: BorderRadius.circular(t.radiusFull),
+        ),
+        child: Icon(
+          Icons.chevron_right_rounded,
+          color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+          size: 18,
+        ),
+      );
+    }
+
+    List<Widget> trailingWidgets() {
+      final widgets = <Widget>[];
+      if (valueBadge != null) {
+        widgets.add(valueBadge!);
+      }
+      if (trailing != null) {
+        widgets.add(trailing!);
+      }
+      if (showChevron && onTap != null) {
+        widgets.add(disclosure());
+      }
+      return widgets;
+    }
+
+    Widget textColumn({required bool compact}) {
+      final trailingChildren = trailingWidgets();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!compact)
+            Row(
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (leadWidget != null) ...[
-                  leadWidget,
-                  SizedBox(width: t.space16),
-                ],
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
+                      color: interactive
+                          ? null
+                          : cs.onSurface.withValues(alpha: 0.78),
+                    ),
+                  ),
+                ),
+                if (trailingChildren.isNotEmpty)
+                  Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        title,
-                        style: tt.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.2,
-                          color: interactive
-                              ? null
-                              : cs.onSurface.withValues(alpha: 0.78),
-                        ),
-                      ),
-                      if (subtitle != null && subtitle!.isNotEmpty) ...[
-                        SizedBox(height: t.space4),
-                        Text(
-                          subtitle!,
-                          style: tt.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant.withValues(alpha: 0.86),
-                            height: 1.35,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      for (var i = 0; i < trailingChildren.length; i++) ...[
+                        if (i > 0) SizedBox(width: t.space12),
+                        trailingChildren[i],
                       ],
                     ],
                   ),
-                ),
-                if (valueBadge != null) ...[
-                  SizedBox(width: t.space12),
-                  valueBadge!,
-                ],
-                if (trailing != null) ...[
-                  SizedBox(width: t.space12),
-                  trailing!,
-                ],
-                if (showChevron && onTap != null) ...[
-                  SizedBox(width: t.space8),
-                  Container(
-                    width: 24,
-                    height: 24,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest.withValues(alpha: 0.42),
-                      borderRadius: BorderRadius.circular(t.radiusFull),
-                    ),
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.8),
-                      size: 18,
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
+                      color: interactive
+                          ? null
+                          : cs.onSurface.withValues(alpha: 0.78),
                     ),
                   ),
-                ],
+                ),
               ],
             ),
+          if (subtitle != null && subtitle!.isNotEmpty) ...[
+            SizedBox(height: t.space4),
+            Text(
+              subtitle!,
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant.withValues(alpha: 0.86),
+                height: 1.35,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          if (compact && trailingChildren.isNotEmpty) ...[
+            SizedBox(height: t.space8),
+            Wrap(
+              spacing: t.space8,
+              runSpacing: t.space8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: trailingChildren,
+            ),
+          ],
+        ],
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 430;
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap == null ? null : Haptics.wrapTap(context, onTap!),
+            borderRadius: BorderRadius.circular(t.radiusXl),
+            overlayColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.pressed)) {
+                return cs.primary.withValues(alpha: 0.08);
+              }
+              if (states.contains(WidgetState.hovered) ||
+                  states.contains(WidgetState.focused)) {
+                return cs.onSurface.withValues(alpha: 0.045);
+              }
+              return null;
+            }),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 76),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: t.space20,
+                  vertical: t.space12,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (leadWidget != null) ...[
+                      leadWidget,
+                      SizedBox(width: t.space16),
+                    ],
+                    Expanded(child: textColumn(compact: compact)),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -1509,7 +1573,6 @@ class _ApiBaseUrlEditorState extends ConsumerState<_ApiBaseUrlEditor> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1517,10 +1580,7 @@ class _ApiBaseUrlEditorState extends ConsumerState<_ApiBaseUrlEditor> {
         TextField(
           controller: _controller,
           enabled: _loaded && !_saving,
-          decoration: InputDecoration(
-            labelText: l10n.settingsApiBaseUrl,
-            hintText: l10n.settingsApiBaseUrlHint,
-          ),
+          decoration: InputDecoration(hintText: l10n.settingsApiBaseUrlHint),
           keyboardType: TextInputType.url,
           autocorrect: false,
         ),
@@ -1548,13 +1608,6 @@ class _ApiBaseUrlEditorState extends ConsumerState<_ApiBaseUrlEditor> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : Text(l10n.settingsApiBaseUrlSave),
-        ),
-        SizedBox(height: t.space4),
-        Text(
-          l10n.settingsApiBaseUrlHint,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
         ),
       ],
     );
@@ -1597,7 +1650,6 @@ class _AiApiBaseUrlEditorState extends ConsumerState<_AiApiBaseUrlEditor> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1605,10 +1657,7 @@ class _AiApiBaseUrlEditorState extends ConsumerState<_AiApiBaseUrlEditor> {
         TextField(
           controller: _controller,
           enabled: _loaded && !_saving,
-          decoration: InputDecoration(
-            labelText: l10n.settingsAiApiBaseUrl,
-            hintText: l10n.settingsAiApiBaseUrlHint,
-          ),
+          decoration: InputDecoration(hintText: l10n.settingsAiApiBaseUrlHint),
           keyboardType: TextInputType.url,
           autocorrect: false,
         ),
@@ -1636,13 +1685,6 @@ class _AiApiBaseUrlEditorState extends ConsumerState<_AiApiBaseUrlEditor> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : Text(l10n.settingsAiApiBaseUrlSave),
-        ),
-        SizedBox(height: t.space4),
-        Text(
-          l10n.settingsAiApiBaseUrlHint,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
         ),
       ],
     );
@@ -1722,9 +1764,9 @@ Future<void> _showRecordingMicPicker(
               children: [
                 Text(
                   l10n.settingsRecordingMicDialogTitle,
-                  style: Theme.of(dialogCtx).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(
+                    dialogCtx,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 SizedBox(height: t.space16),
                 ConstrainedBox(
