@@ -53,6 +53,7 @@
   "importMedia": "Import media",
   "importingMedia": "Importing media…",
   "importMediaFailed": "Could not import this file.",
+  "importUnsupportedFileType": "This file type isn’t supported. Choose an audio or video file.",
   "noMediaYet": "No media yet",
   "tapImportToAdd": "Import audio or video from the toolbar.",
   "navMainLabel": "Primary navigation",

@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
+import 'package:enjoy_player/data/files/media_resolver.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
@@ -43,7 +44,10 @@ void _dismissBlockingImportDialogThen(BuildContext context, VoidCallback then) {
 }
 
 Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
-  final pick = await FilePicker.pickFiles(type: FileType.media);
+  final pick = await FilePicker.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: kFilePickerLocalImportExtensions,
+  );
   if (pick == null || pick.files.isEmpty) return;
   final path = pick.files.single.path;
   if (path == null) return;
@@ -94,7 +98,12 @@ Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
     if (!context.mounted) return;
     _dismissBlockingImportDialogThen(
       context,
-      () => AppNotice.error(context, e.message),
+      () => AppNotice.error(
+        context,
+        e is UnsupportedImportFileFailure
+            ? l10n.importUnsupportedFileType
+            : e.message,
+      ),
     );
   } catch (_) {
     if (!context.mounted) return;

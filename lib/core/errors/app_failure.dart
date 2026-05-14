@@ -13,6 +13,11 @@ final class FileFailure extends AppFailure {
   const FileFailure(super.message);
 }
 
+/// Picked file is not an allowed local audio/video type (e.g. image or document).
+final class UnsupportedImportFileFailure extends AppFailure {
+  const UnsupportedImportFileFailure() : super('');
+}
+
 final class DatabaseFailure extends AppFailure {
   const DatabaseFailure(super.message);
 }

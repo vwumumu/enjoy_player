@@ -156,6 +156,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importMediaFailed => 'Could not import this file.';
 
   @override
+  String get importUnsupportedFileType =>
+      'This file type isn’t supported. Choose an audio or video file.';
+
+  @override
   String get noMediaYet => 'No media yet';
 
   @override

@@ -381,6 +381,12 @@ abstract class AppLocalizations {
   /// **'Could not import this file.'**
   String get importMediaFailed;
 
+  /// No description provided for @importUnsupportedFileType.
+  ///
+  /// In en, this message translates to:
+  /// **'This file type isn’t supported. Choose an audio or video file.'**
+  String get importUnsupportedFileType;
+
   /// No description provided for @noMediaYet.
   ///
   /// In en, this message translates to:

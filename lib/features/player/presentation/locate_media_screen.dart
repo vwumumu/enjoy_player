@@ -10,6 +10,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
+import 'package:enjoy_player/data/files/media_resolver.dart';
+import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/media_relocate_exception.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -41,11 +43,27 @@ class _LocateMediaScreenState extends ConsumerState<LocateMediaScreen> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _working = true);
     try {
-      final pick = await FilePicker.pickFiles(type: FileType.media);
+      final allowed = widget.info.kind == MediaKind.video
+          ? kFilePickerLocalVideoExtensions
+          : kFilePickerLocalAudioExtensions;
+      final pick = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: allowed,
+      );
       if (pick == null || pick.files.isEmpty) return;
       final path = pick.files.single.path;
       if (path == null || path.isEmpty) return;
       if (!mounted) return;
+
+      final pickedName = pick.files.single.name;
+      final extOk = widget.info.kind == MediaKind.video
+          ? isVideoFileName(pickedName)
+          : isAudioFileName(pickedName);
+      if (!extOk) {
+        if (!mounted) return;
+        AppNotice.error(context, l10n.importUnsupportedFileType);
+        return;
+      }
 
       try {
         await ref

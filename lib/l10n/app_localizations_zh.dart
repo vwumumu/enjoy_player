@@ -152,6 +152,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importMediaFailed => '无法导入此文件。';
 
   @override
+  String get importUnsupportedFileType => '不支持此文件类型。请选择音频或视频文件。';
+
+  @override
   String get noMediaYet => '暂无媒体';
 
   @override
@@ -1563,6 +1566,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get importMediaFailed => '无法导入此文件。';
+
+  @override
+  String get importUnsupportedFileType => '不支持此文件类型。请选择音频或视频文件。';
 
   @override
   String get noMediaYet => '暂无媒体';

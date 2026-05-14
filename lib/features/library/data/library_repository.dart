@@ -96,6 +96,9 @@ class MediaLibraryRepository {
   /// [signedInUserId] when non-null enables web-aligned `aid`/`vid` + outbound sync.
   Future<String> importMedia(XFile file, {String? signedInUserId}) async {
     try {
+      if (!isImportableLocalMediaFileName(file.name)) {
+        throw const UnsupportedImportFileFailure();
+      }
       final result = await _storage.importPickedFile(file);
       final kind = isVideoFileName(file.name)
           ? MediaKind.video

@@ -53,6 +53,7 @@
   "importMedia": "导入媒体",
   "importingMedia": "正在导入媒体…",
   "importMediaFailed": "无法导入此文件。",
+  "importUnsupportedFileType": "不支持此文件类型。请选择音频或视频文件。",
   "noMediaYet": "暂无媒体",
   "tapImportToAdd": "从工具栏导入音频或视频。",
   "navMainLabel": "主导航",

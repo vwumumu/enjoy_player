@@ -78,16 +78,29 @@ void main() {
       final hash = sha256.convert(bytes).toString();
       final expectedId = enjoyAudioId(aid: hash);
 
-      final src = File(p.join(root.path, 'in.txt'));
+      final src = File(p.join(root.path, 'lesson.mp3'));
       await src.writeAsBytes(bytes);
 
-      final id = await repo.importMedia(XFile(src.path, name: 'lesson.mp3'));
+      final id = await repo.importMedia(XFile(src.path));
       expect(id, expectedId);
 
       final media = await repo.getById(id);
       expect(media, isNotNull);
       expect(media!.contentHash, hash);
       expect(media.kind, MediaKind.audio);
+    });
+
+    test('importMedia rejects unsupported image extension', () async {
+      final src = File(p.join(root.path, 'photo.jpg'));
+      await src.writeAsBytes([1, 2, 3]);
+
+      await expectLater(
+        repo.importMedia(XFile(src.path, name: 'photo.jpg')),
+        throwsA(isA<UnsupportedImportFileFailure>()),
+      );
+
+      expect(await db.videoDao.watchAll().first, isEmpty);
+      expect(await db.audioDao.watchAll().first, isEmpty);
     });
 
     test('deleteMedia removes row', () async {
