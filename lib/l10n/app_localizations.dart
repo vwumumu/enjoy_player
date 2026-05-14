@@ -2810,6 +2810,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refresh'**
   String get lookupRefresh;
+
+  /// No description provided for @lookupCloudRequiresSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in under Settings to use cloud dictionary, translation, and contextual translation.'**
+  String get lookupCloudRequiresSignIn;
 }
 
 class _AppLocalizationsDelegate

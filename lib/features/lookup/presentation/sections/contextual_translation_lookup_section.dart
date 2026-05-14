@@ -9,7 +9,10 @@ import 'package:logging/logging.dart';
 
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/logging/log.dart';
+import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/features/auth/application/auth_controller.dart';
+import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/ai/application/ai_services.dart';
 import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_section_params.dart';
@@ -105,6 +108,27 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
   }
 
   @override
+  void dispose() {
+    _silenceDetachedFuture(_future);
+    super.dispose();
+  }
+
+  void _silenceDetachedFuture(Future<ContextualTranslationResult>? previous) {
+    if (previous == null) return;
+    unawaited(
+      previous.then<void>(
+        (_) {},
+        onError: (Object e, StackTrace st) {
+          assert(() {
+            _log.finest('superseded contextual future finished', e, st);
+            return true;
+          }());
+        },
+      ),
+    );
+  }
+
+  @override
   void didUpdateWidget(covariant _ContextualFetchBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.params != widget.params) {
@@ -113,6 +137,8 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
   }
 
   void _beginFetch({required bool forceRefresh}) {
+    _silenceDetachedFuture(_future);
+
     final p = widget.params;
     final cache = ref.read(lookupSheetResultCacheProvider);
 
@@ -129,6 +155,16 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
         _deferSetState();
         return;
       }
+    }
+
+    final auth = ref.read(authCtrlProvider).valueOrNull;
+    if (auth is! AuthSignedIn) {
+      _log.fine('contextual translation skipped (not signed in)');
+      _future = Future.error(
+        AuthFailure(widget.l10n.lookupCloudRequiresSignIn),
+      );
+      _deferSetState();
+      return;
     }
 
     _log.info(
@@ -193,7 +229,7 @@ class _ContextualFetchBodyState extends ConsumerState<_ContextualFetchBody> {
         if (snapshot.hasError) {
           final e = snapshot.error!;
           return LookupErrorRow(
-            message: e is AppFailure ? e.message : e.toString(),
+            message: lookupErrorUserMessage(e, widget.l10n),
             onRetry: _retryAfterError,
           );
         }

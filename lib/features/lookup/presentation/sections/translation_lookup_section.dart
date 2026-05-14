@@ -3,7 +3,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_section_providers.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
@@ -48,7 +47,7 @@ class TranslationLookupSection extends ConsumerWidget {
           },
           loading: () => const LookupSectionShimmer(),
           error: (e, _) => LookupErrorRow(
-            message: e is AppFailure ? e.message : e.toString(),
+            message: lookupErrorUserMessage(e, l10n),
             onRetry: () =>
                 ref.invalidate(lookupSheetTranslationProvider(params)),
           ),

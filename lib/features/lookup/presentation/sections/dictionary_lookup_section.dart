@@ -3,7 +3,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/theme/colors.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
@@ -51,7 +50,7 @@ class DictionaryLookupSection extends ConsumerWidget {
           ),
           loading: () => const LookupSectionShimmer(),
           error: (e, _) => LookupErrorRow(
-            message: e is AppFailure ? e.message : e.toString(),
+            message: lookupErrorUserMessage(e, l10n),
             onRetry: forceRefresh,
           ),
         );

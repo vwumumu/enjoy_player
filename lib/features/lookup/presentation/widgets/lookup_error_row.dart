@@ -2,8 +2,18 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
+
+/// User-facing text for lookup failures (translation, dictionary, contextual).
+String lookupErrorUserMessage(Object error, AppLocalizations l10n) {
+  return switch (error) {
+    AuthFailure() => l10n.lookupCloudRequiresSignIn,
+    AppFailure(:final message) => message,
+    _ => error.toString(),
+  };
+}
 
 class LookupErrorRow extends StatelessWidget {
   const LookupErrorRow({

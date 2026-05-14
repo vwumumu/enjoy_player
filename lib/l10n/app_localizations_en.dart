@@ -1466,4 +1466,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lookupRefresh => 'Refresh';
+
+  @override
+  String get lookupCloudRequiresSignIn =>
+      'Sign in under Settings to use cloud dictionary, translation, and contextual translation.';
 }

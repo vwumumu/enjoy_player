@@ -1409,6 +1409,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get lookupRefresh => '刷新';
+
+  @override
+  String get lookupCloudRequiresSignIn => '请在「设置」中登录后使用云端词典、翻译与语境翻译。';
 }
 
 /// The translations for Chinese, as used in China (`zh_CN`).
@@ -2816,4 +2819,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get lookupRefresh => '刷新';
+
+  @override
+  String get lookupCloudRequiresSignIn => '请在「设置」中登录后使用云端词典、翻译与语境翻译。';
 }
