@@ -144,6 +144,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transportExpand => 'Expand player';
 
   @override
+  String get transportDismissPlayer => 'Close player';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override

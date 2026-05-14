@@ -1,6 +1,8 @@
 /// Full-width bottom transport: progress, times, play controls, artwork/meta, tools.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +21,7 @@ import 'package:enjoy_player/features/player/application/player_controller.dart'
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
+import 'package:enjoy_player/features/player/application/player_ui_provider.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -456,9 +459,36 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
       ),
     );
 
-    return GlassSurface(
+    final transportContent = GlassSurface(
       padding: EdgeInsets.zero,
       child: Material(color: Colors.transparent, child: inner),
+    );
+
+    if (onPlayer) return transportContent;
+
+    return Semantics(
+      explicitChildNodes: true,
+      label: l10n.transportDismissPlayer,
+      child: Dismissible(
+        key: ValueKey<String>('transport-${chrome.mediaId}'),
+        direction: DismissDirection.down,
+        background: ColoredBox(
+          color: cs.error.withValues(alpha: 0.1),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: EdgeInsets.only(top: t.space8),
+              child: Icon(Icons.close_rounded, color: cs.error),
+            ),
+          ),
+        ),
+        onDismissed: (_) {
+          Haptics.selection(context);
+          unawaited(ref.read(playerControllerProvider.notifier).clear());
+          ref.read(playerUiProvider.notifier).reset();
+        },
+        child: transportContent,
+      ),
     );
   }
 }

@@ -140,6 +140,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transportExpand => '展开播放器';
 
   @override
+  String get transportDismissPlayer => '关闭播放器';
+
+  @override
   String get settingsTitle => '设置';
 
   @override
@@ -1554,6 +1557,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get transportExpand => '展开播放器';
+
+  @override
+  String get transportDismissPlayer => '关闭播放器';
 
   @override
   String get settingsTitle => '设置';

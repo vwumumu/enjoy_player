@@ -357,6 +357,12 @@ abstract class AppLocalizations {
   /// **'Expand player'**
   String get transportExpand;
 
+  /// No description provided for @transportDismissPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Close player'**
+  String get transportDismissPlayer;
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:

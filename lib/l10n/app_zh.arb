@@ -49,6 +49,7 @@
   "transportMore": "更多",
   "transportCollapse": "收起播放器",
   "transportExpand": "展开播放器",
+  "transportDismissPlayer": "关闭播放器",
   "settingsTitle": "设置",
   "importMedia": "导入媒体",
   "importingMedia": "正在导入媒体…",

@@ -49,6 +49,7 @@
   "transportMore": "More",
   "transportCollapse": "Collapse player",
   "transportExpand": "Expand player",
+  "transportDismissPlayer": "Close player",
   "settingsTitle": "Settings",
   "importMedia": "Import media",
   "importingMedia": "Importing media…",
