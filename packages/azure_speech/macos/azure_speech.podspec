@@ -11,6 +11,7 @@ assessment is implemented first; additional APIs may follow.
   s.author           = { 'Enjoy Player' => 'https://github.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
+  s.dependency 'FlutterMacOS'
   s.dependency 'MicrosoftCognitiveServicesSpeech-macOS', '~> 1.49.0'
   s.platform = :osx, '10.15'
   s.swift_version = '5.0'
