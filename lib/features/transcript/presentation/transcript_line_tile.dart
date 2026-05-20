@@ -1,6 +1,8 @@
 /// Single transcript cue row with timestamp, markup, and tap target.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -48,6 +50,15 @@ class TranscriptLineTile extends StatefulWidget {
 
 class _TranscriptLineTileState extends State<TranscriptLineTile> {
   bool _hover = false;
+  Timer? _selectionToolbarTimer;
+
+  static const _toolbarDebounce = Duration(milliseconds: 200);
+
+  @override
+  void dispose() {
+    _selectionToolbarTimer?.cancel();
+    super.dispose();
+  }
 
   /// [SelectableText]'s [EditableText] is internal; locate it to open the
   /// selection toolbar on desktop mouse drag (Flutter otherwise only auto-shows
@@ -74,13 +85,27 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
     TextSelection selection,
     SelectionChangedCause? cause,
   ) {
+    _selectionToolbarTimer?.cancel();
+    _selectionToolbarTimer = null;
+
     if (!widget.selectable) return;
     // Match [SelectableText] handle visibility: keyboard-driven selection does
     // not surface the floating toolbar by default.
     if (cause == SelectionChangedCause.keyboard) return;
     if (!selection.isValid || selection.isCollapsed) return;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (cause == SelectionChangedCause.drag) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (!selectableSubtreeContext.mounted) return;
+        final editable = _findEditableTextState(selectableSubtreeContext);
+        if (editable == null || !editable.mounted) return;
+        editable.hideToolbar();
+      });
+    }
+
+    _selectionToolbarTimer = Timer(_toolbarDebounce, () {
+      _selectionToolbarTimer = null;
       if (!mounted) return;
       if (!selectableSubtreeContext.mounted) return;
       final editable = _findEditableTextState(selectableSubtreeContext);

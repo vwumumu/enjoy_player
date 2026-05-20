@@ -120,7 +120,7 @@ void main() {
     await tester.tapAt(textCenter);
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tapAt(textCenter);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 250));
 
     expect(lookedUp, isNull);
 
@@ -130,5 +130,45 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(lookedUp, equals('Hello'));
+  });
+
+  testWidgets('selection toolbar debounces during drag selection', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      transcriptTileHarness(
+        TranscriptLineTile(
+          line: const TranscriptLine(
+            text: 'Hello world',
+            startMs: 0,
+            durationMs: 2000,
+          ),
+          secondaryText: null,
+          isActive: true,
+          inEcho: false,
+          groupedInEcho: false,
+          selectable: true,
+          onLookupRequested: (_) {},
+          onTap: () {},
+        ),
+      ),
+    );
+
+    final textFinder = find.text('Hello world');
+    final from = tester.getTopLeft(textFinder) + const Offset(4, 8);
+    final gesture = await tester.startGesture(from);
+    await tester.pump(const Duration(milliseconds: 600));
+    await gesture.moveBy(const Offset(60, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await gesture.moveBy(const Offset(40, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Look up'), findsNothing);
+
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 250));
+    await tester.pump();
+
+    expect(find.text('Look up'), findsOneWidget);
   });
 }
