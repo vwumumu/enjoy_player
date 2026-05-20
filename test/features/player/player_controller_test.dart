@@ -173,6 +173,22 @@ void main() {
       expect(container.read(playerControllerProvider)?.mediaId, idB);
     });
 
+    test('clear invalidates in-flight openMedia', () async {
+      fake.openDelay = () =>
+          Future<void>.delayed(const Duration(milliseconds: 250));
+      final idA = await insertMedia(id: 'a');
+      final idB = await insertMedia(id: 'b');
+
+      final n = container.read(playerControllerProvider.notifier);
+      final f1 = n.openMedia(idA);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await n.clear();
+      final f2 = n.openMedia(idB);
+      await Future.wait([f1, f2]);
+
+      expect(container.read(playerControllerProvider)?.mediaId, idB);
+    });
+
     test('debounced session persistence writes position', () async {
       final id = await insertMedia(id: 'm1');
       final n = container.read(playerControllerProvider.notifier);

@@ -14,9 +14,11 @@ import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/player/domain/echo_window.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
+import 'package:enjoy_player/features/player/application/engines/youtube/youtube_player_engine.dart';
 import 'package:enjoy_player/features/player/application/player_engine.dart';
 import 'package:enjoy_player/features/player/application/playback_open_resolver.dart';
 import 'package:enjoy_player/features/player/application/player_engine_binding.dart';
+import 'package:enjoy_player/features/player/application/player_engine_rev.dart';
 import 'package:enjoy_player/features/player/application/player_open_side_effects.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/features/player/application/video_poster_capture_service.dart';
@@ -85,6 +87,7 @@ class PlayerController extends _$PlayerController {
     final db = ref.read(appDatabaseProvider);
     final resolved = await resolvePlaybackOpen(db, mediaId);
     if (resolved == null) return;
+    if (gen != _openGeneration) return;
 
     final video = resolved.video;
     final audio = resolved.audio;
@@ -105,6 +108,9 @@ class PlayerController extends _$PlayerController {
       getOwnedEngine: () => _ownedEngine,
       setOwnedEngine: (e) => _ownedEngine = e,
     );
+    if (gen != _openGeneration) return;
+
+    final engine = _activeEngine;
 
     final thumb = resolved.thumbnailUrl;
     final language = resolved.language;
@@ -113,9 +119,9 @@ class PlayerController extends _$PlayerController {
     // Bind video output before first decode on Windows (see media_kit_video notes).
     // Audio-only paths skip this so unit tests and headless runs avoid native libmpv.
     if (kind == MediaKind.video &&
-        _activeEngine is MediaKitPlayerEngine &&
+        engine is MediaKitPlayerEngine &&
         Platform.isWindows) {
-      (_activeEngine as MediaKitPlayerEngine).warmVideoSurface();
+      engine.warmVideoSurface();
     }
 
     await _positionSub?.cancel();
@@ -123,10 +129,10 @@ class PlayerController extends _$PlayerController {
     _positionSub = null;
     _durationSub = null;
 
-    await _activeEngine.open(playable);
+    await engine.open(playable);
     if (gen != _openGeneration) return;
 
-    await _activeEngine.disableRenderedSubtitles();
+    await engine.disableRenderedSubtitles();
     if (gen != _openGeneration) return;
 
     await ref
@@ -138,9 +144,11 @@ class PlayerController extends _$PlayerController {
       dexie,
       mediaId,
     );
+    if (gen != _openGeneration) return;
+
     final posMs = persisted?.currentTimeMs ?? 0;
     if (posMs > 0) {
-      await _activeEngine.seek(Duration(milliseconds: posMs));
+      await engine.seek(Duration(milliseconds: posMs));
     }
     if (gen != _openGeneration) return;
 
@@ -156,6 +164,7 @@ class PlayerController extends _$PlayerController {
     } else {
       ref.read(echoModeProvider.notifier).deactivate();
     }
+    if (gen != _openGeneration) return;
 
     final now = DateTime.now();
     state = PlaybackSession(
@@ -186,7 +195,7 @@ class PlayerController extends _$PlayerController {
 
     if (kind == MediaKind.video &&
         video != null &&
-        _activeEngine.supportsVideoPosterCapture) {
+        engine.supportsVideoPosterCapture) {
       ref
           .read(videoPosterCaptureServiceProvider)
           .scheduleCapture(
@@ -197,7 +206,7 @@ class PlayerController extends _$PlayerController {
             currentOpenGeneration: () => _openGeneration,
             currentSessionMediaId: () => state?.mediaId,
             sessionDurationSeconds: () => state?.durationSeconds,
-            activeEngine: _activeEngine,
+            activeEngine: engine,
             onSessionThumbnail: (path) {
               state = state?.copyWith(thumbnailUrl: path);
             },
@@ -360,7 +369,21 @@ class PlayerController extends _$PlayerController {
     _durationSub = null;
     _lastPositionEmitBucket = null;
     _lastEchoApplyBucket = null;
-    await _activeEngine.stop();
+
+    // Drop in-flight [openMedia] work so a dismissed YouTube open cannot
+    // resurrect session state or swap engines after the user opens local media.
+    _openGeneration++;
+
+    final engine = _activeEngine;
+    await engine.stop();
+
+    if (ref.read(playerEngineTestDoubleProvider) == null &&
+        _ownedEngine is YoutubePlayerEngine) {
+      await _ownedEngine!.dispose();
+      _ownedEngine = MediaKitPlayerEngine();
+      ref.read(playerEngineRevProvider.notifier).bump();
+    }
+
     ref.read(echoModeProvider.notifier).deactivate();
     state = null;
   }
