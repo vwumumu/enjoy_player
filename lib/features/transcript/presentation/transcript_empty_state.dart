@@ -8,6 +8,8 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
+import 'transcript_busy_action.dart';
+
 class TranscriptEmptyState extends StatelessWidget {
   const TranscriptEmptyState({
     required this.onImport,
@@ -17,10 +19,10 @@ class TranscriptEmptyState extends StatelessWidget {
     super.key,
   });
 
-  final VoidCallback onImport;
+  final Future<void> Function() onImport;
 
   /// Embedded subtitle extract (local video only).
-  final VoidCallback? onExtract;
+  final Future<void> Function()? onExtract;
 
   /// When false, only cloud/hint copy (e.g. YouTube — no local file to import).
   final bool showImportButton;
@@ -80,16 +82,17 @@ class TranscriptEmptyState extends StatelessWidget {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           if (showExtractButton && onExtract != null)
-                            OutlinedButton.icon(
-                              onPressed: onExtract,
-                              icon: const Icon(Icons.subtitles_outlined),
-                              label: Text(l10n.transcriptEmptyExtract),
+                            TranscriptBusyButton(
+                              icon: Icons.subtitles_outlined,
+                              label: l10n.transcriptEmptyExtract,
+                              onPressed: onExtract!,
                             ),
                           if (showImportButton)
-                            FilledButton.icon(
+                            TranscriptBusyButton(
+                              icon: Icons.upload_file_rounded,
+                              label: l10n.transcriptEmptyAddSubtitle,
                               onPressed: onImport,
-                              icon: const Icon(Icons.upload_file_rounded),
-                              label: Text(l10n.transcriptEmptyAddSubtitle),
+                              filled: true,
                             ),
                         ],
                       ),

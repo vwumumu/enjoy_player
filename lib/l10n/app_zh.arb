@@ -29,6 +29,7 @@
   "transcriptAccessibilityEchoCurrentLine": "当前跟读行。",
   "transcriptErrorFriendlyTitle": "字幕暂不可用",
   "transcriptErrorFriendlyHint": "请尝试选择其他字幕轨道或导入字幕文件。",
+  "transcriptFetchingSubtitles": "正在获取字幕…",
   "actionOpenFiles": "打开文件",
   "actionImport": "导入",
   "importFromFile": "从文件…",

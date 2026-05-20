@@ -84,6 +84,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Try choosing another subtitle track or importing a file.';
 
   @override
+  String get transcriptFetchingSubtitles => 'Fetching subtitles…';
+
+  @override
   String get actionOpenFiles => 'Open file(s)';
 
   @override

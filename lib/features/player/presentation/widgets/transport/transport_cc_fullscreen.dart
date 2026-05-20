@@ -8,6 +8,8 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/transcript/application/all_transcripts_provider.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_fetch_controller.dart';
+import 'package:enjoy_player/features/transcript/domain/transcript_fetch_status.dart';
 import 'package:enjoy_player/features/transcript/presentation/subtitle_track_picker_sheet.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -20,6 +22,9 @@ class TransportCcButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tracksAsync = ref.watch(allTranscriptsForMediaProvider(mediaId));
     final hasTrack = (tracksAsync.value ?? []).isNotEmpty;
+    final fetchState = ref.watch(transcriptFetchStatusProvider(mediaId));
+    final showSpinner =
+        fetchState.status == TranscriptFetchStatus.loading && !hasTrack;
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
 
@@ -28,7 +33,16 @@ class TransportCcButton extends ConsumerWidget {
       children: [
         IconButton(
           tooltip: l10n.subtitles,
-          icon: const Icon(Icons.closed_caption_outlined),
+          icon: showSpinner
+              ? SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                )
+              : const Icon(Icons.closed_caption_outlined),
           onPressed: () => showSubtitleTrackPicker(context, ref, mediaId),
         ),
         if (hasTrack)

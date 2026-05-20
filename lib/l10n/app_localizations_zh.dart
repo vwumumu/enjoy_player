@@ -80,6 +80,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transcriptErrorFriendlyHint => '请尝试选择其他字幕轨道或导入字幕文件。';
 
   @override
+  String get transcriptFetchingSubtitles => '正在获取字幕…';
+
+  @override
   String get actionOpenFiles => '打开文件';
 
   @override
@@ -1497,6 +1500,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get transcriptErrorFriendlyHint => '请尝试选择其他字幕轨道或导入字幕文件。';
+
+  @override
+  String get transcriptFetchingSubtitles => '正在获取字幕…';
 
   @override
   String get actionOpenFiles => '打开文件';

@@ -18,7 +18,10 @@ import '../../../data/db/media_target_resolver.dart';
 import '../../../data/subtitle/embedded_subtitle_service.dart';
 import '../../../data/subtitle/subtitle_parser.dart';
 import '../../../data/subtitle/transcript_line.dart';
+import '../../../data/subtitle/subtitle_filename.dart';
+import '../domain/transcript_fetch_status.dart';
 import '../domain/transcript_track.dart';
+import 'sidecar_subtitle_discovery.dart';
 import 'transcript_timeline_parse.dart';
 
 class _LinesCacheEntry {
@@ -143,21 +146,154 @@ class TranscriptRepository {
         });
       });
 
+  /// Orchestrates transcript resolution when media is opened.
+  ///
+  /// 1. Ensures a primary transcript when tracks exist.
+  /// 2. Imports adjacent sidecar `.srt` / `.vtt` for local files.
+  /// 3. Optionally fetches cloud / YouTube transcripts when [fetchCloud].
+  Future<TranscriptResolveResult> resolveOnOpen(
+    String mediaId, {
+    bool forceCloud = false,
+    bool fetchCloud = true,
+  }) async {
+    final tt = await dexieTargetTypeForId(_db, mediaId);
+    if (tt == null) {
+      return const TranscriptResolveResult(hasTracks: false);
+    }
+
+    await ensurePrimaryTranscript(mediaId);
+    try {
+      await importSidecarSubtitles(mediaId);
+    } on Object catch (e, st) {
+      _log.warning('importSidecarSubtitles failed for $mediaId', e, st);
+    }
+    await ensurePrimaryTranscript(mediaId);
+
+    TranscriptCloudFetchResult cloud = const TranscriptCloudFetchResult(
+      status: TranscriptCloudFetchStatus.skipped,
+    );
+    if (fetchCloud) {
+      cloud = await fetchCloudTranscripts(mediaId, force: forceCloud);
+      await ensurePrimaryTranscript(mediaId);
+    }
+
+    final hasTracks = (await _db.transcriptDao.listForTarget(tt, mediaId)).isNotEmpty;
+    final result = TranscriptResolveResult(
+      hasTracks: hasTracks,
+      cloud: cloud,
+      errorMessage: cloud.status == TranscriptCloudFetchStatus.error
+          ? cloud.errorMessage
+          : null,
+    );
+
+    if (fetchCloud && cloud.status != TranscriptCloudFetchStatus.skipped) {
+      await _persistFetchOutcome(tt, mediaId, result);
+    }
+
+    return result;
+  }
+
+  /// Assigns primary transcript when tracks exist but session has none.
+  Future<bool> ensurePrimaryTranscript(String mediaId) async {
+    final tt = await dexieTargetTypeForId(_db, mediaId);
+    if (tt == null) return false;
+
+    final session = await _db.echoSessionDao.getLatestForTarget(tt, mediaId);
+    if (session?.transcriptId != null) return false;
+
+    final rows = await _db.transcriptDao.listForTarget(tt, mediaId);
+    _sortTranscriptRows(rows);
+    if (rows.isEmpty) return false;
+
+    await _db.echoSessionDao.updatePrimaryTranscriptForTarget(
+      tt,
+      mediaId,
+      rows.first.id,
+    );
+    return true;
+  }
+
+  /// Imports matching sidecar subtitle files next to a local media file.
+  ///
+  /// Returns the number of newly imported sidecar files.
+  Future<int> importSidecarSubtitles(String mediaId) async {
+    final uri = await resolvePlayableSourceUri(_db, mediaId);
+    if (uri == null) return 0;
+
+    final tt = await dexieTargetTypeForId(_db, mediaId);
+    if (tt == null) return 0;
+
+    final sidecars = discoverSidecarSubtitleFiles(uri);
+    if (sidecars.isEmpty) return 0;
+
+    var imported = 0;
+    for (final file in sidecars) {
+      final name = p.basename(file.path);
+      final language = languageHintFromSubtitleFileName(name);
+      const source = 'user';
+      final id = enjoyTranscriptId(
+        targetType: tt,
+        targetId: mediaId,
+        language: language,
+        source: source,
+      );
+      if (await _db.transcriptDao.getById(id) != null) continue;
+
+      await importSubtitle(
+        mediaId: mediaId,
+        file: XFile(file.path, name: name),
+        language: language,
+        label: p.basenameWithoutExtension(name),
+      );
+      imported++;
+    }
+    return imported;
+  }
+
+  Future<void> _persistFetchOutcome(
+    String targetType,
+    String mediaId,
+    TranscriptResolveResult result,
+  ) async {
+    final now = DateTime.now();
+    final status = result.uiStatus;
+    if (status == TranscriptFetchStatus.loading ||
+        status == TranscriptFetchStatus.idle) {
+      return;
+    }
+
+    await _db.transcriptFetchStateDao.upsertOutcome(
+      targetType: targetType,
+      targetId: mediaId,
+      lastFetchedAt: now,
+      lastStatus: TranscriptFetchUiState.toPersisted(status),
+      lastError: result.errorMessage,
+    );
+  }
+
   /// Fetches transcripts from the Enjoy API and upserts them locally.
   ///
   /// When [force] is false, skips if this target was already fetched once
   /// ([TranscriptFetchStates]). On success, marks fetch state. Errors are
-  /// logged and do not mark fetched (so the next open can retry).
-  Future<void> fetchCloudTranscripts(
+  /// logged and persisted as `error` when possible.
+  Future<TranscriptCloudFetchResult> fetchCloudTranscripts(
     String mediaId, {
     bool force = false,
   }) async {
     final tt = await dexieTargetTypeForId(_db, mediaId);
-    if (tt == null) return;
+    if (tt == null) {
+      return const TranscriptCloudFetchResult(
+        status: TranscriptCloudFetchStatus.skipped,
+      );
+    }
 
     if (!force) {
       final state = await _db.transcriptFetchStateDao.getForTarget(tt, mediaId);
-      if (state != null) return;
+      if (state != null) {
+        return const TranscriptCloudFetchResult(
+          status: TranscriptCloudFetchStatus.skipped,
+        );
+      }
     }
 
     if (tt == 'Video') {
@@ -171,7 +307,7 @@ class TranscriptRepository {
         );
         if (ytPlayback != null && _youtubeTranscripts != null) {
           try {
-            await _fetchYoutubeWorkerTranscripts(
+            return await _fetchYoutubeWorkerTranscripts(
               mediaId: mediaId,
               video: video,
               force: force,
@@ -182,14 +318,21 @@ class TranscriptRepository {
               e,
               st,
             );
+            return TranscriptCloudFetchResult(
+              status: TranscriptCloudFetchStatus.error,
+              errorMessage: e.toString(),
+            );
           }
-          return;
         }
       }
     }
 
     final api = _transcriptApi;
-    if (api == null) return;
+    if (api == null) {
+      return const TranscriptCloudFetchResult(
+        status: TranscriptCloudFetchStatus.skipped,
+      );
+    }
 
     try {
       final list = await api.transcripts(targetId: mediaId, targetType: tt);
@@ -202,15 +345,30 @@ class TranscriptRepository {
         storedCount++;
       }
 
-      // Do not mark "fetched" if the server returned transcript rows we could not
-      // persist (e.g. shape mismatch); allows retry on next play.
-      if (list.isEmpty || storedCount > 0) {
-        await _db.transcriptFetchStateDao.upsertFetched(tt, mediaId, now);
+      if (list.isNotEmpty && storedCount == 0) {
+        return const TranscriptCloudFetchResult(
+          status: TranscriptCloudFetchStatus.error,
+          errorMessage: 'Could not store cloud transcripts',
+        );
       }
 
-      await _maybeSetPrimaryTranscript(tt, mediaId, storedCount);
+      if (storedCount > 0) {
+        await ensurePrimaryTranscript(mediaId);
+        return TranscriptCloudFetchResult(
+          status: TranscriptCloudFetchStatus.success,
+          storedCount: storedCount,
+        );
+      }
+
+      return const TranscriptCloudFetchResult(
+        status: TranscriptCloudFetchStatus.empty,
+      );
     } on Object catch (e, st) {
       _log.warning('fetchCloudTranscripts failed for $mediaId', e, st);
+      return TranscriptCloudFetchResult(
+        status: TranscriptCloudFetchStatus.error,
+        errorMessage: e.toString(),
+      );
     }
   }
 
@@ -234,13 +392,17 @@ class TranscriptRepository {
     return lang;
   }
 
-  Future<void> _fetchYoutubeWorkerTranscripts({
+  Future<TranscriptCloudFetchResult> _fetchYoutubeWorkerTranscripts({
     required String mediaId,
     required VideoRow video,
     required bool force,
   }) async {
     final api = _youtubeTranscripts;
-    if (api == null) return;
+    if (api == null) {
+      return const TranscriptCloudFetchResult(
+        status: TranscriptCloudFetchStatus.skipped,
+      );
+    }
 
     final workerVideoId = _workerYoutubeVideoId(video);
     final language = _workerCaptionLanguage(video);
@@ -262,32 +424,37 @@ class TranscriptRepository {
           fallbackNow: now,
         );
         if (stored) {
-          await _db.transcriptFetchStateDao.upsertFetched(
-            'Video',
-            mediaId,
-            DateTime.now(),
+          await ensurePrimaryTranscript(mediaId);
+          return const TranscriptCloudFetchResult(
+            status: TranscriptCloudFetchStatus.success,
+            storedCount: 1,
           );
-          await _maybeSetPrimaryTranscript('Video', mediaId, 1);
         }
-        return;
+        return const TranscriptCloudFetchResult(
+          status: TranscriptCloudFetchStatus.empty,
+        );
       }
 
       if (status == 'failed') {
-        await _db.transcriptFetchStateDao.upsertFetched(
-          'Video',
-          mediaId,
-          DateTime.now(),
-        );
+        final err = map['error']?.toString() ?? 'YouTube transcript failed';
         _log.warning(
-          'YouTube worker transcript failed for $mediaId: ${map['error']}',
+          'YouTube worker transcript failed for $mediaId: $err',
         );
-        return;
+        return TranscriptCloudFetchResult(
+          status: TranscriptCloudFetchStatus.error,
+          errorMessage: err,
+        );
       }
 
       if (attempt < _maxYoutubeWorkerPollAttempts - 1) {
         await Future<void>.delayed(_youtubeWorkerPollDelay);
       }
     }
+
+    return const TranscriptCloudFetchResult(
+      status: TranscriptCloudFetchStatus.error,
+      errorMessage: 'Timed out waiting for YouTube transcripts',
+    );
   }
 
   /// Returns whether a non-empty transcript row was written.
@@ -344,27 +511,6 @@ class TranscriptRepository {
       if (title is String && title.trim().isNotEmpty) return title.trim();
     }
     return 'YouTube captions ($language)';
-  }
-
-  Future<void> _maybeSetPrimaryTranscript(
-    String targetType,
-    String mediaId,
-    int storedCount,
-  ) async {
-    if (storedCount <= 0) return;
-    final session = await _db.echoSessionDao.getLatestForTarget(
-      targetType,
-      mediaId,
-    );
-    if (session?.transcriptId != null) return;
-    final rows = await _db.transcriptDao.listForTarget(targetType, mediaId);
-    _sortTranscriptRows(rows);
-    if (rows.isEmpty) return;
-    await _db.echoSessionDao.updatePrimaryTranscriptForTarget(
-      targetType,
-      mediaId,
-      rows.first.id,
-    );
   }
 
   TranscriptRow? _transcriptRowFromServerMap(

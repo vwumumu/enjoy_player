@@ -1,0 +1,124 @@
+/// Shared loading affordance for transcript manual actions.
+library;
+
+import 'package:flutter/material.dart';
+
+/// Outlined or filled action button with inline loading spinner.
+class TranscriptBusyButton extends StatefulWidget {
+  const TranscriptBusyButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    this.filled = false,
+    super.key,
+  });
+
+  final IconData icon;
+  final String label;
+  final Future<void> Function() onPressed;
+  final bool filled;
+
+  @override
+  State<TranscriptBusyButton> createState() => _TranscriptBusyButtonState();
+}
+
+class _TranscriptBusyButtonState extends State<TranscriptBusyButton> {
+  bool _busy = false;
+
+  Future<void> _run() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onPressed();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = _busy
+        ? SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: widget.filled
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : Theme.of(context).colorScheme.primary,
+            ),
+          )
+        : Icon(widget.icon);
+
+    if (widget.filled) {
+      return FilledButton.icon(
+        onPressed: _busy ? null : _run,
+        icon: icon,
+        label: Text(widget.label),
+      );
+    }
+    return OutlinedButton.icon(
+      onPressed: _busy ? null : _run,
+      icon: icon,
+      label: Text(widget.label),
+    );
+  }
+}
+
+/// [ListTile] row with a busy leading icon for picker actions.
+class TranscriptBusyListTile extends StatefulWidget {
+  const TranscriptBusyListTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.contentPadding,
+    super.key,
+  });
+
+  final IconData icon;
+  final String title;
+  final Future<void> Function() onTap;
+  final EdgeInsetsGeometry? contentPadding;
+
+  @override
+  State<TranscriptBusyListTile> createState() => _TranscriptBusyListTileState();
+}
+
+class _TranscriptBusyListTileState extends State<TranscriptBusyListTile> {
+  bool _busy = false;
+
+  Future<void> _run() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onTap();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return ListTile(
+      contentPadding: widget.contentPadding,
+      leading: _busy
+          ? SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: cs.primary,
+              ),
+            )
+          : Icon(
+              widget.icon,
+              size: 24,
+              color: cs.onSurfaceVariant,
+            ),
+      title: Text(widget.title),
+      enabled: !_busy,
+      onTap: _busy ? null : _run,
+    );
+  }
+}

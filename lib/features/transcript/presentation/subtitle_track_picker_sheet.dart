@@ -8,18 +8,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/notices/app_notice.dart';
+import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
+import 'package:enjoy_player/features/auth/application/auth_controller.dart';
+import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'import_subtitle_language_dialog.dart';
+import 'transcript_busy_action.dart';
 import 'transcript_embedded_extract.dart';
 import '../../player/application/player_controller.dart';
 import '../application/active_transcript_provider.dart';
 import '../application/all_transcripts_provider.dart';
+import '../application/transcript_fetch_controller.dart';
 import '../application/transcript_repository_provider.dart';
 import '../application/video_row_for_media_provider.dart';
+import '../domain/transcript_fetch_status.dart';
 import '../domain/transcript_track.dart';
 
 /// Horizontal inset aligned with section headers and list rows.
@@ -133,9 +139,6 @@ class SubtitleTrackPickerSheet extends ConsumerStatefulWidget {
 
 class _SubtitleTrackPickerSheetState
     extends ConsumerState<SubtitleTrackPickerSheet> {
-  bool _importing = false;
-  bool _extractingEmbedded = false;
-  bool _refreshingCloud = false;
   ScrollController? _dialogScroll;
 
   @override
@@ -171,51 +174,40 @@ class _SubtitleTrackPickerSheetState
     final trimmed = lang.trim();
     if (trimmed.isEmpty) return;
 
-    setState(() => _importing = true);
-    try {
-      await ref
-          .read(transcriptRepositoryProvider)
-          .importSubtitle(
-            mediaId: widget.mediaId,
-            file: XFile(f.path!),
-            language: trimmed,
-          );
-      if (mounted) {
-        AppNotice.success(
-          context,
-          AppLocalizations.of(context)!.importSubtitleSuccess,
+    await ref
+        .read(transcriptRepositoryProvider)
+        .importSubtitle(
+          mediaId: widget.mediaId,
+          file: XFile(f.path!),
+          language: trimmed,
         );
-      }
-    } finally {
-      if (mounted) setState(() => _importing = false);
+    if (mounted) {
+      AppNotice.success(
+        context,
+        AppLocalizations.of(context)!.importSubtitleSuccess,
+      );
     }
   }
 
   Future<void> _extractEmbedded() async {
-    setState(() => _extractingEmbedded = true);
-    try {
-      await runEmbeddedSubtitleExtract(
-        context: context,
-        ref: ref,
-        mediaId: widget.mediaId,
-      );
-    } finally {
-      if (mounted) setState(() => _extractingEmbedded = false);
-    }
+    await runEmbeddedSubtitleExtract(
+      context: context,
+      ref: ref,
+      mediaId: widget.mediaId,
+    );
   }
 
   Future<void> _refreshCloud() async {
     final l10n = AppLocalizations.of(context)!;
-    setState(() => _refreshingCloud = true);
-    try {
-      await ref
-          .read(transcriptRepositoryProvider)
-          .fetchCloudTranscripts(widget.mediaId, force: true);
-      if (mounted) {
+    final signedIn = ref.read(authCtrlProvider).valueOrNull is AuthSignedIn;
+    await ref
+        .read(transcriptFetchCtrlProvider(widget.mediaId).notifier)
+        .refreshFromCloud(signedIn: signedIn);
+    if (mounted) {
+      final status = ref.read(transcriptFetchStatusProvider(widget.mediaId));
+      if (status.status != TranscriptFetchStatus.error) {
         AppNotice.success(context, l10n.subtitlesRefreshDone);
       }
-    } finally {
-      if (mounted) setState(() => _refreshingCloud = false);
     }
   }
 
@@ -250,6 +242,7 @@ class _SubtitleTrackPickerSheetState
     required String? secondaryId,
     required bool showExtractEmbedded,
     required bool showImportFile,
+    required bool isFetching,
   }) {
     final theme = Theme.of(context);
 
@@ -257,6 +250,36 @@ class _SubtitleTrackPickerSheetState
       controller: scrollCtrl,
       padding: EdgeInsets.only(bottom: t.space16),
       children: [
+        if (isFetching)
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              _sheetHorizontalPadding(t),
+              t.space8,
+              _sheetHorizontalPadding(t),
+              t.space8,
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                SizedBox(width: t.space12),
+                Expanded(
+                  child: Text(
+                    l10n.transcriptFetchingSubtitles,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         _SectionHeader(l10n.subtitlesPrimary),
         if (tracks.isEmpty)
           Padding(
@@ -310,66 +333,24 @@ class _SubtitleTrackPickerSheetState
         ),
         const Divider(),
         if (showExtractEmbedded)
-          ListTile(
+          TranscriptBusyListTile(
             contentPadding: _sheetRowPadding(t),
-            leading: _extractingEmbedded
-                ? SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: theme.colorScheme.primary,
-                    ),
-                  )
-                : Icon(
-                    Icons.subtitles_outlined,
-                    size: 24,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-            title: Text(l10n.subtitlesExtractEmbedded),
-            enabled: !_extractingEmbedded,
-            onTap: _extractingEmbedded ? null : _extractEmbedded,
+            icon: Icons.subtitles_outlined,
+            title: l10n.subtitlesExtractEmbedded,
+            onTap: _extractEmbedded,
           ),
-        ListTile(
+        TranscriptBusyListTile(
           contentPadding: _sheetRowPadding(t),
-          leading: _refreshingCloud
-              ? SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: theme.colorScheme.primary,
-                  ),
-                )
-              : Icon(
-                  Icons.cloud_download_outlined,
-                  size: 24,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-          title: Text(l10n.subtitlesRefreshCloud),
-          enabled: !_refreshingCloud,
-          onTap: _refreshingCloud ? null : _refreshCloud,
+          icon: Icons.cloud_download_outlined,
+          title: l10n.subtitlesRefreshCloud,
+          onTap: _refreshCloud,
         ),
         if (showImportFile)
-          ListTile(
+          TranscriptBusyListTile(
             contentPadding: _sheetRowPadding(t),
-            leading: _importing
-                ? SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: theme.colorScheme.primary,
-                    ),
-                  )
-                : Icon(
-                    Icons.upload_file_rounded,
-                    size: 24,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-            title: Text(l10n.subtitlesImportFile),
-            enabled: !_importing,
-            onTap: _importing ? null : _importFile,
+            icon: Icons.upload_file_rounded,
+            title: l10n.subtitlesImportFile,
+            onTap: _importFile,
           ),
       ],
     );
@@ -399,6 +380,8 @@ class _SubtitleTrackPickerSheetState
     );
     final showExtractEmbedded =
         session != null && session.dexieTargetType == 'Video' && !isYoutube;
+    final fetchState = ref.watch(transcriptFetchStatusProvider(widget.mediaId));
+    final isFetching = fetchState.status == TranscriptFetchStatus.loading;
 
     Widget columnBody(ScrollController sc) {
       return Column(
@@ -447,6 +430,7 @@ class _SubtitleTrackPickerSheetState
                 secondaryId: secondaryId,
                 showExtractEmbedded: showExtractEmbedded,
                 showImportFile: !isYoutube,
+                isFetching: isFetching,
               ),
               loading: () =>
                   SkeletonTranscript(lineCount: 12, controller: sc),

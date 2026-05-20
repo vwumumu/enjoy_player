@@ -2895,8 +2895,36 @@ class $TranscriptFetchStatesTable extends TranscriptFetchStates
         type: DriftSqlType.dateTime,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _lastStatusMeta = const VerificationMeta(
+    'lastStatus',
+  );
   @override
-  List<GeneratedColumn> get $columns => [targetType, targetId, lastFetchedAt];
+  late final GeneratedColumn<String> lastStatus = GeneratedColumn<String>(
+    'last_status',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastErrorMeta = const VerificationMeta(
+    'lastError',
+  );
+  @override
+  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
+    'last_error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    targetType,
+    targetId,
+    lastFetchedAt,
+    lastStatus,
+    lastError,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2936,6 +2964,18 @@ class $TranscriptFetchStatesTable extends TranscriptFetchStates
     } else if (isInserting) {
       context.missing(_lastFetchedAtMeta);
     }
+    if (data.containsKey('last_status')) {
+      context.handle(
+        _lastStatusMeta,
+        lastStatus.isAcceptableOrUnknown(data['last_status']!, _lastStatusMeta),
+      );
+    }
+    if (data.containsKey('last_error')) {
+      context.handle(
+        _lastErrorMeta,
+        lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta),
+      );
+    }
     return context;
   }
 
@@ -2960,6 +3000,14 @@ class $TranscriptFetchStatesTable extends TranscriptFetchStates
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_fetched_at'],
       )!,
+      lastStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_status'],
+      ),
+      lastError: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_error'],
+      ),
     );
   }
 
@@ -2975,10 +3023,18 @@ class TranscriptFetchStateRow extends DataClass
   final String targetType;
   final String targetId;
   final DateTime lastFetchedAt;
+
+  /// Terminal outcome: `success`, `empty`, or `error`.
+  final String? lastStatus;
+
+  /// User-facing or log-friendly error when [lastStatus] is `error`.
+  final String? lastError;
   const TranscriptFetchStateRow({
     required this.targetType,
     required this.targetId,
     required this.lastFetchedAt,
+    this.lastStatus,
+    this.lastError,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2986,6 +3042,12 @@ class TranscriptFetchStateRow extends DataClass
     map['target_type'] = Variable<String>(targetType);
     map['target_id'] = Variable<String>(targetId);
     map['last_fetched_at'] = Variable<DateTime>(lastFetchedAt);
+    if (!nullToAbsent || lastStatus != null) {
+      map['last_status'] = Variable<String>(lastStatus);
+    }
+    if (!nullToAbsent || lastError != null) {
+      map['last_error'] = Variable<String>(lastError);
+    }
     return map;
   }
 
@@ -2994,6 +3056,12 @@ class TranscriptFetchStateRow extends DataClass
       targetType: Value(targetType),
       targetId: Value(targetId),
       lastFetchedAt: Value(lastFetchedAt),
+      lastStatus: lastStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastStatus),
+      lastError: lastError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastError),
     );
   }
 
@@ -3006,6 +3074,8 @@ class TranscriptFetchStateRow extends DataClass
       targetType: serializer.fromJson<String>(json['targetType']),
       targetId: serializer.fromJson<String>(json['targetId']),
       lastFetchedAt: serializer.fromJson<DateTime>(json['lastFetchedAt']),
+      lastStatus: serializer.fromJson<String?>(json['lastStatus']),
+      lastError: serializer.fromJson<String?>(json['lastError']),
     );
   }
   @override
@@ -3015,6 +3085,8 @@ class TranscriptFetchStateRow extends DataClass
       'targetType': serializer.toJson<String>(targetType),
       'targetId': serializer.toJson<String>(targetId),
       'lastFetchedAt': serializer.toJson<DateTime>(lastFetchedAt),
+      'lastStatus': serializer.toJson<String?>(lastStatus),
+      'lastError': serializer.toJson<String?>(lastError),
     };
   }
 
@@ -3022,10 +3094,14 @@ class TranscriptFetchStateRow extends DataClass
     String? targetType,
     String? targetId,
     DateTime? lastFetchedAt,
+    Value<String?> lastStatus = const Value.absent(),
+    Value<String?> lastError = const Value.absent(),
   }) => TranscriptFetchStateRow(
     targetType: targetType ?? this.targetType,
     targetId: targetId ?? this.targetId,
     lastFetchedAt: lastFetchedAt ?? this.lastFetchedAt,
+    lastStatus: lastStatus.present ? lastStatus.value : this.lastStatus,
+    lastError: lastError.present ? lastError.value : this.lastError,
   );
   TranscriptFetchStateRow copyWithCompanion(
     TranscriptFetchStatesCompanion data,
@@ -3038,6 +3114,10 @@ class TranscriptFetchStateRow extends DataClass
       lastFetchedAt: data.lastFetchedAt.present
           ? data.lastFetchedAt.value
           : this.lastFetchedAt,
+      lastStatus: data.lastStatus.present
+          ? data.lastStatus.value
+          : this.lastStatus,
+      lastError: data.lastError.present ? data.lastError.value : this.lastError,
     );
   }
 
@@ -3046,20 +3126,25 @@ class TranscriptFetchStateRow extends DataClass
     return (StringBuffer('TranscriptFetchStateRow(')
           ..write('targetType: $targetType, ')
           ..write('targetId: $targetId, ')
-          ..write('lastFetchedAt: $lastFetchedAt')
+          ..write('lastFetchedAt: $lastFetchedAt, ')
+          ..write('lastStatus: $lastStatus, ')
+          ..write('lastError: $lastError')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(targetType, targetId, lastFetchedAt);
+  int get hashCode =>
+      Object.hash(targetType, targetId, lastFetchedAt, lastStatus, lastError);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TranscriptFetchStateRow &&
           other.targetType == this.targetType &&
           other.targetId == this.targetId &&
-          other.lastFetchedAt == this.lastFetchedAt);
+          other.lastFetchedAt == this.lastFetchedAt &&
+          other.lastStatus == this.lastStatus &&
+          other.lastError == this.lastError);
 }
 
 class TranscriptFetchStatesCompanion
@@ -3067,17 +3152,23 @@ class TranscriptFetchStatesCompanion
   final Value<String> targetType;
   final Value<String> targetId;
   final Value<DateTime> lastFetchedAt;
+  final Value<String?> lastStatus;
+  final Value<String?> lastError;
   final Value<int> rowid;
   const TranscriptFetchStatesCompanion({
     this.targetType = const Value.absent(),
     this.targetId = const Value.absent(),
     this.lastFetchedAt = const Value.absent(),
+    this.lastStatus = const Value.absent(),
+    this.lastError = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TranscriptFetchStatesCompanion.insert({
     required String targetType,
     required String targetId,
     required DateTime lastFetchedAt,
+    this.lastStatus = const Value.absent(),
+    this.lastError = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : targetType = Value(targetType),
        targetId = Value(targetId),
@@ -3086,12 +3177,16 @@ class TranscriptFetchStatesCompanion
     Expression<String>? targetType,
     Expression<String>? targetId,
     Expression<DateTime>? lastFetchedAt,
+    Expression<String>? lastStatus,
+    Expression<String>? lastError,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (targetType != null) 'target_type': targetType,
       if (targetId != null) 'target_id': targetId,
       if (lastFetchedAt != null) 'last_fetched_at': lastFetchedAt,
+      if (lastStatus != null) 'last_status': lastStatus,
+      if (lastError != null) 'last_error': lastError,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3100,12 +3195,16 @@ class TranscriptFetchStatesCompanion
     Value<String>? targetType,
     Value<String>? targetId,
     Value<DateTime>? lastFetchedAt,
+    Value<String?>? lastStatus,
+    Value<String?>? lastError,
     Value<int>? rowid,
   }) {
     return TranscriptFetchStatesCompanion(
       targetType: targetType ?? this.targetType,
       targetId: targetId ?? this.targetId,
       lastFetchedAt: lastFetchedAt ?? this.lastFetchedAt,
+      lastStatus: lastStatus ?? this.lastStatus,
+      lastError: lastError ?? this.lastError,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3122,6 +3221,12 @@ class TranscriptFetchStatesCompanion
     if (lastFetchedAt.present) {
       map['last_fetched_at'] = Variable<DateTime>(lastFetchedAt.value);
     }
+    if (lastStatus.present) {
+      map['last_status'] = Variable<String>(lastStatus.value);
+    }
+    if (lastError.present) {
+      map['last_error'] = Variable<String>(lastError.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3134,6 +3239,8 @@ class TranscriptFetchStatesCompanion
           ..write('targetType: $targetType, ')
           ..write('targetId: $targetId, ')
           ..write('lastFetchedAt: $lastFetchedAt, ')
+          ..write('lastStatus: $lastStatus, ')
+          ..write('lastError: $lastError, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8586,6 +8693,8 @@ typedef $$TranscriptFetchStatesTableCreateCompanionBuilder =
       required String targetType,
       required String targetId,
       required DateTime lastFetchedAt,
+      Value<String?> lastStatus,
+      Value<String?> lastError,
       Value<int> rowid,
     });
 typedef $$TranscriptFetchStatesTableUpdateCompanionBuilder =
@@ -8593,6 +8702,8 @@ typedef $$TranscriptFetchStatesTableUpdateCompanionBuilder =
       Value<String> targetType,
       Value<String> targetId,
       Value<DateTime> lastFetchedAt,
+      Value<String?> lastStatus,
+      Value<String?> lastError,
       Value<int> rowid,
     });
 
@@ -8617,6 +8728,16 @@ class $$TranscriptFetchStatesTableFilterComposer
 
   ColumnFilters<DateTime> get lastFetchedAt => $composableBuilder(
     column: $table.lastFetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastStatus => $composableBuilder(
+    column: $table.lastStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastError => $composableBuilder(
+    column: $table.lastError,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -8644,6 +8765,16 @@ class $$TranscriptFetchStatesTableOrderingComposer
     column: $table.lastFetchedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get lastStatus => $composableBuilder(
+    column: $table.lastStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TranscriptFetchStatesTableAnnotationComposer
@@ -8667,6 +8798,14 @@ class $$TranscriptFetchStatesTableAnnotationComposer
     column: $table.lastFetchedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get lastStatus => $composableBuilder(
+    column: $table.lastStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastError =>
+      $composableBuilder(column: $table.lastError, builder: (column) => column);
 }
 
 class $$TranscriptFetchStatesTableTableManager
@@ -8718,11 +8857,15 @@ class $$TranscriptFetchStatesTableTableManager
                 Value<String> targetType = const Value.absent(),
                 Value<String> targetId = const Value.absent(),
                 Value<DateTime> lastFetchedAt = const Value.absent(),
+                Value<String?> lastStatus = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TranscriptFetchStatesCompanion(
                 targetType: targetType,
                 targetId: targetId,
                 lastFetchedAt: lastFetchedAt,
+                lastStatus: lastStatus,
+                lastError: lastError,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -8730,11 +8873,15 @@ class $$TranscriptFetchStatesTableTableManager
                 required String targetType,
                 required String targetId,
                 required DateTime lastFetchedAt,
+                Value<String?> lastStatus = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TranscriptFetchStatesCompanion.insert(
                 targetType: targetType,
                 targetId: targetId,
                 lastFetchedAt: lastFetchedAt,
+                lastStatus: lastStatus,
+                lastError: lastError,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

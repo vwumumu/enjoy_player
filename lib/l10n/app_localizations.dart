@@ -237,6 +237,12 @@ abstract class AppLocalizations {
   /// **'Try choosing another subtitle track or importing a file.'**
   String get transcriptErrorFriendlyHint;
 
+  /// No description provided for @transcriptFetchingSubtitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching subtitles…'**
+  String get transcriptFetchingSubtitles;
+
   /// No description provided for @actionOpenFiles.
   ///
   /// In en, this message translates to:

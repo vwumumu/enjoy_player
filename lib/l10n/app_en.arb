@@ -29,6 +29,7 @@
   "transcriptAccessibilityEchoCurrentLine": "Current echo line.",
   "transcriptErrorFriendlyTitle": "Transcript unavailable",
   "transcriptErrorFriendlyHint": "Try choosing another subtitle track or importing a file.",
+  "transcriptFetchingSubtitles": "Fetching subtitles…",
   "actionOpenFiles": "Open file(s)",
   "actionImport": "Import",
   "importFromFile": "From file…",

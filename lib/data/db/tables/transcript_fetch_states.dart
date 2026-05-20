@@ -13,6 +13,12 @@ class TranscriptFetchStates extends Table {
   TextColumn get targetId => text()();
   DateTimeColumn get lastFetchedAt => dateTime()();
 
+  /// Terminal outcome: `success`, `empty`, or `error`.
+  TextColumn get lastStatus => text().nullable()();
+
+  /// User-facing or log-friendly error when [lastStatus] is `error`.
+  TextColumn get lastError => text().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {targetType, targetId};
 }

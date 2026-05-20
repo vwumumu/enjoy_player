@@ -9,10 +9,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/notices/app_notice.dart';
+import 'package:enjoy_player/core/riverpod/async_value_x.dart';
+import 'package:enjoy_player/features/auth/application/auth_controller.dart';
+import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import 'package:enjoy_player/features/player/application/player_controller.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_fetch_controller.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
+import 'package:enjoy_player/features/transcript/domain/transcript_fetch_status.dart';
 import 'package:enjoy_player/features/transcript/application/video_row_for_media_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_repository_provider.dart';
 import 'package:enjoy_player/features/transcript/presentation/import_subtitle_language_dialog.dart';
@@ -61,6 +66,7 @@ class TranscriptPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final linesAsync = ref.watch(transcriptLinesForMediaProvider(mediaId));
+    final fetchState = ref.watch(transcriptFetchStatusProvider(mediaId));
 
     final videoRowAsync = ref.watch(videoRowForMediaProvider(mediaId));
     final isYoutube = videoRowAsync.maybeWhen(
@@ -74,6 +80,8 @@ class TranscriptPanel extends ConsumerWidget {
         session.dexieTargetType == 'Video' &&
         showLocalActions;
 
+    final signedIn = ref.watch(authCtrlProvider).valueOrNull is AuthSignedIn;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -81,15 +89,70 @@ class TranscriptPanel extends ConsumerWidget {
           child: linesAsync.when(
             data: (lines) {
               if (lines.isEmpty) {
+                if (fetchState.status == TranscriptFetchStatus.loading) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          l10n.transcriptFetchingSubtitles,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                if (fetchState.status == TranscriptFetchStatus.error) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.error_outline_rounded,
+                            size: 40,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            l10n.transcriptErrorFriendlyTitle,
+                            style: Theme.of(context).textTheme.titleMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.transcriptErrorFriendlyHint,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          FilledButton.tonal(
+                            onPressed: () => ref
+                                .read(
+                                  transcriptFetchCtrlProvider(mediaId).notifier,
+                                )
+                                .refreshFromCloud(signedIn: signedIn),
+                            child: Text(l10n.retry),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
                 return TranscriptEmptyState(
                   onImport: () => _import(context, ref),
                   onExtract: showExtractButton
-                      ? () => unawaited(
-                          runEmbeddedSubtitleExtract(
-                            context: context,
-                            ref: ref,
-                            mediaId: mediaId,
-                          ),
+                      ? () => runEmbeddedSubtitleExtract(
+                          context: context,
+                          ref: ref,
+                          mediaId: mediaId,
                         )
                       : null,
                   showImportButton: showLocalActions,
@@ -99,7 +162,26 @@ class TranscriptPanel extends ConsumerWidget {
               return TranscriptScrollableList(mediaId: mediaId, lines: lines);
             },
             loading: () => const SkeletonTranscript(),
-            error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+            error: (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.transcriptErrorFriendlyTitle,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.transcriptErrorFriendlyHint,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ],

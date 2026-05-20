@@ -49,7 +49,7 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: name));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -215,12 +215,30 @@ class TranscriptFetchStateDao extends DatabaseAccessor<AppDatabase>
   Future<void> upsertFetched(
     String targetType,
     String targetId,
-    DateTime lastFetchedAt,
-  ) => into(transcriptFetchStates).insert(
+    DateTime lastFetchedAt, {
+    String? lastStatus,
+    String? lastError,
+  }) => upsertOutcome(
+    targetType: targetType,
+    targetId: targetId,
+    lastFetchedAt: lastFetchedAt,
+    lastStatus: lastStatus ?? 'success',
+    lastError: lastError,
+  );
+
+  Future<void> upsertOutcome({
+    required String targetType,
+    required String targetId,
+    required DateTime lastFetchedAt,
+    required String lastStatus,
+    String? lastError,
+  }) => into(transcriptFetchStates).insert(
     TranscriptFetchStateRow(
       targetType: targetType,
       targetId: targetId,
       lastFetchedAt: lastFetchedAt,
+      lastStatus: lastStatus,
+      lastError: lastError,
     ),
     mode: InsertMode.insertOrReplace,
   );

@@ -2,22 +2,12 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
 
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-/// Guess BCP-47-ish code from filename (e.g. `movie.en.srt` → `en`).
-String languageHintFromSubtitleFileName(String fileName) {
-  final base = p.basenameWithoutExtension(fileName).toLowerCase();
-  final m = RegExp(
-    r'(?:^|[._-])([a-z]{2}(?:-[a-z]{2,4})?)(?:[._-]|$)',
-    caseSensitive: false,
-  ).firstMatch(base);
-  if (m != null) return m.group(1)!;
-  return 'und';
-}
+export 'package:enjoy_player/data/subtitle/subtitle_filename.dart';
 
 /// Returns trimmed language code, or null if cancelled.
 Future<String?> showImportSubtitleLanguageDialog(
