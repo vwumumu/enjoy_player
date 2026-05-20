@@ -12,7 +12,7 @@ import 'transcript_repository_provider.dart';
 
 part 'transcript_fetch_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
   Future<void>? _inFlight;
 
@@ -42,7 +42,9 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
     final tt = await dexieTargetTypeForId(db, mediaId);
     if (tt == null) return false;
     final row = await db.transcriptFetchStateDao.getForTarget(tt, mediaId);
-    return row != null;
+    if (row == null) return false;
+    // Allow automatic retry on next open after a failed fetch.
+    return row.lastStatus != 'error';
   }
 
   /// Resolves transcripts on media open (primary, sidecar, optional cloud).
@@ -53,7 +55,7 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
     }
 
     final shouldShowLoading = signedIn && !await _alreadyCloudFetched();
-    if (shouldShowLoading) {
+    if (shouldShowLoading && ref.mounted) {
       state = state.copyWith(
         status: TranscriptFetchStatus.loading,
         clearError: true,
@@ -75,7 +77,7 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
       return;
     }
 
-    if (signedIn) {
+    if (signedIn && ref.mounted) {
       state = state.copyWith(
         status: TranscriptFetchStatus.loading,
         clearError: true,
@@ -94,8 +96,8 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
     required bool signedIn,
     required bool forceCloud,
   }) async {
+    final repo = ref.read(transcriptRepositoryProvider);
     try {
-      final repo = ref.read(transcriptRepositoryProvider);
       final result = await repo.resolveOnOpen(
         mediaId,
         forceCloud: forceCloud,

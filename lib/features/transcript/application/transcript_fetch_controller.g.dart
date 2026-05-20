@@ -20,7 +20,7 @@ final class TranscriptFetchCtrlProvider
   }) : super(
          retry: null,
          name: r'transcriptFetchCtrlProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -59,7 +59,7 @@ final class TranscriptFetchCtrlProvider
 }
 
 String _$transcriptFetchCtrlHash() =>
-    r'66507f2c3ad2f4bb5bdca22ff0c8419c691681b1';
+    r'09ae216168f93c2065844d90419fa93eb272a4be';
 
 final class TranscriptFetchCtrlFamily extends $Family
     with
@@ -76,7 +76,7 @@ final class TranscriptFetchCtrlFamily extends $Family
         name: r'transcriptFetchCtrlProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   TranscriptFetchCtrlProvider call(String mediaId) =>

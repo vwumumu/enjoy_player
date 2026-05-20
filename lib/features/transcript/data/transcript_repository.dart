@@ -289,7 +289,7 @@ class TranscriptRepository {
 
     if (!force) {
       final state = await _db.transcriptFetchStateDao.getForTarget(tt, mediaId);
-      if (state != null) {
+      if (state != null && state.lastStatus != 'error') {
         return const TranscriptCloudFetchResult(
           status: TranscriptCloudFetchStatus.skipped,
         );
