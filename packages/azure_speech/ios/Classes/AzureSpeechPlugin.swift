@@ -53,7 +53,7 @@ public class AzureSpeechPlugin: NSObject, FlutterPlugin {
     }
 
     let speechConfig = try SPXSpeechConfiguration(authorizationToken: token, region: region)
-    try speechConfig.setSpeechRecognitionLanguage(language)
+    speechConfig.speechRecognitionLanguage = language
 
     guard let audioConfig = SPXAudioConfiguration(wavFileInput: audioPath) else {
       throw NSError(
@@ -73,14 +73,8 @@ public class AzureSpeechPlugin: NSObject, FlutterPlugin {
     // Obj-C API is NSInteger → Swift `Int` (not UInt).
     pronunciationConfig.nbestPhonemeCount = nbestPhonemeCount
 
-    guard
-      let speechRecognizer = try? SPXSpeechRecognizer(
-        speechConfiguration: speechConfig, audioConfiguration: audioConfig)
-    else {
-      throw NSError(
-        domain: "AzureSpeech", code: 5,
-        userInfo: [NSLocalizedDescriptionKey: "Could not create speech recognizer"])
-    }
+    let speechRecognizer = try SPXSpeechRecognizer(
+      speechConfiguration: speechConfig, audioConfiguration: audioConfig)
 
     try pronunciationConfig.apply(to: speechRecognizer)
 
@@ -88,10 +82,10 @@ public class AzureSpeechPlugin: NSObject, FlutterPlugin {
     var jsonOut: String?
     var errOut: NSError?
 
-    speechRecognizer.recognizeOnceAsync { recognitionResult in
-      defer { recognitionResult.close() }
+    try speechRecognizer.recognizeOnceAsync { recognitionResult in
       if recognitionResult.reason == SPXResultReason.recognizedSpeech {
-        jsonOut = recognitionResult.properties?.getPropertyBy(SPXPropertyId.speechServiceResponseJsonResult)
+        jsonOut = recognitionResult.properties?.getPropertyBy(
+          SPXPropertyId.speechServiceResponseJsonResult)
         if jsonOut == nil || jsonOut!.isEmpty {
           errOut = NSError(
             domain: "AzureSpeech", code: 2,
@@ -102,7 +96,8 @@ public class AzureSpeechPlugin: NSObject, FlutterPlugin {
           domain: "AzureSpeech", code: 1,
           userInfo: [NSLocalizedDescriptionKey: "No speech detected"])
       } else if recognitionResult.reason == SPXResultReason.canceled {
-        let cancellationDetails = try? SPXCancellationDetails(fromCanceledRecognitionResult: recognitionResult)
+        let cancellationDetails = try? SPXCancellationDetails(
+          fromCanceledRecognitionResult: recognitionResult)
         let msg = "\(String(describing: cancellationDetails?.reason)): \(cancellationDetails?.errorDetails ?? "")"
         errOut = NSError(
           domain: "AzureSpeech", code: 3,
@@ -117,7 +112,6 @@ public class AzureSpeechPlugin: NSObject, FlutterPlugin {
 
     semaphore.wait()
 
-    speechRecognizer.close()
     if let e = errOut { throw e }
     guard let json = jsonOut, !json.isEmpty else {
       throw NSError(
