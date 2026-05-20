@@ -1,17 +1,18 @@
 /// Scaffold bodies for [ExpandedPlayerScreen] (loading, error, main chrome).
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/theme/widgets/app_background.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
-import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
+import 'package:enjoy_player/features/player/application/player_collapse.dart';
 import 'package:enjoy_player/features/player/application/player_engine_capabilities_provider.dart';
 import 'package:enjoy_player/features/player/application/player_engine_provider.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
-import 'package:enjoy_player/features/player/application/player_ui_provider.dart';
 import 'package:enjoy_player/features/player/application/youtube_auth_provider.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/layouts/audio_player_layout.dart';
@@ -112,13 +113,8 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
                         color: cs.onSurface,
                         size: 28,
                       ),
-                      onPressed: () async {
-                        await ref
-                            .read(windowFullscreenProvider.notifier)
-                            .setFullscreen(false);
-                        ref.read(playerUiProvider.notifier).collapse();
-                        if (context.mounted) context.pop();
-                      },
+                      onPressed: () =>
+                          unawaited(collapseExpandedPlayer(ref, context)),
                     ),
                     title: Text(
                       chrome.mediaTitle,
@@ -190,13 +186,8 @@ class _VideoPausedTitleChromeOverlay extends ConsumerWidget {
                     color: Colors.white,
                     size: 28,
                   ),
-                  onPressed: () async {
-                    await ref
-                        .read(windowFullscreenProvider.notifier)
-                        .setFullscreen(false);
-                    ref.read(playerUiProvider.notifier).collapse();
-                    if (context.mounted) context.pop();
-                  },
+                  onPressed: () =>
+                      unawaited(collapseExpandedPlayer(ref, context)),
                 ),
                 Expanded(
                   child: Text(

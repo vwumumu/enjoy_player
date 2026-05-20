@@ -190,7 +190,7 @@ final List<HotkeyDefinition> hotkeyDefinitions = [
   const HotkeyDefinition(
     id: 'modal.close',
     defaultKeys: 'escape',
-    description: 'Close modal',
+    description: 'Close overlay, exit fullscreen, or cancel recording',
     descriptionKey: 'closeModal',
     scope: HotkeyScope.modal,
     customizable: false,

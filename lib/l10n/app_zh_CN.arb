@@ -264,7 +264,7 @@
   "hotkeysDescShrinkEchoBackward": "向后收缩回声区域",
   "hotkeysDescShrinkEchoForward": "向前收缩回声区域",
   "hotkeysDescLibrarySearch": "聚焦搜索框",
-  "hotkeysDescCloseModal": "关闭弹窗",
+  "hotkeysDescCloseModal": "关闭浮层、退出全屏或取消录音",
   "hotkeysStubSearch": "搜索功能尚未提供。",
   "hotkeysStubDictation": "听写模式尚未提供。",
   "assessmentTitle": "发音评测",

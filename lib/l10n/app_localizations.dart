@@ -1212,7 +1212,7 @@ abstract class AppLocalizations {
   /// No description provided for @hotkeysDescCloseModal.
   ///
   /// In en, this message translates to:
-  /// **'Close modal'**
+  /// **'Close overlay, exit fullscreen, or cancel recording'**
   String get hotkeysDescCloseModal;
 
   /// No description provided for @hotkeysStubSearch.

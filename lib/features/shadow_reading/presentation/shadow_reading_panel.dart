@@ -112,6 +112,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
   /// produces a zero-sample WAV ("second take won't record").
   AudioRecorder _recorder = AudioRecorder();
   bool _recording = false;
+  bool _recordingPending = false;
   String? _selectedRecordingId;
   String? _mediaPath;
   Future<String?>? _mediaPathFuture;
@@ -196,7 +197,14 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
 
   /// Discard in-progress capture (Escape); does not persist to the library.
   Future<void> _cancelRecording() async {
-    if (!_recording) return;
+    if (!_recording && !_recordingPending) return;
+    if (_recordingPending && !_recording) {
+      _recordingPending = false;
+      _clearRecordingTiming();
+      _setRecordingActiveOnBus(false);
+      if (mounted) setState(() {});
+      return;
+    }
     String? path;
     try {
       path = await _recorder.stop();
@@ -204,6 +212,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       _log.warning('microphone stop (cancel recording) failed', e, st);
     }
     _recording = false;
+    _recordingPending = false;
     _clearRecordingTiming();
     _setRecordingActiveOnBus(false);
     await _resetRecorderInstance();
@@ -221,9 +230,11 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
   @override
   void dispose() {
     final wasRecording = _recording;
+    final wasPending = _recordingPending;
     _clearRecordingTiming();
-    if (wasRecording) {
+    if (wasRecording || wasPending) {
       _recording = false;
+      _recordingPending = false;
       _setRecordingActiveOnBus(false);
     }
     unawaited(() async {
@@ -284,6 +295,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       } catch (e, st) {
         _log.warning('microphone stop failed', e, st);
         _recording = false;
+        _recordingPending = false;
         _setRecordingActiveOnBus(false);
         _clearRecordingTiming();
         await _resetRecorderInstance();
@@ -297,6 +309,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
         return;
       }
       _recording = false;
+      _recordingPending = false;
       _setRecordingActiveOnBus(false);
       _clearRecordingTiming();
       await _resetRecorderInstance();
@@ -312,6 +325,9 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
 
     await _mediaPathFutureOnce();
 
+    _setRecordingActiveOnBus(true);
+    _recordingPending = true;
+
     final support = await getApplicationSupportDirectory();
     final dir = Directory(p.join(support.path, 'recordings'));
     await dir.create(recursive: true);
@@ -323,6 +339,8 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       granted = await _recorder.hasPermission();
     } catch (e, st) {
       _log.warning('recorder.hasPermission failed', e, st);
+      _recordingPending = false;
+      _setRecordingActiveOnBus(false);
       if (mounted) {
         AppNotice.error(
           context,
@@ -332,6 +350,8 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       return;
     }
     if (!granted) {
+      _recordingPending = false;
+      _setRecordingActiveOnBus(false);
       if (mounted) {
         AppNotice.warning(context, l10n.shadowRecordingMicDenied);
       }
@@ -349,7 +369,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       await _recorder.start(config, path: outPath);
     } catch (e, st) {
       _log.warning('recorder.start failed at $outPath', e, st);
-      _recording = false;
+      _recordingPending = false;
       _setRecordingActiveOnBus(false);
       _clearRecordingTiming();
       await _resetRecorderInstance();
@@ -369,11 +389,11 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       '${deviceState?.autoPicked == false ? " (user)" : " (auto)"}',
     );
     _recording = true;
+    _recordingPending = false;
     _pitchExpanded = false;
     _recordingStartedAt = DateTime.now();
     _elapsed = Duration.zero;
     _startElapsedTicker();
-    _setRecordingActiveOnBus(true);
     setState(() {});
   }
 
@@ -589,7 +609,7 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
       shadowReadingHotkeyBusProvider.select((s) => s.recordingCancel),
       (prev, next) {
         if (prev == next) return;
-        if (!widget.echoActive) return;
+        if (!_recording && !_recordingPending) return;
         unawaited(_cancelRecording());
       },
     );

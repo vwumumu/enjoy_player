@@ -595,7 +595,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hotkeysDescLibrarySearch => 'Focus search';
 
   @override
-  String get hotkeysDescCloseModal => 'Close modal';
+  String get hotkeysDescCloseModal =>
+      'Close overlay, exit fullscreen, or cancel recording';
 
   @override
   String get hotkeysStubSearch => 'Search is not available yet.';

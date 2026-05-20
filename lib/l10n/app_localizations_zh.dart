@@ -580,7 +580,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hotkeysDescLibrarySearch => '聚焦搜索框';
 
   @override
-  String get hotkeysDescCloseModal => '关闭弹窗';
+  String get hotkeysDescCloseModal => '关闭浮层、退出全屏或取消录音';
 
   @override
   String get hotkeysStubSearch => '搜索功能尚未提供。';
@@ -2002,7 +2002,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get hotkeysDescLibrarySearch => '聚焦搜索框';
 
   @override
-  String get hotkeysDescCloseModal => '关闭弹窗';
+  String get hotkeysDescCloseModal => '关闭浮层、退出全屏或取消录音';
 
   @override
   String get hotkeysStubSearch => '搜索功能尚未提供。';

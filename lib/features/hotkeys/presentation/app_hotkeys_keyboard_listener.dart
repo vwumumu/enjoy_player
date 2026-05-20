@@ -11,7 +11,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/routing/app_router.dart';
+import 'package:enjoy_player/core/routing/player_navigation.dart';
+import 'package:enjoy_player/features/hotkeys/application/escape_dismissal.dart';
 import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
+import 'package:enjoy_player/features/player/application/player_collapse.dart';
 import 'package:enjoy_player/features/hotkeys/domain/hotkey_chord.dart';
 import 'package:enjoy_player/features/library/application/library_search_focus_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
@@ -19,7 +22,6 @@ import 'package:enjoy_player/features/player/application/player_interactions.dar
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
-import 'package:enjoy_player/features/player/application/player_ui_provider.dart';
 import 'package:enjoy_player/features/shadow_reading/application/shadow_reading_hotkey_bus.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -82,47 +84,60 @@ class _AppHotkeysKeyboardListenerState
     final goRouter = ref.read(appRouterProvider);
     final navCtx = _routerNavigatorContext();
 
-    // Modal.close (Escape): cheatsheet and fullscreen before route pops so we
-    // never pop GoRouter under an open dialog; shadow recording cancels before
-    // collapsing the player.
+    // Modal.close (Escape): dismiss transient UI only — never collapse the
+    // player route as a fallback (see escape_dismissal.dart).
     if (_matches(event, ctrl, 'modal.close')) {
-      if (hotkeysCheatsheetOpen.value && navCtx != null) {
-        Navigator.of(navCtx, rootNavigator: true).maybePop();
-        return true;
-      }
-      if (isDesktop && ref.read(windowFullscreenProvider)) {
-        unawaited(
-          ref.read(windowFullscreenProvider.notifier).setFullscreen(false),
-        );
-        return true;
-      }
-      final session = ref.read(playerControllerProvider);
-      if (session != null &&
-          ref.read(shadowReadingHotkeyBusProvider).isRecordingActive) {
-        ref
-            .read(shadowReadingHotkeyBusProvider.notifier)
-            .pulseRecordingCancel();
-        return true;
-      }
-      // Dismiss Navigator overlays (bottom sheets, dialogs, etc.) before
-      // GoRouter pops a page — otherwise Escape on e.g. [DictionaryLookupSheet]
-      // hits `goRouter.pop()` first and exits `/player/...` while the sheet
-      // is still open.
+      final path = goRouter.state.uri.path;
+      NavigatorState? leafNav;
+      NavigatorState? rootNav;
       if (navCtx != null) {
-        final leafNav = Navigator.of(navCtx, rootNavigator: false);
-        if (leafNav.canPop()) {
-          leafNav.pop();
-          return true;
-        }
-        final rootNav = Navigator.of(navCtx, rootNavigator: true);
-        if (!identical(leafNav, rootNav) && rootNav.canPop()) {
-          rootNav.pop();
-          return true;
-        }
+        leafNav = Navigator.of(navCtx, rootNavigator: false);
+        rootNav = Navigator.of(navCtx, rootNavigator: true);
       }
-      if (goRouter.canPop()) {
-        goRouter.pop();
-        return true;
+      final action = resolveEscapeDismissal(
+        EscapeDismissalContext(
+          cheatsheetOpen: hotkeysCheatsheetOpen.value,
+          windowFullscreen: ref.read(windowFullscreenProvider),
+          isRecordingActive:
+              ref.read(shadowReadingHotkeyBusProvider).isRecordingActive,
+          leafNavigatorCanPop: leafNav?.canPop() ?? false,
+          rootNavigatorCanPop: rootNav?.canPop() ?? false,
+          leafAndRootNavIdentical: identical(leafNav, rootNav),
+          goRouterCanPop: goRouter.canPop(),
+          path: path,
+          isDesktop: isDesktop,
+        ),
+      );
+      switch (action) {
+        case EscapeDismissalAction.closeCheatsheet:
+          if (navCtx != null) {
+            Navigator.of(navCtx, rootNavigator: true).maybePop();
+          }
+          return true;
+        case EscapeDismissalAction.exitFullscreen:
+          unawaited(
+            ref.read(windowFullscreenProvider.notifier).setFullscreen(false),
+          );
+          return true;
+        case EscapeDismissalAction.cancelRecording:
+          ref
+              .read(shadowReadingHotkeyBusProvider.notifier)
+              .pulseRecordingCancel();
+          return true;
+        case EscapeDismissalAction.popNavigatorOverlay:
+          if (leafNav?.canPop() ?? false) {
+            leafNav!.pop();
+          } else if (rootNav?.canPop() ?? false) {
+            rootNav!.pop();
+          }
+          return true;
+        case EscapeDismissalAction.popGoRouter:
+          goRouter.pop();
+          return true;
+        case EscapeDismissalAction.noopOnPlayer:
+          return true;
+        case null:
+          break;
       }
     }
 
@@ -169,10 +184,10 @@ class _AppHotkeysKeyboardListenerState
       if (_matches(event, ctrl, 'player.toggleExpand')) {
         final onPlayer = path.startsWith('/player/');
         if (onPlayer) {
-          ref.read(playerUiProvider.notifier).collapse();
-          goRouter.pop();
+          final ctx = navCtx ?? context;
+          unawaited(collapseExpandedPlayer(ref, ctx));
         } else {
-          goRouter.push('/player/${session.mediaId}');
+          openPlayerRoute(context, session.mediaId);
         }
         return true;
       }
