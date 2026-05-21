@@ -30,7 +30,7 @@ flutter build apk --release
 flutter build windows --release
 flutter build ios --release --no-codesign   # compile-only smoke
 flutter build macos --release
-flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+flutter build ipa --release --export-options-plist=ios/ExportOptions.export.plist
 ```
 
 See [packaging.md](packaging.md) for signing, FFmpeg, Inno Setup installer, and Apple release steps.

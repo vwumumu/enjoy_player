@@ -50,3 +50,7 @@ app.*.map.json
 # Tooling (SVG→PNG helper)
 /tool/node_modules/
 .venv-svg/
+
+# Apple signing
+.apple/
+*.p8

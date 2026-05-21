@@ -90,13 +90,15 @@ open ios/Runner.xcworkspace # confirm Team + Signing & Capabilities
 
 ### App Store / TestFlight release
 
+**CI:** see [apple-release-ci.md](apple-release-ci.md) for GitHub Secrets, self-hosted runner setup, and [`.github/workflows/release_apple.yml`](../.github/workflows/release_apple.yml).
+
 1. Bump `version:` in `pubspec.yaml`.
 2. Run pre-release checks (see [Release verification](#release-verification-local) below).
 3. Build and export:
 
 ```bash
 flutter build ipa --release \
-  --export-options-plist=ios/ExportOptions.plist
+  --export-options-plist=ios/ExportOptions.export.plist
 ```
 
 Output: `build/ios/ipa/enjoy_player.ipa`.
@@ -194,7 +196,16 @@ flutter build macos --release
 
 Output: `build/macos/Build/Products/Release/Enjoy Player.app`
 
-4. **One-time notary credentials** (store outside git):
+4. **One-time notary credentials** (store outside git). Prefer **App Store Connect API key** (same as CI):
+
+```bash
+xcrun notarytool store-credentials "enjoy-notary" \
+  --key "AuthKey_XXXXX.p8" \
+  --key-id "YOUR_KEY_ID" \
+  --issuer "YOUR_ISSUER_ID"
+```
+
+Or with Apple ID + app-specific password ([generate at appleid.apple.com](https://appleid.apple.com) → App-Specific Passwords):
 
 ```bash
 xcrun notarytool store-credentials "enjoy-notary" \
