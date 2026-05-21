@@ -3,7 +3,7 @@ name: Codegen drift
 on:
   pull_request:
   push:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux]
     steps:
       - uses: actions/checkout@v4
 
