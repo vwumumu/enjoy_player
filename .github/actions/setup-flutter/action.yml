@@ -1,0 +1,9 @@
+name: Setup Flutter (self-hosted)
+description: Verify Flutter on PATH matches .github/flutter-version (no GitHub cache or download).
+
+runs:
+  using: composite
+  steps:
+    - name: Ensure Flutter
+      shell: bash
+      run: bash .github/scripts/ensure_flutter.sh

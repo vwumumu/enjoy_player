@@ -18,38 +18,14 @@ jobs:
     name: iOS smoke
     runs-on: [self-hosted, macos]
     steps:
-      - name: Add Homebrew to PATH & set UTF-8 locale
-        run: |
-          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
-          echo "LANG=en_US.UTF-8" >> "$GITHUB_ENV"
+      - uses: ./.github/actions/setup-macos-runner-env
 
       - uses: actions/checkout@v6
 
-      - name: Read Flutter version
-        id: flutter_version
-        run: echo "version=$(tr -d ' \n\r' < .github/flutter-version)" >> "$GITHUB_OUTPUT"
-
-      - name: Configure curl for flaky HTTP/2 SDK downloads
-        run: echo "CURL_HTTP_VERSION=1_1" >> "$GITHUB_ENV"
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: ${{ steps.flutter_version.outputs.version }}
-          cache: true
+      - uses: ./.github/actions/setup-flutter
 
       - name: Flutter pub get
         run: flutter pub get
-
-      - name: Cache CocoaPods (iOS)
-        uses: actions/cache@v5
-        with:
-          path: |
-            ios/Pods
-            ~/.cocoapods
-          key: pods-ios-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            pods-ios-
 
       - name: CocoaPods install (iOS)
         run: cd ios && pod install
@@ -64,41 +40,17 @@ jobs:
     name: macOS smoke
     runs-on: [self-hosted, macos]
     steps:
-      - name: Add Homebrew to PATH & set UTF-8 locale
-        run: |
-          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
-          echo "LANG=en_US.UTF-8" >> "$GITHUB_ENV"
+      - uses: ./.github/actions/setup-macos-runner-env
 
       - uses: actions/checkout@v6
 
-      - name: Read Flutter version
-        id: flutter_version
-        run: echo "version=$(tr -d ' \n\r' < .github/flutter-version)" >> "$GITHUB_OUTPUT"
-
-      - name: Configure curl for flaky HTTP/2 SDK downloads
-        run: echo "CURL_HTTP_VERSION=1_1" >> "$GITHUB_ENV"
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: ${{ steps.flutter_version.outputs.version }}
-          cache: true
+      - uses: ./.github/actions/setup-flutter
 
       - name: Install Homebrew deps (FFmpeg kit)
         run: brew bundle install --file=macos/Brewfile
 
       - name: Flutter pub get
         run: flutter pub get
-
-      - name: Cache CocoaPods (macOS)
-        uses: actions/cache@v4
-        with:
-          path: |
-            macos/Pods
-            ~/.cocoapods
-          key: pods-macos-${{ hashFiles('macos/Podfile.lock') }}
-          restore-keys: |
-            pods-macos-
 
       - name: CocoaPods install (macOS)
         run: cd macos && pod install

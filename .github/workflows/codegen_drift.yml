@@ -19,15 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Read Flutter version
-        id: flutter_version
-        run: echo "version=$(tr -d ' \n\r' < .github/flutter-version)" >> "$GITHUB_OUTPUT"
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: ${{ steps.flutter_version.outputs.version }}
-          cache: true
+      - uses: ./.github/actions/setup-flutter
 
       - name: Flutter pub get
         run: flutter pub get

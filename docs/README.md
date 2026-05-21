@@ -10,6 +10,7 @@ Maintainers and agents should keep these files **accurate** when behavior or arc
 | [conventions.md](conventions.md) | Contributors | Style / lint / folder rules change |
 | [packaging.md](packaging.md) | Release | Platform build / signing / store prep |
 | [apple-release-ci.md](apple-release-ci.md) | Release | GitHub Actions Apple release workflow & secrets |
+| [ci-self-hosted-runners.md](ci-self-hosted-runners.md) | Release / CI | Self-hosted runner setup for all workflows |
 | [testing.md](testing.md) | Contributors | Test strategy or CI commands change |
 | [decisions/](decisions/) | Architects | Irreversible technical choices |
 | [features/](features/) | Product + dev | Feature behavior changes |

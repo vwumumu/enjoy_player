@@ -132,6 +132,8 @@ Open the repo on GitHub → **Settings** → **Secrets and variables** → **Act
 
 ## Step 4 — Self-hosted runner checklist
 
+All workflows use repo self-hosted runners. Setup, labels, and per-OS toolchains are documented in [ci-self-hosted-runners.md](ci-self-hosted-runners.md).
+
 On the Mac that runs GitHub Actions:
 
 ```bash

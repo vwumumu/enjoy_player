@@ -1,0 +1,15 @@
+name: Setup macOS runner env
+description: Homebrew PATH, UTF-8 locale, and curl HTTP/1.1 for self-hosted macOS runners.
+
+runs:
+  using: composite
+  steps:
+    - name: Add Homebrew to PATH & set UTF-8 locale
+      shell: bash
+      run: |
+        echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+        echo "LANG=en_US.UTF-8" >> "$GITHUB_ENV"
+
+    - name: Configure curl for flaky HTTP/2 SDK downloads
+      shell: bash
+      run: echo "CURL_HTTP_VERSION=1_1" >> "$GITHUB_ENV"
