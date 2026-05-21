@@ -33,8 +33,10 @@ jobs:
       NOTARY_PROFILE: enjoy-notary
       MACOS_APP_PATH: build/macos/Build/Products/Release/Enjoy Player.app
     steps:
-      - name: Add Homebrew to PATH
-        run: echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+      - name: Add Homebrew to PATH & set UTF-8 locale
+        run: |
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+          echo "LANG=en_US.UTF-8" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v6
 

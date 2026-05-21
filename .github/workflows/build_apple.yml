@@ -18,8 +18,10 @@ jobs:
     name: iOS smoke
     runs-on: [self-hosted, macos]
     steps:
-      - name: Add Homebrew to PATH
-        run: echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+      - name: Add Homebrew to PATH & set UTF-8 locale
+        run: |
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+          echo "LANG=en_US.UTF-8" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v6
 
@@ -62,8 +64,10 @@ jobs:
     name: macOS smoke
     runs-on: [self-hosted, macos]
     steps:
-      - name: Add Homebrew to PATH
-        run: echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+      - name: Add Homebrew to PATH & set UTF-8 locale
+        run: |
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+          echo "LANG=en_US.UTF-8" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v6
 
