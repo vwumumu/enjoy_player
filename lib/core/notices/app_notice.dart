@@ -151,7 +151,10 @@ abstract final class AppNotice {
           closeIconColor: foregroundColor,
           duration: duration,
           action: action,
-          margin: EdgeInsets.fromLTRB(horizontal, 0, horizontal, bottomPad),
+          // SnackBar rejects simultaneous [width] and [margin].
+          margin: snackWidth != null
+              ? EdgeInsets.only(bottom: bottomPad)
+              : EdgeInsets.fromLTRB(horizontal, 0, horizontal, bottomPad),
           content: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -378,6 +378,11 @@ class EmbeddedSubtitleService {
     int streamIndex,
   ) async {
     final tmpDir = await getTemporaryDirectory();
+    // macOS sandbox: path_provider may return a bundle-specific subfolder that
+    // does not exist until created (ffmpeg then fails to open the output path).
+    if (!await tmpDir.exists()) {
+      await tmpDir.create(recursive: true);
+    }
     final outPath = p.join(
       tmpDir.path,
       'enjoy_subs_${DateTime.now().microsecondsSinceEpoch}_$streamIndex.srt',

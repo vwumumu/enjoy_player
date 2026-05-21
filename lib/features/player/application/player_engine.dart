@@ -87,12 +87,27 @@ class MediaKitPlayerEngine implements PlayerEngine {
 
   mk.Player get player => _player;
 
+  static VideoControllerConfiguration get _videoControllerConfiguration {
+    if (Platform.isWindows) {
+      return const VideoControllerConfiguration(width: 1920, height: 1080);
+    }
+    if (Platform.isMacOS) {
+      // Bind libmpv video output before decode; prefer software GL texture path
+      // on recent macOS where deprecated OpenGL HW textures can stay black.
+      return const VideoControllerConfiguration(
+        width: 1920,
+        height: 1080,
+        hwdec: 'auto-safe',
+        enableHardwareAcceleration: false,
+      );
+    }
+    return const VideoControllerConfiguration();
+  }
+
   VideoController get videoController {
     return _videoController ??= VideoController(
       _player,
-      configuration: Platform.isWindows
-          ? const VideoControllerConfiguration(width: 1920, height: 1080)
-          : const VideoControllerConfiguration(),
+      configuration: _videoControllerConfiguration,
     );
   }
 
@@ -231,7 +246,7 @@ class MediaKitPlayerEngine implements PlayerEngine {
 
   @override
   void warmVideoSurface() {
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isMacOS) {
       videoController;
     }
   }

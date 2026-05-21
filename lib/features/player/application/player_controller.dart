@@ -116,11 +116,11 @@ class PlayerController extends _$PlayerController {
     final language = resolved.language;
     final durationSec = resolved.durationSeconds;
 
-    // Bind video output before first decode on Windows (see media_kit_video notes).
+    // Bind video output before first decode on Windows/macOS (see media_kit_video notes).
     // Audio-only paths skip this so unit tests and headless runs avoid native libmpv.
     if (kind == MediaKind.video &&
         engine is MediaKitPlayerEngine &&
-        Platform.isWindows) {
+        (Platform.isWindows || Platform.isMacOS)) {
       engine.warmVideoSurface();
     }
 
