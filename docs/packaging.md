@@ -41,13 +41,157 @@ Release builds enable R8. [`proguard-rules.pro`](../android/app/proguard-rules.p
 
 ## iOS
 
-- Deployment target **13.0** in Xcode project (≥ plan minimum 12).
-- Local file playback uses copied files under app sandbox.
+### Identity & deployment
+
+- **Bundle ID**: `ai.enjoy.player` (matches Android `applicationId` in [ADR-0020](decisions/0020-android-windows-release-identity.md)).
+- **Team**: `46X685R747` — automatic signing in [`ios/Runner.xcodeproj/project.pbxproj`](../ios/Runner.xcodeproj/project.pbxproj).
+- **Deployment target**: **14.0** (`ios/Podfile`, Xcode project). Azure Speech pods require aligning pod targets to this floor.
+- **Versioning**: `pubspec.yaml` → `CFBundleShortVersionString` / `CFBundleVersion`.
+
+### Prerequisites (developers)
+
+- **Xcode** + Apple Developer Program membership for the Enjoy team.
+- **CocoaPods** (`pod --version` — Flutter doctor reports it when Xcode is installed).
+- Open **`ios/Runner.xcworkspace`** (not `.xcodeproj`) after `flutter pub get`.
+
+```bash
+flutter pub get
+cd ios && pod install && cd ..
+```
+
+### Privacy & capabilities
+
+[`ios/Runner/Info.plist`](../ios/Runner/Info.plist):
+
+- **`NSMicrophoneUsageDescription`** — shadow-reading / `record` package.
+- **`ITSAppUsesNonExemptEncryption` = false** — standard HTTPS/TLS only (exempt encryption).
+
+Local media uses the app sandbox (files copied on import). YouTube and Enjoy auth use `flutter_inappwebview` (see [youtube.md](features/youtube.md)).
+
+**App Store Connect** (manual, before first upload):
+
+1. Register App ID **`ai.enjoy.player`** in Apple Developer → Identifiers.
+2. Create the app record in App Store Connect.
+3. Complete **App Privacy** questionnaire: microphone (shadow reading), network/API usage, optional analytics if added later.
+4. Provide microphone justification in review notes if asked.
+
+### Native dependencies (CocoaPods)
+
+`ios/Podfile` uses **`use_frameworks!`** (required for Azure Speech, ADR-0017). Notable pods: `MicrosoftCognitiveServicesSpeech-iOS`, `ffmpeg_kit_flutter_new/full-gpl`, `flutter_inappwebview_ios`, `media_kit_*`, `record_ios`.
+
+[`ios/Podfile.lock`](../ios/Podfile.lock) is tracked for reproducible builds — commit changes when pods shift.
+
+### Dev run
+
+```bash
+flutter run -d ios          # simulator or connected device
+open ios/Runner.xcworkspace # confirm Team + Signing & Capabilities
+```
+
+### App Store / TestFlight release
+
+1. Bump `version:` in `pubspec.yaml`.
+2. Run pre-release checks (see [Release verification](#release-verification-local) below).
+3. Build and export:
+
+```bash
+flutter build ipa --release \
+  --export-options-plist=ios/ExportOptions.plist
+```
+
+Output: `build/ios/ipa/enjoy_player.ipa`.
+
+4. Upload via **Xcode Organizer** (Window → Organizer → Archives) or **Transporter** / `xcrun altool --upload-app`.
+5. In App Store Connect: attach build to a version, submit for TestFlight or App Review.
+
+Compile-only (no upload signing):
+
+```bash
+flutter build ios --release --no-codesign
+```
+
+---
 
 ## macOS
 
-- Sandbox **on**; entitlements include user-selected files and network client.
-- Files: [`macos/Runner/DebugProfile.entitlements`](../macos/Runner/DebugProfile.entitlements), [`Release.entitlements`](../macos/Runner/Release.entitlements).
+### Identity & deployment
+
+- **Bundle ID**: `ai.enjoy.player` — [`macos/Runner/Configs/AppInfo.xcconfig`](../macos/Runner/Configs/AppInfo.xcconfig).
+- **Team**: `46X685R747` — automatic signing in Xcode project.
+- **Min OS**: **10.15** (`macos/Podfile`, Xcode project).
+- **Display name**: Enjoy Player (`PRODUCT_NAME` in AppInfo.xcconfig).
+- **Distribution target**: **direct download** with **Developer ID Application** signing + notarization (not Mac App Store).
+
+### Prerequisites (developers)
+
+- **Xcode** + **CocoaPods**.
+- **Homebrew** + FFmpeg kit deps (see [FFmpeg section](#ffmpeg-ffmpeg_kit_flutter_new-and-homebrew) below).
+- Open **`macos/Runner.xcworkspace`** after pods resolve.
+
+```bash
+flutter pub get
+brew bundle install --file=macos/Brewfile
+cd macos && pod install && cd ..
+```
+
+### Sandbox & entitlements
+
+App Sandbox is **on**. Entitlements:
+
+| File | Purpose |
+|------|---------|
+| [`DebugProfile.entitlements`](../macos/Runner/DebugProfile.entitlements) | Debug/Profile: sandbox, user-selected files, network client, JIT, network server, **audio input** |
+| [`Release.entitlements`](../macos/Runner/Release.entitlements) | Release: sandbox, user-selected files, network client, **audio input** |
+
+[`macos/Runner/Info.plist`](../macos/Runner/Info.plist) includes **`NSMicrophoneUsageDescription`** for shadow-reading.
+
+Release builds set **`ENABLE_HARDENED_RUNTIME = YES`**. `flutter build macos --release` uses automatic **development** signing; the notarization script re-signs with **Developer ID Application** before upload.
+
+### Native dependencies
+
+Same CocoaPods pattern as iOS (`use_frameworks!`). [`macos/Podfile.lock`](../macos/Podfile.lock) is tracked for reproducible builds.
+
+### Dev run
+
+```bash
+flutter run -d macos
+```
+
+If launch fails with **DYLD, Library missing** (`libz.1.dylib` etc.), run `brew bundle install --file=macos/Brewfile` and rebuild. The Xcode **Bundle FFmpeg Homebrew deps** phase copies required dylibs into the app bundle.
+
+### Direct release (Developer ID + notarization)
+
+1. Bump `version:` in `pubspec.yaml`.
+2. Run pre-release checks.
+3. Build:
+
+```bash
+flutter build macos --release
+```
+
+Output: `build/macos/Build/Products/Release/Enjoy Player.app`
+
+4. **One-time notary credentials** (store outside git):
+
+```bash
+xcrun notarytool store-credentials "enjoy-notary" \
+  --apple-id "you@example.com" \
+  --team-id "46X685R747" \
+  --password "@keychain:AC_PASSWORD"
+```
+
+5. Notarize and staple:
+
+```bash
+./macos/scripts/notarize_release.sh \
+  "build/macos/Build/Products/Release/Enjoy Player.app"
+```
+
+Override profile if needed: `NOTARY_PROFILE=my-profile ./macos/scripts/notarize_release.sh …`
+
+6. Ship the stapled `.app` (zip or DMG). Gatekeeper should pass: `spctl --assess --type execute --verbose=4 "…/Enjoy Player.app"`.
+
+**GPL note:** macOS/iOS use `ffmpeg_kit_flutter_new/full-gpl` (bundled FFmpeg). Confirm licensing/compliance before public distribution.
 
 ### FFmpeg (`ffmpeg_kit_flutter_new`) and Homebrew
 

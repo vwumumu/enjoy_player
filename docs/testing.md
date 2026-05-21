@@ -28,9 +28,12 @@ CI runs debug smoke builds plus **release compile** for Android (`apk` + `appbun
 flutter build appbundle --release   # with android/key.properties for real signing
 flutter build apk --release
 flutter build windows --release
+flutter build ios --release --no-codesign   # compile-only smoke
+flutter build macos --release
+flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
 ```
 
-See [packaging.md](packaging.md) for signing, FFmpeg, and Inno Setup installer steps.
+See [packaging.md](packaging.md) for signing, FFmpeg, Inno Setup installer, and Apple release steps.
 
 ## Guidelines
 

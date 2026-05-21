@@ -385,7 +385,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/scripts/bundle_ffmpeg_homebrew_deps.sh\" \"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\"\n";
+			shellScript = "CONFIGURATION=\"${CONFIGURATION}\" EXPANDED_CODE_SIGN_IDENTITY=\"${EXPANDED_CODE_SIGN_IDENTITY}\" CODE_SIGN_IDENTITY=\"${CODE_SIGN_IDENTITY}\" ENABLE_HARDENED_RUNTIME=\"${ENABLE_HARDENED_RUNTIME}\" \"${SRCROOT}/scripts/bundle_ffmpeg_homebrew_deps.sh\" \"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		AD5549E47C025DAE87148CDC /* [CP] Check Pods Manifest.lock */ = {
@@ -714,6 +714,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 46X685R747;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

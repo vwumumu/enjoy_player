@@ -2,6 +2,9 @@
 # Bundles Homebrew dylibs required by ffmpeg_kit_flutter_new prebuilt macOS frameworks.
 # Those binaries were linked against /opt/homebrew/opt/* at build time; without this
 # step (or the same libs installed on the machine), dyld fails at launch.
+#
+# Also re-signs embedded FFmpegKit / media_kit prebuilt frameworks on Release so they
+# share the app signing team (avoids dyld "different Team IDs").
 set -eu
 
 APP_BUNDLE="${1:-}"
@@ -18,6 +21,21 @@ fi
 
 is_macho() {
   file "$1" 2>/dev/null | grep -q 'Mach-O'
+}
+
+resolve_sign_identity() {
+  id="${EXPANDED_CODE_SIGN_IDENTITY:-}"
+  if [ -n "${id}" ] && [ "${id}" != "-" ]; then
+    printf '%s' "${id}"
+    return
+  fi
+  id="${CODE_SIGN_IDENTITY:-}"
+  if [ -n "${id}" ] && [ "${id}" != "-" ]; then
+    printf '%s' "${id}"
+    return
+  fi
+  security find-identity -v -p codesigning 2>/dev/null \
+    | awk -F'"' '/Apple Development/ { print $2; exit }'
 }
 
 homebrew_deps_for() {
@@ -96,65 +114,92 @@ while :; do
 done
 
 BUNDLED_COUNT="$(wc -l <"${BUNDLED}" | tr -d ' ')"
-if [ "${BUNDLED_COUNT}" -eq 0 ]; then
-  rm -f "${MACHO_LIST}" "${DEPS}" "${BUNDLED}"
-  exit 0
+
+if [ "${BUNDLED_COUNT}" -gt 0 ]; then
+  while read -r bin; do
+    [ -n "${bin}" ] || continue
+    while read -r src; do
+      [ -n "${src}" ] || continue
+      base="$(basename "${src}")"
+      install_name_tool -change "${src}" "@rpath/${base}" "${bin}" 2>/dev/null || true
+    done <"${BUNDLED}"
+  done <"${MACHO_LIST}"
 fi
 
-while read -r bin; do
-  [ -n "${bin}" ] || continue
-  while read -r src; do
-    [ -n "${src}" ] || continue
-    base="$(basename "${src}")"
-    install_name_tool -change "${src}" "@rpath/${base}" "${bin}" 2>/dev/null || true
-  done <"${BUNDLED}"
-done <"${MACHO_LIST}"
-
-# install_name_tool invalidates existing signatures; re-sign so dyld accepts the binaries.
 SCRIPT_DIR="$(CDPATH= cd "$(dirname "$0")" && pwd)"
 MACOS_DIR="$(dirname "${SCRIPT_DIR}")"
-if [ "${CONFIGURATION:-Debug}" = "Release" ]; then
+if [ "${CONFIGURATION:-Debug}" = "Release" ] || [ "${ENABLE_HARDENED_RUNTIME:-}" = "YES" ]; then
   ENTITLEMENTS="${MACOS_DIR}/Runner/Release.entitlements"
+  CODESIGN_EXTRA="--options runtime --timestamp"
+  RESIGN_ALL_FRAMEWORKS=1
 else
   ENTITLEMENTS="${MACOS_DIR}/Runner/DebugProfile.entitlements"
+  CODESIGN_EXTRA="--timestamp=none"
+  RESIGN_ALL_FRAMEWORKS=0
 fi
-SIGN_IDENTITY="${EXPANDED_CODE_SIGN_IDENTITY:--}"
 
-while read -r src; do
-  [ -n "${src}" ] || continue
-  dest="${FRAMEWORKS_DIR}/$(basename "${src}")"
-  codesign --force --sign "${SIGN_IDENTITY}" --timestamp=none "${dest}"
-done <"${BUNDLED}"
+SIGN_IDENTITY="$(resolve_sign_identity)"
+if [ -z "${SIGN_IDENTITY}" ]; then
+  echo "bundle_ffmpeg_homebrew_deps: no code signing identity found" >&2
+  exit 1
+fi
 
-while read -r bin; do
-  [ -n "${bin}" ] || continue
-  codesign --force --sign "${SIGN_IDENTITY}" --timestamp=none "${bin}"
-done <"${MACHO_LIST}"
+sign_path() {
+  target="$1"
+  use_entitlements="${2:-0}"
+  if [ "${use_entitlements}" -eq 1 ]; then
+    # shellcheck disable=SC2086
+    codesign --force --sign "${SIGN_IDENTITY}" ${CODESIGN_EXTRA} \
+      --entitlements "${ENTITLEMENTS}" \
+      "${target}"
+  else
+    # shellcheck disable=SC2086
+    codesign --force --sign "${SIGN_IDENTITY}" ${CODESIGN_EXTRA} "${target}"
+  fi
+}
 
-find "${FRAMEWORKS_DIR}" -maxdepth 1 -name '*.framework' -type d | while read -r fw; do
-  codesign --force --sign "${SIGN_IDENTITY}" --timestamp=none "${fw}"
-done
+if [ "${BUNDLED_COUNT}" -gt 0 ]; then
+  while read -r src; do
+    [ -n "${src}" ] || continue
+    sign_path "${FRAMEWORKS_DIR}/$(basename "${src}")"
+  done <"${BUNDLED}"
 
-MACOS_BIN_DIR="${APP_BUNDLE}/Contents/MacOS"
-EXECUTABLE=""
-if [ -d "${MACOS_BIN_DIR}" ]; then
-  find "${MACOS_BIN_DIR}" -type f 2>/dev/null | while read -r bin; do
-    if is_macho "${bin}"; then
-      codesign --force --sign "${SIGN_IDENTITY}" --timestamp=none "${bin}"
+  while read -r bin; do
+    [ -n "${bin}" ] || continue
+    sign_path "${bin}"
+  done <"${MACHO_LIST}"
+fi
+
+if [ "${RESIGN_ALL_FRAMEWORKS}" -eq 1 ]; then
+  while IFS= read -r f; do
+    case "${f}" in
+      *.debug.dylib) continue ;;
+    esac
+    if is_macho "${f}"; then
+      sign_path "${f}"
     fi
-  done
-  EXECUTABLE="${MACOS_BIN_DIR}/$(basename "${APP_BUNDLE}" .app)"
+  done <<EOF
+$(find "${FRAMEWORKS_DIR}" -type f 2>/dev/null)
+EOF
+
+  while IFS= read -r fw; do
+    sign_path "${fw}"
+  done <<EOF
+$(find "${FRAMEWORKS_DIR}" -maxdepth 1 -name '*.framework' -type d 2>/dev/null)
+EOF
+
+  EXECUTABLE="${APP_BUNDLE}/Contents/MacOS/$(basename "${APP_BUNDLE}" .app)"
+  if [ -f "${EXECUTABLE}" ]; then
+    sign_path "${EXECUTABLE}" 1
+  fi
+
+  sign_path "${APP_BUNDLE}" 1
 fi
 
-if [ -f "${EXECUTABLE}" ]; then
-  codesign --force --sign "${SIGN_IDENTITY}" --timestamp=none \
-    --entitlements "${ENTITLEMENTS}" \
-    "${EXECUTABLE}"
+if [ "${BUNDLED_COUNT}" -gt 0 ]; then
+  echo "bundle_ffmpeg_homebrew_deps: bundled ${BUNDLED_COUNT} Homebrew dylib(s) into ${FRAMEWORKS_DIR}"
+elif [ "${RESIGN_ALL_FRAMEWORKS}" -eq 1 ]; then
+  echo "bundle_ffmpeg_homebrew_deps: re-signed embedded frameworks in ${FRAMEWORKS_DIR}"
 fi
 
-codesign --force --deep --sign "${SIGN_IDENTITY}" --timestamp=none \
-  --entitlements "${ENTITLEMENTS}" \
-  "${APP_BUNDLE}"
-
-echo "bundle_ffmpeg_homebrew_deps: bundled ${BUNDLED_COUNT} Homebrew dylib(s) into ${FRAMEWORKS_DIR}"
 rm -f "${MACHO_LIST}" "${DEPS}" "${BUNDLED}"

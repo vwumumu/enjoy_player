@@ -68,5 +68,7 @@
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Enjoy Player uses the microphone for shadow-reading practice recordings.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
