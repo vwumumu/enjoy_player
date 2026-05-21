@@ -1,7 +1,42 @@
 /// JS snippets and URL helpers for [YouTubePlayerEngine].
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
+/// Shared by player + login WebViews — Google/YouTube reject default WKWebView UAs.
+const String kYoutubeMobileChromeUserAgent =
+    'Mozilla/5.0 (Linux; Android 14; Pixel 8) '
+    'AppleWebKit/537.36 (KHTML, like Gecko) '
+    'Chrome/134.0.0.0 Mobile Safari/537.36';
+
+/// WebView settings for YouTube player and sign-in (keep UA aligned).
+class YoutubeWebViewSettings {
+  YoutubeWebViewSettings._();
+
+  static InAppWebViewSettings forPlayer() {
+    return InAppWebViewSettings(
+      mediaPlaybackRequiresUserGesture: false,
+      allowsInlineMediaPlayback: true,
+      allowsPictureInPictureMediaPlayback:
+          defaultTargetPlatform == TargetPlatform.iOS ? false : null,
+      javaScriptEnabled: true,
+      transparentBackground: true,
+      useWideViewPort: true,
+      loadWithOverviewMode: true,
+      userAgent: kYoutubeMobileChromeUserAgent,
+      thirdPartyCookiesEnabled: true,
+    );
+  }
+
+  static InAppWebViewSettings forLogin() {
+    return InAppWebViewSettings(
+      javaScriptEnabled: true,
+      thirdPartyCookiesEnabled: true,
+      userAgent: kYoutubeMobileChromeUserAgent,
+    );
+  }
+}
 
 class YoutubeWebViewBridge {
   YoutubeWebViewBridge._();

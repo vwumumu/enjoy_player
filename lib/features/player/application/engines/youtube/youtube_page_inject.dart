@@ -53,16 +53,6 @@ const String kYoutubeMobileWatchInjectScript = r'''
       '{display:none!important;pointer-events:none!important;}'
     ].join('');
     document.head.appendChild(style);
-    document.addEventListener('fullscreenchange',function(){
-      if(document.fullscreenElement){
-        document.exitFullscreen().catch(function(){});
-      }
-    });
-    document.addEventListener('webkitfullscreenchange',function(){
-      if(document.webkitFullscreenElement && document.webkitExitFullscreen){
-        document.webkitExitFullscreen();
-      }
-    });
   }
 
   // --- Attach event hooks to a <video> element ---
@@ -158,24 +148,19 @@ const String kYoutubeMobileWatchInjectScript = r'''
     var de=document.documentElement;
     de.style.setProperty('overflow','hidden','important');
     de.style.setProperty('background','#000','important');
-    de.style.setProperty('width','100%','important');
-    de.style.setProperty('height','100%','important');
     var b=document.body;
     b.style.setProperty('margin','0','important');
     b.style.setProperty('padding','0','important');
     b.style.setProperty('overflow','hidden','important');
     b.style.setProperty('background','#000','important');
-    b.style.setProperty('position','relative','important');
-    b.style.setProperty('width','100%','important');
-    b.style.setProperty('height','100%','important');
 
     if(player){
-      player.style.setProperty('position','absolute','important');
+      player.style.setProperty('position','fixed','important');
       player.style.setProperty('top','0','important');
       player.style.setProperty('left','0','important');
-      player.style.setProperty('width','100%','important');
-      player.style.setProperty('height','100%','important');
-      player.style.setProperty('z-index','1','important');
+      player.style.setProperty('width','100vw','important');
+      player.style.setProperty('height','100vh','important');
+      player.style.setProperty('z-index','999999','important');
       player.style.setProperty('overflow','hidden','important');
       player.style.setProperty('background','#000','important');
       player.style.setProperty('margin','0','important');

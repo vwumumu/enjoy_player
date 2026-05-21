@@ -7,6 +7,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:enjoy_player/features/player/application/engines/youtube/youtube_webview_bridge.dart';
 import 'package:enjoy_player/features/player/application/youtube_auth_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -93,14 +94,7 @@ class _YoutubeLoginScreenState extends ConsumerState<YoutubeLoginScreen> {
                 initialUrlRequest: URLRequest(
                   url: WebUri(YoutubeLoginScreen._signInUrl),
                 ),
-                initialSettings: InAppWebViewSettings(
-                  javaScriptEnabled: true,
-                  thirdPartyCookiesEnabled: true,
-                  userAgent:
-                      'Mozilla/5.0 (Linux; Android 14; Pixel 8) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) '
-                      'Chrome/134.0.0.0 Mobile Safari/537.36',
-                ),
+                initialSettings: YoutubeWebViewSettings.forLogin(),
                 onWebViewCreated: (controller) {
                   _controller = controller;
                 },

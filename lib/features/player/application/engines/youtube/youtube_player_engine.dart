@@ -317,10 +317,10 @@ class YoutubePlayerEngine implements PlayerEngine {
     if (_rejectingNativeFullscreen) return;
     _rejectingNativeFullscreen = true;
     try {
-      await controller.closeAllMediaPresentations();
+      // JS inline attrs only — closeAllMediaPresentations() stops playback.
       await YoutubeWebViewBridge.forceInlinePlayback(controller);
     } catch (e, st) {
-      _logYoutube.fine('Failed to exit native fullscreen', e, st);
+      _logYoutube.fine('Failed to force inline playback', e, st);
     } finally {
       _rejectingNativeFullscreen = false;
     }
@@ -418,35 +418,24 @@ class _YoutubeWebViewHostState extends State<_YoutubeWebViewHost> {
       return const ColoredBox(color: Colors.black);
     }
 
+    final iosInlinePlayback = defaultTargetPlatform == TargetPlatform.iOS;
+
     return InAppWebView(
-      initialSettings: InAppWebViewSettings(
-        mediaPlaybackRequiresUserGesture: false,
-        allowsInlineMediaPlayback: true,
-        allowsPictureInPictureMediaPlayback: false,
-        isElementFullscreenEnabled: false,
-        javaScriptEnabled: true,
-        transparentBackground: true,
-        useWideViewPort: true,
-        loadWithOverviewMode: true,
-        userAgent: defaultTargetPlatform == TargetPlatform.iOS
-            ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) '
-                'AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                'Version/17.0 Mobile/15E148 Safari/604.1'
-            : 'Mozilla/5.0 (Linux; Android 14; Pixel 8) '
-                'AppleWebKit/537.36 (KHTML, like Gecko) '
-                'Chrome/134.0.0.0 Mobile Safari/537.36',
-        thirdPartyCookiesEnabled: true,
-      ),
+      initialSettings: YoutubeWebViewSettings.forPlayer(),
       onWebViewCreated: (controller) {
         _controller = controller;
         e._onWebViewCreated(controller);
       },
-      onEnterFullscreen: (controller) {
-        unawaited(e._exitNativeFullscreen(controller));
-      },
-      onExitFullscreen: (controller) {
-        unawaited(e._onNativeFullscreenExit(controller));
-      },
+      onEnterFullscreen: iosInlinePlayback
+          ? (controller) {
+              unawaited(e._exitNativeFullscreen(controller));
+            }
+          : null,
+      onExitFullscreen: iosInlinePlayback
+          ? (controller) {
+              unawaited(e._onNativeFullscreenExit(controller));
+            }
+          : null,
       onLoadStop: (controller, url) async {
         await e._onPageFinished(controller);
       },
