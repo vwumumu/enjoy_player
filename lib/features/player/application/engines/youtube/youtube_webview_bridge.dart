@@ -118,4 +118,24 @@ class YoutubeWebViewBridge {
   ) async {
     await web?.loadUrl(urlRequest: URLRequest(url: watchUri(videoId)));
   }
+
+  /// Re-applies `playsinline` on the active `<video>` (iOS WKWebView safety net).
+  static Future<void> forceInlinePlayback(InAppWebViewController? web) async {
+    await web?.evaluateJavascript(
+      source: '''
+        (function(){
+          var p=document.querySelector('.html5-video-player');
+          var v=p?p.querySelector('video'):null;
+          if(!v) v=document.querySelector('video');
+          if(!v) return;
+          v.setAttribute('playsinline','');
+          v.setAttribute('webkit-playsinline','');
+          v.playsInline=true;
+          if(typeof v.webkitSetPresentationMode==='function'){
+            try{v.webkitSetPresentationMode('inline');}catch(e){}
+          }
+        })();
+      ''',
+    );
+  }
 }

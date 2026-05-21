@@ -32,8 +32,47 @@ const String kYoutubeMobileWatchInjectScript = r'''
     return player && player.classList.contains('ad-showing');
   }
 
+  function enableInlinePlayback(video){
+    video.setAttribute('playsinline','');
+    video.setAttribute('webkit-playsinline','');
+    video.playsInline=true;
+    if(typeof video.webkitSetPresentationMode==='function'){
+      try{video.webkitSetPresentationMode('inline');}catch(e){}
+    }
+  }
+
+  function installInlineGuards(){
+    if(window.__enjoyYtInlineGuards){return;}
+    window.__enjoyYtInlineGuards=1;
+    var style=document.createElement('style');
+    style.id='__enjoyYtInlineStyle';
+    style.textContent=[
+      '.ytp-fullscreen-button,.ytp-size-button,.fullscreen-icon',
+      '{display:none!important;pointer-events:none!important;}',
+      'button[aria-label*="Fullscreen"],button[aria-label*="全屏"]',
+      '{display:none!important;pointer-events:none!important;}'
+    ].join('');
+    document.head.appendChild(style);
+    document.addEventListener('fullscreenchange',function(){
+      if(document.fullscreenElement){
+        document.exitFullscreen().catch(function(){});
+      }
+    });
+    document.addEventListener('webkitfullscreenchange',function(){
+      if(document.webkitFullscreenElement && document.webkitExitFullscreen){
+        document.webkitExitFullscreen();
+      }
+    });
+  }
+
   // --- Attach event hooks to a <video> element ---
   function hookVideo(video){
+    enableInlinePlayback(video);
+    video.addEventListener('webkitbeginfullscreen',function(){
+      if(typeof video.webkitSetPresentationMode==='function'){
+        try{video.webkitSetPresentationMode('inline');}catch(e){}
+      }
+    },true);
     var events=['play','playing','pause','ended',
                 'waiting','canplay','error','loadedmetadata'];
     events.forEach(function(e){
@@ -105,6 +144,7 @@ const String kYoutubeMobileWatchInjectScript = r'''
       v=currentV;
       hookVideo(v);
       rebuildMids();
+      enableInlinePlayback(v);
       v.muted=false; v.volume=1;
       v.autoplay=false;
       v.removeAttribute('autoplay');
@@ -113,22 +153,29 @@ const String kYoutubeMobileWatchInjectScript = r'''
     }
     if(!v) return;
 
+    enableInlinePlayback(v);
+
     var de=document.documentElement;
     de.style.setProperty('overflow','hidden','important');
     de.style.setProperty('background','#000','important');
+    de.style.setProperty('width','100%','important');
+    de.style.setProperty('height','100%','important');
     var b=document.body;
     b.style.setProperty('margin','0','important');
     b.style.setProperty('padding','0','important');
     b.style.setProperty('overflow','hidden','important');
     b.style.setProperty('background','#000','important');
+    b.style.setProperty('position','relative','important');
+    b.style.setProperty('width','100%','important');
+    b.style.setProperty('height','100%','important');
 
     if(player){
-      player.style.setProperty('position','fixed','important');
+      player.style.setProperty('position','absolute','important');
       player.style.setProperty('top','0','important');
       player.style.setProperty('left','0','important');
-      player.style.setProperty('width','100vw','important');
-      player.style.setProperty('height','100vh','important');
-      player.style.setProperty('z-index','999999','important');
+      player.style.setProperty('width','100%','important');
+      player.style.setProperty('height','100%','important');
+      player.style.setProperty('z-index','1','important');
       player.style.setProperty('overflow','hidden','important');
       player.style.setProperty('background','#000','important');
       player.style.setProperty('margin','0','important');
@@ -195,6 +242,7 @@ const String kYoutubeMobileWatchInjectScript = r'''
     var tmp=player;
     while(tmp){chain.push(tmp);tmp=tmp.parentElement;}
 
+    installInlineGuards();
     enforce();
     setInterval(enforce,300);
 

@@ -3,6 +3,7 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -42,6 +43,8 @@ class YoutubePlayerEngine implements PlayerEngine {
 
   Timer? _pollTimer;
   double? _pendingSeekSeconds;
+
+  bool _rejectingNativeFullscreen = false;
 
   /// Poll interval is 250ms; 3 ticks ≈ 750ms of stable `paused` before we trust
   /// the poller over transient DOM noise.
@@ -310,6 +313,26 @@ class YoutubePlayerEngine implements PlayerEngine {
     await injectYoutubeMobileWatchPage(controller);
   }
 
+  Future<void> _exitNativeFullscreen(InAppWebViewController controller) async {
+    if (_rejectingNativeFullscreen) return;
+    _rejectingNativeFullscreen = true;
+    try {
+      await controller.closeAllMediaPresentations();
+      await YoutubeWebViewBridge.forceInlinePlayback(controller);
+    } catch (e, st) {
+      _logYoutube.fine('Failed to exit native fullscreen', e, st);
+    } finally {
+      _rejectingNativeFullscreen = false;
+    }
+  }
+
+  Future<void> _onNativeFullscreenExit(InAppWebViewController controller) async {
+    await YoutubeWebViewBridge.forceInlinePlayback(controller);
+    if (_playing && !_playbackCompleted) {
+      await YoutubeWebViewBridge.play(controller);
+    }
+  }
+
   void _applyPendingSeek() {
     final secs = _pendingSeekSeconds;
     if (secs == null || secs <= 0) return;
@@ -399,19 +422,30 @@ class _YoutubeWebViewHostState extends State<_YoutubeWebViewHost> {
       initialSettings: InAppWebViewSettings(
         mediaPlaybackRequiresUserGesture: false,
         allowsInlineMediaPlayback: true,
+        allowsPictureInPictureMediaPlayback: false,
+        isElementFullscreenEnabled: false,
         javaScriptEnabled: true,
         transparentBackground: true,
         useWideViewPort: true,
         loadWithOverviewMode: true,
-        userAgent:
-            'Mozilla/5.0 (Linux; Android 14; Pixel 8) '
-            'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/134.0.0.0 Mobile Safari/537.36',
+        userAgent: defaultTargetPlatform == TargetPlatform.iOS
+            ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) '
+                'AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                'Version/17.0 Mobile/15E148 Safari/604.1'
+            : 'Mozilla/5.0 (Linux; Android 14; Pixel 8) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/134.0.0.0 Mobile Safari/537.36',
         thirdPartyCookiesEnabled: true,
       ),
       onWebViewCreated: (controller) {
         _controller = controller;
         e._onWebViewCreated(controller);
+      },
+      onEnterFullscreen: (controller) {
+        unawaited(e._exitNativeFullscreen(controller));
+      },
+      onExitFullscreen: (controller) {
+        unawaited(e._onNativeFullscreenExit(controller));
       },
       onLoadStop: (controller, url) async {
         await e._onPageFinished(controller);
