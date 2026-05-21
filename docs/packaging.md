@@ -140,10 +140,19 @@ App Sandbox is **on**. Entitlements:
 
 | File | Purpose |
 |------|---------|
-| [`DebugProfile.entitlements`](../macos/Runner/DebugProfile.entitlements) | Debug/Profile: sandbox, user-selected files, network client, JIT, network server, **audio input** |
-| [`Release.entitlements`](../macos/Runner/Release.entitlements) | Release: sandbox, user-selected files, network client, **audio input** |
+| [`DebugProfile.entitlements`](../macos/Runner/DebugProfile.entitlements) | Debug/Profile: sandbox, user-selected files, network client, JIT, network server, **audio input**, **Keychain Sharing** (`keychain-access-groups` for `flutter_secure_storage`) |
+| [`Release.entitlements`](../macos/Runner/Release.entitlements) | Release: sandbox, user-selected files, network client, **audio input**, **Keychain Sharing** |
 
 [`macos/Runner/Info.plist`](../macos/Runner/Info.plist) includes **`NSMicrophoneUsageDescription`** for shadow-reading.
+
+**Keychain + debug signing:** `keychain-access-groups` (required for Enjoy account tokens via `flutter_secure_storage`) needs a real **Apple Development** signature, not ad-hoc (`-`). The Runner target sets `"CODE_SIGN_IDENTITY[sdk=macosx*]" = Apple Development` in [`project.pbxproj`](../macos/Runner.xcodeproj/project.pbxproj). On a new Mac, the first build may fail with *No profiles for 'ai.enjoy.player'* — register the machine and create a Mac development profile once:
+
+```bash
+cd macos && xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug \
+  -allowProvisioningUpdates -allowProvisioningDeviceRegistration build
+```
+
+Or open **`macos/Runner.xcworkspace`** → Runner → **Signing & Capabilities** → ensure **Automatically manage signing** and team **46X685R747** are set, then build once in Xcode.
 
 Release builds set **`ENABLE_HARDENED_RUNTIME = YES`**. `flutter build macos --release` uses automatic **development** signing; the notarization script re-signs with **Developer ID Application** before upload.
 

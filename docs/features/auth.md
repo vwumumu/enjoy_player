@@ -4,7 +4,7 @@
 
 - Optional sign-in: `POST /api/v1/sessions/start_auth`, then the user completes auth in an **in-app WebView** (`flutter_inappwebview`) loading `verificationUrl`; the app polls `GET /api/v1/sessions/poll` until `approved` or timeout (~5 minutes). **Open in system browser** is available from the overflow menu if an IdP blocks embedded WebViews or the user prefers the OS browser (polling unchanged).
 - **Sign-in screen**: After approval the shell navigates **home** automatically; while polling, the user can **reload the sign-in page**, open the system browser, or **cancel**; failed loads show **network error** UI with **retry**.
-- **Bearer token** is stored in **flutter_secure_storage** (not in Drift).
+- **Bearer token** is stored in **flutter_secure_storage** (not in Drift). macOS requires **Keychain Sharing** in [`DebugProfile.entitlements`](../macos/Runner/DebugProfile.entitlements) / [`Release.entitlements`](../macos/Runner/Release.entitlements) (`keychain-access-groups`); without it sign-in fails with `errSecMissingEntitlement` (-34018).
 - Last **profile snapshot** is cached in **flutter_secure_storage** (JSON) for fast cold start when a token exists — avoids coupling auth init to the session-scoped Drift DB ([ADR-0012](../decisions/0012-per-user-sqlite-isolation.md)).
 - **Profile** screen calls `GET/PATCH /api/v1/profile` with camelCase JSON; the HTTP client maps camelCase ↔ snake_case like the web `@enjoy/api` client.
 - **Credits usage** (Worker audit log): from Profile, **Credits usage** opens `/credits` and calls Worker `GET /credits/usages` via the AI API base URL ([features/credits-usage.md](credits-usage.md)).
