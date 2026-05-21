@@ -21,6 +21,7 @@ When the **worker** transcript poll returns `status: failed`, the app records a 
 
 ## Limitations
 
+- **iOS inline playback**: the WebView sets `allowsInlineMediaPlayback`, injects `playsinline` on the `<video>`, and rejects native fullscreen so the 16:9 frame stays visible for echo / shadow reading.
 - Position updates while playing are polled (~250 ms); echo clamp may overshoot slightly vs `media_kit`.
 - Embedded MKV/MP4 subtitle track extraction is unavailable for YouTube (no `media_kit` decode of the stream).
 - Ad behavior depends on YouTube, cookies, and account; “no ads” is best-effort when signed in with Premium where applicable.

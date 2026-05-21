@@ -49,6 +49,18 @@ Release builds enable R8. [`proguard-rules.pro`](../android/app/proguard-rules.p
 - Sandbox **on**; entitlements include user-selected files and network client.
 - Files: [`macos/Runner/DebugProfile.entitlements`](../macos/Runner/DebugProfile.entitlements), [`Release.entitlements`](../macos/Runner/Release.entitlements).
 
+### FFmpeg (`ffmpeg_kit_flutter_new`) and Homebrew
+
+The macOS **ffmpeg_kit** prebuilt frameworks are linked against libraries under `/opt/homebrew/opt/…`. If those kegs are missing, the app crashes at launch with **DYLD, Library missing** (often `libz.1.dylib` from `libswresample.framework`).
+
+**One-time setup (developers):**
+
+```bash
+brew bundle install --file=macos/Brewfile
+```
+
+The Xcode target runs [`macos/scripts/bundle_ffmpeg_homebrew_deps.sh`](../macos/scripts/bundle_ffmpeg_homebrew_deps.sh) after CocoaPods embeds frameworks. It copies the required Homebrew dylibs into `Contents/Frameworks/` and rewrites load paths to `@rpath`, so debug/release builds run without relying on a global Homebrew install path at runtime.
+
 ## Windows
 
 ### Runner build

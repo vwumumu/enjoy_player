@@ -1,0 +1,14 @@
+# Homebrew libraries required by ffmpeg_kit_flutter_new macOS prebuilt frameworks.
+# Install before macOS dev builds: brew bundle install --file=macos/Brewfile
+brew "zlib"
+brew "libiconv"
+brew "libsamplerate"
+brew "srt"
+brew "fontconfig"
+brew "freetype"
+brew "fribidi"
+brew "gettext"
+brew "glib"
+brew "graphite2"
+brew "harfbuzz"
+brew "pcre2"
