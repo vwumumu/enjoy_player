@@ -22,7 +22,7 @@ flutter analyze
 
 ## Pre-release (platform compile)
 
-CI runs debug smoke builds plus **release compile** for Android (`apk` + `appbundle`) and Windows (`--release`) — see `.github/workflows/`. Locally, before tagging:
+CI runs debug smoke builds plus **release compile** for Android (`apk` + `appbundle`), Windows (`--release`), iOS (`--release --no-codesign`), and macOS (`--release` with ad-hoc signing) — see `.github/workflows/`. Locally, before tagging:
 
 ```bash
 flutter build appbundle --release   # with android/key.properties for real signing

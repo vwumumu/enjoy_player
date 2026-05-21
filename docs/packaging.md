@@ -273,4 +273,4 @@ flutter test
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-Then platform release builds as above. CI runs analyze/tests and debug smoke builds; **release** APK/AAB/Windows builds are recommended before tagging a release.
+Then platform release builds as above. CI runs analyze/tests and platform smoke builds (Android, Windows, iOS compile-only, macOS compile-only with ad-hoc signing) — see [testing.md](testing.md). **Release** APK/AAB/Windows/IPA/notarized macOS builds are recommended before tagging a release.

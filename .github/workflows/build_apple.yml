@@ -1,0 +1,100 @@
+name: Build Apple (iOS + macOS)
+
+on:
+  pull_request:
+  push:
+    branches: main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    name: iOS smoke
+    runs-on: [self-hosted, macos]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read Flutter version
+        id: flutter_version
+        run: echo "version=$(tr -d ' \n\r' < .github/flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_version.outputs.version }}
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Cache CocoaPods (iOS)
+        uses: actions/cache@v5
+        with:
+          path: |
+            ios/Pods
+            ~/.cocoapods
+          key: pods-ios-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            pods-ios-
+
+      - name: CocoaPods install (iOS)
+        run: cd ios && pod install
+
+      - name: Flutter build ios (debug, compile-only)
+        run: flutter build ios --debug --no-codesign
+
+      - name: Flutter build ios (release, compile-only)
+        run: flutter build ios --release --no-codesign
+
+  macos:
+    name: macOS smoke
+    runs-on: [self-hosted, macos]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read Flutter version
+        id: flutter_version
+        run: echo "version=$(tr -d ' \n\r' < .github/flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_version.outputs.version }}
+          cache: true
+
+      - name: Install Homebrew deps (FFmpeg kit)
+        run: brew bundle install --file=macos/Brewfile
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Cache CocoaPods (macOS)
+        uses: actions/cache@v4
+        with:
+          path: |
+            macos/Pods
+            ~/.cocoapods
+          key: pods-macos-${{ hashFiles('macos/Podfile.lock') }}
+          restore-keys: |
+            pods-macos-
+
+      - name: CocoaPods install (macOS)
+        run: cd macos && pod install
+
+      - name: Flutter build macos (debug)
+        run: flutter build macos --debug
+        env:
+          CODE_SIGN_IDENTITY: "-"
+          EXPANDED_CODE_SIGN_IDENTITY: "-"
+
+      - name: Flutter build macos (release, compile-only)
+        run: flutter build macos --release
+        env:
+          CODE_SIGN_IDENTITY: "-"
+          EXPANDED_CODE_SIGN_IDENTITY: "-"
