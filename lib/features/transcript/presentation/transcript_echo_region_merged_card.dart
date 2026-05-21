@@ -97,10 +97,14 @@ class EchoRegionMergedCard extends ConsumerWidget {
           expandDisabled: echo.startLineIndex <= 0,
           shrinkDisabled: echo.startLineIndex >= echo.endLineIndex,
           dense: true,
-          onExpand: () =>
-              ref.read(echoModeProvider.notifier).expandEchoBackward(lines),
-          onShrink: () =>
-              ref.read(echoModeProvider.notifier).shrinkEchoBackward(lines),
+          onExpand: () => _deferEchoResize(
+            ref,
+            () => ref.read(echoModeProvider.notifier).expandEchoBackward(lines),
+          ),
+          onShrink: () => _deferEchoResize(
+            ref,
+            () => ref.read(echoModeProvider.notifier).shrinkEchoBackward(lines),
+          ),
         ),
         SizedBox(height: tok.space8),
         // Neutral card with 8px warm orange left rail
@@ -153,10 +157,14 @@ class EchoRegionMergedCard extends ConsumerWidget {
           expandDisabled: echo.endLineIndex >= lines.length - 1,
           shrinkDisabled: echo.endLineIndex <= echo.startLineIndex,
           dense: true,
-          onExpand: () =>
-              ref.read(echoModeProvider.notifier).expandEchoForward(lines),
-          onShrink: () =>
-              ref.read(echoModeProvider.notifier).shrinkEchoForward(lines),
+          onExpand: () => _deferEchoResize(
+            ref,
+            () => ref.read(echoModeProvider.notifier).expandEchoForward(lines),
+          ),
+          onShrink: () => _deferEchoResize(
+            ref,
+            () => ref.read(echoModeProvider.notifier).shrinkEchoForward(lines),
+          ),
         ),
         if (showShadow) ...[
           SizedBox(height: tok.space16),
@@ -173,6 +181,13 @@ class EchoRegionMergedCard extends ConsumerWidget {
       ],
     );
   }
+}
+
+void _deferEchoResize(WidgetRef ref, VoidCallback apply) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!ref.context.mounted) return;
+    apply();
+  });
 }
 
 /// Isolates [displayPositionProvider] so echo cue tiles do not rebuild every tick.

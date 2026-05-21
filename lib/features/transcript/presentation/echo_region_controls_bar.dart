@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:enjoy_player/core/interaction/list_safe_icon_button.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -74,21 +75,15 @@ class EchoRegionControlsBar extends ConsumerWidget {
             ),
           ),
           SizedBox(width: tok.space8),
-          Tooltip(
-            message: expandTip,
-            child: IconButton(
-              visualDensity: VisualDensity.compact,
-              onPressed: expandDisabled ? null : onExpand,
-              icon: Icon(expandIcon, size: 20),
-            ),
+          ListSafeIconButton(
+            semanticLabel: expandTip,
+            onPressed: expandDisabled ? null : onExpand,
+            icon: Icon(expandIcon, size: 20),
           ),
-          Tooltip(
-            message: shrinkTip,
-            child: IconButton(
-              visualDensity: VisualDensity.compact,
-              onPressed: shrinkDisabled ? null : onShrink,
-              icon: const Icon(Icons.remove, size: 20),
-            ),
+          ListSafeIconButton(
+            semanticLabel: shrinkTip,
+            onPressed: shrinkDisabled ? null : onShrink,
+            icon: const Icon(Icons.remove, size: 20),
           ),
           SizedBox(width: tok.space8),
           Expanded(

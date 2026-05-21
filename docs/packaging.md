@@ -178,6 +178,8 @@ flutter run -d macos
 
 **`Failed to foreground app; open returned 1`:** harmless when the app is already running or macOS blocks auto-focus from the terminal; the build still succeeds.
 
+**Hot restart (`R`) on macOS:** unreliable with this app’s native stack (`media_kit` / Mpv, FFmpegKit, sqlite3). After hot restart you may see duplicate Objective‑C class warnings, `Unable to load asset: AssetManifest.bin`, missing fonts/SVGs, and layout crashes. Prefer **hot reload (`r`)** for Dart-only edits, or quit and run `flutter run -d macos` again for a full restart.
+
 If launch fails with **DYLD, Library missing** (`libz.1.dylib` etc.), run `brew bundle install --file=macos/Brewfile` and rebuild. The Xcode **Bundle FFmpeg Homebrew deps** phase copies required dylibs into the app bundle.
 
 ### Direct release (Developer ID + notarization)

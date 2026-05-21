@@ -31,15 +31,30 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
     _hideTimer = null;
   }
 
+  void _setPopupVisible(bool visible) {
+    // Defer portal mutations — showing/hiding during a layout pass (e.g. when
+    // the transcript ListView rebuilds beside this bar) triggers
+    // "_RenderLayoutBuilder was mutated in performLayout".
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (visible) {
+        _portal.show();
+      } else {
+        _portal.hide();
+      }
+    });
+  }
+
   void _showPopup() {
     _cancelHideTimer();
-    _portal.show();
+    _setPopupVisible(true);
   }
 
   void _scheduleHidePopup() {
     _cancelHideTimer();
     _hideTimer = Timer(const Duration(milliseconds: 200), () {
-      if (mounted) _portal.hide();
+      if (!mounted) return;
+      _setPopupVisible(false);
     });
   }
 
