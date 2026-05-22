@@ -21,6 +21,8 @@ Production **`applicationId`** / **`namespace`**: `ai.enjoy.player` (see [ADR-00
 
 If **`android/key.properties` is missing**, release builds still compile but use the **debug keystore** — **do not upload** those artifacts to Play.
 
+**CI:** see [android-release-ci.md](android-release-ci.md) for GitHub Secrets, self-hosted runner setup, and [`.github/workflows/release_android.yml`](../.github/workflows/release_android.yml).
+
 ### Gradle / network (`dl.google.com`)
 
 Symptoms: configuring plugins fails with TLS handshake to Google Maven. Mitigations:
@@ -268,6 +270,8 @@ iscc windows\installer\enjoy_player.iss
 ```
 
 Installer output: `build/windows/installer/EnjoyPlayerSetup.exe`. **Code signing** (Authenticode) is configured outside this repo.
+
+**CI:** see [windows-release-ci.md](windows-release-ci.md) for GitHub Actions setup and [`.github/workflows/release_windows.yml`](../.github/workflows/release_windows.yml).
 
 ### Version / legal strings
 

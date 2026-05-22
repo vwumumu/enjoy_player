@@ -1,0 +1,91 @@
+name: Release Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_installer:
+        description: Build Inno Setup installer (EnjoyPlayerSetup.exe)
+        type: boolean
+        default: true
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: release-windows-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Windows release
+    # Self-hosted Windows runner not ready yet — keep on GitHub-hosted until registered.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Ensure NuGet feed (WebView2 / flutter_inappwebview)
+        shell: pwsh
+        run: .github/scripts/ensure_nuget_feed.ps1
+
+      - name: Pre-release checks
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+      - name: Check bundled FFmpeg
+        shell: pwsh
+        run: |
+          $ffmpeg = "windows/ffmpeg/ffmpeg.exe"
+          if (Test-Path $ffmpeg) {
+            Write-Host "Bundled FFmpeg found: $ffmpeg"
+          } else {
+            Write-Host "::warning::${ffmpeg} not found — release will omit bundled FFmpeg. Place ffmpeg.exe on the runner or commit/LFS before release for full subtitle support."
+          }
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Sync installer version from pubspec
+        if: >-
+          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+          (github.event_name == 'workflow_dispatch' && inputs.build_installer)
+        shell: pwsh
+        run: .github/scripts/sync_windows_installer_version.ps1
+
+      - name: Ensure Inno Setup
+        if: >-
+          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+          (github.event_name == 'workflow_dispatch' && inputs.build_installer)
+        shell: pwsh
+        run: .github/scripts/ensure_inno_setup.ps1
+
+      - name: Build installer
+        if: >-
+          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+          (github.event_name == 'workflow_dispatch' && inputs.build_installer)
+        run: iscc windows\installer\enjoy_player.iss
+
+      - name: Upload runner artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release-${{ github.ref_name }}
+          path: build/windows/x64/runner/Release/**
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload installer artifact
+        if: >-
+          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+          (github.event_name == 'workflow_dispatch' && inputs.build_installer)
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer-${{ github.ref_name }}
+          path: build/windows/installer/EnjoyPlayerSetup.exe
+          if-no-files-found: error
+          retention-days: 30

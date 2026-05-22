@@ -1,6 +1,6 @@
 # Self-hosted CI runners
 
-All GitHub Actions workflows in this repo (except **Build Windows**, which still uses GitHub-hosted `windows-latest` until a self-hosted Windows runner is ready) run on **self-hosted** runners registered for this repository only. They do **not** use GitHub Actions cache (`actions/cache` or `cache: true` on setup actions). Dependencies stay on local disk between jobs.
+All GitHub Actions workflows in this repo (except **Build Windows** and **Release Windows**, which still use GitHub-hosted `windows-latest` until a self-hosted Windows runner is ready) run on **self-hosted** runners registered for this repository only. They do **not** use GitHub Actions cache (`actions/cache` or `cache: true` on setup actions). Dependencies stay on local disk between jobs.
 
 Shared workflow pieces:
 
@@ -25,7 +25,8 @@ Use labels that match workflow `runs-on`:
 |----------|--------|
 | CI, Codegen drift, Android APK smoke | `self-hosted`, `Linux` |
 | Build Apple, Release Apple | `self-hosted`, `macos` |
-| Build Windows | `self-hosted`, `Windows` (planned; currently `windows-latest`) |
+| Release Android | `self-hosted`, `Linux` |
+| Build Windows, Release Windows | GitHub-hosted `windows-latest` (planned: `self-hosted`, `Windows`) |
 
 ---
 
@@ -92,3 +93,5 @@ Optional: place `ffmpeg.exe` under `windows/ffmpeg/` before release builds (see 
 | [build_windows.yml](../.github/workflows/build_windows.yml) | GitHub-hosted `windows-latest` | debug + release smoke (until self-hosted Windows runner is ready) |
 | [build_apple.yml](../.github/workflows/build_apple.yml) | macOS | iOS + macOS compile smoke |
 | [release_apple.yml](../.github/workflows/release_apple.yml) | macOS | signed IPA, TestFlight, notarized macOS |
+| [release_android.yml](../.github/workflows/release_android.yml) | Linux | signed AAB/APK for Play / sideload |
+| [release_windows.yml](../.github/workflows/release_windows.yml) | GitHub-hosted `windows-latest` | release build + Inno Setup installer |
