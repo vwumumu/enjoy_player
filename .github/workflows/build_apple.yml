@@ -31,10 +31,10 @@ jobs:
         run: cd ios && pod install
 
       - name: Flutter build ios (debug, compile-only)
-        run: flutter build ios --debug --no-codesign
+        run: bash .github/scripts/build_ios_ci.sh Debug
 
       - name: Flutter build ios (release, compile-only)
-        run: flutter build ios --release --no-codesign
+        run: bash .github/scripts/build_ios_ci.sh Release
 
   macos:
     name: macOS smoke
