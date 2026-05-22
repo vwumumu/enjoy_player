@@ -30,6 +30,9 @@ jobs:
       - name: CocoaPods install (iOS)
         run: cd ios && pod install
 
+      - name: Ensure iOS Xcode components
+        run: bash .github/scripts/ensure_ios_ci_toolchain.sh
+
       - name: Flutter build ios (debug, compile-only)
         run: bash .github/scripts/build_ios_ci.sh Debug
 
