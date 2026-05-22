@@ -65,7 +65,15 @@ flutter --version
 xcodebuild -version
 pod --version
 brew bundle install --file=macos/Brewfile
+
+# One-time after Xcode upgrade (installs CoreSimulator + CLI components; needs admin once):
+sudo xcodebuild -runFirstLaunch
+
+# iOS smoke CI also runs this idempotently; pre-warm to avoid multi-GB downloads mid-job:
+xcodebuild -downloadPlatform iOS
 ```
+
+The **Build Apple** workflow runs [`.github/scripts/ensure_ios_ci_toolchain.sh`](../.github/scripts/ensure_ios_ci_toolchain.sh) before iOS compile smoke. If `xcodebuild -runFirstLaunch` fails with *Authorization is required*, run the `sudo` command above on the runner Mac.
 
 Runner user must access Keychain certs when using `APPLE_USE_RUNNER_KEYCHAIN=true`.
 
