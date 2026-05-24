@@ -305,7 +305,6 @@
   "assessmentErrorExplMissingBreak": "Expected pause was not detected before this word.",
   "assessmentErrorExplMonotone": "Pitch variation was lower than expected.",
   "assessmentErrorExplCorrect": "No issues detected for this word.",
-  "assessmentWebUnsupported": "Pronunciation assessment is not available on web.",
   "assessmentEmptyReference": "Reference text is empty.",
   "assessmentInvalidStored": "Stored assessment data could not be read.",
   "authSignInTitle": "Sign in to Enjoy",

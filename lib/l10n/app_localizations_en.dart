@@ -707,10 +707,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assessmentErrorExplCorrect => 'No issues detected for this word.';
 
   @override
-  String get assessmentWebUnsupported =>
-      'Pronunciation assessment is not available on web.';
-
-  @override
   String get assessmentEmptyReference => 'Reference text is empty.';
 
   @override

@@ -684,9 +684,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get assessmentErrorExplCorrect => '此词未发现问题。';
 
   @override
-  String get assessmentWebUnsupported => 'Web 上暂不支持发音评测。';
-
-  @override
   String get assessmentEmptyReference => '参考文本为空。';
 
   @override
@@ -2104,9 +2101,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get assessmentErrorExplCorrect => '此词未发现问题。';
-
-  @override
-  String get assessmentWebUnsupported => 'Web 上暂不支持发音评测。';
 
   @override
   String get assessmentEmptyReference => '参考文本为空。';

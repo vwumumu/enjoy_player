@@ -2,9 +2,9 @@
 library;
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -179,12 +179,6 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
 
   Future<void> _runAssessment() async {
     final l10n = AppLocalizations.of(context)!;
-    if (kIsWeb) {
-      _append(
-        '${l10n.error}: pronunciation assessment is not available on web.',
-      );
-      return;
-    }
     final bytes = _pickedAudio;
     if (bytes == null) {
       _append(

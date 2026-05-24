@@ -6,7 +6,6 @@ import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/shadow_reading/presentation/recording_assessment_button.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,7 +52,6 @@ void main() {
   testWidgets('RecordingAssessmentButton opens dialog when scored', (
     WidgetTester tester,
   ) async {
-    if (kIsWeb) return;
     final db = AppDatabase(executor: NativeDatabase.memory());
     addTearDown(db.close);
 

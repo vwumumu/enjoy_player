@@ -1413,12 +1413,6 @@ abstract class AppLocalizations {
   /// **'No issues detected for this word.'**
   String get assessmentErrorExplCorrect;
 
-  /// No description provided for @assessmentWebUnsupported.
-  ///
-  /// In en, this message translates to:
-  /// **'Pronunciation assessment is not available on web.'**
-  String get assessmentWebUnsupported;
-
   /// No description provided for @assessmentEmptyReference.
   ///
   /// In en, this message translates to:

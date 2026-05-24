@@ -6,7 +6,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -563,7 +562,6 @@ class _ShadowReadingPanelState extends ConsumerState<ShadowReadingPanel>
 
   Future<void> _onHotkeyAssessmentRun(AppLocalizations l10n) async {
     if (!widget.echoActive) return;
-    if (kIsWeb) return;
     final db = ref.read(appDatabaseProvider);
     final list = await db.recordingDao.listByEchoRegion(
       targetType: widget.targetType,
@@ -1174,7 +1172,7 @@ class _TakesToolbarActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final preview = ref.watch(recordingPreviewPlayerProvider);
     final lp = row.localPath;
-    final canPlay = echoActive && lp != null && lp.isNotEmpty && !kIsWeb;
+    final canPlay = echoActive && lp != null && lp.isNotEmpty;
 
     final takeSummary =
         '${l10n.shadowRecordingTake} ${_takeNumber(row)} · '
@@ -1312,7 +1310,6 @@ class _TakesToolbarActions extends ConsumerWidget {
                 value: _kReassessTakeToken,
                 enabled:
                     echoActive &&
-                    !kIsWeb &&
                     row.assessmentJson != null &&
                     row.assessmentJson!.trim().isNotEmpty,
                 child: Row(

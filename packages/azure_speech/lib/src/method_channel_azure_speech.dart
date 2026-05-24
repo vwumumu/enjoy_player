@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'azure_speech_exception.dart';
@@ -20,12 +19,6 @@ final class MethodChannelAzureSpeech extends AzureSpeechPlatform {
   Future<AzureSpeechAssessmentOutcome> assess(
     AzurePronunciationAssessmentParams params,
   ) async {
-    if (kIsWeb) {
-      throw const AzureSpeechException(
-        code: 'unsupported',
-        message: 'Azure Speech is not supported on web.',
-      );
-    }
     try {
       final raw = await _channel.invokeMethod<String>('assess', params.toMap());
       if (raw == null || raw.isEmpty) {

@@ -8,7 +8,6 @@ library;
 
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart' as mk;
 
 import 'package:enjoy_player/core/logging/log.dart';
@@ -39,11 +38,6 @@ class RecordingPreviewPlayer {
     if (_disposed) {
       throw StateError('RecordingPreviewPlayer disposed');
     }
-    if (kIsWeb) {
-      throw UnsupportedError(
-        'Shadow recording playback is not available on web.',
-      );
-    }
     final file = File(path);
     if (!await file.exists()) {
       throw StateError('Recording file missing: $path');
@@ -64,11 +58,6 @@ class RecordingPreviewPlayer {
   Future<void> playOrPauseTake(String path) async {
     if (_disposed) {
       throw StateError('RecordingPreviewPlayer disposed');
-    }
-    if (kIsWeb) {
-      throw UnsupportedError(
-        'Shadow recording playback is not available on web.',
-      );
     }
     final abs = File(path).absolute.path;
     if (_loadedPath != null && _loadedPath == abs) {

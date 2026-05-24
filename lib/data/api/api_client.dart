@@ -198,7 +198,7 @@ class ApiClient {
   Future<Object?> _decodeResponseBody(http.Response response) async {
     final raw = response.body;
     if (raw.isEmpty) return null;
-    if (raw.length > 48 * 1024 && !kIsWeb) {
+    if (raw.length > 48 * 1024) {
       return compute(decodeJsonToCamel, raw);
     }
     return decodeJsonToCamel(raw);
@@ -367,7 +367,7 @@ class ApiClient {
     try {
       errBody = response.body.isEmpty
           ? null
-          : (response.body.length > 32 * 1024 && !kIsWeb
+          : (response.body.length > 32 * 1024
                 ? await compute(decodeJsonToCamel, response.body)
                 : decodeJsonToCamel(response.body));
     } catch (_) {

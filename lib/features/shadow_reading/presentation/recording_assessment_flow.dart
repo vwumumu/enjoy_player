@@ -4,7 +4,6 @@ library;
 import 'dart:convert';
 
 import 'package:azure_speech/azure_speech.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,8 +19,6 @@ String recordingAssessmentFailureMessage(
   String? debugMessage,
 }) {
   return switch (kind) {
-    RecordingAssessmentFailureKind.webUnsupported =>
-      l10n.assessmentWebUnsupported,
     RecordingAssessmentFailureKind.noRecording => l10n.assessmentNoRecording,
     RecordingAssessmentFailureKind.emptyReference =>
       l10n.assessmentEmptyReference,
@@ -44,13 +41,6 @@ Future<void> triggerRecordingAssessment({
   required RecordingRow row,
   bool forceRun = false,
 }) async {
-  if (kIsWeb) {
-    if (context.mounted) {
-      AppNotice.warning(context, l10n.assessmentWebUnsupported);
-    }
-    return;
-  }
-
   if (!forceRun) {
     final stored = row.assessmentJson?.trim();
     if (stored != null && stored.isNotEmpty) {

@@ -8,7 +8,6 @@ import 'package:enjoy_player/features/ai/data/azure_language_mapper.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/assessment_capability.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_result.dart';
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -29,12 +28,6 @@ final class EnjoyAssessmentCapability implements AssessmentCapability {
 
   @override
   Future<AssessmentResult> assess(AssessmentRequest request) async {
-    if (kIsWeb) {
-      throw UnimplementedError(
-        'Enjoy pronunciation assessment is not available on web.',
-      );
-    }
-
     final durationSeconds = _estimateDurationSeconds(request);
     final token = await _tokenCache.getToken(durationSeconds: durationSeconds);
 

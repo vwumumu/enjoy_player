@@ -305,7 +305,6 @@
   "assessmentErrorExplMissingBreak": "在此词前未检测到应有的停顿。",
   "assessmentErrorExplMonotone": "音高变化低于预期。",
   "assessmentErrorExplCorrect": "此词未发现问题。",
-  "assessmentWebUnsupported": "Web 上暂不支持发音评测。",
   "assessmentEmptyReference": "参考文本为空。",
   "assessmentInvalidStored": "无法读取已保存的评测数据。",
   "authSignInTitle": "登录 Enjoy",

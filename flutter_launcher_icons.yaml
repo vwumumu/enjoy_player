@@ -14,12 +14,6 @@ flutter_launcher_icons:
   remove_alpha_ios: true
   background_color_ios: "#FFFFFF"
 
-  web:
-    generate: true
-    image_path: assets/logo.png
-    background_color: "#ffffff"
-    theme_color: "#4797F5"
-
   windows:
     generate: true
     image_path: assets/logo.png

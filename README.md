@@ -1,6 +1,6 @@
 # Enjoy Player
 
-Cross-platform **language-learning player** (Android, iOS, Windows, macOS) built with Flutter. MVP focuses on **local** audio/video, **transcripts** (SRT/VTT), and **echo mode** (line-bounded shadow reading), aligned with the Enjoy web app player concepts.
+Cross-platform **language-learning player** (Android, iOS, Windows, macOS; Linux experimental) built with Flutter. **Flutter web is not supported.** MVP focuses on **local** audio/video, **transcripts** (SRT/VTT), and **echo mode** (line-bounded shadow reading), aligned with the Enjoy web app player concepts.
 
 ## Prerequisites
 

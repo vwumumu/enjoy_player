@@ -22,7 +22,7 @@ Enjoy Player calls the same Enjoy / worker HTTP surface as the web `@enjoy/ai` p
 - **Persistence**: `assessment_json` stores the **decoded native SDK JSON** (PascalCase keys from `SpeechServiceResponse_JsonResult`), not `AzurePronunciationAssessmentResult.toJson()`, so `jsonEncode` round-trips correctly when reopening the assessment dialog.
 - **Observability**: Logger `ai.enjoy.assessment` logs recognition status, aggregate scores, word/omission counts, and audio metadata (file name, byte size, whether FFmpeg normalization ran). All-zero aggregate scores emit a **warning** (often silent or mismatched audio vs reference, skipped normalization, or locale mismatch).
 
-Assessment is **not available on web** in this app. **Shadow reading** exposes per-take assess + result dialog (see [echo-mode](echo-mode.md)).
+Assessment requires the native Azure Speech SDK (see [echo-mode](echo-mode.md)). **Shadow reading** exposes per-take assess + result dialog.
 
 ## Not wired yet
 

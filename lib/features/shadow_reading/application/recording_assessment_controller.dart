@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:azure_speech/azure_speech.dart';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
@@ -49,7 +49,6 @@ final class RecordingAssessmentSuccess extends RecordingAssessmentOutcome {
 }
 
 enum RecordingAssessmentFailureKind {
-  webUnsupported,
   noRecording,
   emptyReference,
   fileTooSmall,
@@ -77,12 +76,6 @@ class RecordingAssessmentController extends _$RecordingAssessmentController {
       return RecordingAssessmentFailure(
         RecordingAssessmentFailureKind.serviceError,
         debugMessage: 'id mismatch',
-      );
-    }
-
-    if (kIsWeb) {
-      return RecordingAssessmentFailure(
-        RecordingAssessmentFailureKind.webUnsupported,
       );
     }
 

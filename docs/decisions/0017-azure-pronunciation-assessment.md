@@ -16,7 +16,7 @@ ADR-0014 left Enjoy-backed pronunciation assessment as `UnimplementedError` in F
    - **Windows** — NuGet `Microsoft.CognitiveServices.Speech` (C++), downloaded at CMake configure time and DLLs bundled via `PLUGIN_BUNDLED_LIBRARIES`.
 2. Expose a **narrow Dart API** over a single `MethodChannel` (`azure_speech`): token + region + WAV path + reference text + language → parsed `AzurePronunciationAssessmentResult` (typed mirror of `SpeechServiceResponse_JsonResult`). The plugin package is named **`azure_speech`** so additional Speech SDK features can ship in the same package without another rename.
 3. **Enjoy path**: [`EnjoyAssessmentCapability`](../../lib/features/ai/data/enjoy/enjoy_assessment_capability.dart) obtains tokens through [`AzureTokenCache`](../../lib/data/api/services/ai/azure_token_cache.dart) (9-minute in-memory TTL, same idea as web `@enjoy/ai`), then calls the plugin. **BYOK** remains unimplemented (ADR-0014 scope).
-4. **Web** remains unsupported (`UnimplementedError` / plugin `UnsupportedError`); the app’s primary targets are desktop/mobile native.
+4. **Supported platforms**: Android, iOS, macOS, and Windows only — **Flutter web is not a target** for this app.
 5. **App minimum Android API** is raised to **24** where needed so the Speech SDK binary requirements are satisfied.
 
 ## Consequences
