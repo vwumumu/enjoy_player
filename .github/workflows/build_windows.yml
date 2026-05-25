@@ -28,6 +28,10 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Ensure Windows FFmpeg
+        shell: pwsh
+        run: windows/scripts/fetch_ffmpeg.ps1
+
       - name: Flutter build windows (debug)
         run: flutter build windows --debug
 

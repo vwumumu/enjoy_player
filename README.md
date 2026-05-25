@@ -11,6 +11,7 @@ Cross-platform **language-learning player** (Android, iOS, Windows, macOS; Linux
 - **Windows desktop builds**: [NuGet CLI](https://learn.microsoft.com/en-us/nuget/install-nuget-client-tools?tabs=windows#nugetexe-cli) on your `PATH` (`nuget` / `nuget.exe`). Required by [`flutter_inappwebview`](https://inappwebview.dev/docs/intro#setup-windows) to pull WebView2 native dependencies during CMake/MSBuild. After installing, open a **new** terminal and run `nuget` to verify.
   - NuGet must have **at least one package source** (normally `nuget.org`). If `nuget sources list` is empty or MSBuild fails with `primarySources` / “Feeds used:” and then an error, add it once:  
     `nuget sources Add -Name "nuget.org" -Source "https://api.nuget.org/v3/index.json"`
+  - **FFmpeg** (embedded subtitles, duration probe, echo PCM): run `pwsh windows/scripts/fetch_ffmpeg.ps1` before release builds — see [windows/ffmpeg/README.md](windows/ffmpeg/README.md).
 
 ## Setup
 

@@ -266,7 +266,14 @@ Output: `build/windows/x64/runner/Release/` (executable `enjoy_player.exe` plus 
 
 ### FFmpeg (feature parity)
 
-Place **`windows/ffmpeg/ffmpeg.exe`** before the build so CMake copies it next to the executable, or put `ffmpeg` on **PATH**. See [`windows/ffmpeg/README.md`](../windows/ffmpeg/README.md). Without it, embedded subtitle probe/extract, some duration probes, echo PCM extraction, and poster extraction paths that rely on subprocess FFmpeg are degraded — see [architecture.md](architecture.md).
+Before a release build, fetch the bundled binary (or put `ffmpeg` on **PATH**):
+
+```powershell
+pwsh windows/scripts/fetch_ffmpeg.ps1
+flutter build windows --release
+```
+
+CMake copies **`windows/ffmpeg/ffmpeg.exe`** next to the executable when present. See [`windows/ffmpeg/README.md`](../windows/ffmpeg/README.md). Without it, embedded subtitle probe/extract, some duration probes, echo PCM extraction, and poster extraction paths that rely on subprocess FFmpeg are degraded — see [architecture.md](architecture.md).
 
 ### Signed installer (Inno Setup)
 

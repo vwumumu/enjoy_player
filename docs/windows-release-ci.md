@@ -27,11 +27,9 @@ On the machine that runs the workflow (GitHub-hosted or self-hosted):
 - **NuGet CLI** on `PATH` (WebView2 restore) — smoke workflow runs [`ensure_nuget_feed.ps1`](../.github/scripts/ensure_nuget_feed.ps1)
 - **Inno Setup 6** — release workflow installs via Chocolatey on GitHub-hosted runners if `iscc` is missing; on self-hosted, install from [jrsoftware.org](https://jrsoftware.org/isinfo.php) and add `ISCC.exe` to `PATH`
 
-### Optional: bundled FFmpeg
+### Bundled FFmpeg
 
-For full embedded-subtitle support, place **`windows/ffmpeg/ffmpeg.exe`** before the build (see [windows/ffmpeg/README.md](../windows/ffmpeg/README.md)). The workflow logs a warning if it is missing but still produces a release.
-
-On a self-hosted runner, copy `ffmpeg.exe` once to `windows/ffmpeg/` on disk. Do not commit large binaries unless using Git LFS.
+The release workflow runs [`windows/scripts/fetch_ffmpeg.ps1`](../windows/scripts/fetch_ffmpeg.ps1) before `flutter build windows --release`, downloading and verifying **ffmpeg-release-essentials** into **`windows/ffmpeg/ffmpeg.exe`** (see [windows/ffmpeg/README.md](../windows/ffmpeg/README.md)). Self-hosted runners need outbound HTTPS to `www.gyan.dev`; no manual copy is required unless you use an offline mirror.
 
 ---
 
@@ -46,7 +44,7 @@ No secrets are required for unsigned release builds. **Authenticode signing** st
 When migrating off `windows-latest`:
 
 1. Register runner with labels `self-hosted`, `Windows` (see [ci-self-hosted-runners.md](ci-self-hosted-runners.md)).
-2. Install Flutter, NuGet, Inno Setup, and optionally `windows/ffmpeg/ffmpeg.exe`.
+2. Install Flutter, NuGet, and Inno Setup (FFmpeg is fetched automatically by the workflow).
 3. Edit [`release_windows.yml`](../.github/workflows/release_windows.yml): `runs-on: [self-hosted, Windows]`.
 
 ---
@@ -91,7 +89,7 @@ Configure certificate thumbprint or HSM details per your vendor. See [windows/in
 |---------|-----|
 | *nuget is not on PATH* | Install NuGet CLI on self-hosted runner |
 | *iscc not found* | Install Inno Setup 6; re-run or rely on Chocolatey step on GitHub-hosted |
-| Missing subtitles on end-user machines | Bundle `windows/ffmpeg/ffmpeg.exe` before `flutter build windows` |
+| Missing subtitles on end-user machines | Ensure `windows/scripts/fetch_ffmpeg.ps1` ran before `flutter build windows` (CI does this automatically) |
 | WebView2 errors at runtime | End users need [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) |
 
 ---

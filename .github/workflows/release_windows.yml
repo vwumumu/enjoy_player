@@ -38,15 +38,9 @@ jobs:
           flutter analyze
           flutter test
 
-      - name: Check bundled FFmpeg
+      - name: Ensure Windows FFmpeg
         shell: pwsh
-        run: |
-          $ffmpeg = "windows/ffmpeg/ffmpeg.exe"
-          if (Test-Path $ffmpeg) {
-            Write-Host "Bundled FFmpeg found: $ffmpeg"
-          } else {
-            Write-Host "::warning::${ffmpeg} not found — release will omit bundled FFmpeg. Place ffmpeg.exe on the runner or commit/LFS before release for full subtitle support."
-          }
+        run: windows/scripts/fetch_ffmpeg.ps1
 
       - name: Build Windows release
         run: flutter build windows --release

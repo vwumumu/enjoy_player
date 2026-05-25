@@ -87,7 +87,7 @@ flutter doctor
 nuget help   # NuGet CLI on PATH for azure_speech / WebView2
 ```
 
-Optional: place `ffmpeg.exe` under `windows/ffmpeg/` before release builds (see [packaging.md](packaging.md)).
+Windows release/smoke workflows run `windows/scripts/fetch_ffmpeg.ps1` automatically; for local builds see [packaging.md](packaging.md).
 
 ---
 
