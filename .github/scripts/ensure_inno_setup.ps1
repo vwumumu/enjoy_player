@@ -7,11 +7,22 @@ if ($iscc) {
   exit 0
 }
 
-$defaultPath = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-if (Test-Path $defaultPath) {
-  $dir = Split-Path $defaultPath -Parent
+$candidatePaths = @(
+  "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+  "${env:ProgramFiles}\Inno Setup 6\ISCC.exe",
+  "${env:ProgramFiles}\Inno Setup 7\ISCC.exe",
+  "${env:LOCALAPPDATA}\Programs\Inno Setup 6\ISCC.exe"
+)
+
+foreach ($isccPath in $candidatePaths) {
+  if (-not (Test-Path $isccPath)) { continue }
+  $dir = Split-Path $isccPath -Parent
   Write-Host "Adding Inno Setup to PATH: $dir"
-  echo "$dir" >> $env:GITHUB_PATH
+  if ($env:GITHUB_PATH) {
+    echo "$dir" >> $env:GITHUB_PATH
+  } else {
+    $env:Path = "$dir;$env:Path"
+  }
   exit 0
 }
 
@@ -20,10 +31,11 @@ choco install innosetup -y --no-progress
 
 $iscc = Get-Command iscc -ErrorAction SilentlyContinue
 if (-not $iscc) {
-  if (Test-Path $defaultPath) {
-    $dir = Split-Path $defaultPath -Parent
-    echo "$dir" >> $env:GITHUB_PATH
-    Write-Host "Inno Setup installed at $defaultPath"
+  foreach ($isccPath in $candidatePaths) {
+    if (-not (Test-Path $isccPath)) { continue }
+    $dir = Split-Path $isccPath -Parent
+    if ($env:GITHUB_PATH) { echo "$dir" >> $env:GITHUB_PATH }
+    Write-Host "Inno Setup installed at $isccPath"
     exit 0
   }
   Write-Error "iscc not found after Inno Setup install."
