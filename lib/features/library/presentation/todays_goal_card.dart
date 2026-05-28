@@ -122,7 +122,9 @@ class TodaysGoalCard extends ConsumerWidget {
   final bool containedInParentCard;
 
   static const double _ringSizeCard = 116;
+  static const double _ringSizeBar = 52;
   static const double _strokeWidthCard = 8;
+  static const double _strokeWidthBar = 5;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -221,11 +223,7 @@ class TodaysGoalCard extends ConsumerWidget {
     required String semanticsLabel,
   }) {
     final padded = Padding(
-      padding: EdgeInsets.all(
-        containedInParentCard
-            ? (variant == TodaysGoalCardVariant.bar ? t.space8 : t.space12)
-            : t.space16,
-      ),
+      padding: EdgeInsets.all(t.space16),
       child: child,
     );
     final semanticsChild = Semantics(label: semanticsLabel, child: padded);
@@ -343,58 +341,95 @@ class TodaysGoalCard extends ConsumerWidget {
   ) {
     final frac = _progressFractionMs(recordingDurationMs, goalMinutes);
     final radius = BorderRadius.circular(t.radiusSm);
+    final durationText = recordingDurationMs > 0
+        ? _formatDurationMs(recordingDurationMs)
+        : '0m';
+    final tabular = const [FontFeature.tabularFigures()];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(Icons.track_changes_rounded, size: 18, color: cs.primary),
-            SizedBox(width: t.space8),
-            Expanded(
-              child: Text(
-                l10n.homeTodaysGoal,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+            SizedBox(
+              width: _ringSizeBar,
+              height: _ringSizeBar,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CustomPaint(
+                    size: const Size(_ringSizeBar, _ringSizeBar),
+                    painter: _GoalRingPainter(
+                      percentage: pct,
+                      trackColor: cs.surfaceContainerHighest,
+                      progressColor: progressColor,
+                      strokeWidth: _strokeWidthBar,
+                    ),
+                  ),
+                  Text(
+                    '$pct%',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontFeatures: tabular,
+                    ),
+                  ),
+                ],
               ),
             ),
-            Text(
-              '$pct%',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: progressColor,
+            SizedBox(width: t.space12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.track_changes_rounded,
+                        size: 16,
+                        color: cs.primary,
+                      ),
+                      SizedBox(width: t.space4),
+                      Expanded(
+                        child: Text(
+                          l10n.homeTodaysGoal,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: t.space4),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '$completedMin / $goalMinutes ${l10n.homeMinutes}',
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontFeatures: tabular,
+                              ),
+                        ),
+                        TextSpan(
+                          text: ' · $durationText',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        SizedBox(height: t.space4),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                '$completedMin / $goalMinutes ${l10n.homeMinutes}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
-              ),
-            ),
-            Text(
-              recordingDurationMs > 0
-                  ? _formatDurationMs(recordingDurationMs)
-                  : '0m',
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ],
-        ),
-        SizedBox(height: t.space8),
+        SizedBox(height: t.space12),
         ClipRRect(
           borderRadius: radius,
           child: LinearProgressIndicator(
@@ -404,7 +439,7 @@ class TodaysGoalCard extends ConsumerWidget {
             color: progressColor,
           ),
         ),
-        SizedBox(height: t.space4),
+        SizedBox(height: t.space8),
         Text(
           encouragement,
           maxLines: 1,
@@ -439,24 +474,39 @@ class _TodaysGoalLoadingBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.track_changes_rounded, size: 18, color: cs.primary),
-              SizedBox(width: t.space8),
-              Expanded(
-                child: Container(
-                  height: 18,
-                  decoration: BoxDecoration(
-                    color: base,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
               Container(
-                width: 36,
-                height: 18,
+                width: TodaysGoalCard._ringSizeBar,
+                height: TodaysGoalCard._ringSizeBar,
                 decoration: BoxDecoration(
                   color: base,
-                  borderRadius: BorderRadius.circular(4),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              SizedBox(width: t.space12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 16,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: base,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    SizedBox(height: t.space4),
+                    Container(
+                      height: 14,
+                      width: 140,
+                      decoration: BoxDecoration(
+                        color: base,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -471,8 +521,8 @@ class _TodaysGoalLoadingBody extends StatelessWidget {
           ),
           SizedBox(height: t.space4),
           Container(
-            height: 14,
-            width: 200,
+            height: 12,
+            width: 160,
             decoration: BoxDecoration(
               color: base,
               borderRadius: BorderRadius.circular(4),

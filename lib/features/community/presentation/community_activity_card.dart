@@ -21,6 +21,8 @@ enum CommunityActivityCardVariant {
 
 const int _kMaxAvatarsCard = 8;
 const int _kMaxAvatarsSummary = 4;
+const double _kSummaryAvatarSize = 28;
+const double _kSummaryAvatarOverlap = 8;
 
 String _formatDurationMs(int ms) {
   final seconds = ms ~/ 1000;
@@ -152,13 +154,7 @@ Widget _wrapChrome({
   required String semanticsLabel,
   required Widget child,
 }) {
-  final pad = EdgeInsets.all(
-    containedInParentCard
-        ? (variant == CommunityActivityCardVariant.summary
-              ? t.space8
-              : t.space12)
-        : t.space16,
-  );
+  final pad = EdgeInsets.all(t.space16);
   final body = Semantics(
     label: semanticsLabel,
     child: Padding(padding: pad, child: child),
@@ -236,48 +232,20 @@ class _SummaryBody extends StatelessWidget {
     final hasToday =
         data.recordingsCountToday != null ||
         data.recordingsDurationToday != null;
-
-    final headlineStyle = Theme.of(
-      context,
-    ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700);
     final subStyle = Theme.of(
       context,
     ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant);
-
-    Widget headline;
-    if (hasToday) {
-      final bits = <String>[];
-      if (data.recordingsCountToday != null) {
-        bits.add('${data.recordingsCountToday}');
-      }
-      if (data.recordingsDurationToday != null) {
-        bits.add(_formatDurationMs(data.recordingsDurationToday!));
-      }
-      headline = Text(
-        bits.join(' · '),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: headlineStyle,
-      );
-    } else if (data.users.isEmpty) {
-      headline = Text(
-        l10n.homeNoActiveUsers,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: subStyle,
-      );
-    } else {
-      headline = Text('${data.count}', style: headlineStyle);
-    }
+    final tabular = const [FontFeature.tabularFigures()];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(Icons.group_outlined, size: 18, color: cs.primary),
-            SizedBox(width: t.space8),
+            Icon(Icons.group_outlined, size: 16, color: cs.primary),
+            SizedBox(width: t.space4),
             Expanded(
               child: Text(
                 l10n.communityActivity,
@@ -288,29 +256,197 @@ class _SummaryBody extends StatelessWidget {
                 ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
+            if (data.users.isNotEmpty)
+              _OverlappingAvatarStack(
+                users: data.users,
+                totalCount: data.count,
+                maxShown: _kMaxAvatarsSummary,
+                cs: cs,
+              ),
           ],
         ),
-        SizedBox(height: t.space4),
-        headline,
-        if (!hasToday && data.users.isNotEmpty) ...[
-          SizedBox(height: t.space4),
+        SizedBox(height: t.space8),
+        if (hasToday) ...[
+          Wrap(
+            spacing: t.space8,
+            runSpacing: t.space4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (data.recordingsCountToday != null)
+                _InlineMetric(
+                  icon: Icons.mic,
+                  value: '${data.recordingsCountToday}',
+                  label: l10n.homeRecordingsToday,
+                  cs: cs,
+                  tabular: tabular,
+                ),
+              if (data.recordingsCountToday != null &&
+                  data.recordingsDurationToday != null)
+                Text('·', style: subStyle),
+              if (data.recordingsDurationToday != null)
+                _InlineMetric(
+                  icon: Icons.schedule,
+                  value: _formatDurationMs(data.recordingsDurationToday!),
+                  label: l10n.homePracticeTime,
+                  cs: cs,
+                  tabular: tabular,
+                ),
+            ],
+          ),
+          if (data.count > 0) ...[
+            SizedBox(height: t.space4),
+            Text(
+              '${data.count} ${l10n.homeActiveLearners}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: subStyle?.copyWith(fontFeatures: tabular),
+            ),
+          ],
+        ] else if (data.users.isEmpty)
+          Text(
+            l10n.homeNoActiveUsers,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: subStyle,
+          )
+        else
           Text(
             l10n.homePeopleLearning(data.count),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: subStyle,
           ),
-        ],
-        if (data.users.isNotEmpty) ...[
-          SizedBox(height: t.space8),
-          _AvatarWrap(
-            users: data.users,
-            totalCount: data.count,
-            dense: true,
-            maxShown: _kMaxAvatarsSummary,
-          ),
-        ],
       ],
+    );
+  }
+}
+
+class _InlineMetric extends StatelessWidget {
+  const _InlineMetric({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.cs,
+    required this.tabular,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+  final ColorScheme cs;
+  final List<FontFeature> tabular;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: cs.primary),
+        SizedBox(width: EnjoyThemeTokens.of(context).space4),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            fontFeatures: tabular,
+          ),
+        ),
+        SizedBox(width: EnjoyThemeTokens.of(context).space4),
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+}
+
+class _OverlappingAvatarStack extends StatelessWidget {
+  const _OverlappingAvatarStack({
+    required this.users,
+    required this.totalCount,
+    required this.maxShown,
+    required this.cs,
+  });
+
+  final List<ActiveUser> users;
+  final int totalCount;
+  final int maxShown;
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = users.take(maxShown).toList();
+    final extra = totalCount > maxShown ? totalCount - maxShown : 0;
+    final slots = shown.length + (extra > 0 ? 1 : 0);
+    if (slots == 0) return const SizedBox.shrink();
+
+    final step = _kSummaryAvatarSize - _kSummaryAvatarOverlap;
+    final width = _kSummaryAvatarSize + (slots - 1) * step;
+
+    return SizedBox(
+      width: width,
+      height: _kSummaryAvatarSize,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          for (var i = 0; i < shown.length; i++)
+            Positioned(
+              left: i * step,
+              child: _AvatarBorder(
+                cs: cs,
+                child: _UserAvatar(
+                  user: shown[i],
+                  size: _kSummaryAvatarSize,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          if (extra > 0)
+            Positioned(
+              left: shown.length * step,
+              child: _AvatarBorder(
+                cs: cs,
+                child: Container(
+                  width: _kSummaryAvatarSize,
+                  height: _kSummaryAvatarSize,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '+$extra',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AvatarBorder extends StatelessWidget {
+  const _AvatarBorder({required this.cs, required this.child});
+
+  final ColorScheme cs;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: cs.surface, width: 2),
+      ),
+      child: child,
     );
   }
 }
@@ -332,12 +468,12 @@ class _LoadingInner extends StatelessWidget {
     if (variant == CommunityActivityCardVariant.summary) {
       return Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Icon(Icons.group_outlined, size: 18, color: cs.primary),
-              SizedBox(width: t.space8),
+              Icon(Icons.group_outlined, size: 16, color: cs.primary),
+              SizedBox(width: t.space4),
               Expanded(
                 child: Container(
                   height: 16,
@@ -347,32 +483,60 @@ class _LoadingInner extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: t.space8),
-          Container(
-            height: 16,
-            width: 120,
-            decoration: BoxDecoration(
-              color: base,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          SizedBox(height: t.space8),
-          Row(
-            children: List.generate(
-              4,
-              (_) => Padding(
-                padding: EdgeInsets.only(right: t.space4),
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: base,
-                    shape: BoxShape.circle,
+              SizedBox(
+                width:
+                    _kSummaryAvatarSize +
+                    2 * (_kSummaryAvatarSize - _kSummaryAvatarOverlap),
+                height: _kSummaryAvatarSize,
+                child: Stack(
+                  children: List.generate(
+                    3,
+                    (i) => Positioned(
+                      left: i * (_kSummaryAvatarSize - _kSummaryAvatarOverlap),
+                      child: Container(
+                        width: _kSummaryAvatarSize,
+                        height: _kSummaryAvatarSize,
+                        decoration: BoxDecoration(
+                          color: base,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: cs.surface, width: 2),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
+            ],
+          ),
+          SizedBox(height: t.space8),
+          Row(
+            children: [
+              Container(
+                height: 14,
+                width: 72,
+                decoration: BoxDecoration(
+                  color: base,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              SizedBox(width: t.space8),
+              Container(
+                height: 14,
+                width: 88,
+                decoration: BoxDecoration(
+                  color: base,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: t.space4),
+          Container(
+            height: 12,
+            width: 96,
+            decoration: BoxDecoration(
+              color: base,
+              borderRadius: BorderRadius.circular(4),
             ),
           ),
         ],

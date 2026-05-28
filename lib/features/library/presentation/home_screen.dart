@@ -288,7 +288,6 @@ class _HomeRecentGridSkeletonTile extends StatelessWidget {
 class _HomeInsightCards extends ConsumerWidget {
   const _HomeInsightCards();
 
-  static const double _kWideBreakpoint = 720;
   static const double _kStripSplitMinWidth = 420;
 
   @override
@@ -306,46 +305,21 @@ class _HomeInsightCards extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final wide = constraints.maxWidth >= _kWideBreakpoint;
-        final gap = t.space12;
+        final wide = constraints.maxWidth >= _kStripSplitMinWidth;
         final pad = wide
-            ? EdgeInsets.fromLTRB(t.space24, t.space24, t.space24, t.space24)
-            : EdgeInsets.fromLTRB(t.space24, t.space8, t.space24, t.space8);
+            ? EdgeInsets.fromLTRB(t.space24, t.space20, t.space24, t.space20)
+            : EdgeInsets.fromLTRB(t.space24, t.space12, t.space24, t.space12);
 
-        if (wide) {
-          return Padding(
-            padding: pad,
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Expanded(
-                    child: TodaysGoalCard(variant: TodaysGoalCardVariant.card),
-                  ),
-                  SizedBox(width: gap),
-                  const Expanded(
-                    child: CommunityActivityCard(
-                      outerPadding: EdgeInsets.zero,
-                      variant: CommunityActivityCardVariant.card,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        final narrowSplit = constraints.maxWidth >= _kStripSplitMinWidth;
         final strip = Card(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
-          child: narrowSplit
+          child: wide
               ? IntrinsicHeight(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Expanded(
-                        flex: 3,
+                        flex: 5,
                         child: TodaysGoalCard(
                           variant: TodaysGoalCardVariant.bar,
                           containedInParentCard: true,
@@ -357,7 +331,7 @@ class _HomeInsightCards extends ConsumerWidget {
                         color: cs.outlineVariant.withValues(alpha: 0.35),
                       ),
                       const Expanded(
-                        flex: 2,
+                        flex: 4,
                         child: CommunityActivityCard(
                           outerPadding: EdgeInsets.zero,
                           variant: CommunityActivityCardVariant.summary,
