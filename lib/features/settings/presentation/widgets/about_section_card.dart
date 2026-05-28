@@ -2,7 +2,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,6 +9,7 @@ import 'package:enjoy_player/core/application/app_links.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_logo.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class AboutSectionCard extends StatefulWidget {
@@ -94,22 +94,7 @@ class _AboutSectionCardState extends State<AboutSectionCard> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color: cs.primaryContainer,
-                                borderRadius: BorderRadius.circular(t.radiusLg),
-                              ),
-                              clipBehavior: Clip.antiAlias,
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: SvgPicture.asset(
-                                  'assets/logo-light.svg',
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
+                            const EnjoyLogo(size: 52),
                             SizedBox(width: t.space16),
                             Expanded(
                               child: Column(
