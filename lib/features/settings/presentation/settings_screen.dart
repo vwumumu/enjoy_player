@@ -13,6 +13,7 @@ import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/centered_max_width_scroll.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
@@ -41,13 +42,12 @@ class SettingsScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
+    final contentMaxWidth = t.contentMaxWidth + 96;
+
     return Scaffold(
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: t.contentMaxWidth + 96),
-          child: CustomScrollView(
-            slivers: [
+      body: CenteredMaxWidthScrollView(
+        maxWidth: contentMaxWidth,
+        slivers: [
               SliverToBoxAdapter(
                 child: EditorialHeader(
                   title: l10n.settingsTitle,
@@ -680,8 +680,6 @@ class SettingsScreen extends ConsumerWidget {
 
               SliverToBoxAdapter(child: SizedBox(height: t.space32)),
             ],
-          ),
-        ),
       ),
     );
   }
