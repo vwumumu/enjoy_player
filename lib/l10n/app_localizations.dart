@@ -273,6 +273,174 @@ abstract class AppLocalizations {
   /// **'From YouTube URL…'**
   String get importFromYoutube;
 
+  /// No description provided for @discoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get discoverTitle;
+
+  /// No description provided for @discoverBrowseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Discover'**
+  String get discoverBrowseAction;
+
+  /// No description provided for @discoverRecommendedHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get discoverRecommendedHeading;
+
+  /// No description provided for @discoverSubscriptionsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get discoverSubscriptionsHeading;
+
+  /// No description provided for @discoverTimelineHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent uploads'**
+  String get discoverTimelineHeading;
+
+  /// No description provided for @discoverSubscribeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to channel'**
+  String get discoverSubscribeTitle;
+
+  /// No description provided for @discoverSubscribeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a YouTube channel URL or @handle.'**
+  String get discoverSubscribeHint;
+
+  /// No description provided for @discoverSubscribePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'https://www.youtube.com/@channel'**
+  String get discoverSubscribePlaceholder;
+
+  /// No description provided for @discoverSubscribeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get discoverSubscribeAction;
+
+  /// No description provided for @discoverSubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed to channel'**
+  String get discoverSubscribed;
+
+  /// No description provided for @discoverSubscribeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not subscribe to that channel.'**
+  String get discoverSubscribeFailed;
+
+  /// No description provided for @discoverUnsubscribeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribe'**
+  String get discoverUnsubscribeAction;
+
+  /// No description provided for @discoverUnsubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribed from channel'**
+  String get discoverUnsubscribed;
+
+  /// No description provided for @discoverViewFeed.
+  ///
+  /// In en, this message translates to:
+  /// **'View feed'**
+  String get discoverViewFeed;
+
+  /// No description provided for @discoverAddToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to library'**
+  String get discoverAddToLibrary;
+
+  /// No description provided for @discoverAddedToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your library'**
+  String get discoverAddedToLibrary;
+
+  /// No description provided for @discoverAddFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add this video.'**
+  String get discoverAddFailed;
+
+  /// No description provided for @discoverInLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'In library'**
+  String get discoverInLibrary;
+
+  /// No description provided for @discoverPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get discoverPlay;
+
+  /// No description provided for @discoverFeedEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No videos in feed yet'**
+  String get discoverFeedEmptyTitle;
+
+  /// No description provided for @discoverFeedEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to a channel and refresh to load recent uploads.'**
+  String get discoverFeedEmptyHint;
+
+  /// No description provided for @discoverFeedErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load feed'**
+  String get discoverFeedErrorTitle;
+
+  /// No description provided for @discoverFeedErrorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get discoverFeedErrorHint;
+
+  /// No description provided for @discoverRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get discoverRetry;
+
+  /// No description provided for @discoverRefreshPartialFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Some channel feeds could not be refreshed.'**
+  String get discoverRefreshPartialFailed;
+
+  /// No description provided for @discoverRecommendedLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load recommended channels.'**
+  String get discoverRecommendedLoadFailed;
+
+  /// No description provided for @discoverSubscriptionsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load subscriptions.'**
+  String get discoverSubscriptionsLoadFailed;
+
+  /// No description provided for @discoverNoSubscriptionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to a recommended channel or paste a channel URL.'**
+  String get discoverNoSubscriptionsHint;
+
   /// No description provided for @youtubeImportTitle.
   ///
   /// In en, this message translates to:

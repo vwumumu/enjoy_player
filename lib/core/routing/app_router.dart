@@ -16,6 +16,8 @@ import 'package:enjoy_player/features/auth/presentation/profile_screen.dart';
 import 'package:enjoy_player/features/credits/presentation/credits_usage_screen.dart';
 import 'package:enjoy_player/features/auth/presentation/sign_in_screen.dart';
 import 'package:enjoy_player/features/cloud/presentation/cloud_screen.dart';
+import 'package:enjoy_player/features/discover/presentation/channel_feed_screen.dart';
+import 'package:enjoy_player/features/discover/presentation/discover_screen.dart';
 import 'package:enjoy_player/features/library/presentation/home_screen.dart';
 import 'package:enjoy_player/features/library/presentation/library_screen.dart';
 import 'package:enjoy_player/features/player/presentation/expanded_player_screen.dart';
@@ -101,6 +103,22 @@ GoRouter appRouter(Ref ref) {
               key: const ValueKey<String>('shell-home'),
               child: const HomeScreen(),
             ),
+          ),
+          GoRoute(
+            path: '/discover',
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-discover'),
+              child: const DiscoverScreen(),
+            ),
+            routes: [
+              GoRoute(
+                path: 'channel/:channelId',
+                builder: (context, state) {
+                  final channelId = state.pathParameters['channelId']!;
+                  return ChannelFeedScreen(channelId: channelId);
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: '/library',

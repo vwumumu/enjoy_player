@@ -10,6 +10,7 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/app_background.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_bottom_nav.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
+import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import '../application/player_controller.dart';
@@ -27,9 +28,10 @@ class RootShell extends ConsumerStatefulWidget {
 
 class _RootShellState extends ConsumerState<RootShell> {
   int _navIndexForPath(String path) {
-    if (path.startsWith('/settings')) return 3;
-    if (path.startsWith('/cloud')) return 2;
-    if (path.startsWith('/library')) return 1;
+    if (path.startsWith('/settings')) return 4;
+    if (path.startsWith('/cloud')) return 3;
+    if (path.startsWith('/library')) return 2;
+    if (path.startsWith('/discover')) return 1;
     return 0;
   }
 
@@ -39,12 +41,15 @@ class _RootShellState extends ConsumerState<RootShell> {
         context.go('/');
         return;
       case 1:
-        context.go('/library');
+        context.go('/discover');
         return;
       case 2:
-        context.go('/cloud');
+        context.go('/library');
         return;
       case 3:
+        context.go('/cloud');
+        return;
+      case 4:
         context.go('/settings');
         return;
       default:
@@ -55,6 +60,7 @@ class _RootShellState extends ConsumerState<RootShell> {
   @override
   Widget build(BuildContext context) {
     ref.watch(syncCtrlProvider);
+    ref.watch(discoverFeedRefreshSchedulerProvider);
     final sessionActive = ref.watch(
       playerControllerProvider.select((s) => s != null),
     );
@@ -78,6 +84,11 @@ class _RootShellState extends ConsumerState<RootShell> {
                       icon: Icons.home_outlined,
                       selectedIcon: Icons.home_rounded,
                       label: l10n.homeTitle,
+                    ),
+                    EnjoyBottomNavDestination(
+                      icon: Icons.explore_outlined,
+                      selectedIcon: Icons.explore_rounded,
+                      label: l10n.discoverTitle,
                     ),
                     EnjoyBottomNavDestination(
                       icon: Icons.collections_bookmark_outlined,

@@ -1,0 +1,44 @@
+{
+  "channels": [
+    {
+      "channelId": "UCAuUUnT6oDeKwE6v1NGQxug",
+      "handle": "@TED",
+      "name": "TED",
+      "description": "Talks on ideas worth spreading — clear speech, many with captions.",
+      "language": "en",
+      "tags": ["clear-speech", "captions-common"]
+    },
+    {
+      "channelId": "UCsooa4yRKGN_zEE8iknghZA",
+      "handle": "@TEDEd",
+      "name": "TED-Ed",
+      "description": "Animated lessons — slower narration, educational vocabulary.",
+      "language": "en",
+      "tags": ["education", "captions-common"]
+    },
+    {
+      "channelId": "UCHaHD477h-FeBbVh9Sh7syA",
+      "handle": "@bbclearningenglish",
+      "name": "BBC Learning English",
+      "description": "Short lessons for English learners.",
+      "language": "en",
+      "tags": ["learner", "captions-common"]
+    },
+    {
+      "channelId": "UCz4tgANd4yy8Oe0iXCdSWfA",
+      "handle": "@EnglishwithLucy",
+      "name": "English with Lucy",
+      "description": "British English pronunciation and grammar.",
+      "language": "en",
+      "tags": ["learner", "pronunciation"]
+    },
+    {
+      "channelId": "UCvy2UaY2781nN8S6hZ0e0gA",
+      "handle": "@voalearningenglish",
+      "name": "VOA Learning English",
+      "description": "News and features at a pace for learners.",
+      "language": "en",
+      "tags": ["learner", "news"]
+    }
+  ]
+}

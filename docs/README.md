@@ -25,6 +25,7 @@ Maintainers and agents should keep these files **accurate** when behavior or arc
 | [features/library.md](features/library.md) | Product + dev | Home / Library media UI, thumbnails, cold-start perf notes |
 | [features/cloud.md](features/cloud.md) | Product + dev | Remote media index (add-to-library) behavior changes |
 | [features/youtube.md](features/youtube.md) | Product + dev | YouTube import, WebView playback, login, transcripts behavior changes |
+| [features/discover.md](features/discover.md) | Product + dev | YouTube Discover feeds, subscriptions, add-to-library behavior changes |
 | [features/dictionary-lookup.md](features/dictionary-lookup.md) | Product + dev | Transcript selection lookup (translation / contextual / dictionary) behavior changes |
 
 ## How to add an ADR

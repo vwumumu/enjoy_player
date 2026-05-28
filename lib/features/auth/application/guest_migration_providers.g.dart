@@ -111,7 +111,7 @@ final class GuestMigrationCtrlProvider
 }
 
 String _$guestMigrationCtrlHash() =>
-    r'727c1c35d9fa6ce5a6a6b6279cb7777bb76a4a54';
+    r'7f095cc156e11b65957184660b7d4bd115a3c17f';
 
 abstract class _$GuestMigrationCtrl extends $AsyncNotifier<void> {
   FutureOr<void> build();

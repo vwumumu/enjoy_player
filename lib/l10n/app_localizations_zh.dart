@@ -106,6 +106,90 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importFromYoutube => '从 YouTube 链接…';
 
   @override
+  String get discoverTitle => '发现';
+
+  @override
+  String get discoverBrowseAction => '浏览发现';
+
+  @override
+  String get discoverRecommendedHeading => '推荐频道';
+
+  @override
+  String get discoverSubscriptionsHeading => '订阅';
+
+  @override
+  String get discoverTimelineHeading => '最近上传';
+
+  @override
+  String get discoverSubscribeTitle => '订阅频道';
+
+  @override
+  String get discoverSubscribeHint => '粘贴 YouTube 频道链接或 @用户名。';
+
+  @override
+  String get discoverSubscribePlaceholder => 'https://www.youtube.com/@channel';
+
+  @override
+  String get discoverSubscribeAction => '订阅';
+
+  @override
+  String get discoverSubscribed => '已订阅频道';
+
+  @override
+  String get discoverSubscribeFailed => '无法订阅该频道。';
+
+  @override
+  String get discoverUnsubscribeAction => '取消订阅';
+
+  @override
+  String get discoverUnsubscribed => '已取消订阅';
+
+  @override
+  String get discoverViewFeed => '查看动态';
+
+  @override
+  String get discoverAddToLibrary => '加入库';
+
+  @override
+  String get discoverAddedToLibrary => '已加入你的库';
+
+  @override
+  String get discoverAddFailed => '无法添加此视频。';
+
+  @override
+  String get discoverInLibrary => '已在库中';
+
+  @override
+  String get discoverPlay => '播放';
+
+  @override
+  String get discoverFeedEmptyTitle => '暂无视频';
+
+  @override
+  String get discoverFeedEmptyHint => '订阅频道并刷新以加载最近上传。';
+
+  @override
+  String get discoverFeedErrorTitle => '无法加载动态';
+
+  @override
+  String get discoverFeedErrorHint => '请检查网络连接后重试。';
+
+  @override
+  String get discoverRetry => '重试';
+
+  @override
+  String get discoverRefreshPartialFailed => '部分频道动态刷新失败。';
+
+  @override
+  String get discoverRecommendedLoadFailed => '无法加载推荐频道。';
+
+  @override
+  String get discoverSubscriptionsLoadFailed => '无法加载订阅。';
+
+  @override
+  String get discoverNoSubscriptionsHint => '订阅推荐频道或粘贴频道链接。';
+
+  @override
   String get youtubeImportTitle => '导入 YouTube 视频';
 
   @override
@@ -1554,6 +1638,90 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get importFromYoutube => '从 YouTube 链接…';
+
+  @override
+  String get discoverTitle => '发现';
+
+  @override
+  String get discoverBrowseAction => '浏览发现';
+
+  @override
+  String get discoverRecommendedHeading => '推荐频道';
+
+  @override
+  String get discoverSubscriptionsHeading => '订阅';
+
+  @override
+  String get discoverTimelineHeading => '最近上传';
+
+  @override
+  String get discoverSubscribeTitle => '订阅频道';
+
+  @override
+  String get discoverSubscribeHint => '粘贴 YouTube 频道链接或 @用户名。';
+
+  @override
+  String get discoverSubscribePlaceholder => 'https://www.youtube.com/@channel';
+
+  @override
+  String get discoverSubscribeAction => '订阅';
+
+  @override
+  String get discoverSubscribed => '已订阅频道';
+
+  @override
+  String get discoverSubscribeFailed => '无法订阅该频道。';
+
+  @override
+  String get discoverUnsubscribeAction => '取消订阅';
+
+  @override
+  String get discoverUnsubscribed => '已取消订阅';
+
+  @override
+  String get discoverViewFeed => '查看动态';
+
+  @override
+  String get discoverAddToLibrary => '加入库';
+
+  @override
+  String get discoverAddedToLibrary => '已加入你的库';
+
+  @override
+  String get discoverAddFailed => '无法添加此视频。';
+
+  @override
+  String get discoverInLibrary => '已在库中';
+
+  @override
+  String get discoverPlay => '播放';
+
+  @override
+  String get discoverFeedEmptyTitle => '暂无视频';
+
+  @override
+  String get discoverFeedEmptyHint => '订阅频道并刷新以加载最近上传。';
+
+  @override
+  String get discoverFeedErrorTitle => '无法加载动态';
+
+  @override
+  String get discoverFeedErrorHint => '请检查网络连接后重试。';
+
+  @override
+  String get discoverRetry => '重试';
+
+  @override
+  String get discoverRefreshPartialFailed => '部分频道动态刷新失败。';
+
+  @override
+  String get discoverRecommendedLoadFailed => '无法加载推荐频道。';
+
+  @override
+  String get discoverSubscriptionsLoadFailed => '无法加载订阅。';
+
+  @override
+  String get discoverNoSubscriptionsHint => '订阅推荐频道或粘贴频道链接。';
 
   @override
   String get youtubeImportTitle => '导入 YouTube 视频';

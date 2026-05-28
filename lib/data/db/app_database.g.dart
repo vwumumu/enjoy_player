@@ -7357,6 +7357,892 @@ class SettingsKvCompanion extends UpdateCompanion<SettingRow> {
   }
 }
 
+class $YoutubeChannelSubscriptionsTable extends YoutubeChannelSubscriptions
+    with
+        TableInfo<
+          $YoutubeChannelSubscriptionsTable,
+          YoutubeChannelSubscriptionRow
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $YoutubeChannelSubscriptionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _channelIdMeta = const VerificationMeta(
+    'channelId',
+  );
+  @override
+  late final GeneratedColumn<String> channelId = GeneratedColumn<String>(
+    'channel_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _thumbnailUrlMeta = const VerificationMeta(
+    'thumbnailUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbnailUrl = GeneratedColumn<String>(
+    'thumbnail_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('user'),
+  );
+  static const VerificationMeta _subscribedAtMeta = const VerificationMeta(
+    'subscribedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> subscribedAt = GeneratedColumn<DateTime>(
+    'subscribed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastFetchedAtMeta = const VerificationMeta(
+    'lastFetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastFetchedAt =
+      GeneratedColumn<DateTime>(
+        'last_fetched_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    channelId,
+    displayName,
+    thumbnailUrl,
+    source,
+    subscribedAt,
+    lastFetchedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'youtube_channel_subscriptions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<YoutubeChannelSubscriptionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('channel_id')) {
+      context.handle(
+        _channelIdMeta,
+        channelId.isAcceptableOrUnknown(data['channel_id']!, _channelIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_channelIdMeta);
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_displayNameMeta);
+    }
+    if (data.containsKey('thumbnail_url')) {
+      context.handle(
+        _thumbnailUrlMeta,
+        thumbnailUrl.isAcceptableOrUnknown(
+          data['thumbnail_url']!,
+          _thumbnailUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('subscribed_at')) {
+      context.handle(
+        _subscribedAtMeta,
+        subscribedAt.isAcceptableOrUnknown(
+          data['subscribed_at']!,
+          _subscribedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_subscribedAtMeta);
+    }
+    if (data.containsKey('last_fetched_at')) {
+      context.handle(
+        _lastFetchedAtMeta,
+        lastFetchedAt.isAcceptableOrUnknown(
+          data['last_fetched_at']!,
+          _lastFetchedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {channelId};
+  @override
+  YoutubeChannelSubscriptionRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return YoutubeChannelSubscriptionRow(
+      channelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}channel_id'],
+      )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      )!,
+      thumbnailUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumbnail_url'],
+      ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      subscribedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}subscribed_at'],
+      )!,
+      lastFetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_fetched_at'],
+      ),
+    );
+  }
+
+  @override
+  $YoutubeChannelSubscriptionsTable createAlias(String alias) {
+    return $YoutubeChannelSubscriptionsTable(attachedDatabase, alias);
+  }
+}
+
+class YoutubeChannelSubscriptionRow extends DataClass
+    implements Insertable<YoutubeChannelSubscriptionRow> {
+  final String channelId;
+  final String displayName;
+  final String? thumbnailUrl;
+
+  /// `recommended` or `user`.
+  final String source;
+  final DateTime subscribedAt;
+  final DateTime? lastFetchedAt;
+  const YoutubeChannelSubscriptionRow({
+    required this.channelId,
+    required this.displayName,
+    this.thumbnailUrl,
+    required this.source,
+    required this.subscribedAt,
+    this.lastFetchedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['channel_id'] = Variable<String>(channelId);
+    map['display_name'] = Variable<String>(displayName);
+    if (!nullToAbsent || thumbnailUrl != null) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl);
+    }
+    map['source'] = Variable<String>(source);
+    map['subscribed_at'] = Variable<DateTime>(subscribedAt);
+    if (!nullToAbsent || lastFetchedAt != null) {
+      map['last_fetched_at'] = Variable<DateTime>(lastFetchedAt);
+    }
+    return map;
+  }
+
+  YoutubeChannelSubscriptionsCompanion toCompanion(bool nullToAbsent) {
+    return YoutubeChannelSubscriptionsCompanion(
+      channelId: Value(channelId),
+      displayName: Value(displayName),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
+      source: Value(source),
+      subscribedAt: Value(subscribedAt),
+      lastFetchedAt: lastFetchedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastFetchedAt),
+    );
+  }
+
+  factory YoutubeChannelSubscriptionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return YoutubeChannelSubscriptionRow(
+      channelId: serializer.fromJson<String>(json['channelId']),
+      displayName: serializer.fromJson<String>(json['displayName']),
+      thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
+      source: serializer.fromJson<String>(json['source']),
+      subscribedAt: serializer.fromJson<DateTime>(json['subscribedAt']),
+      lastFetchedAt: serializer.fromJson<DateTime?>(json['lastFetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'channelId': serializer.toJson<String>(channelId),
+      'displayName': serializer.toJson<String>(displayName),
+      'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
+      'source': serializer.toJson<String>(source),
+      'subscribedAt': serializer.toJson<DateTime>(subscribedAt),
+      'lastFetchedAt': serializer.toJson<DateTime?>(lastFetchedAt),
+    };
+  }
+
+  YoutubeChannelSubscriptionRow copyWith({
+    String? channelId,
+    String? displayName,
+    Value<String?> thumbnailUrl = const Value.absent(),
+    String? source,
+    DateTime? subscribedAt,
+    Value<DateTime?> lastFetchedAt = const Value.absent(),
+  }) => YoutubeChannelSubscriptionRow(
+    channelId: channelId ?? this.channelId,
+    displayName: displayName ?? this.displayName,
+    thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
+    source: source ?? this.source,
+    subscribedAt: subscribedAt ?? this.subscribedAt,
+    lastFetchedAt: lastFetchedAt.present
+        ? lastFetchedAt.value
+        : this.lastFetchedAt,
+  );
+  YoutubeChannelSubscriptionRow copyWithCompanion(
+    YoutubeChannelSubscriptionsCompanion data,
+  ) {
+    return YoutubeChannelSubscriptionRow(
+      channelId: data.channelId.present ? data.channelId.value : this.channelId,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      source: data.source.present ? data.source.value : this.source,
+      subscribedAt: data.subscribedAt.present
+          ? data.subscribedAt.value
+          : this.subscribedAt,
+      lastFetchedAt: data.lastFetchedAt.present
+          ? data.lastFetchedAt.value
+          : this.lastFetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YoutubeChannelSubscriptionRow(')
+          ..write('channelId: $channelId, ')
+          ..write('displayName: $displayName, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('source: $source, ')
+          ..write('subscribedAt: $subscribedAt, ')
+          ..write('lastFetchedAt: $lastFetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    channelId,
+    displayName,
+    thumbnailUrl,
+    source,
+    subscribedAt,
+    lastFetchedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is YoutubeChannelSubscriptionRow &&
+          other.channelId == this.channelId &&
+          other.displayName == this.displayName &&
+          other.thumbnailUrl == this.thumbnailUrl &&
+          other.source == this.source &&
+          other.subscribedAt == this.subscribedAt &&
+          other.lastFetchedAt == this.lastFetchedAt);
+}
+
+class YoutubeChannelSubscriptionsCompanion
+    extends UpdateCompanion<YoutubeChannelSubscriptionRow> {
+  final Value<String> channelId;
+  final Value<String> displayName;
+  final Value<String?> thumbnailUrl;
+  final Value<String> source;
+  final Value<DateTime> subscribedAt;
+  final Value<DateTime?> lastFetchedAt;
+  final Value<int> rowid;
+  const YoutubeChannelSubscriptionsCompanion({
+    this.channelId = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.thumbnailUrl = const Value.absent(),
+    this.source = const Value.absent(),
+    this.subscribedAt = const Value.absent(),
+    this.lastFetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  YoutubeChannelSubscriptionsCompanion.insert({
+    required String channelId,
+    required String displayName,
+    this.thumbnailUrl = const Value.absent(),
+    this.source = const Value.absent(),
+    required DateTime subscribedAt,
+    this.lastFetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : channelId = Value(channelId),
+       displayName = Value(displayName),
+       subscribedAt = Value(subscribedAt);
+  static Insertable<YoutubeChannelSubscriptionRow> custom({
+    Expression<String>? channelId,
+    Expression<String>? displayName,
+    Expression<String>? thumbnailUrl,
+    Expression<String>? source,
+    Expression<DateTime>? subscribedAt,
+    Expression<DateTime>? lastFetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (channelId != null) 'channel_id': channelId,
+      if (displayName != null) 'display_name': displayName,
+      if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (source != null) 'source': source,
+      if (subscribedAt != null) 'subscribed_at': subscribedAt,
+      if (lastFetchedAt != null) 'last_fetched_at': lastFetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  YoutubeChannelSubscriptionsCompanion copyWith({
+    Value<String>? channelId,
+    Value<String>? displayName,
+    Value<String?>? thumbnailUrl,
+    Value<String>? source,
+    Value<DateTime>? subscribedAt,
+    Value<DateTime?>? lastFetchedAt,
+    Value<int>? rowid,
+  }) {
+    return YoutubeChannelSubscriptionsCompanion(
+      channelId: channelId ?? this.channelId,
+      displayName: displayName ?? this.displayName,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      source: source ?? this.source,
+      subscribedAt: subscribedAt ?? this.subscribedAt,
+      lastFetchedAt: lastFetchedAt ?? this.lastFetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (channelId.present) {
+      map['channel_id'] = Variable<String>(channelId.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (thumbnailUrl.present) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (subscribedAt.present) {
+      map['subscribed_at'] = Variable<DateTime>(subscribedAt.value);
+    }
+    if (lastFetchedAt.present) {
+      map['last_fetched_at'] = Variable<DateTime>(lastFetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YoutubeChannelSubscriptionsCompanion(')
+          ..write('channelId: $channelId, ')
+          ..write('displayName: $displayName, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('source: $source, ')
+          ..write('subscribedAt: $subscribedAt, ')
+          ..write('lastFetchedAt: $lastFetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $YoutubeFeedEntriesTable extends YoutubeFeedEntries
+    with TableInfo<$YoutubeFeedEntriesTable, YoutubeFeedEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $YoutubeFeedEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _videoIdMeta = const VerificationMeta(
+    'videoId',
+  );
+  @override
+  late final GeneratedColumn<String> videoId = GeneratedColumn<String>(
+    'video_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _channelIdMeta = const VerificationMeta(
+    'channelId',
+  );
+  @override
+  late final GeneratedColumn<String> channelId = GeneratedColumn<String>(
+    'channel_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _thumbnailUrlMeta = const VerificationMeta(
+    'thumbnailUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbnailUrl = GeneratedColumn<String>(
+    'thumbnail_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _publishedAtMeta = const VerificationMeta(
+    'publishedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> publishedAt = GeneratedColumn<DateTime>(
+    'published_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    videoId,
+    channelId,
+    title,
+    thumbnailUrl,
+    publishedAt,
+    fetchedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'youtube_feed_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<YoutubeFeedEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('video_id')) {
+      context.handle(
+        _videoIdMeta,
+        videoId.isAcceptableOrUnknown(data['video_id']!, _videoIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_videoIdMeta);
+    }
+    if (data.containsKey('channel_id')) {
+      context.handle(
+        _channelIdMeta,
+        channelId.isAcceptableOrUnknown(data['channel_id']!, _channelIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_channelIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('thumbnail_url')) {
+      context.handle(
+        _thumbnailUrlMeta,
+        thumbnailUrl.isAcceptableOrUnknown(
+          data['thumbnail_url']!,
+          _thumbnailUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('published_at')) {
+      context.handle(
+        _publishedAtMeta,
+        publishedAt.isAcceptableOrUnknown(
+          data['published_at']!,
+          _publishedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_publishedAtMeta);
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fetchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {videoId, channelId};
+  @override
+  YoutubeFeedEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return YoutubeFeedEntryRow(
+      videoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}video_id'],
+      )!,
+      channelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}channel_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      thumbnailUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumbnail_url'],
+      ),
+      publishedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}published_at'],
+      )!,
+      fetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched_at'],
+      )!,
+    );
+  }
+
+  @override
+  $YoutubeFeedEntriesTable createAlias(String alias) {
+    return $YoutubeFeedEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class YoutubeFeedEntryRow extends DataClass
+    implements Insertable<YoutubeFeedEntryRow> {
+  final String videoId;
+  final String channelId;
+  final String title;
+  final String? thumbnailUrl;
+  final DateTime publishedAt;
+  final DateTime fetchedAt;
+  const YoutubeFeedEntryRow({
+    required this.videoId,
+    required this.channelId,
+    required this.title,
+    this.thumbnailUrl,
+    required this.publishedAt,
+    required this.fetchedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['video_id'] = Variable<String>(videoId);
+    map['channel_id'] = Variable<String>(channelId);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || thumbnailUrl != null) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl);
+    }
+    map['published_at'] = Variable<DateTime>(publishedAt);
+    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    return map;
+  }
+
+  YoutubeFeedEntriesCompanion toCompanion(bool nullToAbsent) {
+    return YoutubeFeedEntriesCompanion(
+      videoId: Value(videoId),
+      channelId: Value(channelId),
+      title: Value(title),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
+      publishedAt: Value(publishedAt),
+      fetchedAt: Value(fetchedAt),
+    );
+  }
+
+  factory YoutubeFeedEntryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return YoutubeFeedEntryRow(
+      videoId: serializer.fromJson<String>(json['videoId']),
+      channelId: serializer.fromJson<String>(json['channelId']),
+      title: serializer.fromJson<String>(json['title']),
+      thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
+      publishedAt: serializer.fromJson<DateTime>(json['publishedAt']),
+      fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'videoId': serializer.toJson<String>(videoId),
+      'channelId': serializer.toJson<String>(channelId),
+      'title': serializer.toJson<String>(title),
+      'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
+      'publishedAt': serializer.toJson<DateTime>(publishedAt),
+      'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+    };
+  }
+
+  YoutubeFeedEntryRow copyWith({
+    String? videoId,
+    String? channelId,
+    String? title,
+    Value<String?> thumbnailUrl = const Value.absent(),
+    DateTime? publishedAt,
+    DateTime? fetchedAt,
+  }) => YoutubeFeedEntryRow(
+    videoId: videoId ?? this.videoId,
+    channelId: channelId ?? this.channelId,
+    title: title ?? this.title,
+    thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
+    publishedAt: publishedAt ?? this.publishedAt,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+  );
+  YoutubeFeedEntryRow copyWithCompanion(YoutubeFeedEntriesCompanion data) {
+    return YoutubeFeedEntryRow(
+      videoId: data.videoId.present ? data.videoId.value : this.videoId,
+      channelId: data.channelId.present ? data.channelId.value : this.channelId,
+      title: data.title.present ? data.title.value : this.title,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      publishedAt: data.publishedAt.present
+          ? data.publishedAt.value
+          : this.publishedAt,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YoutubeFeedEntryRow(')
+          ..write('videoId: $videoId, ')
+          ..write('channelId: $channelId, ')
+          ..write('title: $title, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('publishedAt: $publishedAt, ')
+          ..write('fetchedAt: $fetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    videoId,
+    channelId,
+    title,
+    thumbnailUrl,
+    publishedAt,
+    fetchedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is YoutubeFeedEntryRow &&
+          other.videoId == this.videoId &&
+          other.channelId == this.channelId &&
+          other.title == this.title &&
+          other.thumbnailUrl == this.thumbnailUrl &&
+          other.publishedAt == this.publishedAt &&
+          other.fetchedAt == this.fetchedAt);
+}
+
+class YoutubeFeedEntriesCompanion extends UpdateCompanion<YoutubeFeedEntryRow> {
+  final Value<String> videoId;
+  final Value<String> channelId;
+  final Value<String> title;
+  final Value<String?> thumbnailUrl;
+  final Value<DateTime> publishedAt;
+  final Value<DateTime> fetchedAt;
+  final Value<int> rowid;
+  const YoutubeFeedEntriesCompanion({
+    this.videoId = const Value.absent(),
+    this.channelId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.thumbnailUrl = const Value.absent(),
+    this.publishedAt = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  YoutubeFeedEntriesCompanion.insert({
+    required String videoId,
+    required String channelId,
+    required String title,
+    this.thumbnailUrl = const Value.absent(),
+    required DateTime publishedAt,
+    required DateTime fetchedAt,
+    this.rowid = const Value.absent(),
+  }) : videoId = Value(videoId),
+       channelId = Value(channelId),
+       title = Value(title),
+       publishedAt = Value(publishedAt),
+       fetchedAt = Value(fetchedAt);
+  static Insertable<YoutubeFeedEntryRow> custom({
+    Expression<String>? videoId,
+    Expression<String>? channelId,
+    Expression<String>? title,
+    Expression<String>? thumbnailUrl,
+    Expression<DateTime>? publishedAt,
+    Expression<DateTime>? fetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (videoId != null) 'video_id': videoId,
+      if (channelId != null) 'channel_id': channelId,
+      if (title != null) 'title': title,
+      if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (publishedAt != null) 'published_at': publishedAt,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  YoutubeFeedEntriesCompanion copyWith({
+    Value<String>? videoId,
+    Value<String>? channelId,
+    Value<String>? title,
+    Value<String?>? thumbnailUrl,
+    Value<DateTime>? publishedAt,
+    Value<DateTime>? fetchedAt,
+    Value<int>? rowid,
+  }) {
+    return YoutubeFeedEntriesCompanion(
+      videoId: videoId ?? this.videoId,
+      channelId: channelId ?? this.channelId,
+      title: title ?? this.title,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      publishedAt: publishedAt ?? this.publishedAt,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (videoId.present) {
+      map['video_id'] = Variable<String>(videoId.value);
+    }
+    if (channelId.present) {
+      map['channel_id'] = Variable<String>(channelId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (thumbnailUrl.present) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl.value);
+    }
+    if (publishedAt.present) {
+      map['published_at'] = Variable<DateTime>(publishedAt.value);
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YoutubeFeedEntriesCompanion(')
+          ..write('videoId: $videoId, ')
+          ..write('channelId: $channelId, ')
+          ..write('title: $title, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('publishedAt: $publishedAt, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7370,6 +8256,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DictationsTable dictations = $DictationsTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $SettingsKvTable settingsKv = $SettingsKvTable(this);
+  late final $YoutubeChannelSubscriptionsTable youtubeChannelSubscriptions =
+      $YoutubeChannelSubscriptionsTable(this);
+  late final $YoutubeFeedEntriesTable youtubeFeedEntries =
+      $YoutubeFeedEntriesTable(this);
   late final VideoDao videoDao = VideoDao(this as AppDatabase);
   late final AudioDao audioDao = AudioDao(this as AppDatabase);
   late final TranscriptDao transcriptDao = TranscriptDao(this as AppDatabase);
@@ -7382,6 +8272,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final DictationDao dictationDao = DictationDao(this as AppDatabase);
   late final SyncQueueDao syncQueueDao = SyncQueueDao(this as AppDatabase);
   late final SettingsDao settingsDao = SettingsDao(this as AppDatabase);
+  late final YoutubeChannelSubscriptionDao youtubeChannelSubscriptionDao =
+      YoutubeChannelSubscriptionDao(this as AppDatabase);
+  late final YoutubeFeedEntryDao youtubeFeedEntryDao = YoutubeFeedEntryDao(
+    this as AppDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7396,6 +8291,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     dictations,
     syncQueue,
     settingsKv,
+    youtubeChannelSubscriptions,
+    youtubeFeedEntries,
   ];
 }
 
@@ -10812,6 +11709,488 @@ typedef $$SettingsKvTableProcessedTableManager =
       SettingRow,
       PrefetchHooks Function()
     >;
+typedef $$YoutubeChannelSubscriptionsTableCreateCompanionBuilder =
+    YoutubeChannelSubscriptionsCompanion Function({
+      required String channelId,
+      required String displayName,
+      Value<String?> thumbnailUrl,
+      Value<String> source,
+      required DateTime subscribedAt,
+      Value<DateTime?> lastFetchedAt,
+      Value<int> rowid,
+    });
+typedef $$YoutubeChannelSubscriptionsTableUpdateCompanionBuilder =
+    YoutubeChannelSubscriptionsCompanion Function({
+      Value<String> channelId,
+      Value<String> displayName,
+      Value<String?> thumbnailUrl,
+      Value<String> source,
+      Value<DateTime> subscribedAt,
+      Value<DateTime?> lastFetchedAt,
+      Value<int> rowid,
+    });
+
+class $$YoutubeChannelSubscriptionsTableFilterComposer
+    extends Composer<_$AppDatabase, $YoutubeChannelSubscriptionsTable> {
+  $$YoutubeChannelSubscriptionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get channelId => $composableBuilder(
+    column: $table.channelId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get subscribedAt => $composableBuilder(
+    column: $table.subscribedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastFetchedAt => $composableBuilder(
+    column: $table.lastFetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$YoutubeChannelSubscriptionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $YoutubeChannelSubscriptionsTable> {
+  $$YoutubeChannelSubscriptionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get channelId => $composableBuilder(
+    column: $table.channelId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get subscribedAt => $composableBuilder(
+    column: $table.subscribedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastFetchedAt => $composableBuilder(
+    column: $table.lastFetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$YoutubeChannelSubscriptionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $YoutubeChannelSubscriptionsTable> {
+  $$YoutubeChannelSubscriptionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get channelId =>
+      $composableBuilder(column: $table.channelId, builder: (column) => column);
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get subscribedAt => $composableBuilder(
+    column: $table.subscribedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastFetchedAt => $composableBuilder(
+    column: $table.lastFetchedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$YoutubeChannelSubscriptionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $YoutubeChannelSubscriptionsTable,
+          YoutubeChannelSubscriptionRow,
+          $$YoutubeChannelSubscriptionsTableFilterComposer,
+          $$YoutubeChannelSubscriptionsTableOrderingComposer,
+          $$YoutubeChannelSubscriptionsTableAnnotationComposer,
+          $$YoutubeChannelSubscriptionsTableCreateCompanionBuilder,
+          $$YoutubeChannelSubscriptionsTableUpdateCompanionBuilder,
+          (
+            YoutubeChannelSubscriptionRow,
+            BaseReferences<
+              _$AppDatabase,
+              $YoutubeChannelSubscriptionsTable,
+              YoutubeChannelSubscriptionRow
+            >,
+          ),
+          YoutubeChannelSubscriptionRow,
+          PrefetchHooks Function()
+        > {
+  $$YoutubeChannelSubscriptionsTableTableManager(
+    _$AppDatabase db,
+    $YoutubeChannelSubscriptionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$YoutubeChannelSubscriptionsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$YoutubeChannelSubscriptionsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$YoutubeChannelSubscriptionsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> channelId = const Value.absent(),
+                Value<String> displayName = const Value.absent(),
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<DateTime> subscribedAt = const Value.absent(),
+                Value<DateTime?> lastFetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => YoutubeChannelSubscriptionsCompanion(
+                channelId: channelId,
+                displayName: displayName,
+                thumbnailUrl: thumbnailUrl,
+                source: source,
+                subscribedAt: subscribedAt,
+                lastFetchedAt: lastFetchedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String channelId,
+                required String displayName,
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                required DateTime subscribedAt,
+                Value<DateTime?> lastFetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => YoutubeChannelSubscriptionsCompanion.insert(
+                channelId: channelId,
+                displayName: displayName,
+                thumbnailUrl: thumbnailUrl,
+                source: source,
+                subscribedAt: subscribedAt,
+                lastFetchedAt: lastFetchedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$YoutubeChannelSubscriptionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $YoutubeChannelSubscriptionsTable,
+      YoutubeChannelSubscriptionRow,
+      $$YoutubeChannelSubscriptionsTableFilterComposer,
+      $$YoutubeChannelSubscriptionsTableOrderingComposer,
+      $$YoutubeChannelSubscriptionsTableAnnotationComposer,
+      $$YoutubeChannelSubscriptionsTableCreateCompanionBuilder,
+      $$YoutubeChannelSubscriptionsTableUpdateCompanionBuilder,
+      (
+        YoutubeChannelSubscriptionRow,
+        BaseReferences<
+          _$AppDatabase,
+          $YoutubeChannelSubscriptionsTable,
+          YoutubeChannelSubscriptionRow
+        >,
+      ),
+      YoutubeChannelSubscriptionRow,
+      PrefetchHooks Function()
+    >;
+typedef $$YoutubeFeedEntriesTableCreateCompanionBuilder =
+    YoutubeFeedEntriesCompanion Function({
+      required String videoId,
+      required String channelId,
+      required String title,
+      Value<String?> thumbnailUrl,
+      required DateTime publishedAt,
+      required DateTime fetchedAt,
+      Value<int> rowid,
+    });
+typedef $$YoutubeFeedEntriesTableUpdateCompanionBuilder =
+    YoutubeFeedEntriesCompanion Function({
+      Value<String> videoId,
+      Value<String> channelId,
+      Value<String> title,
+      Value<String?> thumbnailUrl,
+      Value<DateTime> publishedAt,
+      Value<DateTime> fetchedAt,
+      Value<int> rowid,
+    });
+
+class $$YoutubeFeedEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $YoutubeFeedEntriesTable> {
+  $$YoutubeFeedEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get videoId => $composableBuilder(
+    column: $table.videoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get channelId => $composableBuilder(
+    column: $table.channelId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$YoutubeFeedEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $YoutubeFeedEntriesTable> {
+  $$YoutubeFeedEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get videoId => $composableBuilder(
+    column: $table.videoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get channelId => $composableBuilder(
+    column: $table.channelId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$YoutubeFeedEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $YoutubeFeedEntriesTable> {
+  $$YoutubeFeedEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get videoId =>
+      $composableBuilder(column: $table.videoId, builder: (column) => column);
+
+  GeneratedColumn<String> get channelId =>
+      $composableBuilder(column: $table.channelId, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+}
+
+class $$YoutubeFeedEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $YoutubeFeedEntriesTable,
+          YoutubeFeedEntryRow,
+          $$YoutubeFeedEntriesTableFilterComposer,
+          $$YoutubeFeedEntriesTableOrderingComposer,
+          $$YoutubeFeedEntriesTableAnnotationComposer,
+          $$YoutubeFeedEntriesTableCreateCompanionBuilder,
+          $$YoutubeFeedEntriesTableUpdateCompanionBuilder,
+          (
+            YoutubeFeedEntryRow,
+            BaseReferences<
+              _$AppDatabase,
+              $YoutubeFeedEntriesTable,
+              YoutubeFeedEntryRow
+            >,
+          ),
+          YoutubeFeedEntryRow,
+          PrefetchHooks Function()
+        > {
+  $$YoutubeFeedEntriesTableTableManager(
+    _$AppDatabase db,
+    $YoutubeFeedEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$YoutubeFeedEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$YoutubeFeedEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$YoutubeFeedEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> videoId = const Value.absent(),
+                Value<String> channelId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<DateTime> publishedAt = const Value.absent(),
+                Value<DateTime> fetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => YoutubeFeedEntriesCompanion(
+                videoId: videoId,
+                channelId: channelId,
+                title: title,
+                thumbnailUrl: thumbnailUrl,
+                publishedAt: publishedAt,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String videoId,
+                required String channelId,
+                required String title,
+                Value<String?> thumbnailUrl = const Value.absent(),
+                required DateTime publishedAt,
+                required DateTime fetchedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => YoutubeFeedEntriesCompanion.insert(
+                videoId: videoId,
+                channelId: channelId,
+                title: title,
+                thumbnailUrl: thumbnailUrl,
+                publishedAt: publishedAt,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$YoutubeFeedEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $YoutubeFeedEntriesTable,
+      YoutubeFeedEntryRow,
+      $$YoutubeFeedEntriesTableFilterComposer,
+      $$YoutubeFeedEntriesTableOrderingComposer,
+      $$YoutubeFeedEntriesTableAnnotationComposer,
+      $$YoutubeFeedEntriesTableCreateCompanionBuilder,
+      $$YoutubeFeedEntriesTableUpdateCompanionBuilder,
+      (
+        YoutubeFeedEntryRow,
+        BaseReferences<
+          _$AppDatabase,
+          $YoutubeFeedEntriesTable,
+          YoutubeFeedEntryRow
+        >,
+      ),
+      YoutubeFeedEntryRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -10834,6 +12213,14 @@ class $AppDatabaseManager {
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
   $$SettingsKvTableTableManager get settingsKv =>
       $$SettingsKvTableTableManager(_db, _db.settingsKv);
+  $$YoutubeChannelSubscriptionsTableTableManager
+  get youtubeChannelSubscriptions =>
+      $$YoutubeChannelSubscriptionsTableTableManager(
+        _db,
+        _db.youtubeChannelSubscriptions,
+      );
+  $$YoutubeFeedEntriesTableTableManager get youtubeFeedEntries =>
+      $$YoutubeFeedEntriesTableTableManager(_db, _db.youtubeFeedEntries);
 }
 
 mixin _$VideoDaoMixin on DatabaseAccessor<AppDatabase> {
@@ -10947,4 +12334,38 @@ class SettingsDaoManager {
   SettingsDaoManager(this._db);
   $$SettingsKvTableTableManager get settingsKv =>
       $$SettingsKvTableTableManager(_db.attachedDatabase, _db.settingsKv);
+}
+
+mixin _$YoutubeChannelSubscriptionDaoMixin on DatabaseAccessor<AppDatabase> {
+  $YoutubeChannelSubscriptionsTable get youtubeChannelSubscriptions =>
+      attachedDatabase.youtubeChannelSubscriptions;
+  YoutubeChannelSubscriptionDaoManager get managers =>
+      YoutubeChannelSubscriptionDaoManager(this);
+}
+
+class YoutubeChannelSubscriptionDaoManager {
+  final _$YoutubeChannelSubscriptionDaoMixin _db;
+  YoutubeChannelSubscriptionDaoManager(this._db);
+  $$YoutubeChannelSubscriptionsTableTableManager
+  get youtubeChannelSubscriptions =>
+      $$YoutubeChannelSubscriptionsTableTableManager(
+        _db.attachedDatabase,
+        _db.youtubeChannelSubscriptions,
+      );
+}
+
+mixin _$YoutubeFeedEntryDaoMixin on DatabaseAccessor<AppDatabase> {
+  $YoutubeFeedEntriesTable get youtubeFeedEntries =>
+      attachedDatabase.youtubeFeedEntries;
+  YoutubeFeedEntryDaoManager get managers => YoutubeFeedEntryDaoManager(this);
+}
+
+class YoutubeFeedEntryDaoManager {
+  final _$YoutubeFeedEntryDaoMixin _db;
+  YoutubeFeedEntryDaoManager(this._db);
+  $$YoutubeFeedEntriesTableTableManager get youtubeFeedEntries =>
+      $$YoutubeFeedEntriesTableTableManager(
+        _db.attachedDatabase,
+        _db.youtubeFeedEntries,
+      );
 }

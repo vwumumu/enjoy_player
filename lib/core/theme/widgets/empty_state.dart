@@ -29,6 +29,8 @@ class EmptyState extends StatelessWidget {
     required this.subtitle,
     this.action,
     this.actionLabel,
+    this.secondaryAction,
+    this.secondaryActionLabel,
     this.illustration,
     this.illustrationAsset,
   });
@@ -40,6 +42,8 @@ class EmptyState extends StatelessWidget {
   final String subtitle;
   final VoidCallback? action;
   final String? actionLabel;
+  final VoidCallback? secondaryAction;
+  final String? secondaryActionLabel;
 
   /// When non-null, replaces [icon] / asset art.
   final Widget? illustration;
@@ -99,6 +103,13 @@ class EmptyState extends StatelessWidget {
                 EnjoyButton.primary(
                   onPressed: action,
                   child: Text(actionLabel!),
+                ),
+              ],
+              if (secondaryAction != null && secondaryActionLabel != null) ...[
+                SizedBox(height: t.space12),
+                EnjoyButton.secondary(
+                  onPressed: secondaryAction,
+                  child: Text(secondaryActionLabel!),
                 ),
               ],
             ],

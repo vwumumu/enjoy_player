@@ -12,6 +12,7 @@ import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
+import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 
@@ -81,6 +82,8 @@ class GuestMigrationCtrl extends _$GuestMigrationCtrl {
       ref.invalidate(libraryHomeRecentsProvider);
       ref.invalidate(libraryFilteredListsProvider);
       ref.invalidate(syncQueueSnapshotProvider);
+      ref.invalidate(discoverSubscriptionsProvider);
+      ref.invalidate(discoverTimelineProvider);
     });
     if (state.hasError) return;
     state = const AsyncData(null);
@@ -106,7 +109,9 @@ SELECT (
   EXISTS(SELECT 1 FROM echo_sessions LIMIT 1) OR
   EXISTS(SELECT 1 FROM recordings LIMIT 1) OR
   EXISTS(SELECT 1 FROM dictations LIMIT 1) OR
-  EXISTS(SELECT 1 FROM sync_queue LIMIT 1)
+  EXISTS(SELECT 1 FROM sync_queue LIMIT 1) OR
+  EXISTS(SELECT 1 FROM youtube_channel_subscriptions LIMIT 1) OR
+  EXISTS(SELECT 1 FROM youtube_feed_entries LIMIT 1)
 ) AS has_data
 ''',
         readsFrom: {
@@ -117,6 +122,8 @@ SELECT (
           guest.recordings,
           guest.dictations,
           guest.syncQueue,
+          guest.youtubeChannelSubscriptions,
+          guest.youtubeFeedEntries,
         },
       )
       .getSingle();
@@ -138,6 +145,10 @@ Future<void> _migrateGuestToUser({
   final recordings = await guest.select(guest.recordings).get();
   final dictations = await guest.select(guest.dictations).get();
   final syncRows = await guest.select(guest.syncQueue).get();
+  final discoverSubs = await guest
+      .select(guest.youtubeChannelSubscriptions)
+      .get();
+  final discoverFeeds = await guest.select(guest.youtubeFeedEntries).get();
 
   await user.batch((b) {
     for (final r in videos) {
@@ -173,6 +184,16 @@ Future<void> _migrateGuestToUser({
         ),
       );
     }
+    for (final r in discoverSubs) {
+      b.insert(
+        user.youtubeChannelSubscriptions,
+        r,
+        mode: InsertMode.insertOrReplace,
+      );
+    }
+    for (final r in discoverFeeds) {
+      b.insert(user.youtubeFeedEntries, r, mode: InsertMode.insertOrReplace);
+    }
   });
 
   const dataTables = <String>[
@@ -183,6 +204,8 @@ Future<void> _migrateGuestToUser({
     'recordings',
     'dictations',
     'sync_queue',
+    'youtube_channel_subscriptions',
+    'youtube_feed_entries',
   ];
   for (final name in dataTables) {
     await guest.customStatement('DELETE FROM $name');

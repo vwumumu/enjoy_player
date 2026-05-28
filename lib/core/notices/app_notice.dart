@@ -127,9 +127,12 @@ abstract final class AppNotice {
           mq.padding.bottom + shellExtra + (tokens?.space16 ?? 16.0);
       final maxW = mq.size.width;
       final innerMax = math.max(0.0, maxW - horizontal * 2);
-      final double? snackWidth = maxW >= 600 && innerMax > 0
+      final snackMaxWidth = maxW >= 600 && innerMax > 0
           ? math.min(520.0, innerMax)
           : null;
+      final sideMargin = snackMaxWidth != null
+          ? math.max(horizontal, (maxW - snackMaxWidth) / 2)
+          : horizontal;
 
       final radius = tokens?.radiusXl ?? 16.0;
       final elevation = tokens?.elevationSheet ?? 3.0;
@@ -140,7 +143,6 @@ abstract final class AppNotice {
 
       m.showSnackBar(
         SnackBar(
-          width: snackWidth,
           behavior: SnackBarBehavior.floating,
           elevation: elevation,
           shape: RoundedRectangleBorder(
@@ -151,10 +153,12 @@ abstract final class AppNotice {
           closeIconColor: foregroundColor,
           duration: duration,
           action: action,
-          // SnackBar rejects simultaneous [width] and [margin].
-          margin: snackWidth != null
-              ? EdgeInsets.only(bottom: bottomPad)
-              : EdgeInsets.fromLTRB(horizontal, 0, horizontal, bottomPad),
+          margin: EdgeInsets.fromLTRB(
+            sideMargin,
+            0,
+            sideMargin,
+            bottomPad,
+          ),
           content: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -70,3 +70,4 @@ flutter:
   assets:
     - assets/logo-light.svg
     - assets/illustrations/
+    - assets/discover/recommended_channels.json

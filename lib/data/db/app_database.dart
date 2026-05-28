@@ -14,6 +14,8 @@ import 'tables/sync_queue.dart';
 import 'tables/transcript_fetch_states.dart';
 import 'tables/transcripts.dart';
 import 'tables/videos.dart';
+import 'tables/youtube_channel_subscriptions.dart';
+import 'tables/youtube_feed_entries.dart';
 
 part 'app_database.g.dart';
 
@@ -28,6 +30,8 @@ part 'app_database.g.dart';
     Dictations,
     SyncQueue,
     SettingsKv,
+    YoutubeChannelSubscriptions,
+    YoutubeFeedEntries,
   ],
   daos: [
     VideoDao,
@@ -39,6 +43,8 @@ part 'app_database.g.dart';
     DictationDao,
     SyncQueueDao,
     SettingsDao,
+    YoutubeChannelSubscriptionDao,
+    YoutubeFeedEntryDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -49,7 +55,7 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: name));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -57,6 +63,13 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
     },
     onUpgrade: (m, from, to) async {
+      // v6 → v7 only adds Discover tables; preserve existing library data.
+      if (from >= 6 && to == 7) {
+        await m.createTable(youtubeChannelSubscriptions);
+        await m.createTable(youtubeFeedEntries);
+        return;
+      }
+
       const tables = <String>[
         'sync_queue',
         'dictations',
@@ -64,6 +77,8 @@ class AppDatabase extends _$AppDatabase {
         'echo_sessions',
         'transcripts',
         'transcript_fetch_states',
+        'youtube_feed_entries',
+        'youtube_channel_subscriptions',
         'videos',
         'audios',
         'playback_sessions',
@@ -578,4 +593,101 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
     SettingRow(key: key, value: value),
     mode: InsertMode.insertOrReplace,
   );
+}
+
+@DriftAccessor(tables: [YoutubeChannelSubscriptions])
+class YoutubeChannelSubscriptionDao extends DatabaseAccessor<AppDatabase>
+    with _$YoutubeChannelSubscriptionDaoMixin {
+  YoutubeChannelSubscriptionDao(super.db);
+
+  Stream<List<YoutubeChannelSubscriptionRow>> watchAll() => (select(
+    youtubeChannelSubscriptions,
+  )..orderBy([(t) => OrderingTerm.asc(t.displayName)])).watch();
+
+  Future<List<YoutubeChannelSubscriptionRow>> listAll() =>
+      select(youtubeChannelSubscriptions).get();
+
+  Future<YoutubeChannelSubscriptionRow?> getByChannelId(String channelId) =>
+      (select(youtubeChannelSubscriptions)
+            ..where((t) => t.channelId.equals(channelId)))
+          .getSingleOrNull();
+
+  Future<void> upsert(YoutubeChannelSubscriptionRow row) =>
+      into(youtubeChannelSubscriptions).insert(
+        row,
+        mode: InsertMode.insertOrReplace,
+      );
+
+  Future<void> deleteChannelId(String channelId) => (delete(
+    youtubeChannelSubscriptions,
+  )..where((t) => t.channelId.equals(channelId))).go();
+
+  Future<void> touchLastFetched(String channelId, DateTime fetchedAt) async {
+    await (update(youtubeChannelSubscriptions)
+          ..where((t) => t.channelId.equals(channelId)))
+        .write(
+      YoutubeChannelSubscriptionsCompanion(
+        lastFetchedAt: Value(fetchedAt),
+      ),
+    );
+  }
+
+  Future<void> updateDisplayName(String channelId, String displayName) async {
+    await (update(youtubeChannelSubscriptions)
+          ..where((t) => t.channelId.equals(channelId)))
+        .write(
+      YoutubeChannelSubscriptionsCompanion(
+        displayName: Value(displayName),
+      ),
+    );
+  }
+
+  Future<void> updateThumbnail(String channelId, String? thumbnailUrl) async {
+    await (update(youtubeChannelSubscriptions)
+          ..where((t) => t.channelId.equals(channelId)))
+        .write(
+      YoutubeChannelSubscriptionsCompanion(
+        thumbnailUrl: Value(thumbnailUrl),
+      ),
+    );
+  }
+}
+
+@DriftAccessor(tables: [YoutubeFeedEntries])
+class YoutubeFeedEntryDao extends DatabaseAccessor<AppDatabase>
+    with _$YoutubeFeedEntryDaoMixin {
+  YoutubeFeedEntryDao(super.db);
+
+  Stream<List<YoutubeFeedEntryRow>> watchTimeline() => (select(
+    youtubeFeedEntries,
+  )..orderBy([(t) => OrderingTerm.desc(t.publishedAt)])).watch();
+
+  Stream<List<YoutubeFeedEntryRow>> watchForChannel(String channelId) =>
+      (select(youtubeFeedEntries)
+            ..where((t) => t.channelId.equals(channelId))
+            ..orderBy([(t) => OrderingTerm.desc(t.publishedAt)]))
+          .watch();
+
+  Future<void> upsertEntry(YoutubeFeedEntryRow row) =>
+      into(youtubeFeedEntries).insert(row, mode: InsertMode.insertOrReplace);
+
+  Future<void> deleteForChannel(String channelId) => (delete(
+    youtubeFeedEntries,
+  )..where((t) => t.channelId.equals(channelId))).go();
+
+  /// Removes cached entries for [channelId] not present in [keepVideoIds].
+  Future<void> deleteStaleForChannel(
+    String channelId,
+    Set<String> keepVideoIds,
+  ) async {
+    if (keepVideoIds.isEmpty) {
+      await deleteForChannel(channelId);
+      return;
+    }
+    await (delete(youtubeFeedEntries)..where(
+          (t) =>
+              t.channelId.equals(channelId) & t.videoId.isNotIn(keepVideoIds),
+        ))
+        .go();
+  }
 }

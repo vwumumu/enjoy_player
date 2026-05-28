@@ -4,6 +4,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
 import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -58,6 +60,8 @@ class HomeScreen extends ConsumerWidget {
                     subtitle: l10n.homeEmptyHint,
                     action: () => showImportChooser(context, ref),
                     actionLabel: l10n.actionImport,
+                    secondaryAction: () => context.go('/discover'),
+                    secondaryActionLabel: l10n.discoverBrowseAction,
                   );
                 }
 

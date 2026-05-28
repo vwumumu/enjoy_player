@@ -110,6 +110,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importFromYoutube => 'From YouTube URL…';
 
   @override
+  String get discoverTitle => 'Discover';
+
+  @override
+  String get discoverBrowseAction => 'Browse Discover';
+
+  @override
+  String get discoverRecommendedHeading => 'Recommended';
+
+  @override
+  String get discoverSubscriptionsHeading => 'Subscriptions';
+
+  @override
+  String get discoverTimelineHeading => 'Recent uploads';
+
+  @override
+  String get discoverSubscribeTitle => 'Subscribe to channel';
+
+  @override
+  String get discoverSubscribeHint => 'Paste a YouTube channel URL or @handle.';
+
+  @override
+  String get discoverSubscribePlaceholder => 'https://www.youtube.com/@channel';
+
+  @override
+  String get discoverSubscribeAction => 'Subscribe';
+
+  @override
+  String get discoverSubscribed => 'Subscribed to channel';
+
+  @override
+  String get discoverSubscribeFailed => 'Could not subscribe to that channel.';
+
+  @override
+  String get discoverUnsubscribeAction => 'Unsubscribe';
+
+  @override
+  String get discoverUnsubscribed => 'Unsubscribed from channel';
+
+  @override
+  String get discoverViewFeed => 'View feed';
+
+  @override
+  String get discoverAddToLibrary => 'Add to library';
+
+  @override
+  String get discoverAddedToLibrary => 'Added to your library';
+
+  @override
+  String get discoverAddFailed => 'Could not add this video.';
+
+  @override
+  String get discoverInLibrary => 'In library';
+
+  @override
+  String get discoverPlay => 'Play';
+
+  @override
+  String get discoverFeedEmptyTitle => 'No videos in feed yet';
+
+  @override
+  String get discoverFeedEmptyHint =>
+      'Subscribe to a channel and refresh to load recent uploads.';
+
+  @override
+  String get discoverFeedErrorTitle => 'Could not load feed';
+
+  @override
+  String get discoverFeedErrorHint => 'Check your connection and try again.';
+
+  @override
+  String get discoverRetry => 'Retry';
+
+  @override
+  String get discoverRefreshPartialFailed =>
+      'Some channel feeds could not be refreshed.';
+
+  @override
+  String get discoverRecommendedLoadFailed =>
+      'Could not load recommended channels.';
+
+  @override
+  String get discoverSubscriptionsLoadFailed => 'Could not load subscriptions.';
+
+  @override
+  String get discoverNoSubscriptionsHint =>
+      'Subscribe to a recommended channel or paste a channel URL.';
+
+  @override
   String get youtubeImportTitle => 'Import YouTube video';
 
   @override

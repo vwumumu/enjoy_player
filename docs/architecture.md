@@ -53,7 +53,7 @@ sequenceDiagram
 
 ### Schema upgrades (release note)
 
-[`AppDatabase`](../lib/data/db/app_database.dart) currently uses a **destructive** `onUpgrade`: listed tables are dropped and recreated when `schemaVersion` advances. **Any app upgrade that bumps the schema version clears local library data** until incremental migrations replace this strategy. Plan releases accordingly (e.g. avoid shipping a schema bump to users who must keep offline data, or ship a migration before bumping).
+[`AppDatabase`](../lib/data/db/app_database.dart) uses **destructive** `onUpgrade` for schema versions below 6. **v6 → v7** adds Discover tables incrementally without wiping library data. Older upgrades still drop listed tables and recreate them. Plan releases accordingly.
 
 ## Optional Enjoy account (auth)
 
