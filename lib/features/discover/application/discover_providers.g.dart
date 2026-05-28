@@ -256,6 +256,65 @@ final class DiscoverChannelFeedFamily extends $Family
   String toString() => r'discoverChannelFeedProvider';
 }
 
+/// Active Discover feed filter: `null` = all subscribed channels, else one channel.
+
+@ProviderFor(DiscoverSelectedChannel)
+final discoverSelectedChannelProvider = DiscoverSelectedChannelProvider._();
+
+/// Active Discover feed filter: `null` = all subscribed channels, else one channel.
+final class DiscoverSelectedChannelProvider
+    extends $NotifierProvider<DiscoverSelectedChannel, String?> {
+  /// Active Discover feed filter: `null` = all subscribed channels, else one channel.
+  DiscoverSelectedChannelProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'discoverSelectedChannelProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$discoverSelectedChannelHash();
+
+  @$internal
+  @override
+  DiscoverSelectedChannel create() => DiscoverSelectedChannel();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$discoverSelectedChannelHash() =>
+    r'84d965d14d0532158236cfa8ed0a62386dfe9296';
+
+/// Active Discover feed filter: `null` = all subscribed channels, else one channel.
+
+abstract class _$DiscoverSelectedChannel extends $Notifier<String?> {
+  String? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 /// Channel profile photo for recommended row: subscription avatar, bundled
 /// URL, then a one-time fetch from the public channel page.
 

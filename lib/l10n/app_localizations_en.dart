@@ -201,6 +201,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Subscribe to a recommended channel or paste a channel URL.';
 
   @override
+  String get discoverManageChannels => 'Manage channels';
+
+  @override
+  String get discoverFilterAll => 'All';
+
+  @override
+  String get discoverYourChannelsHeading => 'Your channels';
+
+  @override
+  String get discoverRecommendedAllSubscribed =>
+      'You are subscribed to all recommended channels.';
+
+  @override
   String get youtubeImportTitle => 'Import YouTube video';
 
   @override

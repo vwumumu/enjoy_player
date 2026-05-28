@@ -447,6 +447,30 @@ abstract class AppLocalizations {
   /// **'Subscribe to a recommended channel or paste a channel URL.'**
   String get discoverNoSubscriptionsHint;
 
+  /// No description provided for @discoverManageChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage channels'**
+  String get discoverManageChannels;
+
+  /// No description provided for @discoverFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get discoverFilterAll;
+
+  /// No description provided for @discoverYourChannelsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Your channels'**
+  String get discoverYourChannelsHeading;
+
+  /// No description provided for @discoverRecommendedAllSubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'You are subscribed to all recommended channels.'**
+  String get discoverRecommendedAllSubscribed;
+
   /// No description provided for @youtubeImportTitle.
   ///
   /// In en, this message translates to:

@@ -7,10 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/discover/domain/recommended_channel.dart';
+import 'package:enjoy_player/features/discover/presentation/discover_channel_avatar.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class DiscoverRecommendedChannelCard extends ConsumerWidget {
@@ -51,10 +51,11 @@ class DiscoverRecommendedChannelCard extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _ChannelAvatar(
+          DiscoverChannelAvatar(
             url: avatarUrl,
             displayName: channel.name,
             seed: channel.channelId,
+            size: DiscoverRecommendedChannelCard.avatarSize,
           ),
           SizedBox(height: t.space8),
           SizedBox(
@@ -115,59 +116,6 @@ class DiscoverRecommendedChannelCard extends ConsumerWidget {
                   ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ChannelAvatar extends StatelessWidget {
-  const _ChannelAvatar({
-    required this.displayName,
-    required this.seed,
-    this.url,
-  });
-
-  final String? url;
-  final String displayName;
-  final String seed;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = generativeAccentForSeed(seed);
-    final initial = displayName.trim().isNotEmpty
-        ? displayName.trim()[0].toUpperCase()
-        : '?';
-
-    Widget fallback() {
-      return ColoredBox(
-        color: accent.withValues(alpha: 0.22),
-        child: Center(
-          child: Text(
-            initial,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: accent,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return ClipOval(
-      child: SizedBox(
-        width: DiscoverRecommendedChannelCard.avatarSize,
-        height: DiscoverRecommendedChannelCard.avatarSize,
-        child: url != null
-            ? Image.network(
-                url!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => fallback(),
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return fallback();
-                },
-              )
-            : fallback(),
       ),
     );
   }

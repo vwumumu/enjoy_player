@@ -193,6 +193,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get discoverNoSubscriptionsHint => '订阅推荐频道或粘贴频道链接。';
 
   @override
+  String get discoverManageChannels => '管理频道';
+
+  @override
+  String get discoverFilterAll => '全部';
+
+  @override
+  String get discoverYourChannelsHeading => '你的频道';
+
+  @override
+  String get discoverRecommendedAllSubscribed => '你已订阅全部推荐频道。';
+
+  @override
   String get youtubeImportTitle => '导入 YouTube 视频';
 
   @override
@@ -1728,6 +1740,18 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get discoverNoSubscriptionsHint => '订阅推荐频道或粘贴频道链接。';
+
+  @override
+  String get discoverManageChannels => '管理频道';
+
+  @override
+  String get discoverFilterAll => '全部';
+
+  @override
+  String get discoverYourChannelsHeading => '你的频道';
+
+  @override
+  String get discoverRecommendedAllSubscribed => '你已订阅全部推荐频道。';
 
   @override
   String get youtubeImportTitle => '导入 YouTube 视频';

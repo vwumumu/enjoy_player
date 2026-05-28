@@ -12,19 +12,31 @@ Discover feeds are **not** library items until imported. Subscriptions are **Enj
 - Channel feed → `/discover/channel/:channelId`
 - Home empty state → secondary **Browse Discover** action
 
-## Subscriptions
+## Main screen (videos-first)
 
-Users can also paste a YouTube channel URL or `@handle`. The app resolves `channel_id` best-effort and stores a subscription row.
+The Discover tab shows a **merged video feed** only (responsive grid of recent uploads). A horizontal **filter strip** sits below the header:
 
-The **Subscriptions** section (above Recommended) is the management surface:
+- **All** — timeline across all subscribed channels
+- **Channel avatars** — filter the feed to one subscription
+- **Manage channels** — opens subscription management (see below)
 
-- Tap a row → channel feed (`/discover/channel/:channelId`)
-- **Unsubscribe** on the trailing action removes the subscription and its cached feed entries
-- Channel feed app bar also offers Unsubscribe
+Desktop: header **Refresh** button. No inline subscription or recommended lists on the main scroll.
 
-## Recommended channels
+## Manage channels
 
-Shipped in `assets/discover/recommended_channels.json`. Cards show **Subscribe** for new channels, or a static **Subscribed** badge when already in the list (no View feed / Unsubscribe on recommended cards).
+Opened from the filter strip (bottom sheet on narrow layouts, centered dialog at `breakpointRail` and wider):
+
+- **Subscribe** (paste URL / `@handle`) — same resolver as before
+- **Your channels** — list with **Unsubscribe** (does not navigate away from the modal)
+- **Recommended** — bundled catalog (`assets/discover/recommended_channels.json`) with **Subscribe** / **Subscribed** badges
+
+Empty Discover state (no subscriptions) prompts **Manage channels** so users can add recommended channels first.
+
+## Subscriptions (elsewhere)
+
+- Tap a subscription from **channel feed** app bar row context, or navigate to `/discover/channel/:channelId` from library flows as before
+- **Unsubscribe** in Manage channels or channel feed app bar removes the subscription and cached feed entries
+- Filter selection resets to **All** if the active channel is unsubscribed
 
 ## Feed refresh
 

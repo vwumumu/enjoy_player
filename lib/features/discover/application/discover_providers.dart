@@ -51,6 +51,29 @@ Stream<List<FeedEntry>> discoverChannelFeed(Ref ref, String channelId) {
   return ref.watch(discoverRepositoryProvider).watchChannelFeed(channelId);
 }
 
+/// Active Discover feed filter: `null` = all subscribed channels, else one channel.
+@Riverpod(keepAlive: true)
+class DiscoverSelectedChannel extends _$DiscoverSelectedChannel {
+  @override
+  String? build() {
+    ref.listen(discoverSubscriptionsProvider, (previous, next) {
+      final selected = state;
+      if (selected == null) return;
+      final subs = next.valueOrNull;
+      if (subs == null) return;
+      final stillSubscribed = subs.any((s) => s.channelId == selected);
+      if (!stillSubscribed) {
+        state = null;
+      }
+    });
+    return null;
+  }
+
+  void select(String? channelId) {
+    state = channelId;
+  }
+}
+
 /// Channel profile photo for recommended row: subscription avatar, bundled
 /// URL, then a one-time fetch from the public channel page.
 @Riverpod(keepAlive: true)
