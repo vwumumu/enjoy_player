@@ -74,6 +74,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transcriptAccessibilityEchoCurrentLine => '当前跟读行。';
 
   @override
+  String transcriptLineRecordingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 条录音',
+      one: '1 条录音',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get transcriptErrorFriendlyTitle => '字幕暂不可用';
 
   @override
@@ -1511,6 +1522,17 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get transcriptAccessibilityEchoCurrentLine => '当前跟读行。';
+
+  @override
+  String transcriptLineRecordingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 条录音',
+      one: '1 条录音',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get transcriptErrorFriendlyTitle => '字幕暂不可用';

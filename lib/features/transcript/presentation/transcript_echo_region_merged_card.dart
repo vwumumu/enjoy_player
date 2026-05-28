@@ -13,6 +13,7 @@ import 'package:enjoy_player/features/player/application/player_interactions.dar
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/shadow_reading/presentation/shadow_reading_panel.dart';
 import 'package:enjoy_player/features/lookup/application/transcript_lookup_open.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_line_recording_counts_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_alignment.dart';
 import 'package:enjoy_player/features/transcript/presentation/echo_region_controls_bar.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_line_tile.dart';
@@ -44,6 +45,9 @@ class EchoRegionMergedCard extends ConsumerWidget {
     final chrome = ref.watch(playerControllerProvider.select(playbackChromeOf));
     final matcher =
         secondaryMatcher ?? TranscriptSecondaryMatcher.from(secondaryLines);
+    final lineRecordingCounts = ref.watch(
+      transcriptLineRecordingCountsProvider(mediaId),
+    );
 
     // Neutral surface — no colored background; left rail carries the echo accent.
     final shell = scheme.surfaceContainerLow;
@@ -75,6 +79,7 @@ class EchoRegionMergedCard extends ConsumerWidget {
         inEcho: true,
         groupedInEcho: true,
         selectable: true,
+        recordingCount: lineRecordingCounts[i] ?? 0,
         onLookupRequested: (t) => openTranscriptLookup(
           ref: ref,
           context: context,

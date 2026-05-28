@@ -11,6 +11,7 @@ import 'package:enjoy_player/features/player/application/player_interactions.dar
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/transcript/application/echo_region_bounds.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_alignment.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_line_recording_counts_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_playback_highlight_provider.dart';
 import 'package:enjoy_player/features/lookup/application/transcript_lookup_open.dart';
@@ -268,6 +269,9 @@ class _TranscriptScrollableListState
     final secondaryLines = secondaryAsync.value ?? <TranscriptLine>[];
     final secondaryMatcher = _matcherFor(secondaryLines);
     final items = _virtualItems(echo);
+    final lineRecordingCounts = ref.watch(
+      transcriptLineRecordingCountsProvider(widget.mediaId),
+    );
 
     ref.listen(transcriptPlaybackHighlightProvider(widget.mediaId), (
       prev,
@@ -342,6 +346,7 @@ class _TranscriptScrollableListState
                 inEcho: inEcho,
                 groupedInEcho: false,
                 selectable: selectable,
+                recordingCount: lineRecordingCounts[lineIndex] ?? 0,
                 onLookupRequested: selectable
                     ? (t) => openTranscriptLookup(
                         ref: ref,

@@ -77,6 +77,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transcriptAccessibilityEchoCurrentLine => 'Current echo line.';
 
   @override
+  String transcriptLineRecordingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recordings',
+      one: '1 recording',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get transcriptErrorFriendlyTitle => 'Transcript unavailable';
 
   @override

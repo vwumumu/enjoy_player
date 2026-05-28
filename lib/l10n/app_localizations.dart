@@ -225,6 +225,12 @@ abstract class AppLocalizations {
   /// **'Current echo line.'**
   String get transcriptAccessibilityEchoCurrentLine;
 
+  /// No description provided for @transcriptLineRecordingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recording} other{{count} recordings}}'**
+  String transcriptLineRecordingCount(int count);
+
   /// No description provided for @transcriptErrorFriendlyTitle.
   ///
   /// In en, this message translates to:

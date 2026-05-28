@@ -42,7 +42,7 @@ final class PlayerInteractionsProvider
 }
 
 String _$playerInteractionsHash() =>
-    r'0808b7e22fb9ba4b9d587e3e3f401cfc4b18fd5b';
+    r'c9a5df15337f184e1e41921185f4ccf68b7c5fef';
 
 abstract class _$PlayerInteractions extends $Notifier<int> {
   int build();

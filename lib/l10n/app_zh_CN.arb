@@ -27,6 +27,14 @@
   "transcriptAccessibilityCurrentLine": "当前播放行。",
   "transcriptAccessibilityEchoRegion": "跟读练习区域。",
   "transcriptAccessibilityEchoCurrentLine": "当前跟读行。",
+  "transcriptLineRecordingCount": "{count, plural, =1{1 条录音} other{{count} 条录音}}",
+  "@transcriptLineRecordingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "transcriptErrorFriendlyTitle": "字幕暂不可用",
   "transcriptErrorFriendlyHint": "请尝试选择其他字幕轨道或导入字幕文件。",
   "transcriptFetchingSubtitles": "正在获取字幕…",

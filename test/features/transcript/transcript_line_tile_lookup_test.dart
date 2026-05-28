@@ -171,4 +171,55 @@ void main() {
 
     expect(find.text('Look up'), findsOneWidget);
   });
+
+  testWidgets('shows recording badge when recordingCount is positive', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      transcriptTileHarness(
+        TranscriptLineTile(
+          line: const TranscriptLine(
+            text: 'Hello world',
+            startMs: 0,
+            durationMs: 2000,
+          ),
+          secondaryText: null,
+          isActive: false,
+          inEcho: false,
+          groupedInEcho: false,
+          selectable: false,
+          recordingCount: 2,
+          onTap: () {},
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+  });
+
+  testWidgets('hides recording badge when recordingCount is zero', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      transcriptTileHarness(
+        TranscriptLineTile(
+          line: const TranscriptLine(
+            text: 'Hello world',
+            startMs: 0,
+            durationMs: 2000,
+          ),
+          secondaryText: null,
+          isActive: false,
+          inEcho: false,
+          groupedInEcho: false,
+          selectable: false,
+          recordingCount: 0,
+          onTap: () {},
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.mic_rounded), findsNothing);
+  });
 }

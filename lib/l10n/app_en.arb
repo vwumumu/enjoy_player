@@ -27,6 +27,14 @@
   "transcriptAccessibilityCurrentLine": "Current playback line.",
   "transcriptAccessibilityEchoRegion": "Echo practice region.",
   "transcriptAccessibilityEchoCurrentLine": "Current echo line.",
+  "transcriptLineRecordingCount": "{count, plural, =1{1 recording} other{{count} recordings}}",
+  "@transcriptLineRecordingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "transcriptErrorFriendlyTitle": "Transcript unavailable",
   "transcriptErrorFriendlyHint": "Try choosing another subtitle track or importing a file.",
   "transcriptFetchingSubtitles": "Fetching subtitles…",

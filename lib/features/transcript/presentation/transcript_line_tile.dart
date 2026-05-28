@@ -12,6 +12,7 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/hotkeys/application/hotkey_focus_policy.dart';
+import 'package:enjoy_player/features/transcript/presentation/transcript_line_recording_badge.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_markup.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_text_selection_scope.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -25,6 +26,7 @@ class TranscriptLineTile extends StatefulWidget {
     required this.onTap,
     this.groupedInEcho = false,
     this.selectable = false,
+    this.recordingCount = 0,
     this.onLookupRequested,
     super.key,
   });
@@ -39,6 +41,9 @@ class TranscriptLineTile extends StatefulWidget {
 
   /// When true, cue text is selectable and tap-to-seek is disabled (active / echo lines).
   final bool selectable;
+
+  /// Shadow-reading takes whose reference window overlaps this cue.
+  final int recordingCount;
 
   /// Invoked when the user chooses **Look up** in the text selection toolbar
   /// (1–100 characters after trim).
@@ -310,9 +315,13 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
             _snippet(primaryPlain),
           )
         : '${formatTranscriptTimestampMs(widget.line.startMs)}. ${_snippet(primaryPlain)}';
-    final semanticsLabel = statePrefix.isEmpty
+    var semanticsLabel = statePrefix.isEmpty
         ? cueLabel
         : '$statePrefix $cueLabel';
+    if (widget.recordingCount > 0 && l10n != null) {
+      semanticsLabel =
+          '$semanticsLabel. ${l10n.transcriptLineRecordingCount(widget.recordingCount)}';
+    }
 
     final primaryWidget = widget.selectable
         ? _richSelectable(
@@ -358,9 +367,15 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            formatTranscriptTimestampMs(widget.line.startMs),
-            style: timestampStyle,
+          Row(
+            children: [
+              Text(
+                formatTranscriptTimestampMs(widget.line.startMs),
+                style: timestampStyle,
+              ),
+              const Spacer(),
+              TranscriptLineRecordingBadge(count: widget.recordingCount),
+            ],
           ),
           SizedBox(height: tok.space4),
           primaryWidget,
