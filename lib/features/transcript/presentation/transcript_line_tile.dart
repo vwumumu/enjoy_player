@@ -11,7 +11,9 @@ import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
+import 'package:enjoy_player/features/hotkeys/application/hotkey_focus_policy.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_markup.dart';
+import 'package:enjoy_player/features/transcript/presentation/transcript_text_selection_scope.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class TranscriptLineTile extends StatefulWidget {
@@ -155,6 +157,7 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
           onPressed: () {
             Haptics.selection(menuContext);
             editableTextState.hideToolbar();
+            releasePrimaryFocusForGlobalHotkeys();
             widget.onLookupRequested!(lookupText);
           },
         ),
@@ -230,18 +233,20 @@ class _TranscriptLineTileState extends State<TranscriptLineTile> {
   Widget _richSelectable({required TextSpan span}) {
     return Builder(
       builder: (selectableSubtreeContext) {
-        return SelectableText.rich(
-          span,
-          contextMenuBuilder: (menuContext, editableTextState) {
-            return _selectionToolbar(menuContext, editableTextState);
-          },
-          onSelectionChanged: (selection, cause) {
-            _onSelectableSelectionChanged(
-              selectableSubtreeContext,
-              selection,
-              cause,
-            );
-          },
+        return TranscriptTextSelectionScope(
+          child: SelectableText.rich(
+            span,
+            contextMenuBuilder: (menuContext, editableTextState) {
+              return _selectionToolbar(menuContext, editableTextState);
+            },
+            onSelectionChanged: (selection, cause) {
+              _onSelectableSelectionChanged(
+                selectableSubtreeContext,
+                selection,
+                cause,
+              );
+            },
+          ),
         );
       },
     );

@@ -13,6 +13,7 @@ import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/routing/app_router.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/features/hotkeys/application/escape_dismissal.dart';
+import 'package:enjoy_player/features/hotkeys/application/hotkey_focus_policy.dart';
 import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/player/application/player_collapse.dart';
 import 'package:enjoy_player/features/hotkeys/domain/hotkey_chord.dart';
@@ -56,13 +57,6 @@ class _AppHotkeysKeyboardListenerState
     super.dispose();
   }
 
-  bool _primaryFocusIsEditable() {
-    final focus = FocusManager.instance.primaryFocus;
-    final ctx = focus?.context;
-    if (ctx == null) return false;
-    return ctx.findAncestorWidgetOfExactType<EditableText>() != null;
-  }
-
   bool _matches(KeyEvent event, HotkeysCtrl ctrl, String actionId) {
     final binding = ctrl.effectiveKeys(actionId);
     if (binding.isEmpty) return false;
@@ -78,7 +72,7 @@ class _AppHotkeysKeyboardListenerState
   bool _onKey(KeyEvent event) {
     if (!mounted) return false;
     if (event is! KeyDownEvent) return false;
-    if (_primaryFocusIsEditable()) return false;
+    if (primaryFocusBlocksGlobalHotkeys()) return false;
 
     final ctrl = ref.read(hotkeysCtrlProvider.notifier);
     final goRouter = ref.read(appRouterProvider);

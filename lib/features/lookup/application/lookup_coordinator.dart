@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
+import 'package:enjoy_player/features/hotkeys/application/hotkey_focus_policy.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
@@ -56,6 +57,7 @@ class LookupCoordinator extends _$LookupCoordinator {
           );
         },
       );
+      releasePrimaryFocusForGlobalHotkeys();
       return;
     }
 
@@ -68,5 +70,6 @@ class LookupCoordinator extends _$LookupCoordinator {
         request: request,
       ),
     );
+    releasePrimaryFocusForGlobalHotkeys();
   }
 }
