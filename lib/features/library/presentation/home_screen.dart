@@ -26,15 +26,6 @@ import '../application/library_media_provider.dart';
 import '../domain/media.dart';
 import 'library_actions.dart';
 
-/// Matches the recents grid on the loaded home screen.
-const SliverGridDelegateWithMaxCrossAxisExtent _kHomeRecentGridDelegate =
-    SliverGridDelegateWithMaxCrossAxisExtent(
-      maxCrossAxisExtent: 220,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 16 / 14.5,
-    );
-
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -104,15 +95,30 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
 
-                    // Media grid
+                    // Media grid — aspect ratio tracks actual tile width so rows stay tight.
                     SliverPadding(
                       padding: EdgeInsets.symmetric(horizontal: t.space24),
-                      sliver: SliverGrid(
-                        gridDelegate: _kHomeRecentGridDelegate,
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final m = recent[index];
-                          return _HomeMediaTile(media: m);
-                        }, childCount: recent.length),
+                      sliver: SliverLayoutBuilder(
+                        builder: (context, constraints) {
+                          return SliverGrid(
+                            gridDelegate:
+                                mediaCardTileGridDelegateForMinTileWidth(
+                              crossAxisExtent: constraints.crossAxisExtent,
+                              mainAxisSpacing: t.space12,
+                              crossAxisSpacing: t.space12,
+                            ),
+                            delegate: SliverChildBuilderDelegate((
+                              context,
+                              index,
+                            ) {
+                              final m = recent[index];
+                              return Align(
+                                alignment: Alignment.topCenter,
+                                child: _HomeMediaTile(media: m),
+                              );
+                            }, childCount: recent.length),
+                          );
+                        },
                       ),
                     ),
 
@@ -199,12 +205,20 @@ class _HomeLoadingScrollView extends ConsumerWidget {
         ),
         SliverPadding(
           padding: EdgeInsets.symmetric(horizontal: t.space24),
-          sliver: SliverGrid(
-            gridDelegate: _kHomeRecentGridDelegate,
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => const _HomeRecentGridSkeletonTile(),
-              childCount: _kSkeletonTileCount,
-            ),
+          sliver: SliverLayoutBuilder(
+            builder: (context, constraints) {
+              return SliverGrid(
+                gridDelegate: mediaCardTileGridDelegateForMinTileWidth(
+                  crossAxisExtent: constraints.crossAxisExtent,
+                  mainAxisSpacing: t.space12,
+                  crossAxisSpacing: t.space12,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => const _HomeRecentGridSkeletonTile(),
+                  childCount: _kSkeletonTileCount,
+                ),
+              );
+            },
           ),
         ),
         SliverToBoxAdapter(child: SizedBox(height: t.space24)),
@@ -227,10 +241,19 @@ class _HomeRecentGridSkeletonTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(t.radiusXl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(child: ColoredBox(color: base)),
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: ColoredBox(color: base),
+          ),
           Padding(
-            padding: EdgeInsets.all(t.space8),
+            padding: EdgeInsets.fromLTRB(
+              t.space12,
+              t.space8,
+              t.space12,
+              t.space12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -384,8 +407,8 @@ class _HomeMediaTile extends ConsumerWidget {
       playerControllerProvider.select((s) => s?.mediaId),
     );
     final isVideo = media.kind == MediaKind.video;
-    final thumb = localThumbnailFileForCard(media.thumbnailPath);
-    final netThumb = remoteThumbnailForCard(media.thumbnailPath);
+    final thumb = localThumbnailFileForMedia(media);
+    final netThumb = networkThumbnailForMedia(media);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     // Grid tiles use the deterministic generative accent — running
     // `PaletteGenerator.fromImageProvider` per tile decodes + analyses pixels
@@ -397,8 +420,10 @@ class _HomeMediaTile extends ConsumerWidget {
 
     return MediaCardTile(
       title: media.title,
-      subtitle:
-          '${isVideo ? l10n.miniPlayerMediaVideo : l10n.miniPlayerMediaAudio} · $dur',
+      subtitle: isVideo
+          ? l10n.miniPlayerMediaVideo
+          : '${l10n.miniPlayerMediaAudio} · $dur',
+      durationLabel: isVideo && media.durationMs > 0 ? dur : null,
       thumbnailFile: thumb,
       providerBadge: media.provider == 'youtube' ? l10n.youtubeBadge : null,
       thumbnailNetworkUrl: netThumb,

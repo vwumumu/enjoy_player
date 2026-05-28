@@ -410,16 +410,21 @@ class _VideoLibraryBody extends StatelessWidget {
       );
     }
 
-    return GridView.builder(
-      padding: EdgeInsets.all(t.space16),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 280,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 16 / 11.5,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) => _VideoTile(media: items[index]),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisExtent = constraints.maxWidth - t.space16 * 2;
+        return GridView.builder(
+          padding: EdgeInsets.all(t.space16),
+          gridDelegate: mediaCardTileGridDelegateForMaxTileWidth(
+            crossAxisExtent: crossAxisExtent,
+          ),
+          itemCount: items.length,
+          itemBuilder: (context, index) => Align(
+            alignment: Alignment.topCenter,
+            child: _VideoTile(media: items[index]),
+          ),
+        );
+      },
     );
   }
 }
@@ -435,8 +440,8 @@ class _VideoTile extends ConsumerWidget {
     final playingId = ref.watch(
       playerControllerProvider.select((s) => s?.mediaId),
     );
-    final thumb = localThumbnailFileForCard(media.thumbnailPath);
-    final netThumb = remoteThumbnailForCard(media.thumbnailPath);
+    final thumb = localThumbnailFileForMedia(media);
+    final netThumb = networkThumbnailForMedia(media);
     final dur = formatDurationHms(Duration(milliseconds: media.durationMs));
     // See `_HomeMediaTile` for rationale: per-tile palette extraction stalls
     // the main isolate when many cards mount at once.
@@ -444,7 +449,8 @@ class _VideoTile extends ConsumerWidget {
 
     return MediaCardTile(
       title: media.title,
-      subtitle: '${l10n.miniPlayerMediaVideo} · $dur',
+      subtitle: l10n.miniPlayerMediaVideo,
+      durationLabel: media.durationMs > 0 ? dur : null,
       thumbnailFile: thumb,
       providerBadge: media.provider == 'youtube' ? l10n.youtubeBadge : null,
       thumbnailNetworkUrl: netThumb,

@@ -15,6 +15,7 @@ import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
+import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 
 import '../enjoy_tokens.dart';
 import '../generative_media_cover.dart';
@@ -78,6 +79,96 @@ Widget _heroArtworkShell(String? mediaId, Widget child) {
   );
 }
 
+/// Meta block under 16:9 artwork: padding 8+12, title 14×1.25, gap 4, subtitle 13×1.2.
+const double mediaCardTileMetaHeight = 58;
+
+/// [BoxDecoration.border] inset at rest / on hover (up to 1.5 logical px per edge).
+const double mediaCardTileBorderInset = 3;
+
+/// Grid width÷height for a [MediaCardTile] column of [tileWidth].
+double mediaCardTileGridAspectRatioForWidth(double tileWidth) {
+  return tileWidth /
+      (tileWidth * 9 / 16 + mediaCardTileMetaHeight + mediaCardTileBorderInset);
+}
+
+/// Default max column width for library / cloud video grids.
+const double mediaCardTileDefaultMaxWidth = 280;
+
+/// Minimum column width for home recents.
+const double mediaCardTileHomeMinWidth = 200;
+
+int _mediaCardTileCrossAxisCountForMaxWidth({
+  required double crossAxisExtent,
+  required double maxTileWidth,
+  required double crossAxisSpacing,
+  required int maxCrossAxisCount,
+}) {
+  return ((crossAxisExtent + crossAxisSpacing) /
+          (maxTileWidth + crossAxisSpacing))
+      .ceil()
+      .clamp(1, maxCrossAxisCount);
+}
+
+double _mediaCardTileWidth({
+  required double crossAxisExtent,
+  required int crossAxisCount,
+  required double crossAxisSpacing,
+}) {
+  return (crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1)) /
+      crossAxisCount;
+}
+
+/// Grid delegate with column count derived from [maxTileWidth] (library / cloud).
+SliverGridDelegate mediaCardTileGridDelegateForMaxTileWidth({
+  required double crossAxisExtent,
+  double maxTileWidth = mediaCardTileDefaultMaxWidth,
+  double mainAxisSpacing = 12,
+  double crossAxisSpacing = 12,
+  int maxCrossAxisCount = 99,
+}) {
+  final crossAxisCount = _mediaCardTileCrossAxisCountForMaxWidth(
+    crossAxisExtent: crossAxisExtent,
+    maxTileWidth: maxTileWidth,
+    crossAxisSpacing: crossAxisSpacing,
+    maxCrossAxisCount: maxCrossAxisCount,
+  );
+  final tileWidth = _mediaCardTileWidth(
+    crossAxisExtent: crossAxisExtent,
+    crossAxisCount: crossAxisCount,
+    crossAxisSpacing: crossAxisSpacing,
+  );
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: crossAxisCount,
+    mainAxisSpacing: mainAxisSpacing,
+    crossAxisSpacing: crossAxisSpacing,
+    childAspectRatio: mediaCardTileGridAspectRatioForWidth(tileWidth),
+  );
+}
+
+/// Grid delegate with column count derived from [minTileWidth] (home recents).
+SliverGridDelegate mediaCardTileGridDelegateForMinTileWidth({
+  required double crossAxisExtent,
+  double minTileWidth = mediaCardTileHomeMinWidth,
+  double mainAxisSpacing = 12,
+  double crossAxisSpacing = 12,
+  int maxCrossAxisCount = 6,
+}) {
+  final crossAxisCount = (crossAxisExtent / minTileWidth)
+      .floor()
+      .clamp(1, maxCrossAxisCount);
+  final tileWidth = _mediaCardTileWidth(
+    crossAxisExtent: crossAxisExtent,
+    crossAxisCount: crossAxisCount,
+    crossAxisSpacing: crossAxisSpacing,
+  );
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: crossAxisCount,
+    mainAxisSpacing: mainAxisSpacing,
+    crossAxisSpacing: crossAxisSpacing,
+    childAspectRatio: mediaCardTileGridAspectRatioForWidth(tileWidth),
+  );
+}
+
 // ── Tile (vertical, for grids) ──────────────────────────────────────────────
 
 class MediaCardTile extends StatefulWidget {
@@ -94,6 +185,7 @@ class MediaCardTile extends StatefulWidget {
     this.onDelete,
     this.deleteTooltip,
     this.providerBadge,
+    this.durationLabel,
     this.heroArtworkMediaId,
   });
 
@@ -122,6 +214,9 @@ class MediaCardTile extends StatefulWidget {
 
   /// e.g. "YouTube" — top-left on artwork.
   final String? providerBadge;
+
+  /// When set, shown on the thumbnail (Discover-style) instead of the video icon.
+  final String? durationLabel;
 
   @override
   State<MediaCardTile> createState() => _MediaCardTileState();
@@ -190,11 +285,12 @@ class _MediaCardTileState extends State<MediaCardTile> {
                     ]
                   : null,
             ),
-            // Grid cells fix total height; thumbnail must flex so title block never overflows.
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
+                AspectRatio(
+                  aspectRatio: 16 / 9,
                   child: ClipRRect(
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(t.radiusXl - 1),
@@ -221,34 +317,41 @@ class _MediaCardTileState extends State<MediaCardTile> {
                               label: widget.providerBadge!,
                             ),
                           ),
-                        // Media kind (video vs audio) — not a play affordance; tap opens player.
-                        Positioned(
-                          right: t.space8,
-                          bottom: t.space8,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.black.withValues(alpha: 0.42),
-                              boxShadow: const [
-                                BoxShadow(
-                                  blurRadius: 10,
-                                  offset: Offset(0, 2),
-                                  color: Colors.black38,
+                        if (widget.durationLabel != null &&
+                            widget.durationLabel!.isNotEmpty)
+                          Positioned(
+                            right: t.space8,
+                            bottom: t.space8,
+                            child: _DurationBadge(label: widget.durationLabel!),
+                          )
+                        else
+                          Positioned(
+                            right: t.space8,
+                            bottom: t.space8,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.black.withValues(alpha: 0.42),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    blurRadius: 10,
+                                    offset: Offset(0, 2),
+                                    color: Colors.black38,
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(9),
+                                child: Icon(
+                                  widget.isVideo
+                                      ? Icons.videocam_rounded
+                                      : Icons.audiotrack_rounded,
+                                  size: 22,
+                                  color: Colors.white.withValues(alpha: 0.95),
                                 ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(9),
-                              child: Icon(
-                                widget.isVideo
-                                    ? Icons.videocam_rounded
-                                    : Icons.audiotrack_rounded,
-                                size: 22,
-                                color: Colors.white.withValues(alpha: 0.95),
                               ),
                             ),
                           ),
-                        ),
                         if (widget.onDelete != null &&
                             _showPointerDeleteButton())
                           Positioned(
@@ -603,44 +706,45 @@ class _Thumbnail extends StatelessWidget {
   final bool isVideo;
   final ColorScheme cs;
 
+  static const _coverFit = BoxFit.cover;
+
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final dpr = MediaQuery.devicePixelRatioOf(context);
-        int? cacheW;
-        int? cacheH;
-        if (constraints.maxWidth.isFinite && constraints.maxHeight.isFinite) {
-          cacheW = (constraints.maxWidth * dpr).round().clamp(1, 4096);
-          cacheH = (constraints.maxHeight * dpr).round().clamp(1, 4096);
-        }
-
-        if (file != null) {
-          return Image.file(
-            file!,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            cacheWidth: cacheW,
-            cacheHeight: cacheH,
-            errorBuilder: (_, _, _) => _fallback(),
-          );
-        }
-        final url = networkUrl;
-        if (url != null && url.isNotEmpty) {
-          return Image.network(
-            url,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            cacheWidth: cacheW,
-            cacheHeight: cacheH,
-            errorBuilder: (_, _, _) => _fallback(),
-          );
-        }
-        return _fallback();
-      },
-    );
+    if (file != null) {
+      return Image.file(
+        file!,
+        fit: _coverFit,
+        width: double.infinity,
+        height: double.infinity,
+        gaplessPlayback: true,
+        errorBuilder: (_, _, _) => _fallback(),
+      );
+    }
+    final url = networkUrl;
+    if (url != null && url.isNotEmpty) {
+      final mqFallback = youtubeMqFallbackForCardUrl(url);
+      return Image.network(
+        url,
+        fit: _coverFit,
+        width: double.infinity,
+        height: double.infinity,
+        gaplessPlayback: true,
+        errorBuilder: (_, _, _) {
+          if (mqFallback != null && mqFallback != url) {
+            return Image.network(
+              mqFallback,
+              fit: _coverFit,
+              width: double.infinity,
+              height: double.infinity,
+              gaplessPlayback: true,
+              errorBuilder: (_, _, _) => _fallback(),
+            );
+          }
+          return _fallback();
+        },
+      );
+    }
+    return _fallback();
   }
 
   Widget _fallback() {
@@ -651,19 +755,44 @@ class _Thumbnail extends StatelessWidget {
   }
 
   Widget _placeholder() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [cs.surfaceContainerHighest, cs.surfaceContainerHigh],
-        ),
-      ),
+    return ColoredBox(
+      color: cs.surfaceContainerHighest,
       child: Center(
         child: Icon(
           isVideo ? Icons.movie_outlined : Icons.audiotrack_rounded,
           size: 28,
           color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+        ),
+      ),
+    );
+  }
+}
+
+class _DurationBadge extends StatelessWidget {
+  const _DurationBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.78),
+        borderRadius: BorderRadius.circular(t.radiusSm),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: t.space8,
+          vertical: t.space4,
+        ),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
         ),
       ),
     );

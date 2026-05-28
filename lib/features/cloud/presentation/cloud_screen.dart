@@ -446,7 +446,11 @@ class _CloudAudioRowState extends ConsumerState<_CloudAudioRow> {
       subtitle: dur,
       badge: item.language,
       thumbnailFile: null,
-      thumbnailNetworkUrl: remoteThumbnailForCard(item.thumbnailUrl),
+      thumbnailNetworkUrl: remoteThumbnailForCard(
+        item.thumbnailUrl,
+        youtubeVideoId: item.provider == 'youtube' ? item.md5 : null,
+        mediaUrl: item.mediaUrl,
+      ),
       coverSeed: seed,
       isVideo: false,
       accentColor: accent,
@@ -539,28 +543,33 @@ class _CloudVideoGridState extends ConsumerState<_CloudVideoGrid> {
 
     return RefreshIndicator(
       onRefresh: widget.onRefresh,
-      child: GridView.builder(
-        controller: _scroll,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.all(t.space16),
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 280,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 16 / 11.5,
-        ),
-        itemCount:
-            widget.items.length + (widget.loading && !widget.done ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index >= widget.items.length) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.all(t.space24),
-                child: Skeleton.circle(diameter: 32),
-              ),
-            );
-          }
-          return _CloudVideoTile(item: widget.items[index]);
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final crossAxisExtent = constraints.maxWidth - t.space16 * 2;
+          return GridView.builder(
+            controller: _scroll,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(t.space16),
+            gridDelegate: mediaCardTileGridDelegateForMaxTileWidth(
+              crossAxisExtent: crossAxisExtent,
+            ),
+            itemCount:
+                widget.items.length + (widget.loading && !widget.done ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index >= widget.items.length) {
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(t.space24),
+                    child: Skeleton.circle(diameter: 32),
+                  ),
+                );
+              }
+              return Align(
+                alignment: Alignment.topCenter,
+                child: _CloudVideoTile(item: widget.items[index]),
+              );
+            },
+          );
         },
       ),
     );
@@ -671,9 +680,14 @@ class _CloudVideoTileState extends ConsumerState<_CloudVideoTile> {
       children: [
         MediaCardTile(
           title: item.title,
-          subtitle: '${l10n.miniPlayerMediaVideo} · $dur',
+          subtitle: l10n.miniPlayerMediaVideo,
+          durationLabel: item.durationSeconds > 0 ? dur : null,
           thumbnailFile: null,
-          thumbnailNetworkUrl: remoteThumbnailForCard(item.thumbnailUrl),
+          thumbnailNetworkUrl: remoteThumbnailForCard(
+            item.thumbnailUrl,
+            youtubeVideoId: item.provider == 'youtube' ? item.md5 : null,
+            mediaUrl: item.mediaUrl,
+          ),
           coverSeed: seed,
           isVideo: true,
           accentColor: accent,

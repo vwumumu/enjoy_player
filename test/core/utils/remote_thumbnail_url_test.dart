@@ -22,6 +22,31 @@ void main() {
       expect(remoteThumbnailForCard(r'C:\a.jpg'), isNull);
       expect(remoteThumbnailForCard(null), isNull);
     });
+
+    test('upgrades YouTube hqdefault to maxresdefault', () {
+      expect(
+        remoteThumbnailForCard(
+          'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+        ),
+        'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+      );
+      expect(
+        remoteThumbnailForCard(
+          null,
+          youtubeVideoId: 'dQw4w9WgXcQ',
+        ),
+        'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+      );
+    });
+
+    test('mq fallback derived from maxres url', () {
+      expect(
+        youtubeMqFallbackForCardUrl(
+          'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+        ),
+        'https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+      );
+    });
   });
 
   group('localThumbnailFileForCard', () {
