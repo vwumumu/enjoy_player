@@ -43,6 +43,11 @@ class YoutubeRssParser {
     caseSensitive: false,
   );
 
+  /// YouTube Shorts use `/shorts/{id}` in the alternate watch link.
+  static bool isShortEntryBlock(String block) {
+    return block.toLowerCase().contains('youtube.com/shorts/');
+  }
+
   /// Feed-level channel title (before the first `<entry>`).
   String? parseFeedTitle(String xml) {
     final head = xml.split(_entrySplit).first;
@@ -63,6 +68,8 @@ class YoutubeRssParser {
     final entries = <FeedEntry>[];
     for (var i = 1; i < chunks.length; i++) {
       final block = chunks[i];
+      if (isShortEntryBlock(block)) continue;
+
       final videoMatch = _videoId.firstMatch(block);
       if (videoMatch == null) continue;
       final videoId = videoMatch.group(1)!.trim();

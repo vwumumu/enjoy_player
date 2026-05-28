@@ -140,6 +140,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverSubscribed => 'Subscribed to channel';
 
   @override
+  String get discoverSubscribedLabel => 'Subscribed';
+
+  @override
   String get discoverSubscribeFailed => 'Could not subscribe to that channel.';
 
   @override

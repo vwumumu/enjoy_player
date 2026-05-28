@@ -6,10 +6,10 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
@@ -18,6 +18,7 @@ import 'package:enjoy_player/features/discover/domain/discover_channel.dart';
 import 'package:enjoy_player/features/discover/domain/recommended_channel.dart';
 import 'package:enjoy_player/features/discover/presentation/discover_feed_tile.dart';
 import 'package:enjoy_player/features/discover/presentation/discover_recommended_channel_card.dart';
+import 'package:enjoy_player/features/discover/presentation/discover_subscription_row.dart';
 import 'package:enjoy_player/features/discover/presentation/discover_subscribe_sheet.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -54,12 +55,32 @@ class DiscoverScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: EditorialHeader(
                 title: l10n.discoverTitle,
-                trailing: FilledButton.icon(
-                  onPressed: refreshing
-                      ? null
-                      : () => unawaited(showDiscoverSubscribeSheet(context, ref)),
-                  icon: const Icon(Icons.add_rounded, size: 18),
-                  label: Text(l10n.discoverSubscribeAction),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isDesktop)
+                      IconButton(
+                        tooltip: l10n.lookupRefresh,
+                        onPressed: refreshing ? null : () => unawaited(onRefresh()),
+                        icon: refreshing
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: cs.primary,
+                                ),
+                              )
+                            : const Icon(Icons.refresh_rounded),
+                      ),
+                    FilledButton.icon(
+                      onPressed: refreshing
+                          ? null
+                          : () => unawaited(showDiscoverSubscribeSheet(context, ref)),
+                      icon: const Icon(Icons.add_rounded, size: 18),
+                      label: Text(l10n.discoverSubscribeAction),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -70,6 +91,66 @@ class DiscoverScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, t.space8),
+                child: Text(
+                  l10n.discoverSubscriptionsHeading,
+                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            subscriptionsAsync.when(
+              loading: () => const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: SkeletonMediaList(itemCount: 2),
+                ),
+              ),
+              error: (_, _) => SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(t.space24),
+                  child: Text(l10n.discoverSubscriptionsLoadFailed),
+                ),
+              ),
+              data: (subs) {
+                if (subs.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: t.space24),
+                      child: Text(
+                        l10n.discoverNoSubscriptionsHint,
+                        style: tt.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: t.space24),
+                    child: Column(
+                      children: [
+                        for (var i = 0; i < subs.length; i++) ...[
+                          if (i > 0) SizedBox(height: t.space8),
+                          DiscoverSubscriptionRow(
+                            channel: subs[i],
+                            onUnsubscribe: () => unawaited(
+                              unsubscribeDiscoverChannel(
+                                context,
+                                ref,
+                                subs[i].channelId,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(t.space24, t.space16, t.space24, t.space8),
                 child: Text(
                   l10n.discoverRecommendedHeading,
                   style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -109,64 +190,6 @@ class DiscoverScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(t.space24, t.space16, t.space24, t.space8),
-                child: Text(
-                  l10n.discoverSubscriptionsHeading,
-                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-            subscriptionsAsync.when(
-              loading: () => const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: SkeletonMediaList(itemCount: 2),
-                ),
-              ),
-              error: (_, _) => SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(t.space24),
-                  child: Text(l10n.discoverSubscriptionsLoadFailed),
-                ),
-              ),
-              data: (subs) {
-                if (subs.isEmpty) {
-                  return SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: t.space24),
-                      child: Text(
-                        l10n.discoverNoSubscriptionsHint,
-                        style: tt.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 44,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.symmetric(horizontal: t.space24),
-                      itemCount: subs.length,
-                      separatorBuilder: (_, _) => SizedBox(width: t.space8),
-                      itemBuilder: (context, index) {
-                        final sub = subs[index];
-                        return ActionChip(
-                          label: Text(sub.displayName),
-                          onPressed: () => context.push(
-                            '/discover/channel/${sub.channelId}',
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                );
-              },
             ),
             SliverToBoxAdapter(
               child: Padding(
@@ -320,10 +343,7 @@ class _RecommendedRowState extends ConsumerState<_RecommendedRow> {
                   channel: channel,
                   subscribed: subscribed,
                   onSubscribe: () => unawaited(
-                    _subscribeRecommended(context, ref, channel),
-                  ),
-                  onViewFeed: () => context.push(
-                    '/discover/channel/${channel.channelId}',
+                    subscribeRecommendedChannel(context, ref, channel),
                   ),
                 ),
               );
@@ -333,25 +353,35 @@ class _RecommendedRowState extends ConsumerState<_RecommendedRow> {
       ),
     );
   }
+}
 
-  Future<void> _subscribeRecommended(
-    BuildContext context,
-    WidgetRef ref,
-    RecommendedChannel channel,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      await ref
-          .read(discoverRepositoryProvider)
-          .subscribeRecommended(channel);
-      await ref.read(discoverRefreshStateProvider.notifier).refresh(force: true);
-      if (context.mounted) {
-        AppNotice.success(context, l10n.discoverSubscribed);
-      }
-    } catch (_) {
-      if (context.mounted) {
-        AppNotice.error(context, l10n.discoverSubscribeFailed);
-      }
+Future<void> subscribeRecommendedChannel(
+  BuildContext context,
+  WidgetRef ref,
+  RecommendedChannel channel,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  try {
+    await ref.read(discoverRepositoryProvider).subscribeRecommended(channel);
+    await ref.read(discoverRefreshStateProvider.notifier).refresh(force: true);
+    if (context.mounted) {
+      AppNotice.success(context, l10n.discoverSubscribed);
     }
+  } catch (_) {
+    if (context.mounted) {
+      AppNotice.error(context, l10n.discoverSubscribeFailed);
+    }
+  }
+}
+
+Future<void> unsubscribeDiscoverChannel(
+  BuildContext context,
+  WidgetRef ref,
+  String channelId,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  await ref.read(discoverRepositoryProvider).unsubscribe(channelId);
+  if (context.mounted) {
+    AppNotice.success(context, l10n.discoverUnsubscribed);
   }
 }

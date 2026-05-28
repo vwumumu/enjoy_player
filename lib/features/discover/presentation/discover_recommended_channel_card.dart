@@ -18,7 +18,6 @@ class DiscoverRecommendedChannelCard extends ConsumerWidget {
     required this.channel,
     required this.subscribed,
     required this.onSubscribe,
-    required this.onViewFeed,
     super.key,
   });
 
@@ -33,7 +32,6 @@ class DiscoverRecommendedChannelCard extends ConsumerWidget {
   final RecommendedChannel channel;
   final bool subscribed;
   final VoidCallback onSubscribe;
-  final VoidCallback onViewFeed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -74,18 +72,32 @@ class DiscoverRecommendedChannelCard extends ConsumerWidget {
             width: double.infinity,
             height: buttonHeight,
             child: subscribed
-                ? OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: EdgeInsets.symmetric(horizontal: t.space8),
-                      textStyle: tt.labelSmall,
+                ? DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(t.radiusSm),
+                      color: cs.surfaceContainerHighest,
                     ),
-                    onPressed: () {
-                      Haptics.selection(context);
-                      onViewFeed();
-                    },
-                    child: Text(l10n.discoverViewFeed),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline_rounded,
+                          size: 14,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        SizedBox(width: t.space4),
+                        Flexible(
+                          child: Text(
+                            l10n.discoverSubscribedLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: tt.labelSmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 : FilledButton.tonal(
                     style: FilledButton.styleFrom(

@@ -12,22 +12,27 @@ Discover feeds are **not** library items until imported. Subscriptions are **Enj
 - Channel feed → `/discover/channel/:channelId`
 - Home empty state → secondary **Browse Discover** action
 
-## Recommended channels
-
-Shipped in `assets/discover/recommended_channels.json` (English-learning oriented: TED, TED-Ed, BBC Learning English, etc.). Tapping **Subscribe** adds the channel to local subscriptions and includes it in feed refresh.
-
 ## Subscriptions
 
 Users can also paste a YouTube channel URL or `@handle`. The app resolves `channel_id` best-effort and stores a subscription row.
 
-**Unsubscribe** removes the subscription; cached feed entries may remain until the next refresh cycle.
+The **Subscriptions** section (above Recommended) is the management surface:
+
+- Tap a row → channel feed (`/discover/channel/:channelId`)
+- **Unsubscribe** on the trailing action removes the subscription and its cached feed entries
+- Channel feed app bar also offers Unsubscribe
+
+## Recommended channels
+
+Shipped in `assets/discover/recommended_channels.json`. Cards show **Subscribe** for new channels, or a static **Subscribed** badge when already in the list (no View feed / Unsubscribe on recommended cards).
 
 ## Feed refresh
 
 | Trigger | Behavior |
 |---------|----------|
 | App launch | Debounced refresh for eligible channels |
-| Pull-to-refresh | Force refresh all subscriptions |
+| Pull-to-refresh (mobile) | Force refresh all subscriptions |
+| Header refresh button (desktop) | Same as pull-to-refresh |
 | Periodic (8 h) | Background refresh while app runs |
 | Per-channel skip | Skip if last fetch &lt; 1 h unless forced |
 
@@ -44,7 +49,7 @@ No caption availability in RSS. After import, transcript loading follows [`trans
 ## Limitations
 
 - ~15 recent videos per channel per RSS fetch
-- No Shorts / duration filtering in v1
+- **YouTube Shorts** are excluded (RSS alternate link uses `/shorts/`)
 - Handle → `channel_id` resolution may fail if YouTube HTML changes
 - Subscriptions and feed cache are per local SQLite file (guest vs signed-in user DB)
 

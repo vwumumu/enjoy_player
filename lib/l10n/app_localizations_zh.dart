@@ -136,6 +136,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get discoverSubscribed => '已订阅频道';
 
   @override
+  String get discoverSubscribedLabel => '已订阅';
+
+  @override
   String get discoverSubscribeFailed => '无法订阅该频道。';
 
   @override
@@ -1668,6 +1671,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get discoverSubscribed => '已订阅频道';
+
+  @override
+  String get discoverSubscribedLabel => '已订阅';
 
   @override
   String get discoverSubscribeFailed => '无法订阅该频道。';

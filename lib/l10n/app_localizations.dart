@@ -333,6 +333,12 @@ abstract class AppLocalizations {
   /// **'Subscribed to channel'**
   String get discoverSubscribed;
 
+  /// No description provided for @discoverSubscribedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed'**
+  String get discoverSubscribedLabel;
+
   /// No description provided for @discoverSubscribeFailed.
   ///
   /// In en, this message translates to:

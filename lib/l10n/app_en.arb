@@ -52,6 +52,7 @@
   "discoverSubscribePlaceholder": "https://www.youtube.com/@channel",
   "discoverSubscribeAction": "Subscribe",
   "discoverSubscribed": "Subscribed to channel",
+  "discoverSubscribedLabel": "Subscribed",
   "discoverSubscribeFailed": "Could not subscribe to that channel.",
   "discoverUnsubscribeAction": "Unsubscribe",
   "discoverUnsubscribed": "Unsubscribed from channel",

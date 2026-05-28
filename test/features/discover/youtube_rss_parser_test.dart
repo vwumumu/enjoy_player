@@ -62,5 +62,31 @@ void main() {
 ''';
       expect(parser.parseFeedTitle(xml), 'TED');
     });
+
+    test('skips YouTube Shorts entries', () {
+      const xml = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <yt:videoId>7iEiEEzzogU</yt:videoId>
+    <link rel="alternate" href="https://www.youtube.com/shorts/7iEiEEzzogU"/>
+    <title>Short clip</title>
+    <published>2026-05-27T21:00:27+00:00</published>
+  </entry>
+  <entry>
+    <yt:videoId>regularVideo1</yt:videoId>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=regularVideo1"/>
+    <title>Full video</title>
+    <published>2026-05-26T21:00:27+00:00</published>
+  </entry>
+</feed>
+''';
+      final entries = parser.parse(xml, channelId: 'UCtest');
+      expect(entries, hasLength(1));
+      expect(entries.single.videoId, 'regularVideo1');
+      expect(YoutubeRssParser.isShortEntryBlock(
+        '<link rel="alternate" href="https://www.youtube.com/shorts/abc"/>',
+      ), isTrue);
+    });
   });
 }
