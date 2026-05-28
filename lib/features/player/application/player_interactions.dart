@@ -23,6 +23,38 @@ int indexOfActiveLine(List<TranscriptLine> lines, double t) {
   return -1;
 }
 
+/// Target line index for [PlayerInteractions.nextLine].
+///
+/// When echo is active, follow the echo segment ([EchoState.endLineIndex]), not
+/// [currentTimeSeconds]. Playback can sit on the cue after the segment (exclusive
+/// end boundary) while the UI still shows the previous line as the echo region.
+int nextLineNavigationIndex({
+  required EchoState echo,
+  required List<TranscriptLine> lines,
+  required double currentTimeSeconds,
+}) {
+  if (echo.active && echo.endLineIndex >= 0) {
+    final next = echo.endLineIndex + 1;
+    return next < lines.length ? next : lines.length - 1;
+  }
+  final idx = indexOfActiveLine(lines, currentTimeSeconds);
+  return idx < lines.length - 1 ? idx + 1 : lines.length - 1;
+}
+
+/// Target line index for [PlayerInteractions.prevLine] (same echo anchoring rules).
+int prevLineNavigationIndex({
+  required EchoState echo,
+  required List<TranscriptLine> lines,
+  required double currentTimeSeconds,
+}) {
+  if (echo.active && echo.startLineIndex >= 0) {
+    final prev = echo.startLineIndex - 1;
+    return prev > 0 ? prev : 0;
+  }
+  final idx = indexOfActiveLine(lines, currentTimeSeconds);
+  return idx > 0 ? idx - 1 : 0;
+}
+
 @Riverpod(keepAlive: true)
 class PlayerInteractions extends _$PlayerInteractions {
   @override
@@ -43,8 +75,12 @@ class PlayerInteractions extends _$PlayerInteractions {
     if (lines.isEmpty) return;
     final session = ref.read(playerControllerProvider);
     if (session == null) return;
-    final idx = indexOfActiveLine(lines, session.currentTimeSeconds);
-    final prev = idx > 0 ? idx - 1 : 0;
+    final echo = ref.read(echoModeProvider);
+    final prev = prevLineNavigationIndex(
+      echo: echo,
+      lines: lines,
+      currentTimeSeconds: session.currentTimeSeconds,
+    );
     await _seekLine(lines[prev], prev);
   }
 
@@ -53,8 +89,12 @@ class PlayerInteractions extends _$PlayerInteractions {
     if (lines.isEmpty) return;
     final session = ref.read(playerControllerProvider);
     if (session == null) return;
-    final idx = indexOfActiveLine(lines, session.currentTimeSeconds);
-    final next = idx < lines.length - 1 ? idx + 1 : lines.length - 1;
+    final echo = ref.read(echoModeProvider);
+    final next = nextLineNavigationIndex(
+      echo: echo,
+      lines: lines,
+      currentTimeSeconds: session.currentTimeSeconds,
+    );
     await _seekLine(lines[next], next);
   }
 
