@@ -67,14 +67,8 @@ const String kYoutubeMobileWatchInjectScript = r'''
                 'waiting','canplay','error','loadedmetadata'];
     events.forEach(function(e){
       video.addEventListener(e,function(){
-        if(isAd()){
-          if(e==='play'||e==='playing'){
-            window.flutter_inappwebview.callHandler('onVideoEvent','playing');
-          }else if(e==='pause'){
-            window.flutter_inappwebview.callHandler('onVideoEvent','pause');
-          }
-          return;
-        }
+        // Ad playback must not drive Dart transport (playing/pause/polling).
+        if(isAd()) return;
         if(e==='play'||e==='playing'){video.muted=false;video.volume=1;}
         var args=[e];
         if(e==='loadedmetadata') args.push(video.duration||0);

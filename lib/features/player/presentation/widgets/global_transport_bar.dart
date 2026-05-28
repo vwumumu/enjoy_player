@@ -483,8 +483,8 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
         ),
         onDismissed: (_) {
           Haptics.selection(context);
-          unawaited(ref.read(playerControllerProvider.notifier).clear());
           ref.read(playerUiProvider.notifier).reset();
+          unawaited(ref.read(playerControllerProvider.notifier).clear());
         },
         child: transportContent,
       ),

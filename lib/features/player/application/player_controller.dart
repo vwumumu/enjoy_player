@@ -363,8 +363,9 @@ class PlayerController extends _$PlayerController {
 
   Future<void> clear() async {
     ref.read(playbackSessionPersisterProvider).cancel();
-    await _positionSub?.cancel();
-    await _durationSub?.cancel();
+
+    final positionSub = _positionSub;
+    final durationSub = _durationSub;
     _positionSub = null;
     _durationSub = null;
     _lastPositionEmitBucket = null;
@@ -375,16 +376,29 @@ class PlayerController extends _$PlayerController {
     _openGeneration++;
 
     final engine = _activeEngine;
+    final ownedEngine = _ownedEngine;
+    final disposeYoutubeEngine =
+        ref.read(playerEngineTestDoubleProvider) == null &&
+        ownedEngine is YoutubePlayerEngine;
+
+    // Remove session synchronously so [Dismissible] transport unmounts before
+    // async engine teardown (swipe-to-dismiss during load/buffer).
+    ref.read(echoModeProvider.notifier).deactivate();
+    state = null;
+
+    await positionSub?.cancel();
+    await durationSub?.cancel();
     await engine.stop();
 
-    if (ref.read(playerEngineTestDoubleProvider) == null &&
-        _ownedEngine is YoutubePlayerEngine) {
-      await _ownedEngine!.dispose();
+    if (disposeYoutubeEngine) {
+      await ownedEngine.dispose();
       _ownedEngine = MediaKitPlayerEngine();
       ref.read(playerEngineRevProvider.notifier).bump();
     }
+  }
 
-    ref.read(echoModeProvider.notifier).deactivate();
-    state = null;
+  /// Cancels an in-flight [openMedia] before [PlaybackSession] is published.
+  void abandonPendingOpen() {
+    _openGeneration++;
   }
 }

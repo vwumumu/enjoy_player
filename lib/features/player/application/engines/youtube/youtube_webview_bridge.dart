@@ -141,7 +141,7 @@ class YoutubeWebViewBridge {
           var p=document.querySelector('.html5-video-player');
           var v=p?p.querySelector('video'):null;
           if(!v) v=document.querySelector('video');
-          if(v) v.volume=$volume;
+          if(v){v.volume=$volume;v.muted=($volume<=0.001);}
         })();
       ''',
     );

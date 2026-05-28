@@ -13,6 +13,7 @@ import 'package:enjoy_player/features/player/application/player_collapse.dart';
 import 'package:enjoy_player/features/player/application/player_engine_capabilities_provider.dart';
 import 'package:enjoy_player/features/player/application/player_engine_provider.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
+import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/player/application/youtube_auth_provider.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/layouts/audio_player_layout.dart';
@@ -22,16 +23,25 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_panel.dart';
 
 /// Centered loading indicator while [openMediaActionProvider] resolves.
-class ExpandedPlayerLoadingBody extends StatelessWidget {
+class ExpandedPlayerLoadingBody extends ConsumerWidget {
   const ExpandedPlayerLoadingBody({super.key, required this.colorScheme});
 
   final ColorScheme colorScheme;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: const Center(child: SkeletonAppBootstrap()),
+      body: const Stack(
+        fit: StackFit.expand,
+        children: [
+          Center(child: SkeletonAppBootstrap()),
+          Align(
+            alignment: Alignment.topCenter,
+            child: _VideoCollapseOnlyOverlay(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -76,6 +86,8 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final isVideo = chrome.mediaType == 'video';
+    final isBuffering = ref.watch(playerIsBufferingProvider).value ?? false;
+    final showVideoTitleChrome = isVideo && (!isPlaying || isBuffering);
     final engine = ref.read(playerEngineProvider);
     final splitPx = ref.watch(
       playerPreferencesCtrlProvider.select(
@@ -139,8 +151,8 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
                 fit: StackFit.expand,
                 children: [
                   mediaBody,
-                  if (!isPlaying)
-                    _VideoPausedTitleChromeOverlay(
+                  if (showVideoTitleChrome)
+                    _VideoTitleChromeOverlay(
                       mediaTitle: chrome.mediaTitle,
                     ),
                 ],
@@ -151,9 +163,38 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
   }
 }
 
-/// Floating title row over video when paused (does not affect body layout).
-class _VideoPausedTitleChromeOverlay extends ConsumerWidget {
-  const _VideoPausedTitleChromeOverlay({required this.mediaTitle});
+/// Collapse control only (loading / minimal chrome).
+class _VideoCollapseOnlyOverlay extends ConsumerWidget {
+  const _VideoCollapseOnlyOverlay();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SafeArea(
+      bottom: false,
+      left: false,
+      right: false,
+      child: SizedBox(
+        height: kToolbarHeight,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: IconButton(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 28,
+            ),
+            onPressed: () => unawaited(collapseExpandedPlayer(ref, context)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Floating title row over video when paused or buffering (does not affect layout).
+class _VideoTitleChromeOverlay extends ConsumerWidget {
+  const _VideoTitleChromeOverlay({required this.mediaTitle});
 
   final String mediaTitle;
 

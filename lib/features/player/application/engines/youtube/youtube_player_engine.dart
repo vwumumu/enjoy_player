@@ -42,7 +42,11 @@ class YoutubePlayerEngine implements PlayerEngine {
   bool _playbackCompleted = false;
 
   Timer? _pollTimer;
+  Timer? _pollKickTimer;
   double? _pendingSeekSeconds;
+
+  /// Last volume applied via [setVolumeNormalized]; re-applied on main playback.
+  double _volumeNormalized = 1;
 
   bool _rejectingNativeFullscreen = false;
 
@@ -135,7 +139,8 @@ class YoutubePlayerEngine implements PlayerEngine {
 
   @override
   Future<void> setVolumeNormalized(double volume) async {
-    await YoutubeWebViewBridge.setVolume(_webController, volume.clamp(0, 1));
+    _volumeNormalized = volume.clamp(0, 1);
+    await YoutubeWebViewBridge.setVolume(_webController, _volumeNormalized);
   }
 
   @override
@@ -181,6 +186,8 @@ class YoutubePlayerEngine implements PlayerEngine {
   @override
   Future<void> dispose() async {
     _disposed = true;
+    _pollKickTimer?.cancel();
+    _pollKickTimer = null;
     _stopPolling();
     await _positionCtrl.close();
     await _durationCtrl.close();
@@ -243,11 +250,11 @@ class YoutubePlayerEngine implements PlayerEngine {
             _emitBuffering(false);
             _startPolling();
             _applyPendingSeek();
+            unawaited(_reapplyVolume());
             break;
           case 'pause':
+            // Defer playing=false / stop polling until poller confirms pause.
             _pausedPollStreak = 0;
-            _emitPlaying(false);
-            _stopPolling();
             break;
           case 'ended':
             _pausedPollStreak = 0;
@@ -265,6 +272,7 @@ class YoutubePlayerEngine implements PlayerEngine {
             }
             break;
           case 'loadedmetadata':
+            _startPolling();
             if (args.length > 1) {
               final dur = (args[1] as num).toDouble();
               if (dur > 0 && dur.isFinite) {
@@ -311,6 +319,19 @@ class YoutubePlayerEngine implements PlayerEngine {
 
   Future<void> _onPageFinished(InAppWebViewController controller) async {
     await injectYoutubeMobileWatchPage(controller);
+    _schedulePollKick();
+  }
+
+  void _schedulePollKick() {
+    _pollKickTimer?.cancel();
+    _pollKickTimer = Timer(const Duration(milliseconds: 500), () {
+      _pollKickTimer = null;
+      if (!_disposed) _startPolling();
+    });
+  }
+
+  Future<void> _reapplyVolume() async {
+    await YoutubeWebViewBridge.setVolume(_webController, _volumeNormalized);
   }
 
   Future<void> _exitNativeFullscreen(InAppWebViewController controller) async {
@@ -388,6 +409,13 @@ class YoutubePlayerEngine implements PlayerEngine {
               }
             } else {
               _pausedPollStreak = 0;
+              if (!jsPaused && !jsEnded) {
+                _playbackCompleted = false;
+                _emitPlaying(true);
+                if (_buffering) {
+                  _emitBuffering(false);
+                }
+              }
             }
           },
     );
