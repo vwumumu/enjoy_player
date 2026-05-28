@@ -3,12 +3,15 @@ library;
 
 import 'package:drift/drift.dart';
 
+import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/data/api/api_exception.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/api/services/audio_api.dart';
 import 'package:enjoy_player/data/api/services/recording_api.dart';
 import 'package:enjoy_player/data/api/services/video_api.dart';
 import 'package:enjoy_player/features/sync/data/sync_serializers.dart';
+
+final _log = logNamed('sync.upload');
 
 class SyncUploadService {
   SyncUploadService({
@@ -27,8 +30,16 @@ class SyncUploadService {
   final RecordingApi _recordingApi;
 
   Future<void> uploadAudio(AudioRow row) async {
-    final response = await _audioApi.uploadAudio(prepareForSyncAudioMap(row));
-    final inner = unwrapEntity(response, 'audio');
+    Map<String, dynamic> inner;
+    try {
+      final response = await _audioApi.uploadAudio(prepareForSyncAudioMap(row));
+      inner = unwrapEntity(response, 'audio');
+    } on ApiException catch (e) {
+      if (!e.isDuplicateEntity) rethrow;
+      _log.fine('audio ${row.id} already on server; fetching existing row');
+      final response = await _audioApi.audio(row.id);
+      inner = unwrapEntity(response, 'audio');
+    }
     final serverUpdated =
         parseIsoDate(inner['updatedAt']) ?? DateTime.now().toUtc();
     await _db.audioDao.insertRow(
@@ -42,8 +53,26 @@ class SyncUploadService {
   }
 
   Future<void> uploadVideo(VideoRow row) async {
-    final response = await _videoApi.uploadVideo(prepareForSyncVideoMap(row));
-    final inner = unwrapEntity(response, 'video');
+    final inner = await _uploadVideoPayload(row);
+    await _persistSyncedVideo(row, inner);
+  }
+
+  Future<Map<String, dynamic>> _uploadVideoPayload(VideoRow row) async {
+    try {
+      final response = await _videoApi.uploadVideo(prepareForSyncVideoMap(row));
+      return unwrapEntity(response, 'video');
+    } on ApiException catch (e) {
+      if (!e.isDuplicateEntity) rethrow;
+      _log.fine('video ${row.id} already on server; fetching existing row');
+      final response = await _videoApi.video(row.id);
+      return unwrapEntity(response, 'video');
+    }
+  }
+
+  Future<void> _persistSyncedVideo(
+    VideoRow row,
+    Map<String, dynamic> inner,
+  ) async {
     final serverUpdated =
         parseIsoDate(inner['updatedAt']) ?? DateTime.now().toUtc();
     await _db.videoDao.insertRow(

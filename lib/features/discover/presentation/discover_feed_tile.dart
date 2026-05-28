@@ -1,20 +1,27 @@
-/// Single Discover feed row with add / in-library / play actions.
+/// YouTube-style Discover feed video card with add / play actions.
 library;
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import 'package:enjoy_player/core/ids/enjoy_ids.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
+import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
+import 'package:enjoy_player/features/discover/domain/discover_channel.dart';
 import 'package:enjoy_player/features/discover/domain/feed_entry.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
+
+/// Width / height for [SliverGrid] cells (16:9 thumb + compact metadata).
+const double discoverFeedTileGridAspectRatio = 1.18;
 
 class DiscoverFeedTile extends ConsumerStatefulWidget {
   const DiscoverFeedTile({required this.entry, super.key});
@@ -28,6 +35,7 @@ class DiscoverFeedTile extends ConsumerStatefulWidget {
 class _DiscoverFeedTileState extends ConsumerState<DiscoverFeedTile> {
   bool? _inLibrary;
   bool _adding = false;
+  bool _hover = false;
 
   @override
   void initState() {
@@ -82,6 +90,13 @@ class _DiscoverFeedTileState extends ConsumerState<DiscoverFeedTile> {
     openPlayerRoute(context, mediaId);
   }
 
+  DiscoverChannel? _subscriptionForEntry(List<DiscoverChannel> subs) {
+    for (final sub in subs) {
+      if (sub.channelId == widget.entry.channelId) return sub;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -90,81 +105,118 @@ class _DiscoverFeedTileState extends ConsumerState<DiscoverFeedTile> {
     final tt = Theme.of(context).textTheme;
     final entry = widget.entry;
     final thumb = remoteThumbnailForCard(entry.thumbnailUrl);
-
+    final subs = ref.watch(discoverSubscriptionsProvider).valueOrNull ?? const [];
+    final sub = _subscriptionForEntry(subs);
+    final channelName = sub?.displayName ?? 'YouTube';
+    final channelAvatar = remoteThumbnailForCard(sub?.thumbnailUrl);
     final inLibrary = _inLibrary ?? false;
+    final publishedLabel = _formatPublishedLabel(context, entry.publishedAt);
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: inLibrary ? () => unawaited(_play()) : null,
-        child: Padding(
-          padding: EdgeInsets.all(t.space12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(t.radiusLg),
+          onTap: () => unawaited(_play()),
+          hoverColor: cs.onSurface.withValues(alpha: 0.04),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(t.radiusSm),
-                child: thumb != null
-                    ? Image.network(
-                        thumb,
-                        width: 120,
-                        height: 68,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => _thumbFallback(context),
-                      )
-                    : _thumbFallback(context),
+              _VideoThumbnail(
+                thumbUrl: thumb,
+                coverSeed: entry.videoId,
+                hover: _hover,
+                inLibrary: inLibrary,
+                adding: _adding,
               ),
-              SizedBox(width: t.space12),
-              Expanded(
-                child: Column(
+              SizedBox(height: t.space12),
+              Padding(
+                padding: EdgeInsets.fromLTRB(t.space12, 0, t.space12, t.space12),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      entry.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                    _ChannelAvatar(
+                      imageUrl: channelAvatar,
+                      label: channelName,
+                      seed: entry.channelId,
                     ),
-                    SizedBox(height: t.space4),
-                    Text(
-                      _formatPublishedDate(entry.publishedAt),
-                      style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                    ),
-                    SizedBox(height: t.space8),
-                    Wrap(
-                      spacing: t.space8,
-                      children: [
-                        if (inLibrary)
-                          FilledButton.tonalIcon(
-                            onPressed: () => unawaited(_play()),
-                            icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                            label: Text(l10n.discoverPlay),
-                          )
-                        else
-                          FilledButton.icon(
-                            onPressed: _adding ? null : () => unawaited(_addToLibrary()),
-                            icon: _adding
-                                ? SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: cs.onPrimary,
-                                    ),
-                                  )
-                                : const Icon(Icons.add_rounded, size: 18),
-                            label: Text(l10n.discoverAddToLibrary),
+                    SizedBox(width: t.space12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            entry.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: tt.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              height: 1.28,
+                            ),
                           ),
-                        if (inLibrary)
+                          SizedBox(height: t.space4),
+                          Text(
+                            '$channelName · $publishedLabel',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: tt.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: t.space12),
+                    // Visible action or status in the exact same spot for every card
+                    // → perfectly uniform heights in the grid + no hidden menu
+                    if (inLibrary)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle_rounded,
+                            size: 16,
+                            color: cs.primary,
+                          ),
+                          SizedBox(width: t.space4),
                           Text(
                             l10n.discoverInLibrary,
-                            style: tt.labelMedium?.copyWith(
+                            style: tt.labelSmall?.copyWith(
                               color: cs.primary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                      ],
-                    ),
+                        ],
+                      )
+                    else
+                      FilledButton.tonalIcon(
+                        onPressed: _adding ? null : () => unawaited(_addToLibrary()),
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: t.space8,
+                            vertical: t.space4,
+                          ),
+                          textStyle: tt.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                          minimumSize: const Size(0, 32),
+                        ),
+                        icon: _adding
+                            ? SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.0,
+                                  color: cs.primary,
+                                ),
+                              )
+                            : const Icon(Icons.add_rounded, size: 16),
+                        label: Text(l10n.discoverAddToLibrary),
+                      ),
                   ],
                 ),
               ),
@@ -175,22 +227,177 @@ class _DiscoverFeedTileState extends ConsumerState<DiscoverFeedTile> {
     );
   }
 
-  Widget _thumbFallback(BuildContext context) {
+  static String _formatPublishedLabel(BuildContext context, DateTime dt) {
+    final locale = Localizations.localeOf(context).toString();
+    final local = dt.toLocal();
+    final now = DateTime.now();
+    final diff = now.difference(local);
+
+    if (diff.inDays == 0) {
+      return DateFormat.jm(locale).format(local);
+    }
+    if (diff.inDays < 7) {
+      return DateFormat.MMMd(locale).format(local);
+    }
+    if (local.year == now.year) {
+      return DateFormat.MMMd(locale).format(local);
+    }
+    return DateFormat.yMMMd(locale).format(local);
+  }
+}
+
+class _VideoThumbnail extends StatelessWidget {
+  const _VideoThumbnail({
+    required this.coverSeed,
+    required this.hover,
+    required this.inLibrary,
+    required this.adding,
+    this.thumbUrl,
+  });
+
+  final String? thumbUrl;
+  final String coverSeed;
+  final bool hover;
+  final bool inLibrary;
+  final bool adding;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: 120,
-      height: 68,
-      color: cs.surfaceContainerHighest,
-      alignment: Alignment.center,
-      child: Icon(Icons.play_circle_outline_rounded, color: cs.onSurfaceVariant),
+
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(t.radiusLg),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (thumbUrl != null)
+              Image.network(
+                thumbUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => GenerativeMediaCover(
+                  seed: coverSeed,
+                  isVideo: true,
+                ),
+              )
+            else
+              GenerativeMediaCover(seed: coverSeed, isVideo: true),
+            if (hover)
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.22),
+                ),
+              ),
+            if (hover && !adding)
+              Center(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.78),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(14),
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                ),
+              ),
+            if (adding)
+              ColoredBox(
+                color: Colors.black.withValues(alpha: 0.45),
+                child: const Center(
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            if (inLibrary)
+              Positioned(
+                top: t.space8,
+                right: t.space8,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.72),
+                    borderRadius: BorderRadius.circular(t.radiusSm),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: t.space8,
+                      vertical: t.space4,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 14,
+                          color: cs.primary.withValues(alpha: 0.95),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
+}
 
-  static String _formatPublishedDate(DateTime dt) {
-    final local = dt.toLocal();
-    final y = local.year;
-    final m = local.month.toString().padLeft(2, '0');
-    final d = local.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
+class _ChannelAvatar extends StatelessWidget {
+  const _ChannelAvatar({
+    required this.label,
+    required this.seed,
+    this.imageUrl,
+  });
+
+  final String? imageUrl;
+  final String label;
+  final String seed;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = generativeAccentForSeed(seed);
+    final initial = label.trim().isNotEmpty ? label.trim()[0].toUpperCase() : '?';
+
+    Widget fallback() {
+      return ColoredBox(
+        color: accent.withValues(alpha: 0.22),
+        child: Center(
+          child: Text(
+            initial,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ClipOval(
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: imageUrl != null
+            ? Image.network(
+                imageUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => fallback(),
+              )
+            : fallback(),
+      ),
+    );
   }
 }

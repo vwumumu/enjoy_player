@@ -207,11 +207,38 @@ class DiscoverScreen extends ConsumerWidget {
                 }
                 return SliverPadding(
                   padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, t.space32),
-                  sliver: SliverList.separated(
-                    itemCount: entries.length,
-                    separatorBuilder: (_, _) => SizedBox(height: t.space12),
-                    itemBuilder: (context, index) =>
-                        DiscoverFeedTile(entry: entries[index]),
+                  sliver: SliverLayoutBuilder(
+                    builder: (context, constraints) {
+                      const minTileWidth = 320.0;
+                      final crossAxisCount = (constraints.crossAxisExtent / minTileWidth)
+                          .floor()
+                          .clamp(1, 4);
+
+                      if (crossAxisCount == 1) {
+                        return SliverList.separated(
+                          itemCount: entries.length,
+                          separatorBuilder: (_, _) => SizedBox(height: t.space24),
+                          itemBuilder: (context, index) =>
+                              DiscoverFeedTile(entry: entries[index]),
+                        );
+                      }
+
+                      return SliverGrid(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: t.space24,
+                          crossAxisSpacing: t.space16,
+                          childAspectRatio: discoverFeedTileGridAspectRatio,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => Align(
+                            alignment: Alignment.topCenter,
+                            child: DiscoverFeedTile(entry: entries[index]),
+                          ),
+                          childCount: entries.length,
+                        ),
+                      );
+                    },
                   ),
                 );
               },

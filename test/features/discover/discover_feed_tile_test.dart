@@ -5,6 +5,7 @@ import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/discover/data/discover_repository.dart';
+import 'package:enjoy_player/features/discover/domain/discover_channel.dart';
 import 'package:enjoy_player/features/discover/domain/feed_entry.dart';
 import 'package:enjoy_player/features/discover/presentation/discover_feed_tile.dart';
 import 'package:enjoy_player/features/library/data/library_repository.dart';
@@ -64,6 +65,9 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           discoverRepositoryProvider.overrideWithValue(repo),
+          discoverSubscriptionsProvider.overrideWith(
+            (ref) => Stream.value(const <DiscoverChannel>[]),
+          ),
         ],
         child: MaterialApp(
           localizationsDelegates: const [
@@ -80,7 +84,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('In library'), findsOneWidget);
-    expect(find.text('Play'), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
   });
 
   testWidgets('DiscoverFeedTile does not open player when import fails on play', (
@@ -138,6 +142,9 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           discoverRepositoryProvider.overrideWithValue(repo),
+          discoverSubscriptionsProvider.overrideWith(
+            (ref) => Stream.value(const <DiscoverChannel>[]),
+          ),
         ],
         child: MaterialApp.router(
           routerConfig: router,
@@ -155,7 +162,7 @@ void main() {
 
     await db.delete(db.videos).go();
 
-    await tester.tap(find.text('Play'));
+    await tester.tap(find.byType(DiscoverFeedTile));
     await tester.pumpAndSettle();
 
     expect(find.text('player-open'), findsNothing);

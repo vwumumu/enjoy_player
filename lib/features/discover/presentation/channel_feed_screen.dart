@@ -72,12 +72,37 @@ class ChannelFeedScreen extends ConsumerWidget {
               subtitle: l10n.discoverFeedEmptyHint,
             );
           }
-          return ListView.separated(
-            padding: EdgeInsets.all(t.space24),
-            itemCount: entries.length,
-            separatorBuilder: (_, _) => SizedBox(height: t.space12),
-            itemBuilder: (context, index) =>
-                DiscoverFeedTile(entry: entries[index]),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              const minTileWidth = 320.0;
+              final crossAxisCount =
+                  (constraints.maxWidth / minTileWidth).floor().clamp(1, 4);
+
+              if (crossAxisCount == 1) {
+                return ListView.separated(
+                  padding: EdgeInsets.all(t.space24),
+                  itemCount: entries.length,
+                  separatorBuilder: (_, _) => SizedBox(height: t.space24),
+                  itemBuilder: (context, index) =>
+                      DiscoverFeedTile(entry: entries[index]),
+                );
+              }
+
+              return GridView.builder(
+                padding: EdgeInsets.all(t.space24),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: t.space24,
+                  crossAxisSpacing: t.space16,
+                  childAspectRatio: discoverFeedTileGridAspectRatio,
+                ),
+                itemCount: entries.length,
+                itemBuilder: (context, index) => Align(
+                  alignment: Alignment.topCenter,
+                  child: DiscoverFeedTile(entry: entries[index]),
+                ),
+              );
+            },
           );
         },
       ),
