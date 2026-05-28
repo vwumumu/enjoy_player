@@ -17,6 +17,7 @@ import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import '../application/library_media_provider.dart';
+import '../application/library_search_focus_provider.dart';
 import '../application/library_search_provider.dart';
 import '../domain/media.dart';
 import 'library_actions.dart';
@@ -236,6 +237,12 @@ class _CompactLibrarySearchBarState
       }
     });
 
+    ref.listen(librarySearchFocusRequestProvider, (previous, next) {
+      ref.read(libraryCompactSearchFocusNodeProvider).requestFocus();
+    });
+
+    final compactFocusNode = ref.watch(libraryCompactSearchFocusNodeProvider);
+
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -244,6 +251,7 @@ class _CompactLibrarySearchBarState
     return Padding(
       padding: EdgeInsets.fromLTRB(t.space24, 0, t.space24, t.space8),
       child: TextField(
+        focusNode: compactFocusNode,
         controller: _controller,
         onChanged: (v) => ref.read(librarySearchProvider.notifier).setQuery(v),
         style: tt.bodyMedium,

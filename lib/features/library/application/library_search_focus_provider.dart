@@ -1,4 +1,4 @@
-/// Focus node for sidebar library search (hotkey `/`).
+/// Focus nodes and focus-request pulse for library search (hotkey `/`).
 library;
 
 import 'package:flutter/widgets.dart';
@@ -11,4 +11,19 @@ FocusNode librarySearchFocusNode(Ref ref) {
   final node = FocusNode(debugLabel: 'librarySearch');
   ref.onDispose(node.dispose);
   return node;
+}
+
+@Riverpod(keepAlive: true)
+FocusNode libraryCompactSearchFocusNode(Ref ref) {
+  final node = FocusNode(debugLabel: 'librarySearchCompact');
+  ref.onDispose(node.dispose);
+  return node;
+}
+
+@Riverpod(keepAlive: true)
+class LibrarySearchFocusRequest extends _$LibrarySearchFocusRequest {
+  @override
+  int build() => 0;
+
+  void pulse() => state++;
 }

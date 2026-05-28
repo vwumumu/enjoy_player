@@ -17,7 +17,7 @@ import 'package:enjoy_player/features/hotkeys/application/hotkey_focus_policy.da
 import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/player/application/player_collapse.dart';
 import 'package:enjoy_player/features/hotkeys/domain/hotkey_chord.dart';
-import 'package:enjoy_player/features/library/application/library_search_focus_provider.dart';
+import 'package:enjoy_player/features/library/application/library_search_focus.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
@@ -163,9 +163,9 @@ class _AppHotkeysKeyboardListenerState
     }
 
     final path = goRouter.state.uri.path;
-    if (path.startsWith('/library') &&
+    if (librarySearchHotkeyEnabledForPath(path) &&
         _matches(event, ctrl, 'library.search')) {
-      ref.read(librarySearchFocusNodeProvider).requestFocus();
+      requestLibrarySearchFocus(ref);
       return true;
     }
 

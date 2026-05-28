@@ -15,6 +15,7 @@ import 'package:enjoy_player/features/auth/presentation/widgets/sidebar_account_
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
+import '../../../library/application/library_search_focus.dart';
 import '../../../library/application/library_search_focus_provider.dart';
 import '../../../library/application/library_search_provider.dart';
 
@@ -27,21 +28,61 @@ class AppSidebar extends ConsumerStatefulWidget {
 
 class _AppSidebarState extends ConsumerState<AppSidebar> {
   late final TextEditingController _searchController;
+  FocusNode? _attachedSearchFocusNode;
+  VoidCallback? _searchFocusListener;
 
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController();
+    _searchController = TextEditingController(
+      text: ref.read(librarySearchProvider),
+    );
   }
 
   @override
   void dispose() {
+    _detachSearchFocusListener();
     _searchController.dispose();
     super.dispose();
   }
 
+  void _detachSearchFocusListener() {
+    if (_searchFocusListener != null && _attachedSearchFocusNode != null) {
+      _attachedSearchFocusNode!.removeListener(_searchFocusListener!);
+    }
+    _searchFocusListener = null;
+    _attachedSearchFocusNode = null;
+  }
+
+  void _attachSearchFocusListener(FocusNode node) {
+    if (identical(node, _attachedSearchFocusNode)) return;
+    _detachSearchFocusListener();
+    _attachedSearchFocusNode = node;
+    _searchFocusListener = () {
+      if (!node.hasFocus || !mounted) return;
+      ensureLibraryRouteForSearch(GoRouter.of(context));
+    };
+    node.addListener(_searchFocusListener!);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final searchFocusNode = ref.watch(librarySearchFocusNodeProvider);
+    _attachSearchFocusListener(searchFocusNode);
+
+    ref.listen(librarySearchFocusRequestProvider, (previous, next) {
+      searchFocusNode.requestFocus();
+    });
+
+    ref.listen(librarySearchProvider, (previous, next) {
+      if (_searchController.text != next) {
+        _searchController.value = TextEditingValue(
+          text: next,
+          selection: TextSelection.collapsed(offset: next.length),
+        );
+      }
+    });
+
     final t = EnjoyThemeTokens.of(context);
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
@@ -106,8 +147,10 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                 child: Tooltip(
                   message: searchTooltip,
                   child: TextField(
-                    focusNode: ref.watch(librarySearchFocusNodeProvider),
+                    focusNode: searchFocusNode,
                     controller: _searchController,
+                    onTap: () =>
+                        ensureLibraryRouteForSearch(GoRouter.of(context)),
                     onChanged: (v) =>
                         ref.read(librarySearchProvider.notifier).setQuery(v),
                     style: tt.bodyMedium,
