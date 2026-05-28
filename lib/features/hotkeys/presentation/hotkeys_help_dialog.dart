@@ -178,7 +178,7 @@ class _HotkeysHelpDialogState extends ConsumerState<HotkeysHelpDialog> {
                   child: TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
-                      context.go('/settings?section=keyboard');
+                      context.push('/settings/keyboard');
                     },
                     child: Text(l10n.hotkeysHelpCustomize),
                   ),

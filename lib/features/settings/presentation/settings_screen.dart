@@ -23,7 +23,6 @@ import 'package:enjoy_player/features/auth/application/guest_migration_providers
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_help_dialog.dart';
-import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_settings_section.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/widgets/kbd_chip.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/about_section_card.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/language_choice_sheet.dart';
@@ -32,57 +31,11 @@ import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-class SettingsScreen extends ConsumerStatefulWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  late final ScrollController _scrollController;
-  final GlobalKey _keyboardSectionKey = GlobalKey();
-  String? _lastKeyboardScrollUri;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!isDesktop) return;
-    final uri = GoRouterState.of(context).uri;
-    if (uri.queryParameters['section'] != 'keyboard') {
-      _lastKeyboardScrollUri = null;
-      return;
-    }
-    final full = uri.toString();
-    if (_lastKeyboardScrollUri == full) return;
-    _lastKeyboardScrollUri = full;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final ctx = _keyboardSectionKey.currentContext;
-      if (ctx != null) {
-        Scrollable.ensureVisible(
-          ctx,
-          duration: EnjoyThemeTokens.of(context).motionStandard,
-          curve: Curves.easeOutCubic,
-        );
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
@@ -94,7 +47,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: t.contentMaxWidth + 96),
           child: CustomScrollView(
-            controller: _scrollController,
             slivers: [
               SliverToBoxAdapter(
                 child: EditorialHeader(
@@ -583,7 +535,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: _SettingsCard(
                     padding: EdgeInsets.zero,
                     child: Column(
-                      key: _keyboardSectionKey,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Consumer(
@@ -607,9 +558,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           },
                         ),
                         const _SettingsDivider(),
-                        Padding(
-                          padding: EdgeInsets.all(t.space16),
-                          child: const HotkeysSettingsSection(),
+                        _SettingsTile(
+                          leadingIcon: Icons.tune_rounded,
+                          title: l10n.settingsKeyboardCustomizeTitle,
+                          subtitle: l10n.hotkeysSectionKeyboardHint,
+                          onTap: () => context.push('/settings/keyboard'),
                         ),
                       ],
                     ),

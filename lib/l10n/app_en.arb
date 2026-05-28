@@ -563,6 +563,7 @@
   "profileLearningLanguageReadOnly": "Learning language is English (US) in this version.",
   "settingsKeyboardOpenCheatsheet": "Open shortcuts cheatsheet",
   "settingsKeyboardOpenCheatsheetSubtitle": "Browse and customize every shortcut",
+  "settingsKeyboardCustomizeTitle": "Customize shortcuts",
   "hotkeysHelpSubtitle": "Press {key} anytime to open this list.",
   "@hotkeysHelpSubtitle": {
     "placeholders": {
@@ -574,7 +575,7 @@
   },
   "hotkeysHelpSearchHint": "Search shortcuts",
   "hotkeysHelpEmpty": "No matching shortcuts",
-  "hotkeysHelpCustomize": "Customize in Settings",
+  "hotkeysHelpCustomize": "Customize shortcuts",
   "hotkeysSettingsSubtitle": "Tap a row to change. Press {key} anytime.",
   "@hotkeysSettingsSubtitle": {
     "placeholders": {

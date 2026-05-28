@@ -18,7 +18,9 @@ import 'package:enjoy_player/features/hotkeys/presentation/widgets/kbd_chip.dart
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class HotkeysSettingsSection extends ConsumerStatefulWidget {
-  const HotkeysSettingsSection({super.key});
+  const HotkeysSettingsSection({super.key, this.showSectionHeader = true});
+
+  final bool showSectionHeader;
 
   @override
   ConsumerState<HotkeysSettingsSection> createState() =>
@@ -73,39 +75,41 @@ class _HotkeysSettingsSectionState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.hotkeysSectionKeyboard,
-                    style: tt.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+        if (widget.showSectionHeader) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.hotkeysSectionKeyboard,
+                      style: tt.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: t.space4),
-                  Text(
-                    l10n.hotkeysSettingsSubtitle(helpKeyLabel),
-                    style: tt.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      height: 1.35,
+                    SizedBox(height: t.space4),
+                    Text(
+                      l10n.hotkeysSettingsSubtitle(helpKeyLabel),
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        height: 1.35,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () async {
-                await ctrl.resetAllBindings();
-              },
-              child: Text(l10n.hotkeysResetAll),
-            ),
-          ],
-        ),
-        SizedBox(height: t.space12),
+              TextButton(
+                onPressed: () async {
+                  await ctrl.resetAllBindings();
+                },
+                child: Text(l10n.hotkeysResetAll),
+              ),
+            ],
+          ),
+          SizedBox(height: t.space12),
+        ],
         TextField(
           controller: _filter,
           onChanged: (_) => setState(() {}),

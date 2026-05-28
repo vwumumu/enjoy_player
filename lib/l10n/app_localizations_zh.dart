@@ -1326,6 +1326,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsKeyboardOpenCheatsheetSubtitle => '浏览并自定义所有快捷键';
 
   @override
+  String get settingsKeyboardCustomizeTitle => '自定义快捷键';
+
+  @override
   String hotkeysHelpSubtitle(String key) {
     return '随时按 $key 打开此列表。';
   }
@@ -1337,7 +1340,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hotkeysHelpEmpty => '无匹配的快捷键';
 
   @override
-  String get hotkeysHelpCustomize => '在设置中自定义';
+  String get hotkeysHelpCustomize => '自定义快捷键';
 
   @override
   String hotkeysSettingsSubtitle(String key) {
@@ -2756,6 +2759,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsKeyboardOpenCheatsheetSubtitle => '浏览并自定义所有快捷键';
 
   @override
+  String get settingsKeyboardCustomizeTitle => '自定义快捷键';
+
+  @override
   String hotkeysHelpSubtitle(String key) {
     return '随时按 $key 打开此列表。';
   }
@@ -2767,7 +2773,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get hotkeysHelpEmpty => '无匹配的快捷键';
 
   @override
-  String get hotkeysHelpCustomize => '在设置中自定义';
+  String get hotkeysHelpCustomize => '自定义快捷键';
 
   @override
   String hotkeysSettingsSubtitle(String key) {

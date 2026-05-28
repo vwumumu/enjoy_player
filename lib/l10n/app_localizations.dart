@@ -2649,6 +2649,12 @@ abstract class AppLocalizations {
   /// **'Browse and customize every shortcut'**
   String get settingsKeyboardOpenCheatsheetSubtitle;
 
+  /// No description provided for @settingsKeyboardCustomizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize shortcuts'**
+  String get settingsKeyboardCustomizeTitle;
+
   /// No description provided for @hotkeysHelpSubtitle.
   ///
   /// In en, this message translates to:
@@ -2670,7 +2676,7 @@ abstract class AppLocalizations {
   /// No description provided for @hotkeysHelpCustomize.
   ///
   /// In en, this message translates to:
-  /// **'Customize in Settings'**
+  /// **'Customize shortcuts'**
   String get hotkeysHelpCustomize;
 
   /// No description provided for @hotkeysSettingsSubtitle.

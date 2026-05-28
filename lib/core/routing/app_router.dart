@@ -20,6 +20,7 @@ import 'package:enjoy_player/features/library/presentation/library_screen.dart';
 import 'package:enjoy_player/features/player/presentation/expanded_player_screen.dart';
 import 'package:enjoy_player/features/player/presentation/root_shell.dart';
 import 'package:enjoy_player/features/player/presentation/youtube_login_screen.dart';
+import 'package:enjoy_player/features/settings/presentation/hotkeys_settings_screen.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_screen.dart';
 import 'package:enjoy_player/features/settings/presentation/sync_status_screen.dart';
 
@@ -147,6 +148,10 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: '/settings/sync',
             builder: (context, state) => const SyncStatusScreen(),
+          ),
+          GoRoute(
+            path: '/settings/keyboard',
+            builder: (context, state) => const HotkeysSettingsScreen(),
           ),
           GoRoute(
             path: '/settings/ai-playground',

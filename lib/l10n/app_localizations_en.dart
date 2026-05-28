@@ -1383,6 +1383,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Browse and customize every shortcut';
 
   @override
+  String get settingsKeyboardCustomizeTitle => 'Customize shortcuts';
+
+  @override
   String hotkeysHelpSubtitle(String key) {
     return 'Press $key anytime to open this list.';
   }
@@ -1394,7 +1397,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hotkeysHelpEmpty => 'No matching shortcuts';
 
   @override
-  String get hotkeysHelpCustomize => 'Customize in Settings';
+  String get hotkeysHelpCustomize => 'Customize shortcuts';
 
   @override
   String hotkeysSettingsSubtitle(String key) {

@@ -14,7 +14,7 @@ Keyboard shortcuts mirror the Enjoy web app defaults (`stores/hotkeys.ts`). Cust
 
 ## Customization
 
-Settings → **Keyboard shortcuts**: filter list, tap a row or **Change shortcut** to capture a new chord; conflicts show an error snackbar. The capture dialog shows **live chord text** (including invalid attempts) with screen-reader semantics. Reset per row or reset all restores defaults. From the cheatsheet, **Customize in Settings** navigates to `/settings?section=keyboard` and scrolls the keyboard section into view. The cheatsheet dialog allows up to **85%** of viewport height so large text scales remain usable.
+Settings → **Keyboard shortcuts** → **Customize shortcuts** opens `/settings/keyboard` with filter, per-row edit/reset, and reset-all in the app bar. From the cheatsheet, **Customize shortcuts** navigates to the same screen. The capture dialog shows **live chord text** (including invalid attempts) with screen-reader semantics. Reset per row or reset all restores defaults. The cheatsheet dialog allows up to **85%** of viewport height so large text scales remain usable.
 
 ## Implementation entry points
 

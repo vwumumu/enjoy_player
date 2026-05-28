@@ -563,6 +563,7 @@
   "profileLearningLanguageReadOnly": "当前版本学习语言固定为英语（美国）。",
   "settingsKeyboardOpenCheatsheet": "打开快捷键速查",
   "settingsKeyboardOpenCheatsheetSubtitle": "浏览并自定义所有快捷键",
+  "settingsKeyboardCustomizeTitle": "自定义快捷键",
   "hotkeysHelpSubtitle": "随时按 {key} 打开此列表。",
   "@hotkeysHelpSubtitle": {
     "placeholders": {
@@ -574,7 +575,7 @@
   },
   "hotkeysHelpSearchHint": "搜索快捷键",
   "hotkeysHelpEmpty": "无匹配的快捷键",
-  "hotkeysHelpCustomize": "在设置中自定义",
+  "hotkeysHelpCustomize": "自定义快捷键",
   "hotkeysSettingsSubtitle": "点按一行即可修改。随时按 {key}。",
   "@hotkeysSettingsSubtitle": {
     "placeholders": {
