@@ -32,8 +32,8 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: >-
-            platforms;android-35
-            build-tools;35.0.0
+            platforms;android-36
+            build-tools;36.0.0
           cache: false
 
       - name: Point Flutter at Android SDK
@@ -43,7 +43,9 @@ jobs:
           flutter config --android-sdk "$sdk"
 
       - name: Flutter pub get
-        run: flutter pub get
+        run: |
+          flutter pub get
+          bash tool/patch_agp9_pub_plugins.sh
 
       - name: Flutter build apk (debug)
         run: flutter build apk --debug
