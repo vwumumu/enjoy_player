@@ -14,6 +14,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _mediaId = 'media-scroll-test';
 
+class _TestHighlightIndexNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+}
+
+/// Drives [transcriptPlaybackHighlightProvider] in widget tests.
+final _testHighlightIndexProvider =
+    NotifierProvider<_TestHighlightIndexNotifier, int>(
+      _TestHighlightIndexNotifier.new,
+    );
+
 List<TranscriptLine> _sampleLines(int count) => List.generate(
   count,
   (i) => TranscriptLine(
@@ -48,6 +59,21 @@ List<Override> _scrollTestOverrides({
     transcriptPlaybackHighlightProvider(
       _mediaId,
     ).overrideWith((ref) => highlightIndex),
+  ];
+}
+
+List<Override> _scrollTestOverridesWithMutableHighlight() {
+  return [
+    playerIsPlayingProvider.overrideWith((ref) => Stream.value(true)),
+    secondaryTranscriptLinesForMediaProvider(
+      _mediaId,
+    ).overrideWith((ref) => Stream.value(const <TranscriptLine>[])),
+    transcriptLineRecordingCountsProvider(_mediaId).overrideWithValue(
+      const {},
+    ),
+    transcriptPlaybackHighlightProvider(
+      _mediaId,
+    ).overrideWith((ref) => ref.watch(_testHighlightIndexProvider)),
   ];
 }
 
@@ -193,5 +219,69 @@ void main() {
     }
 
     expect(find.text('4'), findsOneWidget);
+  });
+
+  testWidgets('active line scrolls into view with mid-viewport bias', (
+    tester,
+  ) async {
+    const activeIndex = 15;
+    final lines = _sampleLines(30);
+    late ProviderContainer container;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: _scrollTestOverridesWithMutableHighlight(),
+        child: Builder(
+          builder: (context) {
+            container = ProviderScope.containerOf(context);
+            final scheme = ColorScheme.fromSeed(
+              seedColor: const Color(0xFF003366),
+            );
+            return MaterialApp(
+              theme: ThemeData(
+                colorScheme: scheme,
+                extensions: [EnjoyThemeTokens.build(scheme)],
+              ),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: SizedBox(
+                  height: 400,
+                  width: 360,
+                  child: TranscriptScrollableList(
+                    mediaId: _mediaId,
+                    lines: lines,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    container.read(_testHighlightIndexProvider.notifier).state =
+        activeIndex;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    final activeText = find.text('Transcript line $activeIndex');
+    expect(activeText, findsOneWidget);
+
+    final transcriptListView = find.descendant(
+      of: find.byType(TranscriptScrollableList),
+      matching: find.byType(ListView),
+    );
+    expect(transcriptListView, findsOneWidget);
+
+    final viewportRect = tester.getRect(transcriptListView);
+    final activeRect = tester.getRect(activeText);
+
+    expect(viewportRect.overlaps(activeRect), isTrue);
+    expect(activeRect.top, greaterThan(viewportRect.top + 24));
+    expect(activeRect.bottom, lessThan(viewportRect.bottom));
   });
 }

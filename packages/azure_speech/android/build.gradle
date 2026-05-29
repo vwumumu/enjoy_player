@@ -1,27 +1,7 @@
 group = "dev.enjoy_player.azure_speech"
 version = "1.0-SNAPSHOT"
 
-buildscript {
-    ext.kotlin_version = "2.1.0"
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.7.3")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
 
 android {
     namespace = "dev.enjoy_player.azure_speech"
@@ -32,16 +12,17 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
     defaultConfig {
         minSdk = 26
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
 dependencies {
     implementation("com.microsoft.cognitiveservices.speech:client-sdk:1.49.0")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
 }
