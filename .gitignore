@@ -54,3 +54,6 @@ app.*.map.json
 # Apple signing
 .apple/
 *.p8
+
+# Local publish credentials (copy from .github/scripts/publish_env.example.ps1)
+.github/scripts/publish_env.local.ps1

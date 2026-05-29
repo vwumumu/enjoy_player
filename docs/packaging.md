@@ -322,12 +322,66 @@ See [ADR-0023](decisions/0023-app-update-distribution.md). **Store** builds (Tes
 
 The **direct** Android flavor adds `REQUEST_INSTALL_PACKAGES` and the OTA `FileProvider` overlay under `android/app/src/direct/`.
 
-### Publishing feeds (CI)
+### Publishing feeds (CI + local)
 
-On tag push, release workflows may upload immutable `player/<version>/` artifacts and regenerate **`latest.json`** + **`appcast.xml`** when AWS secrets are set (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, optional `ENJOY_DL_CLOUDFRONT_DISTRIBUTION_ID`, Sparkle `SPARKLE_ED_SIGNATURE_*`). Scripts:
+Hosting is **Cloudflare R2** (S3-compatible API) behind `https://dl.enjoy.bot/player/`. The publish script also supports plain AWS S3 + CloudFront if needed.
+
+**GitHub Actions secrets** (Settings → Secrets → Actions):
+
+| Secret | Purpose |
+|--------|---------|
+| `S3_ACCESS_KEY_ID` | R2 API token access key ID |
+| `S3_SECRET_ACCESS_KEY` | R2 API token secret |
+| `S3_BUCKET` | R2 bucket name |
+| `S3_ENDPOINT` | e.g. `https://<account-id>.r2.cloudflarestorage.com` |
+| `CLOUDFLARE_API_TOKEN` | Purge `latest.json` / `appcast.xml` after upload (Zone → Cache Purge) |
+| `CLOUDFLARE_ZONE_ID` | Zone ID for `enjoy.bot` (website zone, not R2) |
+| `SPARKLE_ED_SIGNATURE_WINDOWS` / `SPARKLE_ED_SIGNATURE_MACOS` | Desktop appcast signatures (when signing is set up) |
+
+Optional env (defaults in script): `S3_PREFIX` (`player`), `S3_REGION` (`auto` for AWS CLI).
+
+**Local — Git Bash / WSL** (install [AWS CLI v2](https://aws.amazon.com/cli/)):
+
+```bash
+export S3_ACCESS_KEY_ID="<R2 access key>"
+export S3_SECRET_ACCESS_KEY="<R2 secret>"
+export S3_BUCKET="<r2-bucket>"
+export S3_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com"
+export CLOUDFLARE_API_TOKEN="<token with Cache Purge>"
+export CLOUDFLARE_ZONE_ID="<zone id for enjoy.bot>"
+```
+
+**Local — Windows (PowerShell)** — publish still runs via **Git Bash** or **WSL** (bash script). Set env in PowerShell, then invoke bash from the same session:
+
+```powershell
+# One-time: copy and edit (gitignored)
+Copy-Item .github\scripts\publish_env.example.ps1 .github\scripts\publish_env.local.ps1
+
+# Each session (or dot-source the local file)
+. .\.github\scripts\publish_env.local.ps1
+
+# Publish (Git Bash — paths use forward slashes inside bash)
+bash .github/scripts/publish_player_release_to_s3.sh `
+  --windows-installer "build/windows/installer/EnjoyPlayerSetup-v0.1.0.exe"
+```
+
+**Persistent user env vars (Windows)** — System Properties → Environment Variables, or PowerShell (new terminals only):
+
+```powershell
+[System.Environment]::SetEnvironmentVariable("S3_ACCESS_KEY_ID", "<key>", "User")
+[System.Environment]::SetEnvironmentVariable("S3_SECRET_ACCESS_KEY", "<secret>", "User")
+[System.Environment]::SetEnvironmentVariable("S3_BUCKET", "<bucket>", "User")
+[System.Environment]::SetEnvironmentVariable("S3_ENDPOINT", "https://<account-id>.r2.cloudflarestorage.com", "User")
+```
+
+Verify: `echo $env:S3_BUCKET` (PowerShell) or `echo $S3_BUCKET` (Git Bash).
+
+On tag push, release workflows upload immutable `player/<version>/` artifacts and overwrite **`latest.json`** + **`appcast.xml`**.
+
+Scripts:
 
 - `.github/scripts/generate_update_feeds.sh` — local dry-run
-- `.github/scripts/publish_player_release_to_s3.sh` — upload + feed overwrite
+- `.github/scripts/publish_player_release_to_s3.sh` — upload + feed overwrite (+ optional Cloudflare purge)
 
 **Before first public auto-update:** manually verify WinSparkle + Inno installer and Sparkle + notarized macOS zip (spikes in OpenSpec `app-update-system`).
 
