@@ -39,6 +39,99 @@ String _formatRateCore(double rate) {
   return x.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
 }
 
+/// Narrow transport layout constants ([mobile-transport-line-nav]).
+const double kNarrowPlayRingWidth = 54;
+const double kNarrowIconSlotWidth = 40;
+const double kNarrowSpeedSlotExtra = 12;
+const double kNarrowLayoutSlack = 8;
+const double kNarrowLineNavGap = 4;
+
+enum _NarrowSecondarySlot {
+  echo,
+  cc,
+  speed,
+  volume,
+  fullscreen,
+  expand;
+
+  double get width => switch (this) {
+    _NarrowSecondarySlot.speed => kNarrowIconSlotWidth + kNarrowSpeedSlotExtra,
+    _ => kNarrowIconSlotWidth,
+  };
+}
+
+/// Which controls fit in the narrow single-row transport bar.
+class NarrowTransportBudget {
+  const NarrowTransportBudget({
+    required this.showPrevNext,
+    required this.showEcho,
+    required this.showCc,
+    required this.showSpeed,
+    required this.showVolume,
+    required this.showFullscreen,
+    required this.showExpand,
+  });
+
+  final bool showPrevNext;
+  final bool showEcho;
+  final bool showCc;
+  final bool showSpeed;
+  final bool showVolume;
+  final bool showFullscreen;
+  final bool showExpand;
+}
+
+/// Reserves prev/next first, then packs secondary tools; defers expand → volume.
+NarrowTransportBudget resolveNarrowTransportBudget(
+  double maxWidth, {
+  required bool hasTranscriptLines,
+  required bool onPlayer,
+  required bool showFullscreenTransport,
+}) {
+  var remaining =
+      maxWidth - kNarrowPlayRingWidth - kNarrowLayoutSlack;
+  final showPrevNext = hasTranscriptLines;
+  if (showPrevNext) {
+    remaining -= 2 * kNarrowIconSlotWidth + 2 * kNarrowLineNavGap;
+  }
+
+  final slots = <_NarrowSecondarySlot>[
+    _NarrowSecondarySlot.echo,
+    _NarrowSecondarySlot.cc,
+    _NarrowSecondarySlot.speed,
+    _NarrowSecondarySlot.volume,
+    if (showFullscreenTransport) _NarrowSecondarySlot.fullscreen,
+    if (!onPlayer) _NarrowSecondarySlot.expand,
+  ];
+
+  final visible = List<_NarrowSecondarySlot>.from(slots);
+  while (visible.isNotEmpty) {
+    final needed = visible.fold<double>(0, (sum, s) => sum + s.width);
+    if (needed <= remaining) break;
+    visible.removeLast();
+  }
+
+  bool has(_NarrowSecondarySlot slot) => visible.contains(slot);
+
+  return NarrowTransportBudget(
+    showPrevNext: showPrevNext,
+    showEcho: has(_NarrowSecondarySlot.echo),
+    showCc: has(_NarrowSecondarySlot.cc),
+    showSpeed: has(_NarrowSecondarySlot.speed),
+    showVolume: has(_NarrowSecondarySlot.volume),
+    showFullscreen: has(_NarrowSecondarySlot.fullscreen),
+    showExpand: has(_NarrowSecondarySlot.expand),
+  );
+}
+
+Widget _narrowTransportSlot({required Widget child}) {
+  return SizedBox(
+    width: kNarrowIconSlotWidth,
+    height: kNarrowIconSlotWidth,
+    child: Center(child: child),
+  );
+}
+
 class GlobalTransportBar extends ConsumerStatefulWidget {
   const GlobalTransportBar({super.key});
 
@@ -186,105 +279,122 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
             ),
     );
 
+    final prevButton = IconButton(
+      tooltip: ttPrev,
+      iconSize: 22,
+      onPressed: isBuffering || !hasTranscriptLines
+          ? null
+          : Haptics.wrapTap(
+              context,
+              () => ref.read(playerInteractionsProvider.notifier).prevLine(),
+            ),
+      icon: const Icon(Icons.skip_previous_rounded),
+    );
+
+    final nextButton = IconButton(
+      tooltip: ttNext,
+      iconSize: 22,
+      onPressed: isBuffering || !hasTranscriptLines
+          ? null
+          : Haptics.wrapTap(
+              context,
+              () => ref.read(playerInteractionsProvider.notifier).nextLine(),
+            ),
+      icon: const Icon(Icons.skip_next_rounded),
+    );
+
+    final replayButton = IconButton(
+      tooltip: ttReplay,
+      iconSize: 22,
+      onPressed: isBuffering || !hasTranscriptLines
+          ? null
+          : Haptics.wrapTap(
+              context,
+              () => ref.read(playerInteractionsProvider.notifier).replayLine(),
+            ),
+      icon: const Icon(Icons.replay_rounded),
+    );
+
     final transcriptControls = <Widget>[
-      IconButton(
-        tooltip: ttPrev,
-        iconSize: 22,
-        onPressed: isBuffering || !hasTranscriptLines
-            ? null
-            : Haptics.wrapTap(
-                context,
-                () => ref.read(playerInteractionsProvider.notifier).prevLine(),
-              ),
-        icon: const Icon(Icons.skip_previous_rounded),
-      ),
-      IconButton(
-        tooltip: ttNext,
-        iconSize: 22,
-        onPressed: isBuffering || !hasTranscriptLines
-            ? null
-            : Haptics.wrapTap(
-                context,
-                () => ref.read(playerInteractionsProvider.notifier).nextLine(),
-              ),
-        icon: const Icon(Icons.skip_next_rounded),
-      ),
-      IconButton(
-        tooltip: ttReplay,
-        iconSize: 22,
-        onPressed: isBuffering || !hasTranscriptLines
-            ? null
-            : Haptics.wrapTap(
-                context,
-                () =>
-                    ref.read(playerInteractionsProvider.notifier).replayLine(),
-              ),
-        icon: const Icon(Icons.replay_rounded),
-      ),
+      prevButton,
+      nextButton,
+      replayButton,
     ];
 
     final primaryTransport = <Widget>[playRing, ...transcriptControls];
 
-    final secondaryEssentials = <Widget>[
-      IconButton(
-        tooltip: ttEcho,
-        color: echo.active ? t.echoActive : null,
-        style: echo.active
-            ? IconButton.styleFrom(
-                backgroundColor: t.echoActive.withValues(alpha: 0.18),
-              )
-            : null,
-        onPressed: echo.active || hasTranscriptLines
-            ? Haptics.wrapTap(
-                context,
-                () =>
-                    ref.read(playerInteractionsProvider.notifier).toggleEcho(),
-              )
-            : null,
-        icon: const Icon(Icons.mic_none_rounded),
-      ),
-      TransportCcButton(mediaId: chrome.mediaId),
-      IconButton(
-        tooltip: ttSpeed,
-        onPressed: Haptics.wrapTap(context, _openPlaybackRateSheet),
-        icon: Padding(
-          padding: EdgeInsets.all(t.space8),
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              Icon(Icons.speed_rounded, color: cs.onSurfaceVariant),
-              if (!playbackRatesEqual(playbackRate, 1.0))
-                Positioned(
-                  right: -2,
-                  bottom: -4,
-                  child: Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.playbackRateTimes(_formatRateCore(playbackRate)),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 9,
-                      height: 1,
-                      fontWeight: FontWeight.w600,
-                      color: cs.primary,
-                    ),
+    final echoButton = IconButton(
+      tooltip: ttEcho,
+      color: echo.active ? t.echoActive : null,
+      style: echo.active
+          ? IconButton.styleFrom(
+              backgroundColor: t.echoActive.withValues(alpha: 0.18),
+            )
+          : null,
+      onPressed: echo.active || hasTranscriptLines
+          ? Haptics.wrapTap(
+              context,
+              () => ref.read(playerInteractionsProvider.notifier).toggleEcho(),
+            )
+          : null,
+      icon: const Icon(Icons.mic_none_rounded),
+    );
+
+    final ccButton = TransportCcButton(mediaId: chrome.mediaId);
+
+    final speedButton = IconButton(
+      tooltip: ttSpeed,
+      onPressed: Haptics.wrapTap(context, _openPlaybackRateSheet),
+      icon: Padding(
+        padding: EdgeInsets.all(narrowLayout ? t.space4 : t.space8),
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Icon(Icons.speed_rounded, color: cs.onSurfaceVariant),
+            if (!playbackRatesEqual(playbackRate, 1.0))
+              Positioned(
+                right: -2,
+                bottom: -4,
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.playbackRateTimes(_formatRateCore(playbackRate)),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 9,
+                    height: 1,
+                    fontWeight: FontWeight.w600,
+                    color: cs.primary,
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
-      const TransportVolumeButton(),
-      TransportFullscreenButton(isVideo: chrome.mediaType == 'video'),
-      if (!onPlayer)
-        IconButton(
-          tooltip: ttExpand,
-          icon: const Icon(Icons.open_in_full_rounded),
-          onPressed: Haptics.wrapTap(
-            context,
-            () => openPlayerRoute(context, chrome.mediaId),
-          ),
-        ),
+    );
+
+    const volumeButton = TransportVolumeButton();
+
+    final fullscreenButton = TransportFullscreenButton(
+      isVideo: chrome.mediaType == 'video',
+    );
+
+    final expandButton = IconButton(
+      tooltip: ttExpand,
+      icon: const Icon(Icons.open_in_full_rounded),
+      onPressed: Haptics.wrapTap(
+        context,
+        () => openPlayerRoute(context, chrome.mediaId),
+      ),
+    );
+
+    final secondaryEssentials = <Widget>[
+      echoButton,
+      ccButton,
+      speedButton,
+      volumeButton,
+      fullscreenButton,
+      if (!onPlayer) expandButton,
     ];
 
     final showFullscreenTransport = isDesktop && chrome.mediaType == 'video';
@@ -317,6 +427,7 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
             ),
             child: SizedBox(
               height: 56,
+              width: double.infinity,
               child: AnimatedSwitcher(
                 duration: MediaQuery.of(context).disableAnimations
                     ? Duration.zero
@@ -346,35 +457,53 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                   child: hideBottomMediaInfo
                       ? LayoutBuilder(
                           builder: (context, paddedConstraints) {
-                            // Budget using Material tap targets (~48) — [40] was too
-                            // tight and caused a few px Row overflow on phones.
-                            const playRingWidth = 58.0;
-                            const iconSlotWidth = 48.0;
-                            const layoutSlack = 12.0;
-                            // Speed control wraps the icon in extra padding.
-                            const speedSlotExtra = 16.0;
-                            final secondaryCount =
-                                4 +
-                                (showFullscreenTransport ? 1 : 0) +
-                                (onPlayer ? 0 : 1);
-                            final secondaryWidth =
-                                secondaryCount * iconSlotWidth + speedSlotExtra;
-                            final remaining =
-                                paddedConstraints.maxWidth -
-                                playRingWidth -
-                                secondaryWidth -
-                                layoutSlack;
-                            final showTranscriptControls =
-                                remaining >= iconSlotWidth * 3;
+                            final budget = resolveNarrowTransportBudget(
+                              paddedConstraints.maxWidth,
+                              hasTranscriptLines: hasTranscriptLines,
+                              onPlayer: onPlayer,
+                              showFullscreenTransport:
+                                  showFullscreenTransport,
+                            );
+
+                            final narrowSecondaries = <Widget>[
+                              if (budget.showEcho)
+                                _narrowTransportSlot(child: echoButton),
+                              if (budget.showCc)
+                                _narrowTransportSlot(child: ccButton),
+                              if (budget.showSpeed)
+                                SizedBox(
+                                  width:
+                                      kNarrowIconSlotWidth + kNarrowSpeedSlotExtra,
+                                  height: kNarrowIconSlotWidth,
+                                  child: Center(child: speedButton),
+                                ),
+                              if (budget.showVolume)
+                                _narrowTransportSlot(child: volumeButton),
+                              if (budget.showFullscreen)
+                                _narrowTransportSlot(child: fullscreenButton),
+                              if (budget.showExpand)
+                                _narrowTransportSlot(child: expandButton),
+                            ];
+
+                            final lineNavCluster = budget.showPrevNext
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _narrowTransportSlot(child: prevButton),
+                                      const SizedBox(width: kNarrowLineNavGap),
+                                      playRing,
+                                      const SizedBox(width: kNarrowLineNavGap),
+                                      _narrowTransportSlot(child: nextButton),
+                                    ],
+                                  )
+                                : playRing;
 
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                playRing,
-                                if (showTranscriptControls)
-                                  ...transcriptControls,
+                                lineNavCluster,
                                 const Spacer(),
-                                ...secondaryEssentials,
+                                ...narrowSecondaries,
                               ],
                             );
                           },
