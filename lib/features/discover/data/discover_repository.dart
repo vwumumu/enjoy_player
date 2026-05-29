@@ -183,6 +183,8 @@ class DiscoverRepository {
     return library.importYoutubeVideo(
       entry.videoId,
       signedInUserId: signedInUserId,
+      prefetchedTitle: entry.title,
+      prefetchedThumbnailUrl: entry.thumbnailUrl,
     );
   }
 

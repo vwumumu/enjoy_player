@@ -77,7 +77,8 @@ class _CreditsUsageBody extends ConsumerWidget {
         children: [
           Text(
             l10n.creditsUsageDescription,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            maxLines: 2,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
@@ -87,30 +88,39 @@ class _CreditsUsageBody extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _DateFilterRow(
-                  label: l10n.creditsUsageStartDate,
-                  value: filters.startDate,
-                  onPick: () => pickCreditsUsageDate(
-                    context,
-                    initial: filters.startDate,
-                    onYmd: ctrl.setStartDate,
-                  ),
-                  onClear: filters.startDate != null
-                      ? () => ctrl.setStartDate(null)
-                      : null,
-                ),
-                SizedBox(height: t.space12),
-                _DateFilterRow(
-                  label: l10n.creditsUsageEndDate,
-                  value: filters.endDate,
-                  onPick: () => pickCreditsUsageDate(
-                    context,
-                    initial: filters.endDate,
-                    onYmd: ctrl.setEndDate,
-                  ),
-                  onClear: filters.endDate != null
-                      ? () => ctrl.setEndDate(null)
-                      : null,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _FilterDateField(
+                        label: l10n.creditsUsageStartDate,
+                        value: filters.startDate,
+                        onPick: () => pickCreditsUsageDate(
+                          context,
+                          initial: filters.startDate,
+                          onYmd: ctrl.setStartDate,
+                        ),
+                        onClear: filters.startDate != null
+                            ? () => ctrl.setStartDate(null)
+                            : null,
+                      ),
+                    ),
+                    SizedBox(width: t.space12),
+                    Expanded(
+                      child: _FilterDateField(
+                        label: l10n.creditsUsageEndDate,
+                        value: filters.endDate,
+                        onPick: () => pickCreditsUsageDate(
+                          context,
+                          initial: filters.endDate,
+                          onYmd: ctrl.setEndDate,
+                        ),
+                        onClear: filters.endDate != null
+                            ? () => ctrl.setEndDate(null)
+                            : null,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: t.space12),
                 DropdownButtonFormField<String>(
@@ -120,7 +130,6 @@ class _CreditsUsageBody extends ConsumerWidget {
                   initialValue: filters.serviceType ?? '',
                   decoration: InputDecoration(
                     labelText: l10n.creditsUsageServiceType,
-                    border: const OutlineInputBorder(),
                   ),
                   items: [
                     DropdownMenuItem(
@@ -197,40 +206,76 @@ class _CreditsUsageBody extends ConsumerWidget {
                     },
                   ),
                   SizedBox(height: t.space12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
+                  LayoutBuilder(
+                    builder: (context, pagerConstraints) {
+                      final pageInfo =
                           '${l10n.creditsUsagePageInfo(currentPage)}'
-                          '${!page.hasMore && page.logs.isNotEmpty ? ' · ${l10n.creditsUsageTotalRecords(filters.offset + page.logs.length)}' : ''}',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ),
-                      EnjoyButton.secondary(
-                        onPressed: filters.offset == 0
-                            ? null
-                            : ctrl.goToPreviousPage,
-                        child: Text(l10n.creditsUsagePrevious),
-                      ),
-                      SizedBox(width: t.space8),
-                      EnjoyButton.secondary(
-                        onPressed: !page.hasMore ? null : ctrl.goToNextPage,
-                        child: Text(l10n.creditsUsageNext),
-                      ),
-                    ],
+                          '${!page.hasMore && page.logs.isNotEmpty ? ' · ${l10n.creditsUsageTotalRecords(filters.offset + page.logs.length)}' : ''}';
+                      final pageInfoStyle = Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          );
+                      final narrow = pagerConstraints.maxWidth < 720;
+                      if (narrow) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(pageInfo, style: pageInfoStyle),
+                            SizedBox(height: t.space8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: EnjoyButton.secondary(
+                                    onPressed: filters.offset == 0
+                                        ? null
+                                        : ctrl.goToPreviousPage,
+                                    child: Text(l10n.creditsUsagePrevious),
+                                  ),
+                                ),
+                                SizedBox(width: t.space8),
+                                Expanded(
+                                  child: EnjoyButton.secondary(
+                                    onPressed: !page.hasMore
+                                        ? null
+                                        : ctrl.goToNextPage,
+                                    child: Text(l10n.creditsUsageNext),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Text(pageInfo, style: pageInfoStyle),
+                          ),
+                          EnjoyButton.secondary(
+                            onPressed: filters.offset == 0
+                                ? null
+                                : ctrl.goToPreviousPage,
+                            child: Text(l10n.creditsUsagePrevious),
+                          ),
+                          SizedBox(width: t.space8),
+                          EnjoyButton.secondary(
+                            onPressed: !page.hasMore
+                                ? null
+                                : ctrl.goToNextPage,
+                            child: Text(l10n.creditsUsageNext),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               );
             },
-            loading: () => Padding(
-              padding: EdgeInsets.symmetric(vertical: t.space24),
-              child: const Center(child: CircularProgressIndicator()),
-            ),
+            loading: () => const _CreditsUsageLoadingList(),
             error: (Object e, StackTrace s) => Padding(
               padding: EdgeInsets.symmetric(vertical: t.space24),
               child: Column(
@@ -304,8 +349,8 @@ String serviceTypeLabel(AppLocalizations l10n, String type) {
   };
 }
 
-class _DateFilterRow extends StatelessWidget {
-  const _DateFilterRow({
+class _FilterDateField extends StatelessWidget {
+  const _FilterDateField({
     required this.label,
     required this.value,
     required this.onPick,
@@ -320,27 +365,131 @@ class _DateFilterRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
+    final tt = Theme.of(context).textTheme;
     final display = value == null || value!.isEmpty ? '—' : value!;
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: onPick,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text('$label: $display'),
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPick,
+        borderRadius: BorderRadius.circular(t.radiusMd),
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: label,
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (onClear != null)
+                  IconButton(
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).deleteButtonTooltip,
+                    onPressed: onClear,
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                const Padding(
+                  padding: EdgeInsets.only(right: 8),
+                  child: Icon(Icons.calendar_today_rounded, size: 20),
+                ),
+              ],
+            ),
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              display,
+              style: tt.bodyMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
-        if (onClear != null) ...[
-          SizedBox(width: t.space8),
-          IconButton(
-            tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
-            onPressed: onClear,
-            icon: const Icon(Icons.close_rounded),
+      ),
+    );
+  }
+}
+
+class _CreditsUsageLoadingList extends StatelessWidget {
+  const _CreditsUsageLoadingList();
+
+  static const _skeletonCount = 4;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    return Column(
+      children: [
+        for (var i = 0; i < _skeletonCount; i++)
+          Padding(
+            padding: EdgeInsets.only(bottom: t.space8),
+            child: const _UsageLogCardSkeleton(),
+          ),
+      ],
+    );
+  }
+}
+
+class _UsageLogCardSkeleton extends StatelessWidget {
+  const _UsageLogCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    return EnjoyCard(
+      padding: EdgeInsets.all(t.space16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Skeleton.line(
+            width: double.infinity,
+            height: 16,
+            borderRadius: BorderRadius.circular(t.radiusSm),
+          ),
+          SizedBox(height: t.space8),
+          Skeleton.line(
+            width: 120,
+            height: 12,
+            borderRadius: BorderRadius.circular(t.radiusSm),
+          ),
+          SizedBox(height: t.space12),
+          Row(
+            children: [
+              Skeleton.line(
+                width: 72,
+                height: 24,
+                borderRadius: BorderRadius.circular(t.radiusFull),
+              ),
+              SizedBox(width: t.space8),
+              Skeleton.line(
+                width: 48,
+                height: 24,
+                borderRadius: BorderRadius.circular(t.radiusFull),
+              ),
+            ],
+          ),
+          SizedBox(height: t.space12),
+          Row(
+            children: [
+              Expanded(
+                child: Skeleton.line(
+                  width: double.infinity,
+                  height: 36,
+                  borderRadius: BorderRadius.circular(t.radiusSm),
+                ),
+              ),
+              SizedBox(width: t.space16),
+              Expanded(
+                child: Skeleton.line(
+                  width: double.infinity,
+                  height: 36,
+                  borderRadius: BorderRadius.circular(t.radiusSm),
+                ),
+              ),
+            ],
           ),
         ],
-      ],
+      ),
     );
   }
 }
@@ -453,56 +602,142 @@ class _UsageLogCard extends StatelessWidget {
   final CreditsUsageLog log;
   final String localeName;
 
+  static const _tabularFigures = [FontFeature.tabularFigures()];
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    final df = DateFormat.yMMMd(localeName);
-    final tf = DateFormat.yMMMd().add_jm();
     final when = DateTime.fromMillisecondsSinceEpoch(
       log.timestampMs,
       isUtc: true,
     ).toLocal();
+    final whenText = DateFormat.yMMMd(localeName).add_jm().format(when);
+    final statusLabel = log.allowed
+        ? l10n.creditsUsageAllowed
+        : l10n.creditsUsageDenied;
+    final numberStyle = tt.titleSmall?.copyWith(
+      fontWeight: FontWeight.w600,
+      fontFeatures: _tabularFigures,
+    );
 
     return EnjoyCard(
-      padding: EdgeInsets.all(t.space12),
+      padding: EdgeInsets.all(t.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            tf.format(when),
-            style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      whenText,
+                      style: tt.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: t.space4),
+                    Text(
+                      'UTC · ${log.date}',
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: t.space8),
+              _UsageStatusPill(allowed: log.allowed, label: statusLabel),
+            ],
           ),
-          SizedBox(height: t.space4),
-          Text(
-            df.format(DateTime.parse('${log.date}T00:00:00Z')),
-            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-          ),
-          SizedBox(height: t.space8),
+          SizedBox(height: t.space12),
           Wrap(
             spacing: t.space8,
             runSpacing: t.space4,
             children: [
-              Chip(label: Text(serviceTypeLabel(l10n, log.serviceType))),
-              Chip(label: Text(log.tier)),
               Chip(
-                label: Text(
-                  log.allowed
-                      ? l10n.creditsUsageAllowed
-                      : l10n.creditsUsageDenied,
+                visualDensity: VisualDensity.compact,
+                label: Text(serviceTypeLabel(l10n, log.serviceType)),
+              ),
+              Chip(
+                visualDensity: VisualDensity.compact,
+                label: Text(log.tier),
+              ),
+            ],
+          ),
+          SizedBox(height: t.space12),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.creditsUsageTableRequired,
+                      style: tt.labelSmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    SizedBox(height: t.space4),
+                    Text('${log.creditsRequired}', style: numberStyle),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.creditsUsageTableUsedAfter,
+                      style: tt.labelSmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    SizedBox(height: t.space4),
+                    Text('${log.usedAfter}', style: numberStyle),
+                  ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: t.space8),
-          Text(
-            '${l10n.creditsUsageTableRequired}: ${log.creditsRequired} · '
-            '${l10n.creditsUsageTableUsedAfter}: ${log.usedAfter}',
-            style: tt.bodySmall,
-          ),
         ],
+      ),
+    );
+  }
+}
+
+class _UsageStatusPill extends StatelessWidget {
+  const _UsageStatusPill({required this.allowed, required this.label});
+
+  final bool allowed;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: t.space8,
+        vertical: t.space4,
+      ),
+      decoration: BoxDecoration(
+        color: allowed ? cs.primaryContainer : cs.errorContainer,
+        borderRadius: BorderRadius.circular(t.radiusFull),
+      ),
+      child: Text(
+        label,
+        style: tt.labelSmall?.copyWith(
+          color: allowed ? cs.onPrimaryContainer : cs.onErrorContainer,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

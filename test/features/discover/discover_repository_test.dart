@@ -1,8 +1,11 @@
 import 'package:drift/native.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/features/discover/data/discover_repository.dart';
 import 'package:enjoy_player/features/discover/data/youtube_fetch.dart';
 import 'package:enjoy_player/features/discover/data/youtube_rss_parser.dart';
+import 'package:enjoy_player/features/discover/domain/feed_entry.dart';
+import 'package:enjoy_player/features/library/data/library_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -176,6 +179,35 @@ void main() {
 
       final timeline = await repo.watchTimeline().first;
       expect(timeline.any((e) => e.videoId == 'cachedVideo12345'), isTrue);
+    });
+
+    test('addFeedEntryToLibrary uses RSS title without oEmbed', () async {
+      const vid = 'dQw4w9WgXcQ';
+      final library = MediaLibraryRepository(
+        db,
+        FileStorage(),
+        oembedClient: MockClient((_) async => http.Response('', 500)),
+      );
+      repo = DiscoverRepository(
+        db,
+        httpClient: MockClient((_) async => http.Response('', 404)),
+        rssParser: const YoutubeRssParser(),
+        libraryRepository: library,
+      );
+
+      final id = await repo.addFeedEntryToLibrary(
+        FeedEntry(
+          videoId: vid,
+          channelId: 'UCtestchannel1',
+          title: 'Discover RSS Title',
+          thumbnailUrl: 'https://i.ytimg.com/vi/$vid/hqdefault.jpg',
+          publishedAt: DateTime.utc(2024, 6, 1),
+        ),
+      );
+
+      final row = await db.videoDao.getById(id);
+      expect(row!.title, 'Discover RSS Title');
+      expect(row.thumbnailUrl, 'https://i.ytimg.com/vi/$vid/hqdefault.jpg');
     });
   });
 }

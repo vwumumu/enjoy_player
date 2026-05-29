@@ -6,11 +6,14 @@ import 'package:cross_file/cross_file.dart';
 import 'package:drift/native.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/ids/enjoy_ids.dart';
+import 'package:enjoy_player/core/utils/youtube_video_identity.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/features/library/data/library_repository.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
@@ -260,5 +263,121 @@ void main() {
         expect(after!.thumbnailUrl, isNull);
       },
     );
+
+    test('importYoutubeVideo uses prefetched title without oEmbed', () async {
+      const vid = 'dQw4w9WgXcQ';
+      final oembedClient = MockClient((_) async => http.Response('', 500));
+
+      final ytRepo = MediaLibraryRepository(
+        db,
+        FileStorage(),
+        oembedClient: oembedClient,
+      );
+
+      final id = await ytRepo.importYoutubeVideo(
+        vid,
+        prefetchedTitle: 'RSS Title',
+        prefetchedThumbnailUrl: 'https://i.ytimg.com/vi/$vid/hqdefault.jpg',
+      );
+
+      final row = await db.videoDao.getById(id);
+      expect(row!.title, 'RSS Title');
+      expect(row.thumbnailUrl, 'https://i.ytimg.com/vi/$vid/hqdefault.jpg');
+    });
+
+    test('refreshYoutubeMetadataIfNeeded patches placeholder title', () async {
+      const vid = 'dQw4w9WgXcQ';
+      final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
+      final now = DateTime.now();
+
+      await db.videoDao.insertRow(
+        VideoRow(
+          id: mediaId,
+          vid: vid,
+          provider: 'youtube',
+          title: youtubeImportPlaceholderTitle(vid),
+          description: null,
+          thumbnailUrl: null,
+          durationSeconds: 0,
+          language: 'und',
+          source: 'youtube',
+          localUri: null,
+          md5: null,
+          size: null,
+          mediaUrl: 'https://www.youtube.com/watch?v=$vid',
+          syncStatus: 'pending',
+          serverUpdatedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      final oembedClient = MockClient((request) async {
+        expect(request.url.host, 'www.youtube.com');
+        return http.Response(
+          '{"title":"Real Title","thumbnail_url":"https://i.ytimg.com/vi/$vid/hqdefault.jpg"}',
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final ytRepo = MediaLibraryRepository(
+        db,
+        FileStorage(),
+        oembedClient: oembedClient,
+      );
+
+      final patch = await ytRepo.refreshYoutubeMetadataIfNeeded(mediaId);
+      expect(patch?.title, 'Real Title');
+      expect(
+        patch?.thumbnailUrl,
+        'https://i.ytimg.com/vi/$vid/hqdefault.jpg',
+      );
+
+      final row = await db.videoDao.getById(mediaId);
+      expect(row!.title, 'Real Title');
+      expect(row.thumbnailUrl, 'https://i.ytimg.com/vi/$vid/hqdefault.jpg');
+    });
+
+    test('refreshYoutubeMetadataIfNeeded skips complete metadata', () async {
+      const vid = 'dQw4w9WgXcQ';
+      final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
+      final now = DateTime.now();
+
+      await db.videoDao.insertRow(
+        VideoRow(
+          id: mediaId,
+          vid: vid,
+          provider: 'youtube',
+          title: 'Already Good',
+          description: null,
+          thumbnailUrl: 'https://i.ytimg.com/vi/$vid/hqdefault.jpg',
+          durationSeconds: 120,
+          language: 'und',
+          source: 'youtube',
+          localUri: null,
+          md5: null,
+          size: null,
+          mediaUrl: 'https://www.youtube.com/watch?v=$vid',
+          syncStatus: 'synced',
+          serverUpdatedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      final oembedClient = MockClient((_) async {
+        fail('oEmbed should not be called');
+      });
+
+      final ytRepo = MediaLibraryRepository(
+        db,
+        FileStorage(),
+        oembedClient: oembedClient,
+      );
+
+      final patch = await ytRepo.refreshYoutubeMetadataIfNeeded(mediaId);
+      expect(patch, isNull);
+    });
   });
 }

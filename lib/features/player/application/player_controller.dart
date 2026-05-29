@@ -22,6 +22,7 @@ import 'package:enjoy_player/features/player/application/player_engine_rev.dart'
 import 'package:enjoy_player/features/player/application/player_open_side_effects.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/features/player/application/video_poster_capture_service.dart';
+import 'package:enjoy_player/features/player/domain/playable_source.dart';
 import 'open_media_provider.dart';
 import 'playback_session_persister.dart';
 import 'player_engine_test_double_provider.dart';
@@ -52,6 +53,8 @@ class PlayerController extends _$PlayerController {
 
   /// Incremented on each [openMedia] call; stale async work bails out.
   int _openGeneration = 0;
+
+  int get openGeneration => _openGeneration;
 
   PlayerEngine get engine => _activeEngine;
 
@@ -192,6 +195,14 @@ class PlayerController extends _$PlayerController {
       audio: audio,
       gen: gen,
     );
+
+    if (playable is YoutubePlayableSource) {
+      scheduleYoutubeMetadataRefresh(
+        ref,
+        mediaId: mediaId,
+        openGeneration: gen,
+      );
+    }
 
     if (kind == MediaKind.video &&
         video != null &&
@@ -400,5 +411,19 @@ class PlayerController extends _$PlayerController {
   /// Cancels an in-flight [openMedia] before [PlaybackSession] is published.
   void abandonPendingOpen() {
     _openGeneration++;
+  }
+
+  void patchSessionMetadataIfCurrent({
+    required String mediaId,
+    required int openGeneration,
+    required String title,
+    String? thumbnailUrl,
+  }) {
+    if (_openGeneration != openGeneration) return;
+    if (state?.mediaId != mediaId) return;
+    state = state?.copyWith(
+      mediaTitle: title,
+      thumbnailUrl: thumbnailUrl ?? state?.thumbnailUrl,
+    );
   }
 }

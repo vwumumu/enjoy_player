@@ -130,6 +130,23 @@ class VideoDao extends DatabaseAccessor<AppDatabase> with _$VideoDaoMixin {
     );
   }
 
+  /// Partial update for YouTube oEmbed title/thumbnail refresh.
+  Future<void> updateYoutubeMetadata({
+    required String id,
+    required String title,
+    String? thumbnailUrl,
+  }) async {
+    await (update(videos)..where((t) => t.id.equals(id))).write(
+      VideosCompanion(
+        title: Value(title),
+        thumbnailUrl: thumbnailUrl == null
+            ? const Value.absent()
+            : Value(thumbnailUrl),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> deleteId(String id) =>
       (delete(videos)..where((t) => t.id.equals(id))).go();
 }

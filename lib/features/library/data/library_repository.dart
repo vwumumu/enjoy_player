@@ -8,14 +8,17 @@ import 'package:drift/drift.dart';
 
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/ids/enjoy_ids.dart';
+import 'package:enjoy_player/core/utils/youtube_video_identity.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/files/ffmpeg_media_probe.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/data/files/media_resolver.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/library/data/youtube_oembed_api.dart';
-import 'package:enjoy_player/features/library/data/youtube_url_parser.dart';
 import 'package:enjoy_player/features/sync/domain/sync_types.dart';
+import 'package:http/http.dart' as http;
+
+typedef YoutubeMetadataPatch = ({String title, String? thumbnailUrl});
 
 Media _mediaFromVideo(VideoRow row) {
   return Media(
@@ -56,12 +59,18 @@ Media _mediaFromAudio(AudioRow row) {
 }
 
 class MediaLibraryRepository {
-  MediaLibraryRepository(this._db, this._storage, {SyncEnqueueFn? enqueueSync})
-    : _enqueueSync = enqueueSync;
+  MediaLibraryRepository(
+    this._db,
+    this._storage, {
+    SyncEnqueueFn? enqueueSync,
+    http.Client? oembedClient,
+  }) : _enqueueSync = enqueueSync,
+       _oembedClient = oembedClient;
 
   final AppDatabase _db;
   final FileStorage _storage;
   final SyncEnqueueFn? _enqueueSync;
+  final http.Client? _oembedClient;
 
   Stream<List<Media>> watchAll() {
     late StreamSubscription<List<VideoRow>> subV;
@@ -204,17 +213,33 @@ class MediaLibraryRepository {
   Future<String> importYoutubeVideo(
     String rawInput, {
     String? signedInUserId,
+    String? prefetchedTitle,
+    String? prefetchedThumbnailUrl,
   }) async {
     final id = parseYoutubeVideoId(rawInput);
     if (id == null) {
       throw const FileFailure('Invalid YouTube URL or video ID.');
     }
     final dup = await _db.videoDao.getYoutubeByVid(id);
-    if (dup != null) return dup.id;
+    if (dup != null) {
+      await _maybePatchYoutubeMetadata(
+        dup,
+        prefetchedTitle: prefetchedTitle,
+        prefetchedThumbnailUrl: prefetchedThumbnailUrl,
+      );
+      return dup.id;
+    }
 
-    final meta = await fetchYoutubeOembed(id);
-    final title = meta?.title ?? 'YouTube video $id';
-    final thumb = meta?.thumbnailUrl;
+    final oembed = await fetchYoutubeOembed(id, client: _oembedClient);
+    final title = _resolveYoutubeTitle(
+      id,
+      prefetchedTitle: prefetchedTitle,
+      oembed: oembed,
+    );
+    final thumb = _resolveYoutubeThumbnail(
+      prefetchedThumbnailUrl: prefetchedThumbnailUrl,
+      oembed: oembed,
+    );
 
     final rowId = enjoyVideoId(provider: 'youtube', vid: id);
     final now = DateTime.now();
@@ -244,6 +269,98 @@ class MediaLibraryRepository {
       await _enqueueSync?.call(SyncEntityType.video, rowId, SyncAction.create);
     }
     return rowId;
+  }
+
+  /// Re-fetches oEmbed when title/thumbnail are still import placeholders.
+  Future<YoutubeMetadataPatch?> refreshYoutubeMetadataIfNeeded(
+    String mediaId,
+  ) async {
+    final row = await _db.videoDao.getById(mediaId);
+    if (row == null || row.provider.toLowerCase() != 'youtube') return null;
+    if (!_youtubeMetadataNeedsRefresh(row)) return null;
+
+    final meta = await fetchYoutubeOembed(row.vid, client: _oembedClient);
+    if (meta == null) return null;
+
+    final title = meta.title;
+    final thumb = meta.thumbnailUrl ?? row.thumbnailUrl;
+    await _db.videoDao.updateYoutubeMetadata(
+      id: mediaId,
+      title: title,
+      thumbnailUrl: thumb,
+    );
+    await _enqueueYoutubeMetadataSync(row);
+    return (title: title, thumbnailUrl: thumb);
+  }
+
+  bool _youtubeMetadataNeedsRefresh(VideoRow row) {
+    return isYoutubeImportPlaceholderTitle(row.title, row.vid) ||
+        row.thumbnailUrl == null ||
+        row.thumbnailUrl!.trim().isEmpty;
+  }
+
+  String _resolveYoutubeTitle(
+    String vid, {
+    String? prefetchedTitle,
+    YoutubeOembedMetadata? oembed,
+  }) {
+    final pref = prefetchedTitle?.trim();
+    if (pref != null &&
+        pref.isNotEmpty &&
+        !isYoutubeImportPlaceholderTitle(pref, vid)) {
+      return pref;
+    }
+    return oembed?.title ?? youtubeImportPlaceholderTitle(vid);
+  }
+
+  String? _resolveYoutubeThumbnail({
+    String? prefetchedThumbnailUrl,
+    YoutubeOembedMetadata? oembed,
+  }) {
+    final pref = prefetchedThumbnailUrl?.trim();
+    if (pref != null && pref.isNotEmpty) return pref;
+    return oembed?.thumbnailUrl;
+  }
+
+  Future<void> _maybePatchYoutubeMetadata(
+    VideoRow row, {
+    String? prefetchedTitle,
+    String? prefetchedThumbnailUrl,
+  }) async {
+    if (!_youtubeMetadataNeedsRefresh(row)) return;
+
+    final oembed = await fetchYoutubeOembed(row.vid, client: _oembedClient);
+    final title = _resolveYoutubeTitle(
+      row.vid,
+      prefetchedTitle: prefetchedTitle,
+      oembed: oembed,
+    );
+    final needsTitle = isYoutubeImportPlaceholderTitle(row.title, row.vid) &&
+        !isYoutubeImportPlaceholderTitle(title, row.vid);
+    final thumb = _resolveYoutubeThumbnail(
+      prefetchedThumbnailUrl: prefetchedThumbnailUrl,
+      oembed: oembed,
+    );
+    final needsThumb =
+        (row.thumbnailUrl == null || row.thumbnailUrl!.trim().isEmpty) &&
+        thumb != null &&
+        thumb.isNotEmpty;
+    if (!needsTitle && !needsThumb) return;
+
+    final resolvedTitle = needsTitle ? title : row.title;
+    final resolvedThumb = needsThumb ? thumb : row.thumbnailUrl;
+    await _db.videoDao.updateYoutubeMetadata(
+      id: row.id,
+      title: resolvedTitle,
+      thumbnailUrl: resolvedThumb,
+    );
+    await _enqueueYoutubeMetadataSync(row);
+  }
+
+  Future<void> _enqueueYoutubeMetadataSync(VideoRow row) async {
+    final status = row.syncStatus?.trim();
+    if (status == null || status.isEmpty) return;
+    await _enqueueSync?.call(SyncEntityType.video, row.id, SyncAction.update);
   }
 
   /// Fills `duration_seconds` when still zero after import, using `ffmpeg -i`.

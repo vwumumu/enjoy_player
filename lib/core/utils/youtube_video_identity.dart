@@ -6,6 +6,17 @@ library;
 
 final RegExp _bareYoutubeId = RegExp(r'^[A-Za-z0-9_-]{11}$');
 
+/// Fallback title when oEmbed does not return a real title.
+String youtubeImportPlaceholderTitle(String vid) => 'YouTube video $vid';
+
+/// True when [title] is the import-time placeholder for [vid].
+bool isYoutubeImportPlaceholderTitle(String title, String vid) {
+  final t = title.trim();
+  if (t.isEmpty) return true;
+  if (t == vid) return true;
+  return t == youtubeImportPlaceholderTitle(vid);
+}
+
 /// Returns canonical YouTube video id or null.
 String? parseYoutubeVideoId(String raw) {
   final s = raw.trim();
