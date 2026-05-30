@@ -19,6 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Short workspace path (Windows MAX_PATH)
+        shell: pwsh
+        run: .github/scripts/use_short_windows_workdir.ps1
+
       - uses: ./.github/actions/setup-flutter
 
       - name: Ensure NuGet feed (WebView2 / flutter_inappwebview)
@@ -37,3 +41,9 @@ jobs:
 
       - name: Flutter build windows (release)
         run: flutter build windows --release
+
+      - name: Remove short workspace drive mapping
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path 'W:\') { subst W: /d }
