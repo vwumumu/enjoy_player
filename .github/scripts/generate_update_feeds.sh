@@ -2,11 +2,17 @@
 # Emit appcast.xml + latest.json for dl.enjoy.bot from versioned release artifacts.
 set -euo pipefail
 
-root="$(cd "$(dirname "$0")/../.." && pwd)"
+lib="$(dirname "$0")/release_lib.sh"
+# shellcheck source=release_lib.sh
+source "${lib}"
+
+root="$(release_repo_root)"
 cd "${root}"
 
-version="${VERSION:-$("${root}/.github/scripts/read_pubspec_version.sh")}"
-build="${BUILD_NUMBER:-$(grep '^version:' pubspec.yaml | sed -E 's/.*\+([0-9]+).*/\1/')}"
+release_parse_artifact_args "$@"
+
+version="${VERSION:-$(release_version)}"
+build="${BUILD_NUMBER:-$(release_build_number)}"
 base_url="${ENJOY_PLAYER_DL_BASE:-https://dl.enjoy.bot/player}"
 min_supported="${MIN_SUPPORTED_VERSION:-${version}}"
 notes="${RELEASE_NOTES:-}"
@@ -35,25 +41,9 @@ add_asset() {
   assets["${key}"]="${name}|${url}|${sha}"
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --windows-installer)
-      add_asset windows "$2"
-      shift 2
-      ;;
-    --macos-zip)
-      add_asset macos "$2"
-      shift 2
-      ;;
-    --android-apk)
-      add_asset "$2" "$3"
-      shift 3
-      ;;
-    *)
-      echo "Unknown arg: $1" >&2
-      exit 1
-      ;;
-  esac
+key=""
+for key in "${RELEASE_ARTIFACT_KEYS[@]}"; do
+  add_asset "${key}" "${RELEASE_ARTIFACT_PATHS[$key]}"
 done
 
 out_dir="${FEED_OUT_DIR:-${root}/build/update-feeds}"

@@ -10,6 +10,10 @@ release_version() {
   bash "$(dirname "${BASH_SOURCE[0]}")/read_pubspec_version.sh"
 }
 
+release_build_number() {
+  bash "$(dirname "${BASH_SOURCE[0]}")/read_pubspec_version.sh" --build
+}
+
 release_load_publish_env() {
   local root="$1"
   local env_file="${root}/.github/scripts/publish_env.local.sh"
@@ -18,6 +22,91 @@ release_load_publish_env() {
     source "${env_file}"
     echo "Loaded publish env from ${env_file}"
   fi
+}
+
+# Parse shared release flags. Platform-specific flags remain in RELEASE_EXTRA_ARGS.
+release_parse_common_args() {
+  RELEASE_SKIP_CHECKS=false
+  RELEASE_SKIP_BUILD=false
+  RELEASE_PUBLISH=false
+  RELEASE_FEEDS_ONLY=false
+  RELEASE_EXTRA_ARGS=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --skip-checks)
+        RELEASE_SKIP_CHECKS=true
+        shift
+        ;;
+      --skip-build | --publish-only)
+        RELEASE_SKIP_BUILD=true
+        shift
+        ;;
+      --publish)
+        RELEASE_PUBLISH=true
+        shift
+        ;;
+      --feeds-only)
+        RELEASE_FEEDS_ONLY=true
+        RELEASE_PUBLISH=true
+        shift
+        ;;
+      *)
+        RELEASE_EXTRA_ARGS+=("$1")
+        shift
+        ;;
+    esac
+  done
+}
+
+# Parse --windows-installer / --macos-zip / --android-apk into RELEASE_ARTIFACT_* globals.
+release_parse_artifact_args() {
+  RELEASE_ARTIFACT_KEYS=()
+  declare -gA RELEASE_ARTIFACT_PATHS=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --windows-installer)
+        RELEASE_ARTIFACT_KEYS+=(windows)
+        RELEASE_ARTIFACT_PATHS[windows]="$2"
+        shift 2
+        ;;
+      --macos-zip)
+        RELEASE_ARTIFACT_KEYS+=(macos)
+        RELEASE_ARTIFACT_PATHS[macos]="$2"
+        shift 2
+        ;;
+      --android-apk)
+        RELEASE_ARTIFACT_KEYS+=("$2")
+        RELEASE_ARTIFACT_PATHS["$2"]="$3"
+        shift 3
+        ;;
+      *)
+        echo "Unknown arg: $1" >&2
+        return 1
+        ;;
+    esac
+  done
+}
+
+# Reconstruct artifact argv (for forwarding to generate_update_feeds.sh).
+release_artifact_argv() {
+  local -n _out=$1
+  _out=()
+  local key
+  for key in "${RELEASE_ARTIFACT_KEYS[@]}"; do
+    case "${key}" in
+      windows)
+        _out+=(--windows-installer "${RELEASE_ARTIFACT_PATHS[windows]}")
+        ;;
+      macos)
+        _out+=(--macos-zip "${RELEASE_ARTIFACT_PATHS[macos]}")
+        ;;
+      *)
+        _out+=(--android-apk "${key}" "${RELEASE_ARTIFACT_PATHS[$key]}")
+        ;;
+    esac
+  done
 }
 
 release_run_checks() {

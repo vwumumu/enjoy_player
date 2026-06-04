@@ -3,47 +3,45 @@
 # Use --feeds-only to sign + write feeds under build/update-feeds/ without uploading.
 set -euo pipefail
 
-root="$(cd "$(dirname "$0")/../.." && pwd)"
+lib="$(dirname "$0")/release_lib.sh"
+# shellcheck source=release_lib.sh
+source "${lib}"
+
+root="$(release_repo_root)"
 cd "${root}"
 
-feed_args=()
-upload_files=()
 feeds_only=false
-
+artifact_argv=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --feeds-only)
       feeds_only=true
       shift
       ;;
-    --windows-installer)
-      upload_files+=("$2")
-      feed_args+=(--windows-installer "$2")
-      shift 2
-      ;;
-    --macos-zip)
-      upload_files+=("$2")
-      feed_args+=(--macos-zip "$2")
-      shift 2
-      ;;
-    --android-apk)
-      upload_files+=("$3")
-      feed_args+=(--android-apk "$2" "$3")
-      shift 3
-      ;;
     *)
-      echo "Unknown arg: $1" >&2
-      exit 1
+      artifact_argv+=("$1")
+      shift
       ;;
   esac
 done
+
+release_parse_artifact_args "${artifact_argv[@]}"
+
+upload_files=()
+key=""
+for key in "${RELEASE_ARTIFACT_KEYS[@]}"; do
+  upload_files+=("${RELEASE_ARTIFACT_PATHS[$key]}")
+done
+
+feed_args=()
+release_artifact_argv feed_args
 
 if [[ ${#upload_files[@]} -eq 0 ]]; then
   echo "No artifacts to publish."
   exit 0
 fi
 
-version="${VERSION:-$("${root}/.github/scripts/read_pubspec_version.sh")}"
+version="${VERSION:-$(release_version)}"
 public_base="${ENJOY_PLAYER_DL_BASE:-https://dl.enjoy.bot/player}"
 if [[ "${feeds_only}" == true ]]; then
   public_base="${ENJOY_PLAYER_DL_BASE:-http://127.0.0.1:8787/player}"

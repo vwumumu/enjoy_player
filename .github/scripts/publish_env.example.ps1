@@ -14,7 +14,9 @@ $env:S3_ENDPOINT = "https://<account-id>.r2.cloudflarestorage.com"
 
 # Optional
 $env:S3_PREFIX = "player"
+# $env:S3_REGION = "auto"
 $env:CLOUDFLARE_API_TOKEN = "<token with Cache Purge>"
 $env:CLOUDFLARE_ZONE_ID = "<zone id for enjoy.bot>"
+# $env:ENJOY_PLAYER_DL_BASE = "https://dl.enjoy.bot/player"
 # Optional — local publish with WinSparkle signing:
 # $env:SPARKLE_DSA_PRIV_PEM = "C:\path\to\dsa_priv.pem"

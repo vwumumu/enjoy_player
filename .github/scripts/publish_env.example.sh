@@ -9,8 +9,10 @@ export S3_BUCKET="<r2-bucket-name>"
 export S3_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com"
 
 export S3_PREFIX="player"
+# export S3_REGION="auto"
 export CLOUDFLARE_API_TOKEN="<token with Cache Purge>"
 export CLOUDFLARE_ZONE_ID="<zone id for enjoy.bot>"
+# export ENJOY_PLAYER_DL_BASE="https://dl.enjoy.bot/player"
 
 # WinSparkle signing (optional locally; path to dsa_priv.pem)
 # export SPARKLE_DSA_PRIV_PEM="/path/to/dsa_priv.pem"

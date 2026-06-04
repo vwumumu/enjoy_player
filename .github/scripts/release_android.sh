@@ -14,38 +14,31 @@ source "${lib}"
 root="$(release_repo_root)"
 cd "${root}"
 
-SKIP_CHECKS=false
-SKIP_BUILD=false
 BUILD_APK=true
 BUILD_AAB=true
-PUBLISH=false
-FEEDS_ONLY=false
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --skip-checks) SKIP_CHECKS=true; shift ;;
-    --skip-build | --publish-only) SKIP_BUILD=true; shift ;;
-    --no-apk) BUILD_APK=false; shift ;;
-    --no-aab) BUILD_AAB=false; shift ;;
-    --publish) PUBLISH=true; shift ;;
-    --feeds-only) FEEDS_ONLY=true; PUBLISH=true; shift ;;
+release_parse_common_args "$@"
+for arg in "${RELEASE_EXTRA_ARGS[@]}"; do
+  case "${arg}" in
+    --no-apk) BUILD_APK=false ;;
+    --no-aab) BUILD_AAB=false ;;
     -h | --help)
       sed -n '2,8p' "$0"
       exit 0
       ;;
     *)
-      echo "Unknown option: $1" >&2
+      echo "Unknown option: ${arg}" >&2
       exit 1
       ;;
   esac
 done
 
-if [[ "${SKIP_CHECKS}" != true ]]; then
+if [[ "${RELEASE_SKIP_CHECKS}" != true ]]; then
   echo ">>> Pre-release checks"
   release_run_android_checks "${root}"
 fi
 
-if [[ "${SKIP_BUILD}" != true ]]; then
+if [[ "${RELEASE_SKIP_BUILD}" != true ]]; then
   if [[ -f "${root}/.github/scripts/setup_android_signing.sh" ]]; then
     bash "${root}/.github/scripts/setup_android_signing.sh" || true
   fi
@@ -64,7 +57,7 @@ if [[ "${SKIP_BUILD}" != true ]]; then
   bash "${root}/.github/scripts/rename_release_artifacts.sh" android
 fi
 
-if [[ "${PUBLISH}" == true ]]; then
+if [[ "${RELEASE_PUBLISH}" == true ]]; then
   release_load_publish_env "${root}"
   version="$(release_version)"
   prefix="EnjoyPlayer-v${version}"
@@ -80,7 +73,7 @@ if [[ "${PUBLISH}" == true ]]; then
     echo "No sideload APKs to publish in ${apk_dir}" >&2
     exit 1
   fi
-  if [[ "${FEEDS_ONLY}" == true ]]; then
+  if [[ "${RELEASE_FEEDS_ONLY}" == true ]]; then
     publish_args=(--feeds-only "${publish_args[@]}")
   else
     export RELEASE_REQUIRE_S3=1
