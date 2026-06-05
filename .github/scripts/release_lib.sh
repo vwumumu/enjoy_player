@@ -109,9 +109,19 @@ release_artifact_argv() {
   done
 }
 
+# Stale pubspec.yaml under build/release/ (e.g. from local feed staging) breaks
+# flutter analyze: path deps and assets resolve relative to that nested copy.
+release_prune_stale_build_pubspecs() {
+  local root="$1"
+  if [[ -d "${root}/build/release" ]]; then
+    find "${root}/build/release" -name pubspec.yaml -type f -delete 2>/dev/null || true
+  fi
+}
+
 release_run_checks() {
   local root="$1"
   cd "${root}"
+  release_prune_stale_build_pubspecs "${root}"
   flutter pub get
   flutter analyze
   flutter test
@@ -120,6 +130,7 @@ release_run_checks() {
 release_run_android_checks() {
   local root="$1"
   cd "${root}"
+  release_prune_stale_build_pubspecs "${root}"
   flutter pub get
   bash tool/patch_agp9_pub_plugins.sh
   flutter analyze

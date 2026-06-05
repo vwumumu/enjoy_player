@@ -23,6 +23,30 @@ param(
 $ErrorActionPreference = 'Stop'
 $RepoRoot = $PSScriptRoot
 
+function Resolve-ReleaseBash {
+  $gitBash = @(
+    "${env:ProgramFiles}\Git\bin\bash.exe",
+    "${env:ProgramFiles(x86)}\Git\bin\bash.exe"
+  ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+  if ($gitBash) { return $gitBash }
+
+  $bash = Get-Command bash -ErrorAction SilentlyContinue
+  if (-not $bash) {
+    throw 'bash not found. Install Git for Windows (https://git-scm.com/download/win) or run from Git Bash.'
+  }
+
+  $path = $bash.Source
+  if ($path -match '\\Windows\\System32\\bash\.exe$' -or $path -match '\\WindowsApps\\bash\.exe$') {
+    throw @(
+      'release.ps1 needs Git Bash, not WSL bash (PATH resolves to WSL).',
+      'Install Git for Windows, or run: bash .github/scripts/release.sh --platform windows'
+    ) -join "`n"
+  }
+
+  return $path
+}
+
 if ($Help) {
   Get-Content (Join-Path $RepoRoot '.github/scripts/release.sh') -TotalCount 20
   Write-Host ''
@@ -36,10 +60,8 @@ if (Test-Path $envFile) {
   . $envFile
 }
 
-$bashArgs = @(
-  (Join-Path $RepoRoot '.github/scripts/release.sh'),
-  '--platform', $Platform
-)
+$bashExe = Resolve-ReleaseBash
+$bashArgs = @('.github/scripts/release.sh', '--platform', $Platform)
 
 if ($SkipChecks) { $bashArgs += '--skip-checks' }
 if ($PublishOnly) { $bashArgs += '--publish-only' }
@@ -47,7 +69,13 @@ if ($Publish) { $bashArgs += '--publish' }
 if ($FeedsOnly) { $bashArgs += '--feeds-only' }
 if ($NoInstaller) { $bashArgs += '--no-installer' }
 
-Write-Host ">>> release.ps1 -Platform $Platform $($bashArgs -join ' ')"
+Write-Host ">>> release.ps1 -Platform $Platform $bashExe $($bashArgs -join ' ')"
 
-& bash @bashArgs
-exit $LASTEXITCODE
+Push-Location $RepoRoot
+try {
+  & $bashExe @bashArgs
+  exit $LASTEXITCODE
+}
+finally {
+  Pop-Location
+}
