@@ -47,6 +47,10 @@ app.*.map.json
 # Optional Windows FFmpeg binary (see windows/ffmpeg/README.md)
 /windows/ffmpeg/ffmpeg.exe
 
+# ffmpeg_kit_flutter_new vendored frameworks (see packages/ffmpeg_kit_flutter_new/scripts/setup_*.sh)
+/packages/ffmpeg_kit_flutter_new/macos/Frameworks/
+/packages/ffmpeg_kit_flutter_new/ios/Frameworks/
+
 # Tooling (SVG→PNG helper)
 /tool/node_modules/
 .venv-svg/
