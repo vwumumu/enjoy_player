@@ -192,4 +192,4 @@ flutter build macos --release
 ./macos/scripts/notarize_release.sh "build/macos/Build/Products/Release/Enjoy Player.app"
 ```
 
-For local notarization with Apple ID instead of API key, see [packaging.md § Direct release](packaging.md#direct-release-developer-id--notarization).
+For local notarization with Apple ID instead of API key, see [packaging.md § One-time setup](packaging.md#one-time-setup).

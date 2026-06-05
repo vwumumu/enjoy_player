@@ -1,8 +1,9 @@
 #!/usr/bin/env pwsh
 # Local release entry point (Windows-friendly). Same logic as GitHub release workflows.
 #
-# Examples:
+# Examples (see docs/packaging.md):
 #   pwsh ./release.ps1                          # Windows build + installer
+#   pwsh ./release.ps1 -Platform android        # Android AAB + sideload APKs
 #   pwsh ./release.ps1 -Publish                 # build + upload to dl.enjoy.bot
 #   pwsh ./release.ps1 -FeedsOnly               # build + local feeds (no S3)
 #   pwsh ./release.ps1 -SkipChecks              # faster iteration

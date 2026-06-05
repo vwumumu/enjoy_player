@@ -29,7 +29,7 @@ If you do not already have a Play upload key:
 keytool -genkey -v -keystore release-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
 ```
 
-Keep the keystore and passwords **out of git**. See [packaging.md § Android signing](packaging.md#release-signing-play--sideload).
+Keep the keystore and passwords **out of git**. See [packaging.md § Android signing](packaging.md#android-signing).
 
 For local builds, copy [`android/key.properties.example`](../android/key.properties.example) to `android/key.properties` and point `storeFile` at your keystore.
 

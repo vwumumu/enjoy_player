@@ -46,7 +46,7 @@ if [[ "${SKIP_FEED_CHECK:-}" != "1" ]]; then
 fi
 
 if [[ "${errors}" -gt 0 ]]; then
-  echo "${errors} check(s) failed — see docs/packaging.md § Sparkle keys" >&2
+  echo "${errors} check(s) failed — see docs/packaging.md § Publish to dl.enjoy.bot" >&2
   exit 1
 fi
 

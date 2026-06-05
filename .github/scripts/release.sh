@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Local + CI release entry point. Delegates to platform scripts (same logic as GitHub workflows).
 #
-# Usage:
+# Usage (see docs/packaging.md):
 #   bash .github/scripts/release.sh --platform windows
+#   bash .github/scripts/release.sh --platform android          # Linux or Git Bash
+#   bash .github/scripts/release.sh --platform apple --notarize # macOS only
 #   bash .github/scripts/release.sh --platform windows --publish
 #   bash .github/scripts/release.sh --platform windows --feeds-only
-#   bash .github/scripts/release.sh --platform android --publish
-#   bash .github/scripts/release.sh --platform apple --notarize --publish
 #
 # From repo root on Windows (loads publish_env.local.ps1 when present):
-#   pwsh ./release.ps1 -Platform windows -Publish
+#   pwsh ./release.ps1
+#   pwsh ./release.ps1 -Platform android -Publish
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -27,8 +28,14 @@ while [[ $# -gt 0 ]]; do
     -h | --help)
       cat <<'EOF'
 Enjoy Player release (shared local + CI logic)
+See docs/packaging.md for the full runbook.
 
   bash .github/scripts/release.sh --platform <windows|android|apple> [options]
+
+Host matrix:
+  Windows host  → --platform windows   (or: pwsh ./release.ps1)
+  Windows/Linux → --platform android   (or: pwsh ./release.ps1 -Platform android)
+  macOS host    → --platform apple     (requires macOS)
 
 Common options (forwarded to the platform script):
   --skip-checks       Skip flutter analyze / test
