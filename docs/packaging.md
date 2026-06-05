@@ -51,7 +51,7 @@ flowchart TD
 | Flag (PowerShell) | Flag (bash) | Effect |
 |-------------------|-------------|--------|
 | `-SkipChecks` | `--skip-checks` | Skip `flutter analyze` / `flutter test` |
-| `-PublishOnly -Publish` | `--publish-only --publish` | Re-upload existing artifacts |
+| `-PublishOnly -Publish` | `--publish-only --publish` | Re-upload existing artifacts (no build, no checks) |
 | `-Publish` | `--publish` | Build + upload to `dl.enjoy.bot` |
 | `-FeedsOnly` | `--feeds-only` | Build local update feeds only (no S3) |
 
@@ -109,13 +109,17 @@ flutter test
 
 ### Publish credentials (optional)
 
-Only needed when uploading to `dl.enjoy.bot`:
+Only needed when uploading to `dl.enjoy.bot`. Install **AWS CLI v2** (`winget install Amazon.AWSCLI`).
 
 ```powershell
 # Windows
 Copy-Item .github\scripts\publish_env.example.ps1 .github\scripts\publish_env.local.ps1
-# edit values, then:
+# edit AWS_* / PUBLISH_* values, then:
 pwsh ./release.ps1 -Publish
+
+# Verify credentials (optional)
+. .\.github\scripts\publish_env.local.ps1
+aws s3 ls "s3://$env:PUBLISH_BUCKET/" --endpoint-url $env:AWS_ENDPOINT_URL_S3
 ```
 
 ```bash
@@ -206,7 +210,7 @@ Skip this until local builds work. When ready:
 
 ```powershell
 pwsh ./release.ps1 -Publish             # Windows: build + upload
-pwsh ./release.ps1 -PublishOnly -Publish # re-upload existing installer
+pwsh ./release.ps1 -PublishOnly -Publish # re-upload existing installer (no rebuild)
 ```
 
 ```bash
@@ -272,6 +276,11 @@ Platform CI setup (secrets, runners):
 - **Keychain / signing on new Mac**: open `macos/Runner.xcworkspace`, enable automatic signing, team `46X685R747`, build once in Xcode.
 - **Notarization fails**: check `NOTARY_PROFILE` (default `enjoy-notary`) and stored credentials.
 - **TestFlight skipped**: set App Store Connect API env vars or upload IPA manually via Transporter.
+
+### Publish (R2 / AWS CLI)
+
+- **`SSL: UNEXPECTED_EOF_WHILE_READING`**: the publish script uses CRC32 checksums and single-connection multipart for R2. Try disabling VPN/proxy or updating AWS CLI.
+- **`AccessDenied`**: R2 token needs **Object Read & Write** scoped to `PUBLISH_BUCKET`.
 
 ### General
 

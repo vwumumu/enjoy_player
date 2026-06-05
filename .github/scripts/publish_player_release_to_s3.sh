@@ -49,32 +49,43 @@ fi
 export ENJOY_PLAYER_DL_BASE="${public_base}"
 
 has_s3=false
-if [[ -n "${S3_ACCESS_KEY_ID:-}" && -n "${S3_SECRET_ACCESS_KEY:-}" ]]; then
+if [[ -n "${AWS_ACCESS_KEY_ID:-}" && -n "${AWS_SECRET_ACCESS_KEY:-}" ]]; then
   has_s3=true
 fi
 
 if [[ "${feeds_only}" != true && "${has_s3}" != true ]]; then
   if [[ "${RELEASE_REQUIRE_S3:-}" == "1" ]]; then
-    echo "Publish failed: set S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY (see publish_env.local.ps1)" >&2
+    echo "Publish failed: set AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (see publish_env.local.ps1)" >&2
     exit 1
   fi
-  echo "Skipping publish: S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY not configured."
+  echo "Skipping publish: AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY not configured."
   exit 0
 fi
 
-bucket="${S3_BUCKET:-enjoy-dl}"
-prefix="${S3_PREFIX:-player}"
+bucket="${PUBLISH_BUCKET:-enjoy-dl}"
+prefix="${PUBLISH_PREFIX:-player}"
 s3_base="s3://${bucket}/${prefix}/${version}"
 
 if [[ "${has_s3}" == true ]]; then
-  export AWS_ACCESS_KEY_ID="${S3_ACCESS_KEY_ID}"
-  export AWS_SECRET_ACCESS_KEY="${S3_SECRET_ACCESS_KEY}"
-  export AWS_DEFAULT_REGION="${S3_REGION:-auto}"
+  export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-auto}"
 
-  if [[ -n "${S3_ENDPOINT:-}" ]]; then
-    s3_endpoint=(--endpoint-url "${S3_ENDPOINT}")
-  else
-    s3_endpoint=()
+  s3_endpoint=()
+  s3_checksum=()
+  if [[ -n "${AWS_ENDPOINT_URL_S3:-}" ]]; then
+    s3_endpoint=(--endpoint-url "${AWS_ENDPOINT_URL_S3}")
+    if [[ "${AWS_ENDPOINT_URL_S3}" == *r2.cloudflarestorage.com* ]]; then
+      s3_checksum=(--checksum-algorithm CRC32)
+      s3_aws_config="$(mktemp)"
+      cat >"${s3_aws_config}" <<'EOF'
+[default]
+s3 =
+    max_concurrent_requests = 1
+    multipart_threshold = 128MB
+    multipart_chunksize = 64MB
+EOF
+      export AWS_CONFIG_FILE="${s3_aws_config}"
+      trap 'rm -f "${s3_aws_config:-}"' EXIT
+    fi
   fi
 
   s3_acl=()
@@ -83,7 +94,12 @@ if [[ "${has_s3}" == true ]]; then
   fi
 
   s3_cp() {
-    aws s3 cp "$@" "${s3_endpoint[@]}" "${s3_acl[@]}"
+    aws s3 cp "$@" \
+      "${s3_endpoint[@]}" \
+      "${s3_checksum[@]}" \
+      "${s3_acl[@]}" \
+      --cli-connect-timeout 300 \
+      --cli-read-timeout 300
   }
 else
   s3_cp() {

@@ -32,6 +32,8 @@ for arg in "${RELEASE_EXTRA_ARGS[@]}"; do
   esac
 done
 
+release_log_publish_only
+
 if [[ "${RELEASE_SKIP_CHECKS}" != true ]]; then
   echo ">>> Pre-release checks"
   release_run_checks "${root}"

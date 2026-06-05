@@ -14,6 +14,12 @@ release_build_number() {
   bash "$(dirname "${BASH_SOURCE[0]}")/read_pubspec_version.sh" --build
 }
 
+release_log_publish_only() {
+  if [[ "${RELEASE_SKIP_BUILD}" == true && "${RELEASE_PUBLISH}" == true ]]; then
+    echo ">>> Publish only (skipping build and checks; using existing artifacts)"
+  fi
+}
+
 release_load_publish_env() {
   local root="$1"
   local env_file="${root}/.github/scripts/publish_env.local.sh"
@@ -38,8 +44,13 @@ release_parse_common_args() {
         RELEASE_SKIP_CHECKS=true
         shift
         ;;
-      --skip-build | --publish-only)
+      --skip-build)
         RELEASE_SKIP_BUILD=true
+        shift
+        ;;
+      --publish-only)
+        RELEASE_SKIP_BUILD=true
+        RELEASE_SKIP_CHECKS=true
         shift
         ;;
       --publish)

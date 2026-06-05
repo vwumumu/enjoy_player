@@ -39,7 +39,7 @@ Host matrix:
 
 Common options (forwarded to the platform script):
   --skip-checks       Skip flutter analyze / test
-  --publish-only      Skip build; publish existing artifacts
+  --publish-only      Skip build and checks; publish existing artifacts
   --publish           Upload to dl.enjoy.bot (needs S3 env / publish_env.local.*)
   --feeds-only        Build feeds locally (build/update-feeds/) without S3 upload
 
