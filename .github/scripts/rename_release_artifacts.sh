@@ -5,7 +5,7 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "${root}"
 
-version="$("${root}/.github/scripts/read_pubspec_version.sh")"
+version="$(bash "${root}/.github/scripts/read_pubspec_version.sh")"
 prefix="EnjoyPlayer-v${version}"
 
 rename_if_exists() {
