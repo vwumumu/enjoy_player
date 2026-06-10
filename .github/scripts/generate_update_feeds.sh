@@ -34,7 +34,7 @@ sha256_file() {
   fi
 }
 
-declare -A assets=()
+declare -a ASSET_ENTRIES=()
 
 add_asset() {
   local key="$1"
@@ -47,12 +47,25 @@ add_asset() {
   name="$(basename "${file}")"
   sha="$(sha256_file "${file}")"
   url="${base_url}/${version}/${name}"
-  assets["${key}"]="${name}|${url}|${sha}|${file}"
+  ASSET_ENTRIES+=("${key}|${name}|${url}|${sha}|${file}")
 }
 
-key=""
-for key in "${RELEASE_ARTIFACT_KEYS[@]}"; do
-  add_asset "${key}" "${RELEASE_ARTIFACT_PATHS[$key]}"
+asset_entry_for_key() {
+  local want="$1"
+  local entry key
+  for entry in ${ASSET_ENTRIES[@]+"${ASSET_ENTRIES[@]}"}; do
+    key="${entry%%|*}"
+    if [[ "${key}" == "${want}" ]]; then
+      echo "${entry}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+spec=""
+for spec in ${RELEASE_ARTIFACT_SPECS[@]+"${RELEASE_ARTIFACT_SPECS[@]}"}; do
+  add_asset "$(release_spec_key "${spec}")" "$(release_spec_path "${spec}")"
 done
 
 out_dir="${FEED_OUT_DIR:-${root}/build/update-feeds}"
@@ -67,8 +80,9 @@ latest_json="${out_dir}/latest.json"
   echo "  \"notes\": $(json_string "${notes}"),"
   echo '  "assets": {'
   first=true
-  for key in "${!assets[@]}"; do
-    IFS='|' read -r _file url sha _path <<< "${assets[$key]}"
+  entry=""
+  for entry in ${ASSET_ENTRIES[@]+"${ASSET_ENTRIES[@]}"}; do
+    IFS='|' read -r key _file url sha _path <<< "${entry}"
     if [[ "${first}" == true ]]; then first=false; else echo ','; fi
     printf '    "%s": {"url": "%s", "sha256": "%s", "file": "%s"}' \
       "${key}" "${url}" "${sha}" "${_file}"
@@ -100,8 +114,9 @@ pub_date="$(date -u +"%a, %d %b %Y %H:%M:%S +0000")"
   echo '    <description>Enjoy Player direct-download updates</description>'
   echo '    <language>en</language>'
 
-  if [[ -n "${assets[macos]:-}" ]]; then
-    IFS='|' read -r _name url _sha mac_path <<< "${assets[macos]}"
+  mac_asset="$(asset_entry_for_key macos || true)"
+  if [[ -n "${mac_asset}" ]]; then
+    IFS='|' read -r _key _name url _sha mac_path <<< "${mac_asset}"
     mac_len=0
     if [[ -f "${mac_path}" ]]; then
       mac_len="$(wc -c < "${mac_path}" | tr -d ' ')"
@@ -119,8 +134,9 @@ pub_date="$(date -u +"%a, %d %b %Y %H:%M:%S +0000")"
     echo '    </item>'
   fi
 
-  if [[ -n "${assets[windows]:-}" ]]; then
-    IFS='|' read -r _name url _sha win_path <<< "${assets[windows]}"
+  win_asset="$(asset_entry_for_key windows || true)"
+  if [[ -n "${win_asset}" ]]; then
+    IFS='|' read -r _key _name url _sha win_path <<< "${win_asset}"
     win_len=0
     if [[ -f "${win_path}" ]]; then
       win_len="$(wc -c < "${win_path}" | tr -d ' ')"

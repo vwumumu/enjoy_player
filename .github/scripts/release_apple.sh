@@ -25,7 +25,7 @@ MACOS_ONLY=false
 MACOS_APP_PATH="${MACOS_APP_PATH:-build/macos/Build/Products/Release/Enjoy Player.app}"
 
 release_parse_common_args "$@"
-for arg in "${RELEASE_EXTRA_ARGS[@]}"; do
+for arg in ${RELEASE_EXTRA_ARGS[@]+"${RELEASE_EXTRA_ARGS[@]}"}; do
   case "${arg}" in
     --notarize) NOTARIZE=true ;;
     --testflight) UPLOAD_TESTFLIGHT=true ;;
@@ -120,7 +120,7 @@ elif [[ "${NOTARIZE}" == true || "${RELEASE_PUBLISH}" == true ]]; then
     if release_app_has_developer_id_signature "${MACOS_APP_PATH}"; then
       notarize_args+=(--skip-sign)
     fi
-    "${root}/macos/scripts/notarize_release.sh" "${MACOS_APP_PATH}" "${notarize_args[@]}"
+    "${root}/macos/scripts/notarize_release.sh" "${MACOS_APP_PATH}" ${notarize_args[@]+"${notarize_args[@]}"}
   fi
 
   if [[ "${NOTARIZE}" == true ]]; then
@@ -151,4 +151,5 @@ if [[ "${RELEASE_PUBLISH}" == true ]]; then
 fi
 
 release_print_artifacts "${root}" apple
+release_hint_publish "${root}"
 echo "Done."

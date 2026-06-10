@@ -168,7 +168,26 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-Tag pushes always attempt TestFlight upload and macOS notarization (when secrets are configured).
+Tag pushes always attempt TestFlight upload and macOS notarization (when secrets are configured). They also run a **Publish macOS direct-download feeds** step that uploads `EnjoyPlayer-macOS-vX.Y.Z.zip` plus `latest.json` / `appcast.xml` to `dl.enjoy.bot` (S3-compatible storage).
+
+### Optional secrets (S3 / R2 publish on tag push)
+
+| Secret name | Purpose |
+|-------------|---------|
+| `AWS_ACCESS_KEY_ID` | R2 or S3 access key |
+| `AWS_SECRET_ACCESS_KEY` | R2 or S3 secret key |
+| `AWS_ENDPOINT_URL_S3` | e.g. `https://<account-id>.r2.cloudflarestorage.com` |
+| `PUBLISH_BUCKET` | Bucket name (default in scripts: `enjoy-dl`) |
+| `CLOUDFLARE_API_TOKEN` | Optional — purge CDN cache after feed upload |
+| `CLOUDFLARE_ZONE_ID` | Optional — zone for `enjoy.bot` |
+
+Local publish (after a successful notarized build):
+
+```bash
+cp .github/scripts/publish_env.example.sh .github/scripts/publish_env.local.sh
+# edit AWS_* / PUBLISH_* values
+bash .github/scripts/release.sh --platform apple --publish-only --publish
+```
 
 ---
 
@@ -181,6 +200,8 @@ Tag pushes always attempt TestFlight upload and macOS notarization (when secrets
 | *notarytool* auth failed | Re-check API key ID, Issuer ID, and full `.p8` secret content |
 | macOS DYLD / `libz` missing | Run `brew bundle install --file=macos/Brewfile` on runner |
 | Upload skipped | API secrets missing — workflow logs *Skipping TestFlight upload* |
+| S3 publish failed / skipped locally | Run with `--publish` and configure `publish_env.local.sh` (see [packaging.md § Publish](packaging.md#publish-to-dlenjoybot-optional)). After build-only, use `--publish-only --publish`. |
+| `RELEASE_EXTRA_ARGS[@]: unbound variable` on macOS | Fixed in release scripts (Bash 3.2 + `set -u`); update to latest `main`. |
 
 ---
 

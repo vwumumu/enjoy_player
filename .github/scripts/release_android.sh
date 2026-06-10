@@ -18,7 +18,7 @@ BUILD_APK=true
 BUILD_AAB=true
 
 release_parse_common_args "$@"
-for arg in "${RELEASE_EXTRA_ARGS[@]}"; do
+for arg in ${RELEASE_EXTRA_ARGS[@]+"${RELEASE_EXTRA_ARGS[@]}"}; do
   case "${arg}" in
     --no-apk) BUILD_APK=false ;;
     --no-aab) BUILD_AAB=false ;;

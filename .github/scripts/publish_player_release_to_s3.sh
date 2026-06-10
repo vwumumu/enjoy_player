@@ -25,12 +25,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-release_parse_artifact_args "${artifact_argv[@]}"
+release_parse_artifact_args ${artifact_argv[@]+"${artifact_argv[@]}"}
 
 upload_files=()
-key=""
-for key in "${RELEASE_ARTIFACT_KEYS[@]}"; do
-  upload_files+=("${RELEASE_ARTIFACT_PATHS[$key]}")
+spec=""
+for spec in ${RELEASE_ARTIFACT_SPECS[@]+"${RELEASE_ARTIFACT_SPECS[@]}"}; do
+  upload_files+=("$(release_spec_path "${spec}")")
 done
 
 feed_args=()
@@ -39,6 +39,15 @@ release_artifact_argv feed_args
 if [[ ${#upload_files[@]} -eq 0 ]]; then
   echo "No artifacts to publish."
   exit 0
+fi
+
+if [[ "${feeds_only}" != true ]]; then
+  if ! command -v aws >/dev/null 2>&1; then
+    echo "Publish failed: AWS CLI (aws) not found in PATH." >&2
+    echo "Install on macOS: brew install awscli" >&2
+    echo "Install on Windows: winget install Amazon.AWSCLI" >&2
+    exit 1
+  fi
 fi
 
 version="${VERSION:-$(release_version)}"
@@ -95,9 +104,9 @@ EOF
 
   s3_cp() {
     aws s3 cp "$@" \
-      "${s3_endpoint[@]}" \
-      "${s3_checksum[@]}" \
-      "${s3_acl[@]}" \
+      ${s3_endpoint[@]+"${s3_endpoint[@]}"} \
+      ${s3_checksum[@]+"${s3_checksum[@]}"} \
+      ${s3_acl[@]+"${s3_acl[@]}"} \
       --cli-connect-timeout 300 \
       --cli-read-timeout 300
   }
@@ -132,7 +141,7 @@ purge_feed_cache() {
 local_stage="${root}/build/release/${version}"
 mkdir -p "${local_stage}"
 
-for f in "${upload_files[@]}"; do
+for f in ${upload_files[@]+"${upload_files[@]}"}; do
   if [[ ! -f "${f}" ]]; then
     echo "::error::Missing artifact: ${f}" >&2
     exit 1
@@ -145,7 +154,7 @@ for f in "${upload_files[@]}"; do
   fi
 done
 
-for f in "${upload_files[@]}"; do
+for f in ${upload_files[@]+"${upload_files[@]}"}; do
   case "$(basename "${f}")" in
     EnjoyPlayerSetup-v*.exe|*.exe)
       sign_out="$(bash "${root}/.github/scripts/sign_sparkle_enclosure.sh" "${f}" 2>&1)" || true
@@ -173,7 +182,7 @@ if [[ "${feeds_only}" != true && "${has_s3}" == true ]]; then
   fi
 fi
 
-bash "${root}/.github/scripts/generate_update_feeds.sh" "${feed_args[@]}"
+bash "${root}/.github/scripts/generate_update_feeds.sh" ${feed_args[@]+"${feed_args[@]}"}
 unset MERGE_LATEST_JSON MERGE_APPCAST_XML
 if [[ -n "${merge_feed_dir}" ]]; then
   rm -rf "${merge_feed_dir}"
@@ -189,7 +198,7 @@ if [[ "${feeds_only}" == true ]]; then
   serve_version="${serve_player}/${version}"
   rm -rf "${serve_root}"
   mkdir -p "${serve_version}"
-  for f in "${upload_files[@]}"; do
+  for f in ${upload_files[@]+"${upload_files[@]}"}; do
     cp -f "${f}" "${serve_version}/$(basename "${f}")"
   done
   cp -f "${feed_dir}/latest.json" "${serve_player}/latest.json"

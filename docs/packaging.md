@@ -104,7 +104,7 @@ flutter test
     ```
   - **API key** (CI / optional locally): set `APP_STORE_CONNECT_API_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`, and `APP_STORE_CONNECT_API_PRIVATE_KEY` — the release script registers profile `enjoy-notary` automatically when `--notarize` is set
 - **TestFlight upload** (for `--testflight`): same three `APP_STORE_CONNECT_*` env vars
-- **Sparkle auto-update** (before `--publish`): run once on Mac — `dart run auto_updater:generate_keys`, then `bash .github/scripts/verify_sparkle_setup.sh`
+- **Sparkle auto-update** (before `--publish`): run once on Mac — `dart run auto_updater:generate_keys`, **paste the printed `SUPublicEDKey` into [`macos/Runner/Info.plist`](../macos/Runner/Info.plist)** (private key stays in Keychain), then `bash .github/scripts/verify_sparkle_setup.sh`
 
 ### Android signing
 
@@ -122,7 +122,10 @@ flutter test
 
 ### Publish credentials (optional)
 
-Only needed when uploading to `dl.enjoy.bot`. Install **AWS CLI v2** (`winget install Amazon.AWSCLI`).
+Only needed when uploading to `dl.enjoy.bot`. Install **AWS CLI v2**:
+
+- **macOS**: `brew install awscli`
+- **Windows**: `winget install Amazon.AWSCLI`
 
 ```powershell
 # Windows

@@ -72,6 +72,14 @@ else
   warn "Run: brew bundle install --file=macos/Brewfile"
 fi
 
+if [[ -f "${root}/.github/scripts/publish_env.local.sh" ]]; then
+  if command -v aws >/dev/null 2>&1; then
+    ok "aws CLI $(aws --version 2>/dev/null | awk '{print $1}')"
+  else
+    warn "publish_env.local.sh present but aws CLI missing (brew install awscli)"
+  fi
+fi
+
 if [[ "${errors}" -gt 0 ]]; then
   echo "${errors} check(s) failed, ${warns} warning(s)." >&2
   exit 1

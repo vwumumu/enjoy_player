@@ -18,7 +18,7 @@ cd "${root}"
 BUILD_INSTALLER=true
 
 release_parse_common_args "$@"
-for arg in "${RELEASE_EXTRA_ARGS[@]}"; do
+for arg in ${RELEASE_EXTRA_ARGS[@]+"${RELEASE_EXTRA_ARGS[@]}"}; do
   case "${arg}" in
     --no-installer) BUILD_INSTALLER=false ;;
     -h | --help)

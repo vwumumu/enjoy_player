@@ -37,13 +37,13 @@ if [[ ${#publish_args[@]} -eq 0 ]]; then
 fi
 
 if [[ "${RELEASE_FEEDS_ONLY}" == true ]]; then
-  publish_args=(--feeds-only "${publish_args[@]}")
+  publish_args=(--feeds-only ${publish_args[@]+"${publish_args[@]}"})
 else
   export RELEASE_REQUIRE_S3=1
 fi
 
 echo ">>> Publish all available artifacts"
-bash "${root}/.github/scripts/publish_player_release_to_s3.sh" "${publish_args[@]}"
+bash "${root}/.github/scripts/publish_player_release_to_s3.sh" ${publish_args[@]+"${publish_args[@]}"}
 
 release_print_artifacts "${root}" all
 echo "Done."

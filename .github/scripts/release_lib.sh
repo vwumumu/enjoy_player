@@ -2,6 +2,43 @@
 # Shared helpers for local + CI release scripts.
 set -euo pipefail
 
+# macOS ships Bash 3.2: empty "${array[@]}" is fatal with set -u. Use these helpers
+# instead of associative arrays (declare -A) or namerefs (local -n).
+RELEASE_ARTIFACT_SPECS=()
+
+release_spec_key() {
+  echo "${1%%|*}"
+}
+
+release_spec_path() {
+  echo "${1#*|}"
+}
+
+release_spec_path_for_key() {
+  local want="$1"
+  local spec key
+  for spec in ${RELEASE_ARTIFACT_SPECS[@]+"${RELEASE_ARTIFACT_SPECS[@]}"}; do
+    key="$(release_spec_key "${spec}")"
+    if [[ "${key}" == "${want}" ]]; then
+      release_spec_path "${spec}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+release_hint_publish() {
+  local root="$1"
+  local zip
+  zip="$(release_macos_zip_path "${root}")"
+  if [[ -f "${zip}" && "${RELEASE_PUBLISH:-}" != true ]]; then
+    echo ""
+    echo "Publish skipped. Upload to dl.enjoy.bot with:"
+    echo "  bash .github/scripts/release.sh --platform apple --publish-only --publish"
+    echo "Configure credentials: .github/scripts/publish_env.example.sh → publish_env.local.sh"
+  fi
+}
+
 release_repo_root() {
   cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd
 }
@@ -42,26 +79,28 @@ release_macos_zip_path() {
 # Populate publish argv with every versioned artifact that exists on disk.
 release_collect_publish_artifact_args() {
   local root="$1"
-  local -n _out=$2
+  local out_name="$2"
+  local -a out=()
   local f abi
-  _out=()
 
   f="$(release_windows_installer_path "${root}")"
   if [[ -f "${f}" ]]; then
-    _out+=(--windows-installer "${f}")
+    out+=(--windows-installer "${f}")
   fi
 
   for abi in arm64-v8a armeabi-v7a x86_64; do
     f="$(release_android_apk_path "${root}" "${abi}")"
     if [[ -f "${f}" ]]; then
-      _out+=(--android-apk "android_${abi//-/_}" "${f}")
+      out+=(--android-apk "android_${abi//-/_}" "${f}")
     fi
   done
 
   f="$(release_macos_zip_path "${root}")"
   if [[ -f "${f}" ]]; then
-    _out+=(--macos-zip "${f}")
+    out+=(--macos-zip "${f}")
   fi
+
+  eval "${out_name}=(\"\${out[@]}\")"
 }
 
 release_build_number() {
@@ -136,26 +175,22 @@ release_parse_common_args() {
   done
 }
 
-# Parse --windows-installer / --macos-zip / --android-apk into RELEASE_ARTIFACT_* globals.
+# Parse --windows-installer / --macos-zip / --android-apk into RELEASE_ARTIFACT_SPECS.
 release_parse_artifact_args() {
-  RELEASE_ARTIFACT_KEYS=()
-  declare -gA RELEASE_ARTIFACT_PATHS=()
+  RELEASE_ARTIFACT_SPECS=()
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --windows-installer)
-        RELEASE_ARTIFACT_KEYS+=(windows)
-        RELEASE_ARTIFACT_PATHS[windows]="$2"
+        RELEASE_ARTIFACT_SPECS+=("windows|$2")
         shift 2
         ;;
       --macos-zip)
-        RELEASE_ARTIFACT_KEYS+=(macos)
-        RELEASE_ARTIFACT_PATHS[macos]="$2"
+        RELEASE_ARTIFACT_SPECS+=("macos|$2")
         shift 2
         ;;
       --android-apk)
-        RELEASE_ARTIFACT_KEYS+=("$2")
-        RELEASE_ARTIFACT_PATHS["$2"]="$3"
+        RELEASE_ARTIFACT_SPECS+=("$2|$3")
         shift 3
         ;;
       *)
@@ -168,22 +203,25 @@ release_parse_artifact_args() {
 
 # Reconstruct artifact argv (for forwarding to generate_update_feeds.sh).
 release_artifact_argv() {
-  local -n _out=$1
-  _out=()
-  local key
-  for key in "${RELEASE_ARTIFACT_KEYS[@]}"; do
+  local out_name="$1"
+  local -a out=()
+  local spec key path
+  for spec in ${RELEASE_ARTIFACT_SPECS[@]+"${RELEASE_ARTIFACT_SPECS[@]}"}; do
+    key="$(release_spec_key "${spec}")"
+    path="$(release_spec_path "${spec}")"
     case "${key}" in
       windows)
-        _out+=(--windows-installer "${RELEASE_ARTIFACT_PATHS[windows]}")
+        out+=(--windows-installer "${path}")
         ;;
       macos)
-        _out+=(--macos-zip "${RELEASE_ARTIFACT_PATHS[macos]}")
+        out+=(--macos-zip "${path}")
         ;;
       *)
-        _out+=(--android-apk "${key}" "${RELEASE_ARTIFACT_PATHS[$key]}")
+        out+=(--android-apk "${key}" "${path}")
         ;;
     esac
   done
+  eval "${out_name}=(\"\${out[@]}\")"
 }
 
 # Stale pubspec.yaml under build/release/ (e.g. from local feed staging) breaks
