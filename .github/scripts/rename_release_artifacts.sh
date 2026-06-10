@@ -14,30 +14,41 @@ rename_if_exists() {
   if [[ -f "${src}" ]]; then
     mv -f "${src}" "${dest}"
     echo "Renamed: $(basename "${dest}")"
+    return 0
   fi
+  return 1
+}
+
+rename_first_match() {
+  local dest="$1"
+  shift
+  local candidate
+  for candidate in "$@"; do
+    if rename_if_exists "${candidate}" "${dest}"; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 platform="${1:-all}"
 
 rename_android() {
-  local aab_dir="build/app/outputs/bundle/storeRelease"
-  rename_if_exists "${aab_dir}/app-store-release.aab" "${aab_dir}/${prefix}.aab"
-
-  # Legacy unflavored bundle output.
-  if [[ ! -f "${aab_dir}/${prefix}.aab" ]]; then
-    rename_if_exists "build/app/outputs/bundle/release/app-release.aab" \
-      "build/app/outputs/bundle/release/${prefix}.aab"
-  fi
+  local aab_dest="build/app/outputs/bundle/release/${prefix}.aab"
+  mkdir -p "$(dirname "${aab_dest}")"
+  rename_first_match "${aab_dest}" \
+    "build/app/outputs/bundle/storeRelease/app-store-release.aab" \
+    "build/app/outputs/bundle/storeRelease/app-release.aab" \
+    "build/app/outputs/bundle/release/app-release.aab"
 
   local apk_dir="build/app/outputs/flutter-apk"
-  rename_if_exists "${apk_dir}/app-direct-arm64-v8a-release.apk" "${apk_dir}/${prefix}-arm64-v8a.apk"
-  rename_if_exists "${apk_dir}/app-direct-armeabi-v7a-release.apk" "${apk_dir}/${prefix}-armeabi-v7a.apk"
-  rename_if_exists "${apk_dir}/app-direct-x86_64-release.apk" "${apk_dir}/${prefix}-x86_64.apk"
-
-  # Legacy unflavored split APK names.
-  rename_if_exists "${apk_dir}/app-arm64-v8a-release.apk" "${apk_dir}/${prefix}-arm64-v8a.apk"
-  rename_if_exists "${apk_dir}/app-armeabi-v7a-release.apk" "${apk_dir}/${prefix}-armeabi-v7a.apk"
-  rename_if_exists "${apk_dir}/app-x86_64-release.apk" "${apk_dir}/${prefix}-x86_64.apk"
+  local abi
+  for abi in arm64-v8a armeabi-v7a x86_64; do
+    rename_first_match "${apk_dir}/${prefix}-${abi}.apk" \
+      "${apk_dir}/app-${abi}-direct-release.apk" \
+      "${apk_dir}/app-direct-${abi}-release.apk" \
+      "${apk_dir}/app-${abi}-release.apk"
+  done
 }
 
 rename_apple() {

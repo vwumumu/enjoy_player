@@ -7,7 +7,7 @@
 #   pwsh ./release.ps1 -Publish                 # build + upload to dl.enjoy.bot
 #   pwsh ./release.ps1 -FeedsOnly               # build + local feeds (no S3)
 #   pwsh ./release.ps1 -SkipChecks              # faster iteration
-#   pwsh ./release.ps1 -PublishOnly -Publish    # re-upload existing artifacts
+#   pwsh ./release.ps1 -PublishOnly -Publish    # re-upload all built artifacts (any platform)
 #
 param(
   [ValidateSet('windows', 'android', 'apple')]
@@ -62,15 +62,19 @@ if (Test-Path $envFile) {
 }
 
 $bashExe = Resolve-ReleaseBash
-$bashArgs = @('.github/scripts/release.sh', '--platform', $Platform)
+$effectivePlatform = $Platform
+if ($PublishOnly -and ($Publish -or $FeedsOnly)) {
+  $effectivePlatform = 'all'
+}
+$bashArgs = @('.github/scripts/release.sh', '--platform', $effectivePlatform)
 
 if ($SkipChecks) { $bashArgs += '--skip-checks' }
 if ($PublishOnly) { $bashArgs += '--publish-only' }
 if ($Publish) { $bashArgs += '--publish' }
 if ($FeedsOnly) { $bashArgs += '--feeds-only' }
-if ($NoInstaller) { $bashArgs += '--no-installer' }
+if ($NoInstaller -and $effectivePlatform -eq 'windows') { $bashArgs += '--no-installer' }
 
-Write-Host ">>> release.ps1 -Platform $Platform $bashExe $($bashArgs -join ' ')"
+Write-Host ">>> release.ps1 -Platform $effectivePlatform $bashExe $($bashArgs -join ' ')"
 
 Push-Location $RepoRoot
 try {

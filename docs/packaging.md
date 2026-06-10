@@ -199,7 +199,7 @@ Version comes from `pubspec.yaml` (`version: 0.1.0+1` → `0.1.0` in filenames).
 | Platform | Output (example at `0.1.0`) |
 |----------|-------------------------------|
 | Windows installer | `build/windows/installer/EnjoyPlayerSetup-v0.1.0.exe` |
-| Android (Play) | `build/app/outputs/bundle/storeRelease/EnjoyPlayer-v0.1.0.aab` |
+| Android (Play) | `build/app/outputs/bundle/release/EnjoyPlayer-v0.1.0.aab` |
 | Android (sideload) | `build/app/outputs/flutter-apk/EnjoyPlayer-v0.1.0-arm64-v8a.apk` (+ `armeabi-v7a`, `x86_64`) |
 | iOS | `build/ios/ipa/EnjoyPlayer-v0.1.0.ipa` |
 | macOS | `EnjoyPlayer-macOS-v0.1.0.zip` (repo root) |
@@ -233,12 +233,15 @@ Skip this until local builds work. When ready:
 
 ```powershell
 pwsh ./release.ps1 -Publish             # Windows: build + upload
-pwsh ./release.ps1 -PublishOnly -Publish # re-upload existing installer (no rebuild)
+pwsh ./release.ps1 -PublishOnly -Publish # upload every built artifact (Windows/Android/macOS)
 ```
 
-```bash
-bash .github/scripts/release.sh --platform android --publish
+Per-platform build + publish:
+
+```powershell
+pwsh ./release.ps1 -Platform android -Publish
 bash .github/scripts/release.sh --platform apple --publish-only --publish
+bash .github/scripts/release.sh --platform all --publish-only --publish
 ```
 
 **Test auto-update locally (no S3):**

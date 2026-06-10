@@ -7,6 +7,7 @@ packages=(
   cmake
   curl
   git
+  jq
   ninja-build
   pkg-config
   unzip

@@ -160,7 +160,24 @@ for f in "${upload_files[@]}"; do
   esac
 done
 
+merge_feed_dir=""
+if [[ "${feeds_only}" != true && "${has_s3}" == true ]]; then
+  merge_feed_dir="$(mktemp -d)"
+  s3_cp "s3://${bucket}/${prefix}/latest.json" "${merge_feed_dir}/latest.json" 2>/dev/null || true
+  s3_cp "s3://${bucket}/${prefix}/appcast.xml" "${merge_feed_dir}/appcast.xml" 2>/dev/null || true
+  if [[ -f "${merge_feed_dir}/latest.json" ]]; then
+    export MERGE_LATEST_JSON="${merge_feed_dir}/latest.json"
+  fi
+  if [[ -f "${merge_feed_dir}/appcast.xml" ]]; then
+    export MERGE_APPCAST_XML="${merge_feed_dir}/appcast.xml"
+  fi
+fi
+
 bash "${root}/.github/scripts/generate_update_feeds.sh" "${feed_args[@]}"
+unset MERGE_LATEST_JSON MERGE_APPCAST_XML
+if [[ -n "${merge_feed_dir}" ]]; then
+  rm -rf "${merge_feed_dir}"
+fi
 
 feed_dir="${FEED_OUT_DIR:-${root}/build/update-feeds}"
 cp -f "${feed_dir}/latest.json" "${local_stage}/latest.json"

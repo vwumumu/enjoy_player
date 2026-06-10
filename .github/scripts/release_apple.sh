@@ -126,8 +126,7 @@ elif [[ "${NOTARIZE}" == true || "${RELEASE_PUBLISH}" == true ]]; then
   if [[ "${NOTARIZE}" == true ]]; then
     release_pack_macos_zip "${root}" "${MACOS_APP_PATH}"
   else
-    version="$(release_version)"
-    zip="${root}/EnjoyPlayer-macOS-v${version}.zip"
+    zip="$(release_macos_zip_path "${root}")"
     if [[ ! -f "${zip}" ]]; then
       release_pack_macos_zip "${root}" "${MACOS_APP_PATH}"
     fi
@@ -136,8 +135,7 @@ fi
 
 if [[ "${RELEASE_PUBLISH}" == true ]]; then
   release_load_publish_env "${root}"
-  version="$(release_version)"
-  zip="${root}/EnjoyPlayer-macOS-v${version}.zip"
+  zip="$(release_macos_zip_path "${root}")"
   if [[ ! -f "${zip}" ]]; then
     echo "Missing macOS zip: ${zip}" >&2
     exit 1

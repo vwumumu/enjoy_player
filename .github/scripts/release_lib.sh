@@ -21,7 +21,7 @@ release_android_aab_path() {
   local root="$1"
   local version
   version="$(release_version)"
-  echo "${root}/build/app/outputs/bundle/storeRelease/EnjoyPlayer-v${version}.aab"
+  echo "${root}/build/app/outputs/bundle/release/EnjoyPlayer-v${version}.aab"
 }
 
 release_android_apk_path() {
@@ -30,6 +30,38 @@ release_android_apk_path() {
   local version
   version="$(release_version)"
   echo "${root}/build/app/outputs/flutter-apk/EnjoyPlayer-v${version}-${abi}.apk"
+}
+
+release_macos_zip_path() {
+  local root="$1"
+  local version
+  version="$(release_version)"
+  echo "${root}/EnjoyPlayer-macOS-v${version}.zip"
+}
+
+# Populate publish argv with every versioned artifact that exists on disk.
+release_collect_publish_artifact_args() {
+  local root="$1"
+  local -n _out=$2
+  local f abi
+  _out=()
+
+  f="$(release_windows_installer_path "${root}")"
+  if [[ -f "${f}" ]]; then
+    _out+=(--windows-installer "${f}")
+  fi
+
+  for abi in arm64-v8a armeabi-v7a x86_64; do
+    f="$(release_android_apk_path "${root}" "${abi}")"
+    if [[ -f "${f}" ]]; then
+      _out+=(--android-apk "android_${abi//-/_}" "${f}")
+    fi
+  done
+
+  f="$(release_macos_zip_path "${root}")"
+  if [[ -f "${f}" ]]; then
+    _out+=(--macos-zip "${f}")
+  fi
 }
 
 release_build_number() {
@@ -280,6 +312,19 @@ release_print_artifacts() {
         ls -1 "${root}/build/ios/ipa/"EnjoyPlayer-v*.ipa || true
       compgen -G "${root}/EnjoyPlayer-macOS-v"*.zip >/dev/null 2>&1 &&
         ls -1 "${root}/"EnjoyPlayer-macOS-v*.zip || true
+      ;;
+    all)
+      local installer aab apk abi zip
+      installer="$(release_windows_installer_path "${root}")"
+      [[ -f "${installer}" ]] && echo "${installer}" || true
+      aab="$(release_android_aab_path "${root}")"
+      [[ -f "${aab}" ]] && echo "${aab}" || true
+      for abi in arm64-v8a armeabi-v7a x86_64; do
+        apk="$(release_android_apk_path "${root}" "${abi}")"
+        [[ -f "${apk}" ]] && echo "${apk}" || true
+      done
+      zip="$(release_macos_zip_path "${root}")"
+      [[ -f "${zip}" ]] && echo "${zip}" || true
       ;;
   esac
   local feed_dir="${root}/build/update-feeds"

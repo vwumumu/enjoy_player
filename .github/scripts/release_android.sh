@@ -71,7 +71,7 @@ if [[ "${RELEASE_SKIP_BUILD}" != true ]]; then
     aab="$(release_android_aab_path "${root}")"
     if [[ ! -f "${aab}" ]]; then
       echo "Expected Play AAB not found at ${aab} after rename." >&2
-      echo "Check build/app/outputs/bundle/storeRelease/ for app-store-release.aab." >&2
+      echo "Check build/app/outputs/bundle/release/ for app-release.aab." >&2
       exit 1
     fi
   fi
@@ -80,7 +80,7 @@ if [[ "${RELEASE_SKIP_BUILD}" != true ]]; then
     arm64_apk="$(release_android_apk_path "${root}" "arm64-v8a")"
     if [[ ! -f "${arm64_apk}" ]]; then
       echo "Expected sideload APK not found at ${arm64_apk} after rename." >&2
-      echo "Check build/app/outputs/flutter-apk/ for app-direct-*-release.apk outputs." >&2
+      echo "Check build/app/outputs/flutter-apk/ for app-*-direct-release.apk outputs." >&2
       exit 1
     fi
   fi

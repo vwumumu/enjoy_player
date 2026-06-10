@@ -17,6 +17,15 @@ base_url="${ENJOY_PLAYER_DL_BASE:-https://dl.enjoy.bot/player}"
 min_supported="${MIN_SUPPORTED_VERSION:-${version}}"
 notes="${RELEASE_NOTES:-}"
 
+json_string() {
+  local s="${1//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '"%s"' "${s}"
+}
+
 sha256_file() {
   if command -v sha256sum >/dev/null 2>&1; then
     sha256sum "$1" | awk '{print $1}'
@@ -38,7 +47,7 @@ add_asset() {
   name="$(basename "${file}")"
   sha="$(sha256_file "${file}")"
   url="${base_url}/${version}/${name}"
-  assets["${key}"]="${name}|${url}|${sha}"
+  assets["${key}"]="${name}|${url}|${sha}|${file}"
 }
 
 key=""
@@ -55,19 +64,27 @@ latest_json="${out_dir}/latest.json"
   echo "  \"version\": \"${version}\","
   echo "  \"build\": ${build},"
   echo "  \"minSupportedVersion\": \"${min_supported}\","
-  echo "  \"notes\": $(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "${notes}"),"
+  echo "  \"notes\": $(json_string "${notes}"),"
   echo '  "assets": {'
   first=true
   for key in "${!assets[@]}"; do
-    IFS='|' read -r _file url sha <<< "${assets[$key]}"
+    IFS='|' read -r _file url sha _path <<< "${assets[$key]}"
     if [[ "${first}" == true ]]; then first=false; else echo ','; fi
     printf '    "%s": {"url": "%s", "sha256": "%s", "file": "%s"}' \
-      "${key}" "${url}" "${sha}" "$(basename "${_file}")"
+      "${key}" "${url}" "${sha}" "${_file}"
   done
   echo
   echo '  }'
   echo '}'
 } > "${latest_json}"
+
+if [[ -n "${MERGE_LATEST_JSON:-}" && -f "${MERGE_LATEST_JSON}" ]]; then
+  merged_json="${out_dir}/latest.merged.json"
+  bash "${root}/.github/scripts/merge_latest_json.sh" \
+    "${latest_json}" "${MERGE_LATEST_JSON}" "${merged_json}"
+  mv -f "${merged_json}" "${latest_json}"
+  echo "Merged remote latest.json assets for version ${version}."
+fi
 
 appcast="${out_dir}/appcast.xml"
 sparkle_mac_sig="${SPARKLE_ED_SIGNATURE_MACOS:-}"
@@ -84,10 +101,10 @@ pub_date="$(date -u +"%a, %d %b %Y %H:%M:%S +0000")"
   echo '    <language>en</language>'
 
   if [[ -n "${assets[macos]:-}" ]]; then
-    IFS='|' read -r file url sha <<< "${assets[macos]}"
+    IFS='|' read -r _name url _sha mac_path <<< "${assets[macos]}"
     mac_len=0
-    if [[ -f "${file}" ]]; then
-      mac_len="$(wc -c < "${file}" | tr -d ' ')"
+    if [[ -f "${mac_path}" ]]; then
+      mac_len="$(wc -c < "${mac_path}" | tr -d ' ')"
     fi
     echo '    <item>'
     echo "      <title>Version ${version}</title>"
@@ -103,10 +120,10 @@ pub_date="$(date -u +"%a, %d %b %Y %H:%M:%S +0000")"
   fi
 
   if [[ -n "${assets[windows]:-}" ]]; then
-    IFS='|' read -r file url sha <<< "${assets[windows]}"
+    IFS='|' read -r _name url _sha win_path <<< "${assets[windows]}"
     win_len=0
-    if [[ -f "${file}" ]]; then
-      win_len="$(wc -c < "${file}" | tr -d ' ')"
+    if [[ -f "${win_path}" ]]; then
+      win_len="$(wc -c < "${win_path}" | tr -d ' ')"
     fi
     echo '    <item>'
     echo "      <title>Version ${version}</title>"
@@ -124,6 +141,14 @@ pub_date="$(date -u +"%a, %d %b %Y %H:%M:%S +0000")"
   echo '  </channel>'
   echo '</rss>'
 } > "${appcast}"
+
+if [[ -n "${MERGE_APPCAST_XML:-}" && -f "${MERGE_APPCAST_XML}" ]]; then
+  merged_appcast="${out_dir}/appcast.merged.xml"
+  bash "${root}/.github/scripts/merge_appcast_xml.sh" \
+    "${appcast}" "${MERGE_APPCAST_XML}" "${merged_appcast}" "${version}"
+  mv -f "${merged_appcast}" "${appcast}"
+  echo "Merged remote appcast.xml items for version ${version}."
+fi
 
 echo "Wrote ${latest_json}"
 echo "Wrote ${appcast}"

@@ -6,6 +6,7 @@
 #   bash .github/scripts/release.sh --platform android          # Linux or Git Bash
 #   bash .github/scripts/release.sh --platform apple --notarize # macOS only
 #   bash .github/scripts/release.sh --platform windows --publish
+#   bash .github/scripts/release.sh --platform all --publish-only --publish
 #   bash .github/scripts/release.sh --platform windows --feeds-only
 #
 # From repo root on Windows (loads publish_env.local.ps1 when present):
@@ -30,12 +31,13 @@ while [[ $# -gt 0 ]]; do
 Enjoy Player release (shared local + CI logic)
 See docs/packaging.md for the full runbook.
 
-  bash .github/scripts/release.sh --platform <windows|android|apple> [options]
+  bash .github/scripts/release.sh --platform <windows|android|apple|all> [options]
 
 Host matrix:
   Windows host  → --platform windows   (or: pwsh ./release.ps1)
   Windows/Linux → --platform android   (or: pwsh ./release.ps1 -Platform android)
   macOS host    → --platform apple     (requires macOS)
+  Any host      → --platform all --publish-only --publish  (upload every built artifact)
 
 Common options (forwarded to the platform script):
   --skip-checks       Skip flutter analyze / test
@@ -69,11 +71,14 @@ EOF
 done
 
 if [[ -z "${PLATFORM}" ]]; then
-  echo "Missing --platform (windows|android|apple). Try --help." >&2
+  echo "Missing --platform (windows|android|apple|all). Try --help." >&2
   exit 1
 fi
 
 case "${PLATFORM}" in
+  all)
+    exec bash "${scripts}/release_publish.sh" "${ARGS[@]}"
+    ;;
   windows)
     exec bash "${scripts}/release_windows.sh" "${ARGS[@]}"
     ;;
