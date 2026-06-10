@@ -55,9 +55,9 @@ fi
 
 if [[ "${RELEASE_PUBLISH}" == true ]]; then
   release_load_publish_env "${root}"
-  installer="$(ls -1 "${root}/build/windows/installer/"EnjoyPlayerSetup-v*.exe 2>/dev/null | head -1 || true)"
-  if [[ -z "${installer}" ]]; then
-    echo "No installer at build/windows/installer/EnjoyPlayerSetup-v*.exe" >&2
+  installer="$(release_windows_installer_path "${root}")"
+  if [[ ! -f "${installer}" ]]; then
+    echo "No installer at ${installer} (expected pubspec version $(release_version))" >&2
     exit 1
   fi
   publish_args=(--windows-installer "${installer}")

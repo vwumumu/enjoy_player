@@ -42,7 +42,16 @@ fi
 
 if [[ "${RELEASE_SKIP_BUILD}" != true ]]; then
   if [[ -f "${root}/.github/scripts/setup_android_signing.sh" ]]; then
-    bash "${root}/.github/scripts/setup_android_signing.sh" || true
+    if ! bash "${root}/.github/scripts/setup_android_signing.sh"; then
+      if [[ -f "${root}/android/key.properties" ]]; then
+        echo "Using existing android/key.properties (signing setup skipped)."
+      elif [[ -n "${GITHUB_ACTIONS:-}" || "${RELEASE_PUBLISH}" == true ]]; then
+        echo "Android signing setup failed; CI/publish requires a release keystore." >&2
+        exit 1
+      else
+        echo "WARNING: No release keystore; APK/AAB will be debug-signed." >&2
+      fi
+    fi
   fi
 
   if [[ "${BUILD_AAB}" == true ]]; then
@@ -57,16 +66,32 @@ if [[ "${RELEASE_SKIP_BUILD}" != true ]]; then
   fi
 
   bash "${root}/.github/scripts/rename_release_artifacts.sh" android
+
+  if [[ "${BUILD_AAB}" == true ]]; then
+    aab="$(release_android_aab_path "${root}")"
+    if [[ ! -f "${aab}" ]]; then
+      echo "Expected Play AAB not found at ${aab} after rename." >&2
+      echo "Check build/app/outputs/bundle/storeRelease/ for app-store-release.aab." >&2
+      exit 1
+    fi
+  fi
+
+  if [[ "${BUILD_APK}" == true ]]; then
+    arm64_apk="$(release_android_apk_path "${root}" "arm64-v8a")"
+    if [[ ! -f "${arm64_apk}" ]]; then
+      echo "Expected sideload APK not found at ${arm64_apk} after rename." >&2
+      echo "Check build/app/outputs/flutter-apk/ for app-direct-*-release.apk outputs." >&2
+      exit 1
+    fi
+  fi
 fi
 
 if [[ "${RELEASE_PUBLISH}" == true ]]; then
   release_load_publish_env "${root}"
-  version="$(release_version)"
-  prefix="EnjoyPlayer-v${version}"
   apk_dir="${root}/build/app/outputs/flutter-apk"
   publish_args=()
   for abi in arm64-v8a armeabi-v7a x86_64; do
-    f="${apk_dir}/${prefix}-${abi}.apk"
+    f="$(release_android_apk_path "${root}" "${abi}")"
     if [[ -f "${f}" ]]; then
       publish_args+=(--android-apk "android_${abi//-/_}" "${f}")
     fi

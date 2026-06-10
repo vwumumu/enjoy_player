@@ -90,7 +90,7 @@ sdkmanager "platforms;android-35" "build-tools;35.0.0"
 2. GitHub → **Actions** → **Release Android** → **Run workflow**.
 3. Toggle **Also build release APK** as needed.
 4. Collect outputs from the runner workspace, or enable **Publish** to upload to dl.enjoy.bot:
-   - `build/app/outputs/bundle/release/EnjoyPlayer-vX.Y.Z.aab`
+   - `build/app/outputs/bundle/storeRelease/EnjoyPlayer-vX.Y.Z.aab`
    - `build/app/outputs/flutter-apk/EnjoyPlayer-vX.Y.Z-*.apk` (when APK step ran)
 
 ### Tag release

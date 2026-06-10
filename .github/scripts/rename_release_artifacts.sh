@@ -20,14 +20,21 @@ rename_if_exists() {
 platform="${1:-all}"
 
 rename_android() {
-  local aab_dir="build/app/outputs/bundle/release"
-  if compgen -G "${aab_dir}/*.aab" >/dev/null; then
-    local aab
-    aab="$(ls -1 "${aab_dir}"/*.aab | head -1)"
-    rename_if_exists "${aab}" "${aab_dir}/${prefix}.aab"
+  local aab_dir="build/app/outputs/bundle/storeRelease"
+  rename_if_exists "${aab_dir}/app-store-release.aab" "${aab_dir}/${prefix}.aab"
+
+  # Legacy unflavored bundle output.
+  if [[ ! -f "${aab_dir}/${prefix}.aab" ]]; then
+    rename_if_exists "build/app/outputs/bundle/release/app-release.aab" \
+      "build/app/outputs/bundle/release/${prefix}.aab"
   fi
 
   local apk_dir="build/app/outputs/flutter-apk"
+  rename_if_exists "${apk_dir}/app-direct-arm64-v8a-release.apk" "${apk_dir}/${prefix}-arm64-v8a.apk"
+  rename_if_exists "${apk_dir}/app-direct-armeabi-v7a-release.apk" "${apk_dir}/${prefix}-armeabi-v7a.apk"
+  rename_if_exists "${apk_dir}/app-direct-x86_64-release.apk" "${apk_dir}/${prefix}-x86_64.apk"
+
+  # Legacy unflavored split APK names.
   rename_if_exists "${apk_dir}/app-arm64-v8a-release.apk" "${apk_dir}/${prefix}-arm64-v8a.apk"
   rename_if_exists "${apk_dir}/app-armeabi-v7a-release.apk" "${apk_dir}/${prefix}-armeabi-v7a.apk"
   rename_if_exists "${apk_dir}/app-x86_64-release.apk" "${apk_dir}/${prefix}-x86_64.apk"

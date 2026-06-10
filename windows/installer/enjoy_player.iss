@@ -23,7 +23,7 @@ OutputBaseFilename=EnjoyPlayerSetup-v{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Languages]
