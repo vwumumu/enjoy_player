@@ -1,6 +1,8 @@
 /// Shared subscribe / unsubscribe actions for Discover UI.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +19,18 @@ Future<void> subscribeRecommendedChannel(
   final l10n = AppLocalizations.of(context)!;
   try {
     await ref.read(discoverRepositoryProvider).subscribeRecommended(channel);
+  } catch (_) {
+    if (context.mounted) {
+      AppNotice.error(context, l10n.discoverSubscribeFailed);
+    }
+    return;
+  }
+
+  // Let the subscription stream rebuild finish before refresh + notice.
+  await Future<void>.delayed(Duration.zero);
+  if (!context.mounted) return;
+
+  try {
     await ref.read(discoverRefreshStateProvider.notifier).refresh(force: true);
     if (context.mounted) {
       AppNotice.success(context, l10n.discoverSubscribed);

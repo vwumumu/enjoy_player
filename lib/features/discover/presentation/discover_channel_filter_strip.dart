@@ -3,10 +3,10 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:enjoy_player/core/interaction/horizontal_drag_scroll_behavior.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -66,16 +66,9 @@ class _DiscoverChannelFilterStripState
       data: (subs) {
         return SizedBox(
           height: DiscoverChannelFilterStrip.rowHeight,
-          child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(
-              dragDevices: {
-                PointerDeviceKind.touch,
-                PointerDeviceKind.mouse,
-                PointerDeviceKind.trackpad,
-                PointerDeviceKind.stylus,
-              },
-            ),
-            child: Scrollbar(
+            child: ScrollConfiguration(
+              behavior: const HorizontalDragScrollBehavior(),
+              child: Scrollbar(
               controller: _scrollController,
               interactive: true,
               notificationPredicate: (n) => n.metrics.axis == Axis.horizontal,

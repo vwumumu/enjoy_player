@@ -3,10 +3,10 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:enjoy_player/core/interaction/horizontal_drag_scroll_behavior.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -75,14 +75,7 @@ class _DiscoverRecommendedAvatarStripState
     return SizedBox(
       height: DiscoverRecommendedAvatarStrip.rowHeight,
       child: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(
-          dragDevices: {
-            PointerDeviceKind.touch,
-            PointerDeviceKind.mouse,
-            PointerDeviceKind.trackpad,
-            PointerDeviceKind.stylus,
-          },
-        ),
+        behavior: const HorizontalDragScrollBehavior(),
         child: Scrollbar(
           controller: _scrollController,
           interactive: true,

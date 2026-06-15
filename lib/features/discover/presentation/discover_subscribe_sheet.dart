@@ -124,6 +124,8 @@ Future<void> _submit(
   setState(() {});
   try {
     await ref.read(discoverRepositoryProvider).subscribeFromUserInput(input);
+    await Future<void>.delayed(Duration.zero);
+    if (!context.mounted) return;
     await ref.read(discoverRefreshStateProvider.notifier).refresh(force: true);
     if (!context.mounted) return;
     Navigator.pop(context);
@@ -138,6 +140,8 @@ Future<void> _submit(
     }
   } finally {
     onEnd();
-    setState(() {});
+    if (context.mounted) {
+      setState(() {});
+    }
   }
 }
