@@ -1,0 +1,31 @@
+# Security headers applied to all responses
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://dl.enjoy.bot; font-src 'self'; frame-ancestors 'none'
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+# HTML: always revalidate so users see the latest links
+/index.html
+  Cache-Control: no-cache, must-revalidate
+
+# Static assets: moderate TTL (no build-time fingerprinting, so not immutable)
+/styles.css
+  Cache-Control: public, max-age=3600
+
+/main.js
+  Cache-Control: public, max-age=3600
+
+/config.js
+  Cache-Control: public, max-age=3600
+
+/logo.svg
+  Cache-Control: public, max-age=86400, immutable
+
+/og-image.svg
+  Cache-Control: public, max-age=86400, immutable
+
+# Manifest proxy: edge-side caching is set by the Function; browser gets 5 min
+/api/latest
+  Cache-Control: public, max-age=300, stale-while-revalidate=600

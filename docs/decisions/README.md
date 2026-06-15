@@ -47,3 +47,4 @@ Trade-offs, follow-up work, risks.
 | [0021](0021-youtube-discover-rss.md) | YouTube discovery via RSS feeds and local channel subscriptions |
 | [0022](0022-unified-library-navigation.md) | Unified Library navigation — local + cloud source switch |
 | [0023](0023-app-update-distribution.md) | App update distribution — store no-op, direct feeds on dl.enjoy.bot |
+| [0024](0024-download-landing-page.md) | Download landing page — static site on Cloudflare Pages at get.enjoy.bot |

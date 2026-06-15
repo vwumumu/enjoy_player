@@ -1,0 +1,295 @@
+/* ── Variables ────────────────────────────────────────────────── */
+:root {
+  --brand-from:   #4797F5;
+  --brand-to:     #A855F7;
+  --brand-grad:   linear-gradient(135deg, var(--brand-from), var(--brand-to));
+
+  --bg:           #08080E;
+  --surface:      #101018;
+  --card-bg:      #13131E;
+  --card-border:  #1E1E30;
+  --text:         #E8E8F2;
+  --text-muted:   #888899;
+  --text-dim:     #555566;
+  --radius:       14px;
+  --radius-sm:    8px;
+  --transition:   200ms ease;
+}
+
+/* ── Reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--brand-from); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Utility ──────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ── Layout wrapper ───────────────────────────────────────────── */
+.site-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────── */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 72px 0 56px;
+  gap: 16px;
+}
+
+.hero-logo {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 24px rgba(71, 151, 245, 0.35));
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: var(--brand-grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.15;
+}
+
+.hero-tagline {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  max-width: 480px;
+}
+
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(71, 151, 245, 0.1);
+  border: 1px solid rgba(71, 151, 245, 0.25);
+  color: var(--brand-from);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+
+.version-badge.hidden { display: none; }
+
+/* ── Platform section ─────────────────────────────────────────── */
+.platform-section {
+  padding-bottom: 80px;
+}
+
+.section-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+/* ── Platform grid ────────────────────────────────────────────── */
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 540px) {
+  .platform-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 760px) {
+  .platform-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ── Card ─────────────────────────────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color var(--transition), transform var(--transition);
+  position: relative;
+}
+
+.card:hover {
+  border-color: #2A2A44;
+  transform: translateY(-2px);
+}
+
+/* Gradient border for recommended card */
+.card--recommended {
+  background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+              var(--brand-grad) border-box;
+  border: 1.5px solid transparent;
+}
+
+.card--recommended:hover {
+  background: linear-gradient(#16162A, #16162A) padding-box,
+              var(--brand-grad) border-box;
+  border-color: transparent;
+  transform: translateY(-2px);
+}
+
+.recommended-badge {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--brand-grad);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.card--hidden { display: none; }
+
+/* ── Card header ──────────────────────────────────────────────── */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.platform-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.card--recommended .platform-icon { color: var(--brand-from); }
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.card-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* ── Card actions ─────────────────────────────────────────────── */
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity var(--transition), transform var(--transition);
+  text-decoration: none;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.btn:hover { opacity: 0.88; transform: translateY(-1px); text-decoration: none; }
+.btn:focus-visible {
+  outline: 2px solid var(--brand-from);
+  outline-offset: 2px;
+}
+.btn:active { transform: translateY(0); }
+
+.btn--primary {
+  background: var(--brand-grad);
+  color: #fff;
+}
+
+.btn--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  border: 1px solid var(--card-border);
+}
+
+.btn--secondary:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* ── Card note (install guidance) ────────────────────────────── */
+.card-note {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.site-footer {
+  border-top: 1px solid var(--card-border);
+  padding: 24px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.8125rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.site-footer a {
+  color: var(--text-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color var(--transition);
+}
+
+.site-footer a:hover { color: var(--text); text-decoration: none; }
+
+/* ── No-script notice ─────────────────────────────────────────── */
+.nojs-notice {
+  display: none;
+}

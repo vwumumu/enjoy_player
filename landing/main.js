@@ -1,0 +1,104 @@
+'use strict';
+
+const cfg = window.ENJOY_CONFIG;
+
+// ── OS detection ────────────────────────────────────────────────
+function detectOS() {
+  const ua = navigator.userAgent;
+  const plat = (navigator.platform || '').toLowerCase();
+
+  // iPadOS reports as 'MacIntel' but has multiple touch points
+  if (/ipad|iphone|ipod/i.test(ua)) return 'ios';
+  if (/macintosh|macintel/i.test(plat) && navigator.maxTouchPoints > 1) return 'ios';
+  if (/mac/i.test(plat) || /macintosh/i.test(ua)) return 'macos';
+  if (/win/i.test(plat) || /windows/i.test(ua)) return 'windows';
+  if (/android/i.test(ua)) return 'android';
+
+  return null;
+}
+
+// ── Manifest fetch (with timeout + fallback) ────────────────────
+async function fetchManifest(url, timeoutMs = 5000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const resp = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    return await resp.json();
+  } catch {
+    clearTimeout(timer);
+    return null;
+  }
+}
+
+// ── Apply manifest data to the page ────────────────────────────
+function applyManifest(manifest) {
+  if (!manifest) return;
+
+  const { version, assets = {} } = manifest;
+
+  // Version badge
+  if (version) {
+    const badge = document.getElementById('version-badge');
+    if (badge) {
+      badge.textContent = `v${version}`;
+      badge.classList.remove('hidden');
+    }
+  }
+
+  // Update download hrefs for direct-download platforms
+  const urlMap = {
+    'btn-windows':  assets.windows?.url,
+    'btn-macos':    assets.macos?.url,
+    'btn-android':  assets.android_arm64_v8a?.url,
+  };
+
+  for (const [id, url] of Object.entries(urlMap)) {
+    if (!url) continue;
+    const el = document.getElementById(id);
+    if (el) el.href = url;
+  }
+}
+
+// ── Highlight + reorder recommended card ───────────────────────
+function highlightPlatform(os) {
+  if (!os) return;
+
+  const card = document.getElementById(`card-${os}`);
+  if (!card) return;
+
+  card.classList.add('card--recommended');
+
+  const badge = document.createElement('div');
+  badge.className = 'recommended-badge';
+  badge.setAttribute('aria-label', 'Recommended for your device');
+  badge.textContent = 'Recommended';
+  card.prepend(badge);
+
+  // Move recommended card to the front of the grid
+  const grid = document.getElementById('platform-grid');
+  if (grid && grid.firstChild !== card) {
+    grid.prepend(card);
+  }
+}
+
+// ── Apply config URLs (store / TestFlight links from config.js) ─
+function applyConfig() {
+  const tfBtn = document.getElementById('btn-testflight');
+  if (tfBtn && cfg.testFlightUrl) tfBtn.href = cfg.testFlightUrl;
+
+  const playBtn = document.getElementById('btn-play-beta');
+  if (playBtn && cfg.playBetaUrl) playBtn.href = cfg.playBetaUrl;
+}
+
+// ── Main ────────────────────────────────────────────────────────
+(async function init() {
+  applyConfig();
+
+  const os = detectOS();
+  highlightPlatform(os);
+
+  const manifest = await fetchManifest(cfg.manifestUrl);
+  applyManifest(manifest);
+})();

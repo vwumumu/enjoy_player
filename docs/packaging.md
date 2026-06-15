@@ -2,6 +2,23 @@
 
 **Verify releases locally first.** GitHub Actions workflows call the same scripts you run on your machine.
 
+## How users get the app
+
+The public download page is at **[https://get.enjoy.bot](https://get.enjoy.bot)**. It detects the visitor's OS and surfaces the correct install action:
+
+| Platform | Install path |
+|----------|-------------|
+| Windows | Direct download — `.exe` installer from `dl.enjoy.bot` |
+| macOS | Direct download — notarized `.zip` from `dl.enjoy.bot` |
+| Android | APK sideload from `dl.enjoy.bot` **or** Play Store beta enrollment |
+| iOS | TestFlight beta invitation |
+
+The page reads the current version from the release manifest (`dl.enjoy.bot/player/latest.json`) via a same-origin proxy, so download links update automatically after each release. Store/TestFlight links are configured in [`landing/config.js`](../landing/config.js).
+
+See [ADR-0024](decisions/0024-download-landing-page.md) for hosting decisions and [Cloudflare Pages deploy](#landing-page-deploy) below for the deploy pipeline.
+
+---
+
 ## Quick start
 
 1. Bump `version:` in [`pubspec.yaml`](../pubspec.yaml).
@@ -349,3 +366,40 @@ Identity: **`ai.enjoy.player`** everywhere ([ADR-0020](decisions/0020-android-wi
 | Windows | x64 | Authenticode signing outside repo |
 
 Further reading: [architecture.md](architecture.md), [testing.md](testing.md), platform folders under `android/`, `ios/`, `macos/`, `windows/`.
+
+---
+
+## Landing page deploy
+
+The landing page lives in [`landing/`](../landing/) — a standalone static site (not a Flutter web build). It is deployed independently of the app.
+
+### Prerequisites
+
+Set two repository secrets (Settings → Secrets → Actions):
+
+| Secret | Value |
+|--------|-------|
+| `CLOUDFLARE_API_TOKEN` | A Cloudflare API token with **Cloudflare Pages: Edit** permission |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
+
+### Automatic deploys
+
+`.github/workflows/deploy_landing.yml` deploys automatically:
+- **Production** — any push to `main` that touches `landing/**`
+- **Preview** — any PR touching `landing/**` (PR comment links to the preview URL)
+- **Manual** — workflow dispatch from the Actions tab
+
+### Manual local deploy
+
+```bash
+cd landing
+npx wrangler pages deploy .
+```
+
+### Updating store links
+
+When the TestFlight invite URL changes or the Play beta URL changes, edit [`landing/config.js`](../landing/config.js) and push to `main`. The deploy workflow picks it up automatically.
+
+### Custom domain
+
+`get.enjoy.bot` must have a CNAME record pointing to `enjoy-player-landing.pages.dev` in Cloudflare DNS. Until the custom domain is attached, the `enjoy-player-landing.pages.dev` URL works for verification.

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enjoy Player — Language Learning Player</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Enjoy Player is a cross-platform language-learning player for audio and video with transcript, echo mode, and YouTube support. Available for Windows, macOS, Android, and iOS.">
+  <meta name="theme-color" content="#08080E">
+  <link rel="canonical" href="https://get.enjoy.bot/">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://get.enjoy.bot/">
+  <meta property="og:title"       content="Enjoy Player — Language Learning Player">
+  <meta property="og:description" content="Cross-platform audio & video player with transcripts, echo mode, and YouTube support. Download for Windows, macOS, Android, and iOS.">
+  <meta property="og:image"       content="https://get.enjoy.bot/og-image.svg">
+  <meta property="og:image:alt"   content="Enjoy Player logo and tagline">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="Enjoy Player — Language Learning Player">
+  <meta name="twitter:description" content="Cross-platform audio & video player with transcripts, echo mode, and YouTube support.">
+  <meta name="twitter:image"       content="https://get.enjoy.bot/og-image.svg">
+
+  <!-- Favicon -->
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Preconnect to download host for faster manifest fetch -->
+  <link rel="preconnect" href="https://dl.enjoy.bot">
+</head>
+<body>
+  <noscript>
+    <style>.nojs-notice { display: block !important; }</style>
+  </noscript>
+
+  <div class="site-wrapper">
+    <!-- ── Hero ────────────────────────────────────────────── -->
+    <header class="hero" role="banner">
+      <img class="hero-logo" src="logo.svg" alt="Enjoy Player logo" width="80" height="80">
+      <h1>Enjoy Player</h1>
+      <p class="hero-tagline">A cross-platform language-learning player for audio &amp; video</p>
+      <span
+        id="version-badge"
+        class="version-badge hidden"
+        aria-label="Current version"
+      ></span>
+
+      <p class="nojs-notice" style="font-size:0.875rem;color:#888899;margin-top:4px;">
+        Enable JavaScript to get direct download links, or visit the
+        <a href="https://github.com/an-lee/enjoy_player/releases/latest">GitHub releases page</a>.
+      </p>
+    </header>
+
+    <!-- ── Downloads ───────────────────────────────────────── -->
+    <main>
+      <section class="platform-section" aria-labelledby="download-heading">
+        <h2 id="download-heading" class="section-label">Download</h2>
+
+        <div class="platform-grid" id="platform-grid">
+
+          <!-- Windows -->
+          <article class="card" id="card-windows" aria-label="Windows">
+            <div class="card-header">
+              <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24L10.949 22.051"/>
+              </svg>
+              <div>
+                <div class="card-title">Windows</div>
+                <div class="card-subtitle">Windows 10 / 11 · x64</div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <a
+                id="btn-windows"
+                class="btn btn--primary"
+                href="https://github.com/an-lee/enjoy_player/releases/latest"
+                aria-label="Download Enjoy Player installer for Windows"
+                download
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 12l-4.5-4.5 1.06-1.06L7 8.88V2h2v6.88l2.44-2.44L12.5 7.5 8 12zM2 14v-2h12v2H2z"/></svg>
+                Download for Windows
+              </a>
+            </div>
+          </article>
+
+          <!-- macOS -->
+          <article class="card" id="card-macos" aria-label="macOS">
+            <div class="card-header">
+              <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.54 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
+              </svg>
+              <div>
+                <div class="card-title">macOS</div>
+                <div class="card-subtitle">macOS 10.15+ · Universal</div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <a
+                id="btn-macos"
+                class="btn btn--primary"
+                href="https://github.com/an-lee/enjoy_player/releases/latest"
+                aria-label="Download Enjoy Player for macOS"
+                download
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 12l-4.5-4.5 1.06-1.06L7 8.88V2h2v6.88l2.44-2.44L12.5 7.5 8 12zM2 14v-2h12v2H2z"/></svg>
+                Download for macOS
+              </a>
+            </div>
+          </article>
+
+          <!-- Android -->
+          <article class="card" id="card-android" aria-label="Android">
+            <div class="card-header">
+              <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M17.523 15.341c-.551 0-.999-.449-.999-1s.448-.999.999-.999c.551 0 .999.448.999.999 0 .551-.448 1-.999 1m-11.046 0c-.551 0-.999-.449-.999-1s.448-.999.999-.999c.551 0 .999.448.999.999 0 .551-.448 1-.999 1m11.405-6.02l1.997-3.459a.416.416 0 00-.71-.419L17.172 8.9C15.59 8.244 13.853 7.851 12 7.851s-3.59.393-5.172 1.049L4.831 5.443a.416.416 0 00-.71.419l1.997 3.459C2.689 11.187.343 14.659 0 18.761h24c-.344-4.102-2.689-7.574-6.118-9.44"/>
+              </svg>
+              <div>
+                <div class="card-title">Android</div>
+                <div class="card-subtitle">Android 8.0+</div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <a
+                id="btn-android"
+                class="btn btn--primary"
+                href="https://github.com/an-lee/enjoy_player/releases/latest"
+                aria-label="Download Enjoy Player APK for Android"
+                download
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 12l-4.5-4.5 1.06-1.06L7 8.88V2h2v6.88l2.44-2.44L12.5 7.5 8 12zM2 14v-2h12v2H2z"/></svg>
+                Download APK
+              </a>
+              <a
+                id="btn-play-beta"
+                class="btn btn--secondary"
+                href="https://play.google.com/apps/testing/ai.enjoy.player"
+                aria-label="Join the Google Play beta for Enjoy Player"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.18 23.76c.41.23.88.24 1.28.05l13.2-7.63-3.3-3.3-11.18 10.88zM.5 1.62C.19 2.03 0 2.6 0 3.33v17.34c0 .73.19 1.3.5 1.71l.09.08L9.77 13.3v-.22L.59 1.54l-.09.08zM20.37 10.05L17.26 8.2l-3.63 3.63 3.63 3.63 3.14-1.87c.9-.52.9-1.37 0-1.89l.03-.65zM4.46.19L17.66 7.82l-3.3 3.3L3.18.23C3.59.04 4.06.05 4.46.19z"/></svg>
+                Join Play Beta
+              </a>
+            </div>
+            <p class="card-note">
+              Tip: installing the APK requires enabling <em>Install unknown apps</em> in your Android settings.
+            </p>
+          </article>
+
+          <!-- iOS -->
+          <article class="card" id="card-ios" aria-label="iOS">
+            <div class="card-header">
+              <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/>
+              </svg>
+              <div>
+                <div class="card-title">iOS</div>
+                <div class="card-subtitle">iOS 14.0+ · TestFlight Beta</div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <a
+                id="btn-testflight"
+                class="btn btn--primary"
+                href="https://testflight.apple.com/join/PLACEHOLDER"
+                aria-label="Join the TestFlight beta for Enjoy Player on iOS"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/><path d="M10.49 8.06L16 12l-5.51 3.94V8.06z"/></svg>
+                Join TestFlight
+              </a>
+            </div>
+            <p class="card-note">
+              Free beta via Apple TestFlight. App Store release coming soon.
+            </p>
+          </article>
+
+        </div><!-- /.platform-grid -->
+      </section>
+    </main>
+  </div><!-- /.site-wrapper -->
+
+  <!-- ── Footer ───────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <a
+      href="https://github.com/an-lee/enjoy_player"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="View Enjoy Player source code on GitHub"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/>
+      </svg>
+      GitHub
+    </a>
+    <span>© 2026 Enjoy Player</span>
+    <a href="https://enjoy.bot" target="_blank" rel="noopener noreferrer">enjoy.bot</a>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
