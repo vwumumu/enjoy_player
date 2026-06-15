@@ -57,7 +57,10 @@ function applyManifest(manifest) {
   for (const [id, url] of Object.entries(urlMap)) {
     if (!url) continue;
     const el = document.getElementById(id);
-    if (el) el.href = url;
+    if (el) {
+      el.href = url;
+      el.setAttribute('download', '');
+    }
   }
 }
 
@@ -73,7 +76,14 @@ function highlightPlatform(os) {
   const badge = document.createElement('div');
   badge.className = 'recommended-badge';
   badge.setAttribute('aria-label', 'Recommended for your device');
-  badge.textContent = 'Recommended';
+  badge.setAttribute('data-i18n', 'recommended');
+  
+  // Use translation if available
+  const lang = document.documentElement.lang || 'en';
+  badge.textContent = (window.translations && window.translations[lang] && window.translations[lang]['recommended']) 
+    ? window.translations[lang]['recommended'] 
+    : 'Recommended';
+    
   card.prepend(badge);
 
   // Move recommended card to the front of the grid
@@ -94,6 +104,7 @@ function applyConfig() {
 
 // ── Main ────────────────────────────────────────────────────────
 (async function init() {
+  if (window.initI18n) window.initI18n();
   applyConfig();
 
   const os = detectOS();

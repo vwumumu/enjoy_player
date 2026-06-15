@@ -54,6 +54,49 @@ a:hover { text-decoration: underline; }
   width: 100%;
 }
 
+/* ── Top Nav (Language Switcher) ──────────────────────────────── */
+.top-nav {
+  display: flex;
+  justify-content: flex-end;
+  padding: 24px 0 0;
+}
+
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  padding: 4px 6px;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 999px;
+  transition: color var(--transition), background var(--transition);
+}
+
+.lang-btn:hover {
+  color: var(--text);
+}
+
+.lang-btn.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.lang-sep {
+  color: var(--card-border);
+  font-size: 0.75rem;
+  margin: 0 2px;
+}
+
 /* ── Hero ─────────────────────────────────────────────────────── */
 .hero {
   display: flex;
@@ -86,6 +129,17 @@ a:hover { text-decoration: underline; }
   font-size: 1.125rem;
   color: var(--text-muted);
   max-width: 480px;
+}
+
+.hero-cta {
+  margin-top: 8px;
+}
+
+.btn--large {
+  padding: 14px 28px;
+  font-size: 1rem;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(71, 151, 245, 0.2);
 }
 
 .version-badge {
@@ -164,7 +218,7 @@ a:hover { text-decoration: underline; }
 
 .bento-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
@@ -192,7 +246,7 @@ a:hover { text-decoration: underline; }
 }
 
 .bento-card--large {
-  grid-column: span 3;
+  grid-column: span 2;
   background: linear-gradient(145deg, rgba(71, 151, 245, 0.08), rgba(168, 85, 247, 0.08));
 }
 
