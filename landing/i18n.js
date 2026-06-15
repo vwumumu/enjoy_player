@@ -6,6 +6,7 @@ const translations = {
     'hero.title': 'Enjoy Player',
     'hero.tagline': 'A cross-platform language-learning player for audio & video',
     'hero.cta': 'Download Now',
+    'hero.secondary_cta': 'View Features',
     'hero.nojs': 'Enable JavaScript to get direct download links, or visit the download directory.',
     
     'features.title': 'Features',
@@ -50,6 +51,7 @@ const translations = {
     'hero.title': 'Enjoy Player',
     'hero.tagline': '跨平台音视频语言学习播放器',
     'hero.cta': '立即下载',
+    'hero.secondary_cta': '查看功能',
     'hero.nojs': '请启用 JavaScript 以获取直接下载链接，或访问下载目录。',
     
     'features.title': '核心功能',
