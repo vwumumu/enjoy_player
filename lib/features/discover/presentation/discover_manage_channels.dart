@@ -111,7 +111,7 @@ class DiscoverManageChannelsView extends ConsumerWidget {
           SizedBox(height: t.space24),
           OutlinedButton.icon(
             onPressed: () =>
-                unawaited(showDiscoverSubscribeSheet(context, ref)),
+                unawaited(showDiscoverSubscribeSheet(context)),
             icon: const Icon(Icons.add_link_rounded, size: 18),
             label: Text(l10n.discoverSubscribeAction),
           ),
