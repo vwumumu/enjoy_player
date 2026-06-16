@@ -82,6 +82,25 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
+// Workaround: flutter/flutter#187553 — flavored release APKs can ship stale libapp.so on 3.44.
+// merge*JniLibFolders may stay UP-TO-DATE while copyJniLibsflutterBuild* produces fresh libapp.so.
+afterEvaluate {
+    android.applicationVariants.forEach { variant ->
+        val capitalized = variant.name.replaceFirstChar { it.uppercase() }
+        val copyTask = tasks.findByName("copyJniLibsflutterBuild$capitalized") ?: return@forEach
+        val mergeTask = tasks.findByName("merge${capitalized}JniLibFolders") ?: return@forEach
+        mergeTask.dependsOn(copyTask)
+        copyTask.doLast {
+            layout.buildDirectory
+                .dir("intermediates/merged_jni_libs/${variant.name}")
+                .get()
+                .asFile
+                .takeIf { it.exists() }
+                ?.deleteRecursively()
+        }
+    }
+}
+
 // Flutter `run` without --flavor looks for app-debug.apk; copy the default store variant.
 tasks.configureEach {
     if (name == "assembleStoreDebug" || name == "assembleDebug") {
