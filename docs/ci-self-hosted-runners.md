@@ -10,8 +10,29 @@ Shared workflow pieces:
 | [`.github/actions/setup-macos-runner-env`](../.github/actions/setup-macos-runner-env) | Homebrew PATH, UTF-8 locale, curl HTTP/1.1 |
 | [`.github/scripts/ensure_linux_tooling.sh`](../.github/scripts/ensure_linux_tooling.sh) | Install apt packages only when missing |
 | [`.github/scripts/ensure_nuget_feed.ps1`](../.github/scripts/ensure_nuget_feed.ps1) | Ensure NuGet.org feed on Windows |
+| [`.github/workflows/shared/runtime.md`](../.github/workflows/shared/runtime.md) | gh-aw shared Flutter pre-agent setup + `dart` network for agentic workflows |
 
 When you bump Flutter in `.github/flutter-version`, the next workflow run installs/switches to that version on the runner via `flutter-action` (local disk, no GitHub cache API).
+
+---
+
+## Agentic workflows (gh-aw)
+
+GitHub **Agentic Workflows** (`gh-aw`) run on a Linux self-hosted runner with labels **`self-hosted`**, **`linux`**, and **`agentic`**. The same physical machine may also carry the **`Linux`** label used by deterministic CI — that is fine; both share the Flutter pin in [`.github/flutter-version`](../.github/flutter-version).
+
+Each agentic job runs pre-agent steps from [`shared/runtime.md`](../.github/workflows/shared/runtime.md) before the AI engine starts:
+
+1. `ensure_linux_tooling.sh` (apt packages, idempotent)
+2. [`.github/actions/setup-flutter`](../.github/actions/setup-flutter)
+3. `flutter pub get`
+
+**Scope:** AWF requires Linux. Agents can run `flutter analyze`, `flutter test`, and `dart format` here — not iOS/macOS/Windows builds or signed Android releases.
+
+**Network:** Shared runtime adds the gh-aw `dart` ecosystem (`pub.dev`, Flutter storage) to the firewall allowlist.
+
+**Compile:** After editing workflow `.md` files, run `gh aw compile --validate` and commit the generated `.lock.yml` files.
+
+Agentic workflow sources: `test-improver`, `repo-assist`, `perf-improver`, `duplicate-code-detector`, `large-file-simplifier`, `issue-triage`, `update-docs`, `agentic-wiki-writer`.
 
 ---
 
@@ -24,6 +45,7 @@ Use labels that match workflow `runs-on`:
 | Workflow | Labels |
 |----------|--------|
 | CI, Codegen drift, Android APK smoke | `self-hosted`, `Linux` |
+| gh-aw agentic workflows (test-improver, repo-assist, …) | `self-hosted`, `linux`, `agentic` |
 | Build Apple, Release Apple | `self-hosted`, `macos` |
 | Release Android | `self-hosted`, `Linux` |
 | Build Windows | `self-hosted`, `Windows` |

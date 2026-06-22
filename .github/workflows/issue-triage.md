@@ -15,6 +15,7 @@ runs-on: [self-hosted, linux, agentic]
 runs-on-slim: "self-hosted"
 
 imports:
+  - shared/runtime.md
   - shared/engine-minimax.md
 
 permissions: read-all

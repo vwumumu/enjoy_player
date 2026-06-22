@@ -15,6 +15,7 @@ runs-on: [self-hosted, linux, agentic]
 runs-on-slim: "self-hosted"
 
 imports:
+  - shared/runtime.md
   - shared/engine-minimax.md
 
 # # This workflow runs often, so you can use a small model to keep costs down.
