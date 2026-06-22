@@ -1,48 +1,41 @@
 ---
+on:
+  push:
+    branches:
+    - main
+  workflow_dispatch: null
+permissions: read-all
+network: defaults
+imports:
+- shared/runtime.md
+- shared/engine-minimax.md
+safe-outputs:
+  create-pull-request:
+    draft: true
+    labels:
+    - automation
+    - documentation
+    protected-files: fallback-to-issue
 description: |
   This workflow keeps docs synchronized with code changes.
   Triggered on every push to main, it analyzes diffs to identify changed entities and
   updates corresponding documentation. Maintains consistent style (precise, active voice,
   plain English), ensures single source of truth, and creates draft PRs with documentation
   updates. Supports documentation-as-code philosophy.
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-runs-on: [self-hosted, linux, agentic]
-runs-on-slim: "self-hosted"
-
-imports:
-  - shared/runtime.md
-  - shared/engine-minimax.md
-
-# # This workflow runs often, so you can use a small model to keep costs down.
-# engine:
-#   model: small
-
-permissions: read-all
-
-network: defaults
-
-safe-outputs:
-  create-pull-request:
-    draft: true
-    protected-files: fallback-to-issue
-    labels: [automation, documentation]
-
-tools:
-  github:
-    toolsets: [all]
-  web-fetch:
-  # By default this workflow allows all bash commands within the confine of Github Actions VM 
-  bash: true
-
+runs-on:
+- self-hosted
+- linux
+- agentic
+runs-on-slim: self-hosted
+source: githubnext/agentics/workflows/update-docs.md@d63b34de41bc0dc052096e094c732cf28eafc659
 timeout-minutes: 15
-source: githubnext/agentics/workflows/update-docs.md@df35cf29fb856d1c3b8f023ed46d19126e7813bf
+tools:
+  bash: true
+  github:
+    toolsets:
+    - all
+  web-fetch: null
 ---
-
 # Update Docs
 
 ## Job Description

@@ -1,52 +1,46 @@
 ---
+on:
+  issues:
+    types:
+    - opened
+    - reopened
+  reaction: eyes
+permissions: read-all
+network: defaults
+imports:
+- shared/runtime.md
+- shared/engine-minimax.md
+safe-outputs:
+  add-comment: null
+  add-labels:
+    max: 5
+  close-issue:
+    max: 1
+    state-reason: not_planned
+    target: triggering
+  set-issue-type:
+    max: 1
 description: |
   Intelligent issue triage assistant that processes new and reopened issues.
   Analyzes issue content, detects spam and incomplete reports, selects appropriate
   labels, sets issue type, detects duplicates, and provides structured
   triage reports with debugging strategies and resource links. Helps maintainers
   quickly understand and prioritize incoming issues.
-
-on:
-  issues:
-    types: [opened, reopened]
-  reaction: eyes
-
-runs-on: [self-hosted, linux, agentic]
-runs-on-slim: "self-hosted"
-
-imports:
-  - shared/runtime.md
-  - shared/engine-minimax.md
-
-permissions: read-all
-
-network: defaults
-
-# # This workflow runs often, so you can use a small model to keep costs down.
-# engine:
-#   model: small
-
-safe-outputs:
-  add-labels:
-    max: 5
-  add-comment:
-  set-issue-type:
-    max: 1
-  close-issue:
-    target: "triggering"
-    state-reason: "not_planned"
-    max: 1
-
-tools:
-  web-fetch:
-  github:
-    toolsets: [issues, labels]
-    min-integrity: none # This workflow is allowed to examine and comment on any issues
-
+runs-on:
+- self-hosted
+- linux
+- agentic
+runs-on-slim: self-hosted
+source: githubnext/agentics/workflows/issue-triage.md@d63b34de41bc0dc052096e094c732cf28eafc659
 timeout-minutes: 10
-source: githubnext/agentics/workflows/issue-triage.md@df35cf29fb856d1c3b8f023ed46d19126e7813bf
+tools:
+  github:
+    min-integrity: none
+    toolsets:
+    - issues
+    - labels
+  web-fetch: null
 ---
-
 # Agentic Triage
 
 <!-- Note - this file can be customized to your needs. Replace this section directly, or add further instructions here. After editing run 'gh aw compile' -->
