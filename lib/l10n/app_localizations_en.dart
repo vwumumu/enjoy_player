@@ -1587,6 +1587,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAboutOpenSourceSubtitle => 'View source code on GitHub';
 
   @override
+  String get settingsDiagnosticsLoggingTitle => 'Diagnostic logging';
+
+  @override
+  String get settingsDiagnosticsLoggingSubtitle =>
+      'Record extra detail for YouTube, sync, and sign-in issues';
+
+  @override
+  String get settingsDiagnosticsPrivacyNote =>
+      'Logs stay on this device until you export them. Tokens and cookies are redacted.';
+
+  @override
+  String get settingsDiagnosticsExportTitle => 'Export diagnostic report';
+
+  @override
+  String get settingsDiagnosticsExportSubtitle =>
+      'Save a zip of recent logs for support';
+
+  @override
+  String get settingsDiagnosticsExportSuccess => 'Diagnostic report saved.';
+
+  @override
+  String get settingsDiagnosticsExportError =>
+      'Could not export diagnostic report.';
+
+  @override
   String get settingsCheckForUpdatesTitle => 'Check for updates';
 
   @override

@@ -16,6 +16,7 @@ dependencies:
   cross_file: ^0.3.5
   cached_network_image: ^3.4.1
   crypto: ^3.0.6
+  archive: ^4.0.7
   async: ^2.13.0
   azure_speech:
     path: packages/azure_speech

@@ -38,6 +38,9 @@ abstract final class SettingsKeys {
 
   /// Version string the user snoozed (optional updates only).
   static const String updateSnoozeVersion = 'update.snooze_version';
+
+  /// When `true`, allowlisted diagnostic loggers write FINE records to the log file.
+  static const String diagnosticsVerboseEnabled = 'diagnostics.verbose_enabled';
 }
 
 /// Default Enjoy API origin (no trailing slash).

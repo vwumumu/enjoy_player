@@ -6,6 +6,8 @@ import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
+import 'core/logging/diagnostic_log_config.dart';
+import 'core/logging/diagnostic_session_header.dart';
 import 'core/logging/setup_logging.dart';
 
 Future<void> main() async {
@@ -15,7 +17,9 @@ Future<void> main() async {
   // separate files and separate isolate executors, so Drift's runtime check
   // for "multiple databases" is a false positive here.
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-  setupAppLogging();
+  await DiagnosticLogConfig.loadFromGuestSettings();
+  await setupAppLogging();
+  await writeDiagnosticSessionHeader();
   MediaKit.ensureInitialized();
 
   if (defaultTargetPlatform == TargetPlatform.windows ||

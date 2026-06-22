@@ -3009,6 +3009,48 @@ abstract class AppLocalizations {
   /// **'View source code on GitHub'**
   String get settingsAboutOpenSourceSubtitle;
 
+  /// No description provided for @settingsDiagnosticsLoggingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostic logging'**
+  String get settingsDiagnosticsLoggingTitle;
+
+  /// No description provided for @settingsDiagnosticsLoggingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record extra detail for YouTube, sync, and sign-in issues'**
+  String get settingsDiagnosticsLoggingSubtitle;
+
+  /// No description provided for @settingsDiagnosticsPrivacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs stay on this device until you export them. Tokens and cookies are redacted.'**
+  String get settingsDiagnosticsPrivacyNote;
+
+  /// No description provided for @settingsDiagnosticsExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export diagnostic report'**
+  String get settingsDiagnosticsExportTitle;
+
+  /// No description provided for @settingsDiagnosticsExportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a zip of recent logs for support'**
+  String get settingsDiagnosticsExportSubtitle;
+
+  /// No description provided for @settingsDiagnosticsExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostic report saved.'**
+  String get settingsDiagnosticsExportSuccess;
+
+  /// No description provided for @settingsDiagnosticsExportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export diagnostic report.'**
+  String get settingsDiagnosticsExportError;
+
   /// No description provided for @settingsCheckForUpdatesTitle.
   ///
   /// In en, this message translates to:

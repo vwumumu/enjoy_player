@@ -1520,6 +1520,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAboutOpenSourceSubtitle => '在 GitHub 查看源代码';
 
   @override
+  String get settingsDiagnosticsLoggingTitle => '诊断日志';
+
+  @override
+  String get settingsDiagnosticsLoggingSubtitle => '为 YouTube、同步和登录问题记录更多细节';
+
+  @override
+  String get settingsDiagnosticsPrivacyNote =>
+      '日志保存在本设备，导出前不会上传。令牌和 Cookie 会被脱敏。';
+
+  @override
+  String get settingsDiagnosticsExportTitle => '导出诊断报告';
+
+  @override
+  String get settingsDiagnosticsExportSubtitle => '保存近期日志压缩包以便反馈问题';
+
+  @override
+  String get settingsDiagnosticsExportSuccess => '诊断报告已保存。';
+
+  @override
+  String get settingsDiagnosticsExportError => '无法导出诊断报告。';
+
+  @override
   String get settingsCheckForUpdatesTitle => '检查更新';
 
   @override
@@ -3135,6 +3157,28 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsAboutOpenSourceSubtitle => '在 GitHub 查看源代码';
+
+  @override
+  String get settingsDiagnosticsLoggingTitle => '诊断日志';
+
+  @override
+  String get settingsDiagnosticsLoggingSubtitle => '为 YouTube、同步和登录问题记录更多细节';
+
+  @override
+  String get settingsDiagnosticsPrivacyNote =>
+      '日志保存在本设备，导出前不会上传。令牌和 Cookie 会被脱敏。';
+
+  @override
+  String get settingsDiagnosticsExportTitle => '导出诊断报告';
+
+  @override
+  String get settingsDiagnosticsExportSubtitle => '保存近期日志压缩包以便反馈问题';
+
+  @override
+  String get settingsDiagnosticsExportSuccess => '诊断报告已保存。';
+
+  @override
+  String get settingsDiagnosticsExportError => '无法导出诊断报告。';
 
   @override
   String get settingsCheckForUpdatesTitle => '检查更新';

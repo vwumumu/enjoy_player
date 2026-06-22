@@ -7,6 +7,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:enjoy_player/core/application/app_links.dart';
+import 'package:enjoy_player/core/diagnostics/diagnostic_export_flow.dart';
+import 'package:enjoy_player/core/diagnostics/diagnostics_verbose_provider.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -198,6 +200,162 @@ class _AboutSectionCardState extends ConsumerState<AboutSectionCard> {
                                       SizedBox(height: t.space4),
                                       Text(
                                         l10n.settingsCheckForUpdatesSubtitle,
+                                        style: tt.bodySmall?.copyWith(
+                                          color: cs.onSurfaceVariant.withValues(
+                                            alpha: 0.86,
+                                          ),
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 22,
+                                  color: cs.onSurfaceVariant.withValues(
+                                    alpha: 0.55,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: t.space16,
+                        endIndent: t.space16,
+                        color: cs.outlineVariant.withValues(alpha: 0.18),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          t.space16,
+                          t.space12,
+                          t.space8,
+                          t.space8,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.bug_report_outlined,
+                                  size: 22,
+                                  color: cs.primary.withValues(alpha: 0.92),
+                                ),
+                                SizedBox(width: t.space12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.settingsDiagnosticsLoggingTitle,
+                                        style: tt.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.2,
+                                        ),
+                                      ),
+                                      SizedBox(height: t.space4),
+                                      Text(
+                                        l10n.settingsDiagnosticsLoggingSubtitle,
+                                        style: tt.bodySmall?.copyWith(
+                                          color: cs.onSurfaceVariant.withValues(
+                                            alpha: 0.86,
+                                          ),
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                ref
+                                    .watch(diagnosticsVerboseProvider)
+                                    .when(
+                                      data: (enabled) => Switch.adaptive(
+                                        value: enabled,
+                                        onChanged: (value) {
+                                          ref
+                                              .read(
+                                                diagnosticsVerboseProvider
+                                                    .notifier,
+                                              )
+                                              .setEnabled(value);
+                                        },
+                                      ),
+                                      loading: () => const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                      error: (_, _) => const SizedBox.shrink(),
+                                    ),
+                              ],
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: 34 + t.space12,
+                                top: t.space4,
+                              ),
+                              child: Text(
+                                l10n.settingsDiagnosticsPrivacyNote,
+                                style: tt.labelSmall?.copyWith(
+                                  color: cs.onSurfaceVariant.withValues(
+                                    alpha: 0.78,
+                                  ),
+                                  height: 1.35,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: t.space16,
+                        endIndent: t.space16,
+                        color: cs.outlineVariant.withValues(alpha: 0.18),
+                      ),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: Haptics.wrapTap(
+                            context,
+                            () => exportDiagnosticReport(context),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: t.space16,
+                              vertical: t.space12,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.archive_outlined,
+                                  size: 22,
+                                  color: cs.primary.withValues(alpha: 0.92),
+                                ),
+                                SizedBox(width: t.space12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.settingsDiagnosticsExportTitle,
+                                        style: tt.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.2,
+                                        ),
+                                      ),
+                                      SizedBox(height: t.space4),
+                                      Text(
+                                        l10n.settingsDiagnosticsExportSubtitle,
                                         style: tt.bodySmall?.copyWith(
                                           color: cs.onSurfaceVariant.withValues(
                                             alpha: 0.86,

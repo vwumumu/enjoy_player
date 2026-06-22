@@ -14,6 +14,7 @@ import 'package:enjoy_player/features/player/application/player_engine.dart';
 import 'package:enjoy_player/features/player/domain/playable_source.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/youtube_video_poster.dart';
 import 'youtube_page_inject.dart';
+import 'youtube_playback_stall_watchdog.dart';
 import 'youtube_webview_host.dart';
 import 'youtube_state_poller.dart';
 import 'youtube_webview_bridge.dart';
@@ -73,6 +74,15 @@ class YoutubePlayerEngine implements PlayerEngine {
   /// Bumped on each explicit watch/idle navigation so stale async loads can bail.
   int _navGeneration = 0;
 
+  late final YoutubePlaybackStallWatchdog _stallWatchdog =
+      YoutubePlaybackStallWatchdog(
+        onStall: (videoId) {
+          _logYoutube.warning(
+            'youtube playback stalled after load_stop vid=$videoId',
+          );
+        },
+      );
+
   /// Poll interval is 250ms; 3 ticks ≈ 750ms of stable `paused` before we trust
   /// the poller over transient DOM noise.
   static const int _kPauseConfirmPollTicks = 3;
@@ -120,6 +130,7 @@ class YoutubePlayerEngine implements PlayerEngine {
   }
 
   void markOpenTimingStart() {
+    _stallWatchdog.cancel();
     _initStopwatch = Stopwatch()..start();
     _loggedFirstPlaying = false;
     _logInitPhase('open_start');
@@ -145,6 +156,7 @@ class YoutubePlayerEngine implements PlayerEngine {
         'YoutubePlayerEngine requires YoutubePlayableSource',
       );
     }
+    _stallWatchdog.cancel();
     _videoId = source.videoId;
     _playbackCompleted = false;
     _emitBuffering(true);
@@ -241,6 +253,7 @@ class YoutubePlayerEngine implements PlayerEngine {
 
   /// Stops playback and navigates to `about:blank` while keeping the WebView warm.
   Future<void> idleAfterClear() async {
+    _stallWatchdog.cancel();
     _stopPolling();
     _videoId = '';
     _mountRequested = false;
@@ -273,6 +286,7 @@ class YoutubePlayerEngine implements PlayerEngine {
   @override
   Future<void> dispose() async {
     _disposed = true;
+    _stallWatchdog.cancel();
     _mountRequested = false;
     _pollKickTimer?.cancel();
     _pollKickTimer = null;
@@ -305,6 +319,7 @@ class YoutubePlayerEngine implements PlayerEngine {
     _playingCtrl.add(v);
     if (v && !_loggedFirstPlaying) {
       _loggedFirstPlaying = true;
+      _stallWatchdog.onFirstPlaying();
       _logInitPhase('first_playing');
     }
   }
@@ -445,6 +460,7 @@ class YoutubePlayerEngine implements PlayerEngine {
       return;
     }
     _logInitPhase('load_stop');
+    _stallWatchdog.onLoadStop(_videoId);
     await injectYoutubeMobileWatchPage(controller);
     _schedulePollKick();
   }
