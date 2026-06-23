@@ -54,32 +54,34 @@ class _YoutubeWebViewHostState extends State<YoutubeWebViewHost> {
         ? YoutubeWebViewBridge.idleUri
         : YoutubeWebViewBridge.watchUri(vid);
 
-    return InAppWebView(
-      initialSettings: YoutubeWebViewSettings.forPlayer(),
-      onWebViewCreated: (controller) {
-        _controller = controller;
-        // [initialUrlRequest] already navigates on cold mount when [vid] is set;
-        // avoid a second [loadWatchPage] that interrupts the first playback start.
-        e.onWebViewCreated(
-          controller,
-          initialWatchUrlRequested: vid.isNotEmpty,
-        );
-      },
-      onEnterFullscreen: iosInlinePlayback
-          ? (controller) {
-              unawaited(e.exitNativeFullscreen(controller));
-            }
-          : null,
-      onExitFullscreen: iosInlinePlayback
-          ? (controller) {
-              unawaited(e.onNativeFullscreenExit(controller));
-            }
-          : null,
-      onLoadStop: (controller, url) async {
-        await e.onPageFinished(controller, url?.toString());
-      },
-      shouldOverrideUrlLoading: _onShouldOverrideUrlLoading,
-      initialUrlRequest: URLRequest(url: initialUrl),
+    return ExcludeSemantics(
+      child: InAppWebView(
+        initialSettings: YoutubeWebViewSettings.forPlayer(),
+        onWebViewCreated: (controller) {
+          _controller = controller;
+          // [initialUrlRequest] already navigates on cold mount when [vid] is set;
+          // avoid a second [loadWatchPage] that interrupts the first playback start.
+          e.onWebViewCreated(
+            controller,
+            initialWatchUrlRequested: vid.isNotEmpty,
+          );
+        },
+        onEnterFullscreen: iosInlinePlayback
+            ? (controller) {
+                unawaited(e.exitNativeFullscreen(controller));
+              }
+            : null,
+        onExitFullscreen: iosInlinePlayback
+            ? (controller) {
+                unawaited(e.onNativeFullscreenExit(controller));
+              }
+            : null,
+        onLoadStop: (controller, url) async {
+          await e.onPageFinished(controller, url?.toString());
+        },
+        shouldOverrideUrlLoading: _onShouldOverrideUrlLoading,
+        initialUrlRequest: URLRequest(url: initialUrl),
+      ),
     );
   }
 }

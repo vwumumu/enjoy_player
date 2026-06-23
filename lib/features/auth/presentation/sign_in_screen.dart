@@ -356,34 +356,36 @@ class _SigningInWebPaneState extends ConsumerState<_SigningInWebPane> {
               backgroundColor: Colors.transparent,
             ),
           Expanded(
-            child: InAppWebView(
-              initialUrlRequest: URLRequest(
-                url: WebUri(widget.verificationUrl),
+            child: ExcludeSemantics(
+              child: InAppWebView(
+                initialUrlRequest: URLRequest(
+                  url: WebUri(widget.verificationUrl),
+                ),
+                initialSettings: InAppWebViewSettings(
+                  javaScriptEnabled: true,
+                  thirdPartyCookiesEnabled: true,
+                  userAgent: _chromeMobileUserAgent,
+                ),
+                onWebViewCreated: (controller) {
+                  _controller = controller;
+                },
+                onLoadStart: (_, _) {
+                  if (mounted) setState(() => _isLoading = true);
+                },
+                onLoadStop: (controller, _) async {
+                  if (!mounted) return;
+                  final title = await controller.getTitle();
+                  setState(() {
+                    _isLoading = false;
+                    _pageTitle = title;
+                  });
+                },
+                onTitleChanged: (_, title) {
+                  if (mounted && title != null) {
+                    setState(() => _pageTitle = title);
+                  }
+                },
               ),
-              initialSettings: InAppWebViewSettings(
-                javaScriptEnabled: true,
-                thirdPartyCookiesEnabled: true,
-                userAgent: _chromeMobileUserAgent,
-              ),
-              onWebViewCreated: (controller) {
-                _controller = controller;
-              },
-              onLoadStart: (_, _) {
-                if (mounted) setState(() => _isLoading = true);
-              },
-              onLoadStop: (controller, _) async {
-                if (!mounted) return;
-                final title = await controller.getTitle();
-                setState(() {
-                  _isLoading = false;
-                  _pageTitle = title;
-                });
-              },
-              onTitleChanged: (_, title) {
-                if (mounted && title != null) {
-                  setState(() => _pageTitle = title);
-                }
-              },
             ),
           ),
         ],
