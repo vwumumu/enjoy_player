@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-06-23
+
+### Added
+
+- Local production diagnostics logging and zip export.
+
+### Changed
+
+- YouTube player: poster overlay and warm WebView on init.
+
+### Fixed
+
+- Echo-mode transcript autoscroll crashes without losing scroll accuracy.
+- YouTube player WebView: block Google sign-in navigations that interrupt playback.
+- Windows debug: silence `accessibility_bridge` AXTree console spam.
+
 ## [0.2.1] - 2026-06-16
 
 ### Added
