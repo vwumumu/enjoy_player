@@ -26,6 +26,10 @@ class YoutubeWebViewSettings {
       loadWithOverviewMode: true,
       userAgent: kYoutubeMobileChromeUserAgent,
       thirdPartyCookiesEnabled: true,
+      // Android: allow listening for renderer crashes (reload watch page).
+      useOnRenderProcessGone: defaultTargetPlatform == TargetPlatform.android
+          ? true
+          : null,
     );
   }
 

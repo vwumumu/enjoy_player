@@ -384,6 +384,17 @@ class YoutubePlayerEngine implements PlayerEngine {
     await YoutubeWebViewBridge.loadWatchPage(controller, vid);
   }
 
+  /// iOS/macOS WKWebView process exit or Android renderer crash — reload.
+  Future<void> onWebViewProcessTerminated() async {
+    final controller = _webController;
+    final vid = _videoId;
+    if (controller == null || vid.isEmpty || _disposed) return;
+    _logYoutube.warning('youtube WebView process terminated; reloading vid=$vid');
+    _emitBuffering(true);
+    _emitPlaying(false);
+    await YoutubeWebViewBridge.loadWatchPage(controller, vid);
+  }
+
   void onWebViewCreated(
     InAppWebViewController controller, {
     bool initialWatchUrlRequested = false,
@@ -460,8 +471,9 @@ class YoutubePlayerEngine implements PlayerEngine {
 
     if (_videoId.isNotEmpty && !initialWatchUrlRequested) {
       unawaited(_loadCurrentVideoIfAttached());
-    } else if (_videoId.isNotEmpty && initialWatchUrlRequested) {
-      // Windows release: [initialUrlRequest] alone can fail to finish loading.
+    }
+    if (_videoId.isNotEmpty) {
+      // All platforms: recover when initial navigation never reaches playback.
       unawaited(_ensureWatchPageLoadedAfterDelay());
     }
   }

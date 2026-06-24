@@ -25,12 +25,12 @@ While a video is open, the player WebView [`shouldOverrideUrlLoading`](../../lib
 |------------|--------|
 | `m.youtube.com` / `youtube.com` / `youtu.be` watch and redirect hops | Allow (main frame only) |
 | `googlevideo.com`, `ytimg.com`, and other CDN/static asset hosts | Allow |
-| Subresource loads (Windows WebView2 fires `shouldOverrideUrlLoading` for these too) | Always allow |
+| Subresource / iframe loads (`isForMainFrame: false`) | Always allow (all platforms) |
 | `consent.youtube.com`, `gstatic.com`, `googleapis.com`, other allowed Google static/consent URLs | Allow |
 | **`accounts.google.com` (passive or active sign-in)** | **Cancel** (main frame); player reloads watch URL |
 | Unrelated main-frame origins | Cancel |
 
-**Why**: YouTube’s mobile watch page often redirects through **passive Google sign-in** when no session cookies exist. In embedded WebViews (especially release builds), that chain can finish without a playable `<video>` — infinite loading. Blocking account navigations in the player keeps anonymous playback on the watch page; use **YouTube login** when a signed-in session is needed.
+**Why**: YouTube’s mobile watch page often redirects through **passive Google sign-in** when no session cookies exist. In embedded WebViews (especially **release** builds on any platform), that chain can finish without a playable `<video>` — infinite loading. Blocking account navigations in the player keeps anonymous playback on the watch page; the engine reloads the watch URL when sign-in is cancelled. Use **YouTube login** when a signed-in session is needed.
 
 ## Transcripts
 
@@ -46,12 +46,13 @@ When the **worker** transcript poll returns `status: failed`, the app records a 
 - Embedded MKV/MP4 subtitle track extraction is unavailable for YouTube (no `media_kit` decode of the stream).
 - Ad behavior depends on YouTube, cookies, and account; “no ads” is best-effort when signed in with Premium where applicable.
 
-## Troubleshooting (Windows release)
+## Troubleshooting (release / cold profile)
 
 If YouTube stalls on loading in a **release** or installed build but works in `flutter run`:
 
-1. Confirm you are on a build that includes ADR-0025 (blocks `accounts.google.com` in the player WebView).
+1. Confirm you are on a build that includes the navigation-policy fix (ADR-0025 + subframe/CDN allowlist).
 2. Try **YouTube login** once, then reopen the video (establishes session cookies).
-3. Compare portable `build\windows\x64\runner\Release\enjoy_player.exe` vs Program Files install (antivirus can slow first launch).
+3. Check diagnostic logs for `youtube init load_stop`, `youtube playback stalled`, or `WebView process terminated`.
+4. **Windows only**: compare portable `build\windows\x64\runner\Release\enjoy_player.exe` vs Program Files install (antivirus can slow first launch).
 
 Policy rules are unit-tested in [`youtube_watch_navigation_policy_test.dart`](../../test/features/player/youtube_watch_navigation_policy_test.dart).

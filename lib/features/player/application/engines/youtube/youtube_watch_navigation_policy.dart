@@ -24,8 +24,11 @@ bool isYoutubePlaybackOrStaticAssetUrl(String url) {
 ///
 /// Explicit YouTube login uses [`YoutubeLoginScreen`] — not the player WebView.
 ///
-/// On Windows, [shouldOverrideUrlLoading] is invoked for subresource loads as
-/// well as main-frame navigations — pass [isForMainFrame] from the callback.
+/// Applies on **all platforms** (Android, iOS, macOS, Windows). Pass
+/// [isForMainFrame] from [NavigationAction.isForMainFrame]: on Windows some
+/// iframe document loads use `isForMainFrame: false`; on Android/iOS/macOS
+/// subframe navigations also arrive with `isForMainFrame: false` and must not
+/// be blocked.
 bool shouldAllowYoutubeWatchNavigation({
   required String url,
   required String videoId,

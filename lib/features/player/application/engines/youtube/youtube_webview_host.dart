@@ -101,6 +101,12 @@ class _YoutubeWebViewHostState extends State<YoutubeWebViewHost> {
             description: error.description,
           );
         },
+        onWebContentProcessDidTerminate: (controller) {
+          unawaited(e.onWebViewProcessTerminated());
+        },
+        onRenderProcessGone: (controller, detail) {
+          unawaited(e.onWebViewProcessTerminated());
+        },
         shouldOverrideUrlLoading: _onShouldOverrideUrlLoading,
         initialUrlRequest: URLRequest(url: initialUrl),
       ),
