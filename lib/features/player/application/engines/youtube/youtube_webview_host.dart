@@ -35,10 +35,18 @@ class _YoutubeWebViewHostState extends State<YoutubeWebViewHost> {
     NavigationAction action,
   ) async {
     final url = action.request.url?.toString() ?? '';
+    final videoId = widget.engine.currentVideoId;
     final allowed = shouldAllowYoutubeWatchNavigation(
       url: url,
-      videoId: widget.engine.currentVideoId,
+      videoId: videoId,
+      isForMainFrame: action.isForMainFrame,
     );
+    if (!allowed &&
+        action.isForMainFrame &&
+        url.contains('accounts.google.com') &&
+        videoId.isNotEmpty) {
+      unawaited(widget.engine.onSignInNavigationBlocked(controller));
+    }
     return allowed
         ? NavigationActionPolicy.ALLOW
         : NavigationActionPolicy.CANCEL;
@@ -78,6 +86,20 @@ class _YoutubeWebViewHostState extends State<YoutubeWebViewHost> {
             : null,
         onLoadStop: (controller, url) async {
           await e.onPageFinished(controller, url?.toString());
+        },
+        onReceivedHttpError: (controller, request, response) {
+          e.onWebResourceHttpError(
+            url: request.url.toString(),
+            statusCode: response.statusCode,
+            isForMainFrame: request.isForMainFrame ?? false,
+          );
+        },
+        onReceivedError: (controller, request, error) {
+          if (request.isForMainFrame != true) return;
+          e.onWebResourceLoadError(
+            url: request.url.toString(),
+            description: error.description,
+          );
         },
         shouldOverrideUrlLoading: _onShouldOverrideUrlLoading,
         initialUrlRequest: URLRequest(url: initialUrl),

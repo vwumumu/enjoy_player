@@ -25,12 +25,27 @@ void main() {
     });
   });
 
+  group('isYoutubePlaybackOrStaticAssetUrl', () {
+    test('detects googlevideo CDN', () {
+      expect(
+        isYoutubePlaybackOrStaticAssetUrl(
+          'https://rr3---sn-abc.googlevideo.com/videoplayback?expire=1',
+        ),
+        isTrue,
+      );
+    });
+  });
+
   group('shouldAllowYoutubeWatchNavigation', () {
     const videoId = 'mA1lnxfqHk8';
 
     test('allows about:blank', () {
       expect(
-        shouldAllowYoutubeWatchNavigation(url: 'about:blank', videoId: videoId),
+        shouldAllowYoutubeWatchNavigation(
+          url: 'about:blank',
+          videoId: videoId,
+          isForMainFrame: true,
+        ),
         isTrue,
       );
     });
@@ -40,6 +55,7 @@ void main() {
         shouldAllowYoutubeWatchNavigation(
           url: 'https://m.youtube.com/watch?v=$videoId',
           videoId: videoId,
+          isForMainFrame: true,
         ),
         isTrue,
       );
@@ -47,6 +63,7 @@ void main() {
         shouldAllowYoutubeWatchNavigation(
           url: 'https://www.youtube.com/watch?v=$videoId',
           videoId: videoId,
+          isForMainFrame: true,
         ),
         isTrue,
       );
@@ -54,6 +71,7 @@ void main() {
         shouldAllowYoutubeWatchNavigation(
           url: 'https://m.youtube.com/',
           videoId: videoId,
+          isForMainFrame: true,
         ),
         isTrue,
       );
@@ -66,6 +84,7 @@ void main() {
               'https://accounts.google.com/ServiceLogin?passive=true&'
               'service=youtube',
           videoId: videoId,
+          isForMainFrame: true,
         ),
         isFalse,
       );
@@ -73,6 +92,7 @@ void main() {
         shouldAllowYoutubeWatchNavigation(
           url: 'https://accounts.google.com/v3/signin/identifier',
           videoId: videoId,
+          isForMainFrame: true,
         ),
         isFalse,
       );
@@ -83,6 +103,7 @@ void main() {
         shouldAllowYoutubeWatchNavigation(
           url: 'https://consent.youtube.com/m?continue=...',
           videoId: videoId,
+          isForMainFrame: true,
         ),
         isTrue,
       );
@@ -90,16 +111,48 @@ void main() {
         shouldAllowYoutubeWatchNavigation(
           url: 'https://fonts.gstatic.com/s/roboto/v1/foo.woff2',
           videoId: videoId,
+          isForMainFrame: true,
         ),
         isTrue,
       );
     });
 
-    test('denies unrelated origins when a video is open', () {
+    test('allows googlevideo CDN on main frame', () {
+      expect(
+        shouldAllowYoutubeWatchNavigation(
+          url: 'https://rr3---sn-abc.googlevideo.com/videoplayback?expire=1',
+          videoId: videoId,
+          isForMainFrame: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('allows all subresource loads regardless of origin', () {
+      expect(
+        shouldAllowYoutubeWatchNavigation(
+          url: 'https://example.com/segment.ts',
+          videoId: videoId,
+          isForMainFrame: false,
+        ),
+        isTrue,
+      );
+      expect(
+        shouldAllowYoutubeWatchNavigation(
+          url: 'https://accounts.google.com/ServiceLogin?passive=true',
+          videoId: videoId,
+          isForMainFrame: false,
+        ),
+        isTrue,
+      );
+    });
+
+    test('denies unrelated main-frame origins when a video is open', () {
       expect(
         shouldAllowYoutubeWatchNavigation(
           url: 'https://example.com/',
           videoId: videoId,
+          isForMainFrame: true,
         ),
         isFalse,
       );
@@ -110,6 +163,7 @@ void main() {
         shouldAllowYoutubeWatchNavigation(
           url: 'https://m.youtube.com/watch?v=$videoId',
           videoId: '',
+          isForMainFrame: true,
         ),
         isFalse,
       );

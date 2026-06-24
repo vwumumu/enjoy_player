@@ -80,6 +80,7 @@ class YoutubePlayerEngine implements PlayerEngine {
           _logYoutube.warning(
             'youtube playback stalled after load_stop vid=$videoId',
           );
+          unawaited(_recoverStalledPlayback());
         },
       );
 
@@ -336,9 +337,51 @@ class YoutubePlayerEngine implements PlayerEngine {
 
   void _logInitPhase(String phase) {
     final ms = _initStopwatch?.elapsedMilliseconds;
-    _logYoutube.fine(
-      'youtube init $phase${ms != null ? ' +${ms}ms' : ''}',
+    final message = 'youtube init $phase${ms != null ? ' +${ms}ms' : ''}';
+    if (phase == 'load_stop' || phase == 'first_playing') {
+      _logYoutube.info(message);
+    } else {
+      _logYoutube.fine(message);
+    }
+  }
+
+  /// Called when [shouldOverrideUrlLoading] cancels passive Google sign-in.
+  Future<void> onSignInNavigationBlocked(
+    InAppWebViewController controller,
+  ) async {
+    final vid = _videoId;
+    if (vid.isEmpty || _disposed) return;
+    _logYoutube.info('youtube reload after blocked sign-in vid=$vid');
+    await YoutubeWebViewBridge.loadWatchPage(controller, vid);
+  }
+
+  void onWebResourceHttpError({
+    required String? url,
+    required int? statusCode,
+    required bool isForMainFrame,
+  }) {
+    if (!isForMainFrame) return;
+    _logYoutube.warning(
+      'youtube main-frame HTTP $statusCode url=${url ?? ''}',
     );
+  }
+
+  void onWebResourceLoadError({
+    required String url,
+    required String description,
+  }) {
+    _logYoutube.warning(
+      'youtube load error url=$url msg=$description',
+    );
+  }
+
+  Future<void> _recoverStalledPlayback() async {
+    final controller = _webController;
+    final vid = _videoId;
+    if (controller == null || vid.isEmpty || _disposed) return;
+    _logYoutube.info('youtube reload after stall vid=$vid');
+    _emitBuffering(true);
+    await YoutubeWebViewBridge.loadWatchPage(controller, vid);
   }
 
   void onWebViewCreated(
@@ -417,7 +460,18 @@ class YoutubePlayerEngine implements PlayerEngine {
 
     if (_videoId.isNotEmpty && !initialWatchUrlRequested) {
       unawaited(_loadCurrentVideoIfAttached());
+    } else if (_videoId.isNotEmpty && initialWatchUrlRequested) {
+      // Windows release: [initialUrlRequest] alone can fail to finish loading.
+      unawaited(_ensureWatchPageLoadedAfterDelay());
     }
+  }
+
+  Future<void> _ensureWatchPageLoadedAfterDelay() async {
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (_disposed || _videoId.isEmpty || _webController == null) return;
+    if (_loggedFirstPlaying) return;
+    _logYoutube.info('youtube verify watch load vid=$_videoId');
+    await _loadCurrentVideoIfAttached();
   }
 
   void onWebViewDisposed(InAppWebViewController? controller) {

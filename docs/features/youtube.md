@@ -23,10 +23,12 @@ While a video is open, the player WebView [`shouldOverrideUrlLoading`](../../lib
 
 | Navigation | Policy |
 |------------|--------|
-| `m.youtube.com` / `youtube.com` / `youtu.be` watch and redirect hops | Allow |
+| `m.youtube.com` / `youtube.com` / `youtu.be` watch and redirect hops | Allow (main frame only) |
+| `googlevideo.com`, `ytimg.com`, and other CDN/static asset hosts | Allow |
+| Subresource loads (Windows WebView2 fires `shouldOverrideUrlLoading` for these too) | Always allow |
 | `consent.youtube.com`, `gstatic.com`, `googleapis.com`, other allowed Google static/consent URLs | Allow |
-| **`accounts.google.com` (passive or active sign-in)** | **Cancel** |
-| Unrelated origins | Cancel |
+| **`accounts.google.com` (passive or active sign-in)** | **Cancel** (main frame); player reloads watch URL |
+| Unrelated main-frame origins | Cancel |
 
 **Why**: YouTube’s mobile watch page often redirects through **passive Google sign-in** when no session cookies exist. In embedded WebViews (especially release builds), that chain can finish without a playable `<video>` — infinite loading. Blocking account navigations in the player keeps anonymous playback on the watch page; use **YouTube login** when a signed-in session is needed.
 
