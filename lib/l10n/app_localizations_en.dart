@@ -1715,4 +1715,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authRequiredCloudFeaturesTitle => 'Account required';
+
+  @override
+  String get practicePosterShareTooltip => 'Share practice poster';
+
+  @override
+  String get practicePosterPreviewTitle => 'Share your practice';
+
+  @override
+  String get practicePosterTagline => 'Shadow reading';
+
+  @override
+  String get practicePosterStatTakes => 'Takes';
+
+  @override
+  String get practicePosterStatSentences => 'Sentences';
+
+  @override
+  String get practicePosterStatSpoken => 'Spoken';
+
+  @override
+  String get practicePosterQrHint =>
+      'Scan to download Enjoy Player\nplayer.enjoy.bot';
+
+  @override
+  String get practicePosterShareAction => 'Share poster';
+
+  @override
+  String get practicePosterShareSuccess => 'Poster shared.';
+
+  @override
+  String get practicePosterSaveSuccess => 'Poster saved.';
+
+  @override
+  String get practicePosterExportError => 'Could not share practice poster.';
+
+  @override
+  String get practicePosterLoadError =>
+      'Could not load practice data for this video.';
 }

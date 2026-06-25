@@ -696,5 +696,17 @@
   "lookupPickTargetTitle": "选择目标语言",
   "lookupRefresh": "刷新",
   "lookupCloudRequiresSignIn": "请在「设置」中登录后使用云端词典、翻译与语境翻译。",
-  "authRequiredCloudFeaturesTitle": "需要登录账户"
+  "authRequiredCloudFeaturesTitle": "需要登录账户",
+  "practicePosterShareTooltip": "分享练习海报",
+  "practicePosterPreviewTitle": "分享你的练习",
+  "practicePosterTagline": "跟读练习",
+  "practicePosterStatTakes": "录音",
+  "practicePosterStatSentences": "句子",
+  "practicePosterStatSpoken": "开口",
+  "practicePosterQrHint": "扫码下载 Enjoy Player\nplayer.enjoy.bot",
+  "practicePosterShareAction": "分享海报",
+  "practicePosterShareSuccess": "海报已分享。",
+  "practicePosterSaveSuccess": "海报已保存。",
+  "practicePosterExportError": "无法分享练习海报。",
+  "practicePosterLoadError": "无法加载此视频的练习数据。"
 }

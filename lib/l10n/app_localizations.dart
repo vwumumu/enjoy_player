@@ -3248,6 +3248,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account required'**
   String get authRequiredCloudFeaturesTitle;
+
+  /// No description provided for @practicePosterShareTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Share practice poster'**
+  String get practicePosterShareTooltip;
+
+  /// No description provided for @practicePosterPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your practice'**
+  String get practicePosterPreviewTitle;
+
+  /// No description provided for @practicePosterTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Shadow reading'**
+  String get practicePosterTagline;
+
+  /// No description provided for @practicePosterStatTakes.
+  ///
+  /// In en, this message translates to:
+  /// **'Takes'**
+  String get practicePosterStatTakes;
+
+  /// No description provided for @practicePosterStatSentences.
+  ///
+  /// In en, this message translates to:
+  /// **'Sentences'**
+  String get practicePosterStatSentences;
+
+  /// No description provided for @practicePosterStatSpoken.
+  ///
+  /// In en, this message translates to:
+  /// **'Spoken'**
+  String get practicePosterStatSpoken;
+
+  /// No description provided for @practicePosterQrHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to download Enjoy Player\nplayer.enjoy.bot'**
+  String get practicePosterQrHint;
+
+  /// No description provided for @practicePosterShareAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Share poster'**
+  String get practicePosterShareAction;
+
+  /// No description provided for @practicePosterShareSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Poster shared.'**
+  String get practicePosterShareSuccess;
+
+  /// No description provided for @practicePosterSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Poster saved.'**
+  String get practicePosterSaveSuccess;
+
+  /// No description provided for @practicePosterExportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share practice poster.'**
+  String get practicePosterExportError;
+
+  /// No description provided for @practicePosterLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load practice data for this video.'**
+  String get practicePosterLoadError;
 }
 
 class _AppLocalizationsDelegate

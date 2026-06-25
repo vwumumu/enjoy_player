@@ -696,5 +696,17 @@
   "lookupPickTargetTitle": "Choose target language",
   "lookupRefresh": "Refresh",
   "lookupCloudRequiresSignIn": "Sign in under Settings to use cloud dictionary, translation, and contextual translation.",
-  "authRequiredCloudFeaturesTitle": "Account required"
+  "authRequiredCloudFeaturesTitle": "Account required",
+  "practicePosterShareTooltip": "Share practice poster",
+  "practicePosterPreviewTitle": "Share your practice",
+  "practicePosterTagline": "Shadow reading",
+  "practicePosterStatTakes": "Takes",
+  "practicePosterStatSentences": "Sentences",
+  "practicePosterStatSpoken": "Spoken",
+  "practicePosterQrHint": "Scan to download Enjoy Player\nplayer.enjoy.bot",
+  "practicePosterShareAction": "Share poster",
+  "practicePosterShareSuccess": "Poster shared.",
+  "practicePosterSaveSuccess": "Poster saved.",
+  "practicePosterExportError": "Could not share practice poster.",
+  "practicePosterLoadError": "Could not load practice data for this video."
 }

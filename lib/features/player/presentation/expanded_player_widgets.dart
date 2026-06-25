@@ -23,6 +23,7 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:enjoy_player/features/player/application/youtube_open_preview_provider.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/youtube_loading_video_stage.dart';
 
+import 'package:enjoy_player/features/share_poster/presentation/share_practice_poster_button.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_panel.dart';
 
 /// Centered loading indicator while [openMediaActionProvider] resolves.
@@ -166,16 +167,37 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
       body: PlayerAmbientBackdrop(
         accentColor: accent,
         intensity: 0.08,
-        child: isVideo
-            ? Stack(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (isVideo)
+              Stack(
                 fit: StackFit.expand,
                 children: [
                   mediaBody,
                   if (showVideoTitleChrome)
-                    _VideoTitleChromeOverlay(mediaTitle: chrome.mediaTitle),
+                    _VideoTitleChromeOverlay(
+                      mediaId: mediaId,
+                      mediaTitle: chrome.mediaTitle,
+                    ),
                 ],
               )
-            : mediaBody,
+            else
+              mediaBody,
+            Positioned(
+              top: 0,
+              right: 0,
+              child: SafeArea(
+                bottom: false,
+                left: false,
+                child: SharePracticePosterButton(
+                  mediaId: mediaId,
+                  iconColor: isVideo ? Colors.white : cs.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -212,8 +234,12 @@ class _VideoCollapseOnlyOverlay extends ConsumerWidget {
 
 /// Floating title row over video when paused or buffering (does not affect layout).
 class _VideoTitleChromeOverlay extends ConsumerWidget {
-  const _VideoTitleChromeOverlay({required this.mediaTitle});
+  const _VideoTitleChromeOverlay({
+    required this.mediaId,
+    required this.mediaTitle,
+  });
 
+  final String mediaId;
   final String mediaTitle;
 
   @override

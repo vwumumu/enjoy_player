@@ -1641,6 +1641,42 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get authRequiredCloudFeaturesTitle => '需要登录账户';
+
+  @override
+  String get practicePosterShareTooltip => '分享练习海报';
+
+  @override
+  String get practicePosterPreviewTitle => '分享你的练习';
+
+  @override
+  String get practicePosterTagline => '跟读练习';
+
+  @override
+  String get practicePosterStatTakes => '录音';
+
+  @override
+  String get practicePosterStatSentences => '句子';
+
+  @override
+  String get practicePosterStatSpoken => '开口';
+
+  @override
+  String get practicePosterQrHint => '扫码下载 Enjoy Player\nplayer.enjoy.bot';
+
+  @override
+  String get practicePosterShareAction => '分享海报';
+
+  @override
+  String get practicePosterShareSuccess => '海报已分享。';
+
+  @override
+  String get practicePosterSaveSuccess => '海报已保存。';
+
+  @override
+  String get practicePosterExportError => '无法分享练习海报。';
+
+  @override
+  String get practicePosterLoadError => '无法加载此视频的练习数据。';
 }
 
 /// The translations for Chinese, as used in China (`zh_CN`).
@@ -3280,4 +3316,40 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get authRequiredCloudFeaturesTitle => '需要登录账户';
+
+  @override
+  String get practicePosterShareTooltip => '分享练习海报';
+
+  @override
+  String get practicePosterPreviewTitle => '分享你的练习';
+
+  @override
+  String get practicePosterTagline => '跟读练习';
+
+  @override
+  String get practicePosterStatTakes => '录音';
+
+  @override
+  String get practicePosterStatSentences => '句子';
+
+  @override
+  String get practicePosterStatSpoken => '开口';
+
+  @override
+  String get practicePosterQrHint => '扫码下载 Enjoy Player\nplayer.enjoy.bot';
+
+  @override
+  String get practicePosterShareAction => '分享海报';
+
+  @override
+  String get practicePosterShareSuccess => '海报已分享。';
+
+  @override
+  String get practicePosterSaveSuccess => '海报已保存。';
+
+  @override
+  String get practicePosterExportError => '无法分享练习海报。';
+
+  @override
+  String get practicePosterLoadError => '无法加载此视频的练习数据。';
 }
