@@ -4,22 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PracticePosterWidget renders stats and quote lines', (tester) async {
+  testWidgets('PracticePosterWidget renders stats and quote', (tester) async {
     const data = PracticePosterData(
       title: 'Sample lesson',
       coverSeed: 'seed-abc',
       isVideo: true,
       quote: PracticePosterQuote(
-        lines: [
-          PracticePosterQuoteLine(
-            text: 'so I could get away from the buzzing',
-            trailingEllipsis: true,
-          ),
-          PracticePosterQuoteLine(
-            text: 'and focus on the speech patterns',
-            trailingEllipsis: true,
-          ),
-        ],
+        line: PracticePosterQuoteLine(
+          text:
+              'so I could get away from the buzzing and focus on the speech patterns',
+          trailingEllipsis: true,
+        ),
       ),
       takes: 5,
       sentencesPracticed: 2,
@@ -50,7 +45,6 @@ void main() {
 
     expect(find.text('Sample lesson'), findsOneWidget);
     expect(find.textContaining('so I could get away'), findsOneWidget);
-    expect(find.textContaining('and focus on the speech'), findsOneWidget);
     expect(find.text('5'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
     expect(find.text('2m 5s'), findsOneWidget);

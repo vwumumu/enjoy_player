@@ -108,9 +108,52 @@ void main() {
           _recording(id: 'c', start: 1200, duration: 500),
         ],
       );
-      expect(quote?.lines.first.text, 'Longer practiced line.');
-      expect(quote?.lines.first.trailingEllipsis, isFalse);
-      expect(quote?.lines, hasLength(2));
+      expect(quote?.line.text, 'Longer practiced line.');
+      expect(quote?.line.trailingEllipsis, isFalse);
+    });
+
+    test('strips subtitle markup from quote lines', () {
+      const lineWithMarkup = TranscriptLine(
+        text: '<font size="54">JUST \'CAUSE I DON\'T</font>',
+        startMs: 0,
+        durationMs: 2000,
+      );
+      final quote = resolvePracticePosterQuote(
+        lines: const [lineWithMarkup],
+        recordings: [
+          _recording(id: 'a', start: 100, duration: 500),
+        ],
+      );
+      expect(quote?.line.text, "JUST 'CAUSE I DON'T");
+    });
+
+    test('prefers active echo region over most-practiced line', () {
+      const lineA = TranscriptLine(
+        text: 'First echo line.',
+        startMs: 0,
+        durationMs: 1000,
+      );
+      const lineB = TranscriptLine(
+        text: 'Second echo line.',
+        startMs: 1000,
+        durationMs: 1000,
+      );
+      const lineOther = TranscriptLine(
+        text: 'Most practiced but outside echo.',
+        startMs: 3000,
+        durationMs: 1000,
+      );
+      final quote = resolvePracticePosterQuote(
+        lines: const [lineA, lineB, lineOther],
+        recordings: [
+          _recording(id: 'a', start: 3100, duration: 500),
+          _recording(id: 'b', start: 3200, duration: 500),
+          _recording(id: 'c', start: 3200, duration: 500),
+        ],
+        echoStartLineIndex: 0,
+        echoEndLineIndex: 1,
+      );
+      expect(quote?.line.text, 'First echo line. Second echo line.');
     });
 
     test('appends ellipsis for incomplete fragment', () {
@@ -120,11 +163,11 @@ void main() {
           _recording(id: 'a', start: 3100, duration: 500),
         ],
       );
-      expect(quote?.lines.single.displayText, endsWith('...'));
-      expect(quote?.lines.single.trailingEllipsis, isTrue);
+      expect(quote?.line.displayText, endsWith('...'));
+      expect(quote?.line.trailingEllipsis, isTrue);
     });
 
-    test('returns top two practiced lines', () {
+    test('returns only the top practiced line when several exist', () {
       final quote = resolvePracticePosterQuote(
         lines: const [lineShort, lineLong, lineFragment],
         recordings: [
@@ -134,10 +177,7 @@ void main() {
           _recording(id: 'd', start: 100, duration: 500),
         ],
       );
-      expect(quote?.lines, hasLength(2));
-      expect(quote?.lines.first.text, 'Longer practiced line.');
-      expect(quote?.lines.last.text, 'so I could get away from the buzzing');
-      expect(quote?.lines.last.trailingEllipsis, isTrue);
+      expect(quote?.line.text, 'Longer practiced line.');
     });
 
     test('tie-breaks by longer text', () {
@@ -148,8 +188,7 @@ void main() {
           _recording(id: 'b', start: 5100, duration: 400),
         ],
       );
-      expect(quote?.lines.first.text, 'Hi.');
-      expect(quote?.lines, hasLength(2));
+      expect(quote?.line.text, 'Hi.');
     });
 
     test('falls back to longest referenceText without transcript overlap', () {
@@ -170,7 +209,7 @@ void main() {
           ),
         ],
       );
-      expect(quote?.lines.single.text, 'Much longer reference text');
+      expect(quote?.line.text, 'Much longer reference text');
     });
 
     test('returns null when no usable text', () {

@@ -49,6 +49,16 @@ class _StyleFrame {
   }
 }
 
+/// Plain text with markup tags removed (preserves inner text and `<br>` breaks).
+String plainTextFromSubtitleMarkup(String input) {
+  final segments = parseSubtitleMarkup(input);
+  if (segments.isEmpty) {
+    final plain = input.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+    return plain.isEmpty ? input.trim() : plain;
+  }
+  return segments.map((s) => s.text).join().trim();
+}
+
 /// Parses [input] into styled segments for rich text rendering.
 List<SubtitleTextSegment> parseSubtitleMarkup(String input) {
   if (input.isEmpty) return const [];

@@ -14,7 +14,11 @@ import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/library/application/library_repository_provider.dart';
+import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
+import 'package:enjoy_player/features/player/application/player_controller.dart';
+import 'package:enjoy_player/features/player/application/player_engine_provider.dart';
 import 'package:enjoy_player/features/share_poster/application/practice_poster_builder.dart';
+import 'package:enjoy_player/features/share_poster/application/practice_poster_echo_frame_capture.dart';
 import 'package:enjoy_player/features/share_poster/application/practice_poster_export.dart';
 import 'package:enjoy_player/features/share_poster/domain/practice_poster_data.dart';
 import 'package:enjoy_player/features/share_poster/presentation/practice_poster_widget.dart';
@@ -59,11 +63,23 @@ class _PracticePosterPreviewSheetState
 
   Future<void> _load() async {
     try {
+      final session = ref.read(playerControllerProvider);
+      final echo = session?.mediaId == widget.mediaId
+          ? ref.read(echoModeProvider)
+          : EchoState.inactive;
+      final echoCoverBytes = await capturePracticePosterEchoFrame(
+        engine: ref.read(playerEngineProvider),
+        echo: echo,
+        session: session,
+        mediaId: widget.mediaId,
+      );
       final data = await buildPracticePosterData(
         db: ref.read(appDatabaseProvider),
         library: ref.read(mediaLibraryRepositoryProvider),
         transcriptRepo: ref.read(transcriptRepositoryProvider),
         mediaId: widget.mediaId,
+        echo: echo,
+        echoCoverBytes: echoCoverBytes,
       );
       if (!mounted) return;
       setState(() {

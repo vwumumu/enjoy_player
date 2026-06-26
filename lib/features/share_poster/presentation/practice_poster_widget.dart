@@ -47,7 +47,6 @@ class PracticePosterWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = generativeAccentForSeed(data.coverSeed);
     final hasQuote = data.quote != null && !data.quote!.isEmpty;
-    final denseContent = hasQuote && data.quote!.hasMultiple;
 
     return SizedBox(
       width: practicePosterLogicalWidth,
@@ -85,9 +84,9 @@ class PracticePosterWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: denseContent ? 14 : 18),
+              const SizedBox(height: 18),
               AspectRatio(
-                aspectRatio: denseContent ? 2.12 : 16 / 9,
+                aspectRatio: 16 / 9,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(14),
                   child: DecoratedBox(
@@ -107,7 +106,7 @@ class PracticePosterWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: denseContent ? 12 : 14),
+              const SizedBox(height: 14),
               Text(
                 data.title,
                 maxLines: 2,
@@ -155,7 +154,7 @@ class PracticePosterWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: denseContent ? 12 : 14),
+              const SizedBox(height: 14),
               Divider(
                 height: 24,
                 thickness: 1,
@@ -178,8 +177,6 @@ class _PracticePosterQuoteBlock extends StatelessWidget {
 
   final PracticePosterQuote quote;
   final Color accent;
-
-  static const _maxQuoteLines = 2;
 
   static TextStyle _quoteMarkStyle(Color accent, {required double fontSize}) {
     return GoogleFonts.playfairDisplay(
@@ -255,62 +252,35 @@ class _PracticePosterQuoteBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lines = quote.lines.take(_maxQuoteLines).toList(growable: false);
-    final perLineMax = lines.length > 1 ? 1 : _maxQuoteLines;
-    final dualLines = lines.length > 1;
-    final primarySize = dualLines ? 17.0 : 18.0;
-    final secondarySize = dualLines ? 16.0 : 18.0;
-    final markSize = dualLines ? 28.0 : 32.0;
+    const maxQuoteLines = 2;
+    const fontSize = 18.0;
+    const markSize = 32.0;
+    final quoteText = quote.line.displayText;
     final primaryStyle = _quoteTextStyle(
       opacity: 0.97,
-      fontSize: primarySize,
+      fontSize: fontSize,
     );
     final markStyle = _quoteMarkStyle(accent, fontSize: markSize);
 
-    final markBox = TextPainter(
-      text: TextSpan(text: '“', style: markStyle),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    final textIndent = markBox.width + 5;
-
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text('“', style: markStyle),
-            const SizedBox(width: 5),
-            Expanded(
-              child: Text.rich(
-                _shadowingQuoteSpan(
-                  text: lines.first.displayText,
-                  baseStyle: primaryStyle,
-                  highlightWords: dualLines ? 3 : 4,
-                ),
-                maxLines: perLineMax,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text('“', style: markStyle),
         ),
-        if (lines.length > 1) ...[
-          const SizedBox(height: 10),
-          Padding(
-            padding: EdgeInsets.only(left: textIndent),
-            child: Text(
-              lines[1].displayText,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: _quoteTextStyle(
-                opacity: 0.78,
-                fontSize: secondarySize,
-                fontWeight: FontWeight.w500,
-              ),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text.rich(
+            _shadowingQuoteSpan(
+              text: quoteText,
+              baseStyle: primaryStyle,
+              highlightWords: 4,
             ),
+            maxLines: maxQuoteLines,
+            overflow: TextOverflow.ellipsis,
           ),
-        ],
+        ),
       ],
     );
   }
@@ -393,6 +363,14 @@ class _PracticePosterCoverState extends State<PracticePosterCover> {
 
   @override
   Widget build(BuildContext context) {
+    final echoBytes = widget.data.echoCoverBytes;
+    if (echoBytes != null && echoBytes.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _notifyReadyOnce();
+      });
+      return Image.memory(echoBytes, fit: BoxFit.cover);
+    }
+
     final localPath = widget.data.localThumbnailPath;
     if (localPath != null && localPath.isNotEmpty) {
       final file = File(localPath);

@@ -8,7 +8,9 @@ import 'package:enjoy_player/data/db/media_target_resolver.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/library/data/library_repository.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
+import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/share_poster/domain/practice_poster_data.dart';
+import 'package:enjoy_player/features/transcript/application/echo_region_bounds.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_repository.dart';
 
 Future<List<RecordingRow>> listRecordingsForTarget(
@@ -49,6 +51,8 @@ Future<PracticePosterData?> buildPracticePosterData({
   required MediaLibraryRepository library,
   required TranscriptRepository transcriptRepo,
   required String mediaId,
+  EchoState? echo,
+  Uint8List? echoCoverBytes,
 }) async {
   final media = await library.getById(mediaId);
   if (media == null) return null;
@@ -72,9 +76,14 @@ Future<PracticePosterData?> buildPracticePosterData({
     recordings: recordings,
     lines: lines,
   );
+  final activeEcho = echo != null
+      ? activeEchoForTranscript(echo, lines.length)
+      : null;
   final quote = resolvePracticePosterQuote(
     lines: lines,
     recordings: recordings,
+    echoStartLineIndex: activeEcho?.startLineIndex,
+    echoEndLineIndex: activeEcho?.endLineIndex,
   );
 
   final netThumb = networkThumbnailForMedia(media);
@@ -84,6 +93,7 @@ Future<PracticePosterData?> buildPracticePosterData({
     title: media.title,
     coverSeed: media.coverSeed,
     isVideo: media.kind == MediaKind.video,
+    echoCoverBytes: echoCoverBytes,
     localThumbnailPath: localFile?.path,
     networkThumbnailUrl: netThumb,
     quote: quote,

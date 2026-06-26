@@ -20,4 +20,9 @@ void main() {
     expect(segs.single.colorArgb, 0xFFFFFF00);
     expect(segs.single.bold, isTrue);
   });
+
+  test('plainTextFromSubtitleMarkup strips font size tags', () {
+    const input = '<font size="54">JUST \'CAUSE I DON\'T</font>';
+    expect(plainTextFromSubtitleMarkup(input), "JUST 'CAUSE I DON'T");
+  });
 }
