@@ -1,4 +1,4 @@
-import org.gradle.api.tasks.compile.JavaCompile
+import com.android.build.gradle.BaseExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -48,16 +48,23 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
-// Flutter plugins often default to Java 8; JDK 21+ warns that -source/-target 8 are obsolete.
-// Tune JavaCompile tasks directly (--release is forbidden by AGP for Android bootclasspath).
-subprojects {
-    tasks.withType<JavaCompile>().configureEach {
-        sourceCompatibility = JavaVersion.VERSION_17.toString()
-        targetCompatibility = JavaVersion.VERSION_17.toString()
-    }
-    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+// Flutter plugins declare mixed Java levels (1.8, 11, 17). Do not force Kotlin to 17 globally —
+// that breaks AGP's Java/Kotlin compatibility check (e.g. sign_in_with_apple: Java 1.8, Kotlin 17).
+// After all projects are evaluated, align each KotlinCompile jvmTarget to android.compileOptions.
+gradle.projectsEvaluated {
+    subprojects {
+        val javaVersion =
+            runCatching {
+                extensions.findByType(BaseExtension::class.java)?.compileOptions?.sourceCompatibility
+            }.getOrNull() ?: JavaVersion.VERSION_1_8
+        val jvmTarget =
+            when (javaVersion) {
+                JavaVersion.VERSION_17 -> JvmTarget.JVM_17
+                JavaVersion.VERSION_11 -> JvmTarget.JVM_11
+                else -> JvmTarget.JVM_1_8
+            }
         tasks.withType<KotlinCompile>().configureEach {
-            compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+            compilerOptions.jvmTarget.set(jvmTarget)
         }
     }
 }
