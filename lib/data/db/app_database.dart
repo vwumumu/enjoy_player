@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/utils/stream_distinct.dart';
 import 'tables/audios.dart';
 import 'tables/dictations.dart';
 import 'tables/echo_sessions.dart';
@@ -453,7 +454,8 @@ class RecordingDao extends DatabaseAccessor<AppDatabase>
                   t.targetType.equals(targetType) & t.targetId.equals(targetId),
             )
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
-          .watch();
+          .watch()
+          .distinctBy(_listEqualsRecordingRow);
 
   /// Echo-region overlap — same rules as web `getRecordingsByEchoRegion`.
   Stream<List<RecordingRow>> watchByEchoRegion({
@@ -473,7 +475,8 @@ class RecordingDao extends DatabaseAccessor<AppDatabase>
                   recordingEnd.isBiggerThanValue(echoStartMs);
             })
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
-          .watch();
+          .watch()
+          .distinctBy(_listEqualsRecordingRow);
 
   Future<List<RecordingRow>> listByEchoRegion({
     required String targetType,
@@ -729,4 +732,42 @@ class YoutubeFeedEntryDao extends DatabaseAccessor<AppDatabase>
         ))
         .go();
   }
+}
+
+/// Element-wise comparison of two `RecordingRow` lists without allocating.
+///
+/// Used by `RecordingDao.watchByTarget` and `RecordingDao.watchByEchoRegion`
+/// to skip identical re-emissions — Drift re-queries on any change to the
+/// `recordings` table, and `shadow_reading_panel` plus
+/// `recordingsForTargetProvider` re-build on every emission.
+bool _listEqualsRecordingRow(
+  List<RecordingRow> previous,
+  List<RecordingRow> current,
+) {
+  if (identical(previous, current)) return true;
+  if (previous.length != current.length) return false;
+  for (var i = 0; i < previous.length; i++) {
+    final a = previous[i];
+    final b = current[i];
+    if (a.id != b.id ||
+        a.targetType != b.targetType ||
+        a.targetId != b.targetId ||
+        a.referenceStart != b.referenceStart ||
+        a.referenceDuration != b.referenceDuration ||
+        a.referenceText != b.referenceText ||
+        a.language != b.language ||
+        a.duration != b.duration ||
+        a.md5 != b.md5 ||
+        a.audioUrl != b.audioUrl ||
+        a.pronunciationScore != b.pronunciationScore ||
+        a.assessmentJson != b.assessmentJson ||
+        a.localPath != b.localPath ||
+        a.syncStatus != b.syncStatus ||
+        a.serverUpdatedAt != b.serverUpdatedAt ||
+        a.createdAt != b.createdAt ||
+        a.updatedAt != b.updatedAt) {
+      return false;
+    }
+  }
+  return true;
 }
