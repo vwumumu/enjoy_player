@@ -263,29 +263,42 @@ class DiscoverRepository {
       keepVideoIds,
     );
 
-    for (final entry in entries) {
-      final existing = await _db.youtubeFeedEntryDao.getEntry(
-        channelId: channelId,
-        videoId: entry.videoId,
-      );
-      final libraryVideo = await _db.videoDao.getYoutubeByVid(entry.videoId);
-      final durationSeconds =
-          libraryVideo != null && libraryVideo.durationSeconds > 0
-          ? libraryVideo.durationSeconds
-          : existing?.durationSeconds;
-
-      await _db.youtubeFeedEntryDao.upsertEntry(
-        YoutubeFeedEntryRow(
+    // Read and write per-entry work is keyed by (channelId, videoId), so
+    // entries do not contend with each other. Fan the reads out, then fan
+    // the writes out — a typical YouTube RSS feed of ~15 entries turns
+    // ~45 sequential awaits into two parallel batches.
+    final resolved = await Future.wait(
+      entries.map((entry) async {
+        final existing = await _db.youtubeFeedEntryDao.getEntry(
+          channelId: channelId,
           videoId: entry.videoId,
-          channelId: entry.channelId,
-          title: entry.title,
-          thumbnailUrl: entry.thumbnailUrl,
-          durationSeconds: durationSeconds,
-          publishedAt: entry.publishedAt,
-          fetchedAt: fetchedAt,
+        );
+        final libraryVideo = await _db.videoDao.getYoutubeByVid(
+          entry.videoId,
+        );
+        final durationSeconds =
+            libraryVideo != null && libraryVideo.durationSeconds > 0
+            ? libraryVideo.durationSeconds
+            : existing?.durationSeconds;
+        return (entry: entry, durationSeconds: durationSeconds);
+      }),
+    );
+
+    await Future.wait(
+      resolved.map(
+        (r) => _db.youtubeFeedEntryDao.upsertEntry(
+          YoutubeFeedEntryRow(
+            videoId: r.entry.videoId,
+            channelId: r.entry.channelId,
+            title: r.entry.title,
+            thumbnailUrl: r.entry.thumbnailUrl,
+            durationSeconds: r.durationSeconds,
+            publishedAt: r.entry.publishedAt,
+            fetchedAt: fetchedAt,
+          ),
         ),
-      );
-    }
+      ),
+    );
 
     unawaited(_enrichMissingDurations(channelId, entries));
 
