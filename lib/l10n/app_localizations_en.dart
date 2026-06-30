@@ -1220,7 +1220,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionProcessorStripe => 'Stripe';
 
   @override
-  String get subscriptionProcessorMixin => 'Mixin';
+  String get subscriptionProcessorMixin => 'Cryptocurrency';
 
   @override
   String get subscriptionPaymentMethodCard => 'Card';
@@ -1232,6 +1232,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionPaymentMethodAlipay => 'Alipay';
 
   @override
+  String get subscriptionPaymentMethodGooglePay => 'Google Pay';
+
+  @override
+  String get subscriptionPaymentMethodUsdt => 'USDT';
+
+  @override
+  String get subscriptionPaymentMethodUsdc => 'USDC';
+
+  @override
   String get subscriptionPaymentMethodBtc => 'BTC';
 
   @override
@@ -1239,6 +1248,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionPaymentMethodDoge => 'Doge';
+
+  @override
+  String get subscriptionPaymentMethodAndMore => 'and more';
 
   @override
   String get subscriptionTotalPriceLabel => 'Total';

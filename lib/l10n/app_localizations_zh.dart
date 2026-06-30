@@ -1175,7 +1175,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subscriptionProcessorStripe => 'Stripe';
 
   @override
-  String get subscriptionProcessorMixin => 'Mixin';
+  String get subscriptionProcessorMixin => '虚拟货币';
 
   @override
   String get subscriptionPaymentMethodCard => '银行卡';
@@ -1187,6 +1187,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subscriptionPaymentMethodAlipay => '支付宝';
 
   @override
+  String get subscriptionPaymentMethodGooglePay => 'Google Pay';
+
+  @override
+  String get subscriptionPaymentMethodUsdt => 'USDT';
+
+  @override
+  String get subscriptionPaymentMethodUsdc => 'USDC';
+
+  @override
   String get subscriptionPaymentMethodBtc => 'BTC';
 
   @override
@@ -1194,6 +1203,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get subscriptionPaymentMethodDoge => 'Doge';
+
+  @override
+  String get subscriptionPaymentMethodAndMore => '更多';
 
   @override
   String get subscriptionTotalPriceLabel => '合计';

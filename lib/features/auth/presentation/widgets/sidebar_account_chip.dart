@@ -83,25 +83,22 @@ class SidebarAccountChip extends ConsumerWidget {
                       background: cs.primaryContainer,
                       foreground: cs.onPrimaryContainer,
                     ),
-                  ] else if (isFree) ...[
-                    SizedBox(width: t.space4),
-                    _SidebarTierBadge(
-                      label: l10n.subscriptionUpgradeShort,
-                      background: cs.primary,
-                      foreground: cs.onPrimary,
-                    ),
                   ],
                 ],
               ),
               subtitle: Text(
-                isPro
-                    ? l10n.profileSubscriptionTile
-                    : l10n.settingsAccountOpenProfile,
+                l10n.settingsAccountOpenProfile,
                 style: Theme.of(
                   context,
                 ).textTheme.labelSmall?.copyWith(color: cs.primary),
               ),
-              onTap: () => context.push(isFree ? '/subscription' : '/profile'),
+              trailing: isFree
+                  ? _SidebarUpgradeButton(
+                      label: l10n.subscriptionUpgradeShort,
+                      onPressed: () => context.push('/subscription'),
+                    )
+                  : null,
+              onTap: () => context.push('/profile'),
             );
           }
           return ListTile(
@@ -154,6 +151,40 @@ class _SidebarTierBadge extends StatelessWidget {
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: foreground,
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarUpgradeButton extends StatelessWidget {
+  const _SidebarUpgradeButton({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Material(
+      color: cs.primary,
+      borderRadius: BorderRadius.circular(999),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: cs.onPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
       ),
     );

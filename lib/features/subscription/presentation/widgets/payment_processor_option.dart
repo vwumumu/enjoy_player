@@ -8,6 +8,8 @@ import 'package:enjoy_player/features/subscription/domain/payment_processor.dart
 import 'package:enjoy_player/features/subscription/presentation/widgets/payment_method_icons.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
+typedef _MethodEntry = ({PaymentMethodIcon? icon, String label});
+
 class PaymentProcessorOption extends StatelessWidget {
   const PaymentProcessorOption({
     required this.processor,
@@ -35,33 +37,46 @@ class PaymentProcessorOption extends StatelessWidget {
     };
 
     final methods = switch (processor) {
-      PaymentProcessor.stripe => [
+      PaymentProcessor.stripe => <_MethodEntry>[
         (
-          const PaymentMethodIcon(PaymentMethodIconKind.mastercard),
-          l10n.subscriptionPaymentMethodCard,
+          icon: const PaymentMethodIcon(PaymentMethodIconKind.mastercard),
+          label: l10n.subscriptionPaymentMethodCard,
         ),
         (
-          const PaymentMethodIcon(PaymentMethodIconKind.wechat),
-          l10n.subscriptionPaymentMethodWechat,
+          icon: const PaymentMethodIcon(PaymentMethodIconKind.wechat),
+          label: l10n.subscriptionPaymentMethodWechat,
         ),
         (
-          const PaymentMethodIcon(PaymentMethodIconKind.alipay),
-          l10n.subscriptionPaymentMethodAlipay,
+          icon: const PaymentMethodIcon(PaymentMethodIconKind.alipay),
+          label: l10n.subscriptionPaymentMethodAlipay,
+        ),
+        (
+          icon: const PaymentMethodIcon(PaymentMethodIconKind.googlePay),
+          label: l10n.subscriptionPaymentMethodGooglePay,
         ),
       ],
-      PaymentProcessor.mixin => [
+      PaymentProcessor.mixin => <_MethodEntry>[
         (
-          const PaymentMethodIcon(PaymentMethodIconKind.btc),
-          l10n.subscriptionPaymentMethodBtc,
+          icon: const PaymentMethodIcon(PaymentMethodIconKind.usdt),
+          label: l10n.subscriptionPaymentMethodUsdt,
         ),
         (
-          const PaymentMethodIcon(PaymentMethodIconKind.eth),
-          l10n.subscriptionPaymentMethodEth,
+          icon: const PaymentMethodIcon(PaymentMethodIconKind.usdc),
+          label: l10n.subscriptionPaymentMethodUsdc,
         ),
         (
-          const PaymentMethodIcon(PaymentMethodIconKind.doge),
-          l10n.subscriptionPaymentMethodDoge,
+          icon: const PaymentMethodIcon(PaymentMethodIconKind.btc),
+          label: l10n.subscriptionPaymentMethodBtc,
         ),
+        (
+          icon: const PaymentMethodIcon(PaymentMethodIconKind.eth),
+          label: l10n.subscriptionPaymentMethodEth,
+        ),
+        (
+          icon: const PaymentMethodIcon(PaymentMethodIconKind.doge),
+          label: l10n.subscriptionPaymentMethodDoge,
+        ),
+        (icon: null, label: l10n.subscriptionPaymentMethodAndMore),
       ],
     };
 
@@ -110,8 +125,11 @@ class PaymentProcessorOption extends StatelessWidget {
                       spacing: t.space12,
                       runSpacing: t.space8,
                       children: [
-                        for (final (icon, label) in methods)
-                          PaymentMethodChip(icon: icon, label: label),
+                        for (final method in methods)
+                          PaymentMethodChip(
+                            icon: method.icon,
+                            label: method.label,
+                          ),
                       ],
                     ),
                   ],

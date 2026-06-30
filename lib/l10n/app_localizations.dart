@@ -2346,7 +2346,7 @@ abstract class AppLocalizations {
   /// No description provided for @subscriptionProcessorMixin.
   ///
   /// In en, this message translates to:
-  /// **'Mixin'**
+  /// **'Cryptocurrency'**
   String get subscriptionProcessorMixin;
 
   /// No description provided for @subscriptionPaymentMethodCard.
@@ -2367,6 +2367,24 @@ abstract class AppLocalizations {
   /// **'Alipay'**
   String get subscriptionPaymentMethodAlipay;
 
+  /// No description provided for @subscriptionPaymentMethodGooglePay.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Pay'**
+  String get subscriptionPaymentMethodGooglePay;
+
+  /// No description provided for @subscriptionPaymentMethodUsdt.
+  ///
+  /// In en, this message translates to:
+  /// **'USDT'**
+  String get subscriptionPaymentMethodUsdt;
+
+  /// No description provided for @subscriptionPaymentMethodUsdc.
+  ///
+  /// In en, this message translates to:
+  /// **'USDC'**
+  String get subscriptionPaymentMethodUsdc;
+
   /// No description provided for @subscriptionPaymentMethodBtc.
   ///
   /// In en, this message translates to:
@@ -2384,6 +2402,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Doge'**
   String get subscriptionPaymentMethodDoge;
+
+  /// No description provided for @subscriptionPaymentMethodAndMore.
+  ///
+  /// In en, this message translates to:
+  /// **'and more'**
+  String get subscriptionPaymentMethodAndMore;
 
   /// No description provided for @subscriptionTotalPriceLabel.
   ///
