@@ -54,6 +54,7 @@ class SidebarAccountChip extends ConsumerWidget {
             final p = state.profile;
             final avatarUrl = p.avatarUrl;
             final isPro = p.subscriptionTier == SubscriptionTier.pro;
+            final isFree = !isPro;
             return ListTile(
               dense: true,
               leading: CircleAvatar(
@@ -77,22 +78,17 @@ class SidebarAccountChip extends ConsumerWidget {
                   ),
                   if (isPro) ...[
                     SizedBox(width: t.space4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.primaryContainer,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        l10n.profileSubscriptionPro,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: cs.onPrimaryContainer,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                    _SidebarTierBadge(
+                      label: l10n.profileSubscriptionPro,
+                      background: cs.primaryContainer,
+                      foreground: cs.onPrimaryContainer,
+                    ),
+                  ] else if (isFree) ...[
+                    SizedBox(width: t.space4),
+                    _SidebarTierBadge(
+                      label: l10n.subscriptionUpgradeShort,
+                      background: cs.primary,
+                      foreground: cs.onPrimary,
                     ),
                   ],
                 ],
@@ -105,7 +101,7 @@ class SidebarAccountChip extends ConsumerWidget {
                   context,
                 ).textTheme.labelSmall?.copyWith(color: cs.primary),
               ),
-              onTap: () => context.push(isPro ? '/subscription' : '/profile'),
+              onTap: () => context.push(isFree ? '/subscription' : '/profile'),
             );
           }
           return ListTile(
@@ -129,6 +125,36 @@ class SidebarAccountChip extends ConsumerWidget {
           ),
         ),
         error: (Object e, StackTrace s) => const SizedBox.shrink(),
+      ),
+    );
+  }
+}
+
+class _SidebarTierBadge extends StatelessWidget {
+  const _SidebarTierBadge({
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: foreground,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

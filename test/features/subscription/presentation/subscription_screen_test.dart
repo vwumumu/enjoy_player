@@ -88,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final l10n = lookupAppLocalizations(const Locale('en'));
-    expect(find.text(l10n.subscriptionTitle), findsOneWidget);
+    expect(find.text(l10n.subscriptionTitle), findsWidgets);
     expect(find.text(l10n.subscriptionTierFreeName), findsWidgets);
     expect(find.text(l10n.subscriptionUpgrade), findsWidgets);
   });

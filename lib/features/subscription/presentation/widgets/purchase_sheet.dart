@@ -1,4 +1,4 @@
-/// Desktop purchase sheet: external checkout and balance conversion.
+/// Desktop purchase sheet: external checkout only.
 library;
 
 import 'package:flutter/material.dart';
@@ -13,50 +13,31 @@ import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/features/subscription/application/subscription_purchase_provider.dart';
 import 'package:enjoy_player/features/subscription/domain/payment_processor.dart';
 import 'package:enjoy_player/features/subscription/domain/purchase_request.dart';
+import 'package:enjoy_player/features/subscription/presentation/widgets/payment_processor_option.dart';
+import 'package:enjoy_player/features/subscription/presentation/widgets/subscription_duration_selector.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-Future<void> showSubscriptionPurchaseSheet(
-  BuildContext context, {
-  double? accountBalance,
-}) {
+Future<void> showSubscriptionPurchaseSheet(BuildContext context) {
   if (!supportsExternalSubscriptionPurchase()) return Future.value();
   return showEnjoySheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (ctx) => _PurchaseSheetBody(accountBalance: accountBalance),
+    builder: (ctx) => const _PurchaseSheetBody(),
   );
 }
 
 class _PurchaseSheetBody extends ConsumerStatefulWidget {
-  const _PurchaseSheetBody({this.accountBalance});
-
-  final double? accountBalance;
+  const _PurchaseSheetBody();
 
   @override
   ConsumerState<_PurchaseSheetBody> createState() => _PurchaseSheetBodyState();
 }
 
-class _PurchaseSheetBodyState extends ConsumerState<_PurchaseSheetBody>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabs;
+class _PurchaseSheetBodyState extends ConsumerState<_PurchaseSheetBody> {
   int _months = 1;
   PaymentProcessor _processor = PaymentProcessor.stripe;
 
-  @override
-  void initState() {
-    super.initState();
-    _tabs = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabs.dispose();
-    super.dispose();
-  }
-
   double get _totalPrice => _months * kSubscriptionMonthlyPriceUsd;
-
-  bool get _hasBalance => (widget.accountBalance ?? 0) > 0;
 
   Future<void> _purchaseExternal() async {
     final l10n = AppLocalizations.of(context)!;
@@ -79,39 +60,6 @@ class _PurchaseSheetBodyState extends ConsumerState<_PurchaseSheetBody>
         AppFailure(:final message) => message,
         _ => l10n.subscriptionPurchaseFailed,
       };
-      AppNotice.error(context, message);
-    }
-  }
-
-  Future<void> _confirmBalancePurchase() async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showEnjoyAlertDialog<bool>(
-      context: context,
-      title: Text(l10n.subscriptionConfirmBalanceTitle),
-      content: Text(l10n.subscriptionConfirmBalanceMessage),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: Text(l10n.subscriptionConfirmPurchase),
-        ),
-      ],
-    );
-    if (confirmed != true || !mounted) return;
-
-    try {
-      await ref
-          .read(subscriptionPurchaseCtrlProvider.notifier)
-          .purchaseWithBalance();
-      if (!mounted) return;
-      Navigator.pop(context);
-      AppNotice.success(context, l10n.subscriptionPurchaseSuccess);
-    } catch (e) {
-      if (!mounted) return;
-      final message = e is AppFailure ? e.message : l10n.subscriptionPurchaseFailed;
       AppNotice.error(context, message);
     }
   }
@@ -157,183 +105,72 @@ class _PurchaseSheetBodyState extends ConsumerState<_PurchaseSheetBody>
             style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           ),
           SizedBox(height: t.space16),
-          TabBar(
-            controller: _tabs,
-            tabs: [
-              Tab(text: l10n.subscriptionPurchasePaymentTab),
-              Tab(text: l10n.subscriptionPurchaseBalanceTab),
-            ],
-          ),
-          SizedBox(height: t.space16),
-          SizedBox(
-            height: 320,
-            child: TabBarView(
-              controller: _tabs,
-              children: [
-                _PaymentTab(
+          ListView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+                SubscriptionDurationSelector(
                   months: _months,
-                  processor: _processor,
-                  totalPrice: _totalPrice,
-                  busy: busy,
+                  enabled: !busy,
                   onMonthsChanged: (v) => setState(() => _months = v),
-                  onProcessorChanged: (v) => setState(() => _processor = v),
-                  onPurchase: busy ? null : _purchaseExternal,
                 ),
-                _BalanceTab(
-                  hasBalance: _hasBalance,
-                  busy: busy,
-                  onPurchase: busy ? null : _confirmBalancePurchase,
+                SizedBox(height: t.space16),
+                Text(l10n.subscriptionPurchasePaymentMethod, style: tt.titleSmall),
+                SizedBox(height: t.space8),
+                PaymentProcessorOption(
+                  processor: PaymentProcessor.stripe,
+                  selected: _processor == PaymentProcessor.stripe,
+                  enabled: !busy,
+                  onSelected: () =>
+                      setState(() => _processor = PaymentProcessor.stripe),
+                ),
+                SizedBox(height: t.space8),
+                PaymentProcessorOption(
+                  processor: PaymentProcessor.mixin,
+                  selected: _processor == PaymentProcessor.mixin,
+                  enabled: !busy,
+                  onSelected: () =>
+                      setState(() => _processor = PaymentProcessor.mixin),
+                ),
+                SizedBox(height: t.space12),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(t.radiusMd),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(t.space16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(l10n.subscriptionTotalPriceLabel),
+                        Text(
+                          l10n.subscriptionTotalPrice(
+                            _totalPrice.toStringAsFixed(2),
+                          ),
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: t.space16),
+                EnjoyButton.primary(
+                  onPressed: busy ? null : _purchaseExternal,
+                  child: busy
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.subscriptionContinueToPayment),
                 ),
               ],
             ),
-          ),
         ],
       ),
-    );
-  }
-}
-
-class _PaymentTab extends StatelessWidget {
-  const _PaymentTab({
-    required this.months,
-    required this.processor,
-    required this.totalPrice,
-    required this.busy,
-    required this.onMonthsChanged,
-    required this.onProcessorChanged,
-    required this.onPurchase,
-  });
-
-  final int months;
-  final PaymentProcessor processor;
-  final double totalPrice;
-  final bool busy;
-  final ValueChanged<int> onMonthsChanged;
-  final ValueChanged<PaymentProcessor> onProcessorChanged;
-  final VoidCallback? onPurchase;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    return ListView(
-      children: [
-        DropdownButtonFormField<int>(
-          initialValue: months,
-          decoration: InputDecoration(labelText: l10n.subscriptionPurchaseDuration),
-          items: [
-            for (var i = 1; i <= 12; i++)
-              DropdownMenuItem(
-                value: i,
-                child: Text(
-                  i == 1
-                      ? l10n.subscriptionPurchaseOneMonth
-                      : l10n.subscriptionPurchaseMonths(i),
-                ),
-              ),
-          ],
-          onChanged: busy ? null : (v) => onMonthsChanged(v ?? 1),
-        ),
-        SizedBox(height: t.space16),
-        Text(l10n.subscriptionPurchasePaymentMethod, style: tt.titleSmall),
-        RadioListTile<PaymentProcessor>(
-          value: PaymentProcessor.stripe,
-          groupValue: processor,
-          onChanged: busy
-              ? null
-              : (v) {
-                  if (v != null) onProcessorChanged(v);
-                },
-          title: Text(l10n.subscriptionProcessorStripe),
-        ),
-        RadioListTile<PaymentProcessor>(
-          value: PaymentProcessor.mixin,
-          groupValue: processor,
-          onChanged: busy
-              ? null
-              : (v) {
-                  if (v != null) onProcessorChanged(v);
-                },
-          title: Text(l10n.subscriptionProcessorMixin),
-        ),
-        SizedBox(height: t.space12),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(t.radiusMd),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(t.space16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(l10n.subscriptionTotalPriceLabel),
-                Text(
-                  l10n.subscriptionTotalPrice(totalPrice.toStringAsFixed(2)),
-                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: t.space16),
-        EnjoyButton.primary(
-          onPressed: onPurchase,
-          child: busy
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.subscriptionContinueToPayment),
-        ),
-      ],
-    );
-  }
-}
-
-class _BalanceTab extends StatelessWidget {
-  const _BalanceTab({
-    required this.hasBalance,
-    required this.busy,
-    required this.onPurchase,
-  });
-
-  final bool hasBalance;
-  final bool busy;
-  final VoidCallback? onPurchase;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
-
-    return ListView(
-      children: [
-        Text(
-          hasBalance
-              ? l10n.subscriptionBalancePurchaseDescription
-              : l10n.subscriptionBalanceZeroMessage,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: cs.onSurfaceVariant,
-          ),
-        ),
-        SizedBox(height: t.space24),
-        EnjoyButton.secondary(
-          onPressed: hasBalance ? onPurchase : null,
-          child: busy
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.subscriptionPurchaseWithBalance),
-        ),
-      ],
     );
   }
 }

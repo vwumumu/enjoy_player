@@ -1125,6 +1125,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subscriptionUpgrade => '升级至专业版';
 
   @override
+  String get subscriptionUpgradeShort => '升级';
+
+  @override
+  String get subscriptionRecommendedPlan => '推荐';
+
+  @override
   String get subscriptionExtend => '续订';
 
   @override
@@ -1134,16 +1140,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subscriptionPurchaseSelectDuration => '选择时长';
 
   @override
-  String get subscriptionPurchasePaymentTab => '支付';
-
-  @override
-  String get subscriptionPurchaseBalanceTab => '使用余额';
-
-  @override
   String get subscriptionPurchaseDuration => '时长';
 
   @override
   String get subscriptionPurchaseOneMonth => '1 个月';
+
+  @override
+  String get subscriptionPurchaseOneSeason => '1 季';
+
+  @override
+  String get subscriptionPurchaseOneYear => '1 年';
+
+  @override
+  String get subscriptionPurchaseCustomDuration => '自定义';
+
+  @override
+  String get subscriptionPurchaseCustomMonthsLabel => '月数';
+
+  @override
+  String get subscriptionPurchaseCustomMonthsHint => '1–12';
+
+  @override
+  String get subscriptionPurchaseCustomMonthsHelper => '请输入 1 到 12 个月';
 
   @override
   String subscriptionPurchaseMonths(int count) {
@@ -1160,6 +1178,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subscriptionProcessorMixin => 'Mixin';
 
   @override
+  String get subscriptionPaymentMethodCard => '银行卡';
+
+  @override
+  String get subscriptionPaymentMethodWechat => '微信';
+
+  @override
+  String get subscriptionPaymentMethodAlipay => '支付宝';
+
+  @override
+  String get subscriptionPaymentMethodBtc => 'BTC';
+
+  @override
+  String get subscriptionPaymentMethodEth => 'ETH';
+
+  @override
+  String get subscriptionPaymentMethodDoge => 'Doge';
+
+  @override
   String get subscriptionTotalPriceLabel => '合计';
 
   @override
@@ -1169,24 +1205,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get subscriptionContinueToPayment => '继续支付';
-
-  @override
-  String get subscriptionBalancePurchaseDescription => '将全部可用余额转换为订阅时长。';
-
-  @override
-  String get subscriptionBalanceZeroMessage => '余额为零，无法使用余额购买。';
-
-  @override
-  String get subscriptionPurchaseWithBalance => '使用余额购买';
-
-  @override
-  String get subscriptionConfirmBalanceTitle => '确认使用余额购买？';
-
-  @override
-  String get subscriptionConfirmBalanceMessage => '将全部可用余额转换为订阅时长。';
-
-  @override
-  String get subscriptionConfirmPurchase => '确认购买';
 
   @override
   String get subscriptionRedirectingToPayment => '正在跳转到支付页面…';
@@ -1199,9 +1217,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get subscriptionPurchaseFailed => '购买失败';
-
-  @override
-  String get subscriptionPurchaseSuccess => '购买成功';
 
   @override
   String get subscriptionMobilePurchaseTitle => '移动端购买即将推出';

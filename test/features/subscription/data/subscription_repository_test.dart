@@ -19,10 +19,6 @@ class _FakeSubscriptionApi implements SubscriptionApi {
     required int months,
     PaymentProcessor processor = PaymentProcessor.stripe,
   }) => _handler('purchase');
-
-  @override
-  Future<Map<String, dynamic>> purchaseWithBalance() =>
-      _handler('purchaseWithBalance');
 }
 
 void main() {
@@ -92,7 +88,4 @@ class _ThrowingApi implements SubscriptionApi {
     required int months,
     PaymentProcessor processor = PaymentProcessor.stripe,
   }) => throw error;
-
-  @override
-  Future<Map<String, dynamic>> purchaseWithBalance() => throw error;
 }

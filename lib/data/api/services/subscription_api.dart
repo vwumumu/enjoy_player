@@ -20,7 +20,4 @@ class SubscriptionApi {
     _path,
     body: {'months': months, 'processor': processor.apiValue},
   );
-
-  Future<Map<String, dynamic>> purchaseWithBalance() =>
-      _client.postJson('$_path/balance', body: const {});
 }

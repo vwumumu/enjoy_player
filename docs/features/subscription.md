@@ -14,10 +14,9 @@ Signed-in users open **Subscription** from Profile → Account or navigate to `/
 ### Desktop (Windows, macOS)
 
 - **Upgrade to Pro** / **Extend subscription** opens a purchase sheet:
-  - Duration 1–12 months
+  - Duration presets (1 month, 1 season, 1 year, or custom 1–12 months)
   - Stripe or Mixin processor
   - External checkout via system browser (`payUrl`)
-  - **Use balance** tab converts account balance to subscription time (with confirmation)
 
 ### Mobile (iOS, Android)
 
@@ -31,11 +30,10 @@ Signed-in users open **Subscription** from Profile → Account or navigate to `/
 |--------|------|---------|
 | GET | `/api/v1/subscriptions` | Current subscription status |
 | POST | `/api/v1/subscriptions` | Start checkout (`months`, `processor`) |
-| POST | `/api/v1/subscriptions/balance` | Convert balance to subscription |
 
 Rails API base URL (`apiClientProvider`); bearer auth required.
 
 ## Related
 
-- Profile tier chip uses cached `UserProfile.subscriptionTier`; refreshed after balance purchase.
+- Profile tier chip uses cached `UserProfile.subscriptionTier`.
 - [ADR-0032](../decisions/0032-platform-scoped-subscription-purchase.md) — platform-scoped purchase policy.

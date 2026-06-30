@@ -48,17 +48,6 @@ class SubscriptionRepository {
     }
   }
 
-  Future<SubscriptionStatus> purchaseWithBalance() async {
-    try {
-      final json = await _api.purchaseWithBalance();
-      return SubscriptionStatus.fromJson(json);
-    } on ApiException catch (e) {
-      throw _mapApiException(e);
-    } on FormatException catch (e) {
-      throw NetworkFailure(e.message);
-    }
-  }
-
   AppFailure _mapApiException(ApiException e) {
     if (e.statusCode == 402) {
       return CreditsFailure(e.message);

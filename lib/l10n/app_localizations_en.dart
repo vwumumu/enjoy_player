@@ -1169,6 +1169,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionUpgrade => 'Upgrade to Pro';
 
   @override
+  String get subscriptionUpgradeShort => 'Upgrade';
+
+  @override
+  String get subscriptionRecommendedPlan => 'Recommended';
+
+  @override
   String get subscriptionExtend => 'Extend subscription';
 
   @override
@@ -1178,16 +1184,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionPurchaseSelectDuration => 'Select duration';
 
   @override
-  String get subscriptionPurchasePaymentTab => 'Payment';
-
-  @override
-  String get subscriptionPurchaseBalanceTab => 'Use balance';
-
-  @override
   String get subscriptionPurchaseDuration => 'Duration';
 
   @override
   String get subscriptionPurchaseOneMonth => '1 month';
+
+  @override
+  String get subscriptionPurchaseOneSeason => '1 season';
+
+  @override
+  String get subscriptionPurchaseOneYear => '1 year';
+
+  @override
+  String get subscriptionPurchaseCustomDuration => 'Custom';
+
+  @override
+  String get subscriptionPurchaseCustomMonthsLabel => 'Number of months';
+
+  @override
+  String get subscriptionPurchaseCustomMonthsHint => '1–12';
+
+  @override
+  String get subscriptionPurchaseCustomMonthsHelper =>
+      'Enter between 1 and 12 months';
 
   @override
   String subscriptionPurchaseMonths(int count) {
@@ -1204,6 +1223,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionProcessorMixin => 'Mixin';
 
   @override
+  String get subscriptionPaymentMethodCard => 'Card';
+
+  @override
+  String get subscriptionPaymentMethodWechat => 'WeChat';
+
+  @override
+  String get subscriptionPaymentMethodAlipay => 'Alipay';
+
+  @override
+  String get subscriptionPaymentMethodBtc => 'BTC';
+
+  @override
+  String get subscriptionPaymentMethodEth => 'ETH';
+
+  @override
+  String get subscriptionPaymentMethodDoge => 'Doge';
+
+  @override
   String get subscriptionTotalPriceLabel => 'Total';
 
   @override
@@ -1213,27 +1250,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionContinueToPayment => 'Continue to payment';
-
-  @override
-  String get subscriptionBalancePurchaseDescription =>
-      'Convert all available balance to subscription time.';
-
-  @override
-  String get subscriptionBalanceZeroMessage =>
-      'Your balance is zero. Unable to purchase with balance.';
-
-  @override
-  String get subscriptionPurchaseWithBalance => 'Purchase with balance';
-
-  @override
-  String get subscriptionConfirmBalanceTitle => 'Purchase with balance?';
-
-  @override
-  String get subscriptionConfirmBalanceMessage =>
-      'This will convert all available balance to subscription time.';
-
-  @override
-  String get subscriptionConfirmPurchase => 'Confirm purchase';
 
   @override
   String get subscriptionRedirectingToPayment => 'Redirecting to payment…';
@@ -1246,9 +1262,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionPurchaseFailed => 'Purchase failed';
-
-  @override
-  String get subscriptionPurchaseSuccess => 'Purchase successful';
 
   @override
   String get subscriptionMobilePurchaseTitle => 'Mobile purchase coming soon';

@@ -475,6 +475,7 @@ class _ProfileHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -543,6 +544,20 @@ class _ProfileHeroCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (p.subscriptionTier != SubscriptionTier.pro) ...[
+                SizedBox(width: t.space12),
+                FilledButton.tonal(
+                  onPressed: () => context.push('/subscription'),
+                  style: FilledButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: t.space16,
+                      vertical: t.space12,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: Text(l10n.subscriptionUpgradeShort),
+                ),
+              ],
             ],
           ),
         ),

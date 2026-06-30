@@ -16,12 +16,10 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 class TierComparison extends StatelessWidget {
   const TierComparison({
     required this.status,
-    this.accountBalance,
     super.key,
   });
 
   final SubscriptionStatus status;
-  final double? accountBalance;
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +31,16 @@ class TierComparison extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          l10n.subscriptionTierComparisonTitle,
-          textAlign: TextAlign.center,
-          style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.compare_arrows_rounded, size: 22, color: Theme.of(context).colorScheme.primary),
+            SizedBox(width: t.space8),
+            Text(
+              l10n.subscriptionTierComparisonTitle,
+              style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ],
         ),
         SizedBox(height: t.space16),
         LayoutBuilder(
@@ -49,7 +53,6 @@ class TierComparison extends StatelessWidget {
               dailyCredits: l10n.subscriptionTierFreeDailyCredits,
               features: _freeFeatures(l10n),
               isCurrent: currentTier == SubscriptionTier.free,
-              isHighlighted: currentTier == SubscriptionTier.free,
               actionLabel: currentTier == SubscriptionTier.free
                   ? l10n.subscriptionCurrentPlan
                   : l10n.subscriptionUpgrade,
@@ -64,8 +67,8 @@ class TierComparison extends StatelessWidget {
               dailyCredits: l10n.subscriptionTierProDailyCredits,
               features: _proFeatures(l10n),
               isCurrent: currentTier == SubscriptionTier.pro,
-              isHighlighted: currentTier == SubscriptionTier.pro,
               emphasize: true,
+              showRecommended: currentTier == SubscriptionTier.free,
               actionLabel: currentTier == SubscriptionTier.pro
                   ? l10n.subscriptionExtend
                   : l10n.subscriptionUpgrade,
@@ -73,13 +76,15 @@ class TierComparison extends StatelessWidget {
             );
 
             if (wide) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: freeCard),
-                  SizedBox(width: t.space16),
-                  Expanded(child: proCard),
-                ],
+              return IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: freeCard),
+                    SizedBox(width: t.space16),
+                    Expanded(child: proCard),
+                  ],
+                ),
               );
             }
             return Column(
@@ -120,10 +125,7 @@ class TierComparison extends StatelessWidget {
     }
     if (!supportsExternalSubscriptionPurchase()) return;
     if (!context.mounted) return;
-    await showSubscriptionPurchaseSheet(
-      context,
-      accountBalance: accountBalance,
-    );
+    await showSubscriptionPurchaseSheet(context);
   }
 }
 
@@ -135,9 +137,9 @@ class _PlanCard extends StatelessWidget {
     required this.dailyCredits,
     required this.features,
     required this.isCurrent,
-    required this.isHighlighted,
     required this.actionLabel,
     this.emphasize = false,
+    this.showRecommended = false,
     this.onAction,
   });
 
@@ -147,8 +149,8 @@ class _PlanCard extends StatelessWidget {
   final String dailyCredits;
   final List<String> features;
   final bool isCurrent;
-  final bool isHighlighted;
   final bool emphasize;
+  final bool showRecommended;
   final String actionLabel;
   final VoidCallback? onAction;
 
@@ -159,76 +161,142 @@ class _PlanCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return EnjoyCard(
-      padding: EdgeInsets.all(t.space20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (isCurrent)
-            Padding(
-              padding: EdgeInsets.only(bottom: t.space8),
+    final card = SizedBox(
+      height: double.infinity,
+      child: EnjoyCard(
+        padding: EdgeInsets.all(t.space20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: 28,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: cs.secondaryContainer,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    l10n.subscriptionCurrentPlan,
-                    style: tt.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
+                child: showRecommended
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [cs.primary, cs.tertiary],
+                          ),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          l10n.subscriptionRecommendedPlan,
+                          style: tt.labelSmall?.copyWith(
+                            color: cs.onPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      )
+                    : isCurrent
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: cs.secondaryContainer,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          l10n.subscriptionCurrentPlan,
+                          style: tt.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
             ),
-          Text(
-            title,
-            style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          SizedBox(height: t.space4),
-          Text(
-            description,
-            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-          ),
-          SizedBox(height: t.space16),
-          Text(
-            price,
-            style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          SizedBox(height: t.space4),
-          Text(
-            dailyCredits,
-            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-          ),
-          SizedBox(height: t.space16),
-          for (final feature in features) ...[
+            SizedBox(height: t.space8),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.check_rounded,
-                  size: 18,
-                  color: emphasize ? cs.primary : cs.onSurfaceVariant,
+                if (emphasize) ...[
+                  Icon(Icons.auto_awesome_rounded, size: 20, color: cs.primary),
+                  SizedBox(width: t.space4),
+                ],
+                Expanded(
+                  child: Text(
+                    title,
+                    style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                  ),
                 ),
-                SizedBox(width: t.space8),
-                Expanded(child: Text(feature, style: tt.bodyMedium)),
               ],
             ),
-            SizedBox(height: t.space8),
-          ],
-          SizedBox(height: t.space8),
-          if (onAction == null)
-            EnjoyButton.secondary(
-              onPressed: null,
-              child: Text(actionLabel),
-            )
-          else
-            EnjoyButton.primary(
-              onPressed: onAction,
-              child: Text(actionLabel),
+            SizedBox(height: t.space4),
+            Text(
+              description,
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
-        ],
+            SizedBox(height: t.space16),
+            Text(
+              price,
+              style: tt.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: emphasize ? cs.primary : null,
+              ),
+            ),
+            SizedBox(height: t.space4),
+            Text(
+              dailyCredits,
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontWeight: emphasize ? FontWeight.w600 : null,
+              ),
+            ),
+            SizedBox(height: t.space16),
+            for (final feature in features) ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.check_circle_rounded,
+                    size: 18,
+                    color: emphasize ? cs.primary : cs.onSurfaceVariant,
+                  ),
+                  SizedBox(width: t.space8),
+                  Expanded(child: Text(feature, style: tt.bodyMedium)),
+                ],
+              ),
+              SizedBox(height: t.space8),
+            ],
+            const Spacer(),
+            if (onAction == null)
+              EnjoyButton.secondary(
+                onPressed: null,
+                child: Text(actionLabel),
+              )
+            else
+              EnjoyButton.primary(
+                onPressed: onAction,
+                child: Text(actionLabel),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (!emphasize) return card;
+
+    return SizedBox(
+      height: double.infinity,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(t.radiusLg + 2),
+          gradient: LinearGradient(
+            colors: [
+              cs.primary.withValues(alpha: 0.85),
+              cs.tertiary.withValues(alpha: 0.75),
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: cs.primary.withValues(alpha: 0.22),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(1.5),
+          child: card,
+        ),
       ),
     );
   }

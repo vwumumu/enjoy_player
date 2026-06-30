@@ -2247,6 +2247,18 @@ abstract class AppLocalizations {
   /// **'Upgrade to Pro'**
   String get subscriptionUpgrade;
 
+  /// No description provided for @subscriptionUpgradeShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get subscriptionUpgradeShort;
+
+  /// No description provided for @subscriptionRecommendedPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get subscriptionRecommendedPlan;
+
   /// No description provided for @subscriptionExtend.
   ///
   /// In en, this message translates to:
@@ -2265,18 +2277,6 @@ abstract class AppLocalizations {
   /// **'Select duration'**
   String get subscriptionPurchaseSelectDuration;
 
-  /// No description provided for @subscriptionPurchasePaymentTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment'**
-  String get subscriptionPurchasePaymentTab;
-
-  /// No description provided for @subscriptionPurchaseBalanceTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Use balance'**
-  String get subscriptionPurchaseBalanceTab;
-
   /// No description provided for @subscriptionPurchaseDuration.
   ///
   /// In en, this message translates to:
@@ -2288,6 +2288,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'1 month'**
   String get subscriptionPurchaseOneMonth;
+
+  /// No description provided for @subscriptionPurchaseOneSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'1 season'**
+  String get subscriptionPurchaseOneSeason;
+
+  /// No description provided for @subscriptionPurchaseOneYear.
+  ///
+  /// In en, this message translates to:
+  /// **'1 year'**
+  String get subscriptionPurchaseOneYear;
+
+  /// No description provided for @subscriptionPurchaseCustomDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get subscriptionPurchaseCustomDuration;
+
+  /// No description provided for @subscriptionPurchaseCustomMonthsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of months'**
+  String get subscriptionPurchaseCustomMonthsLabel;
+
+  /// No description provided for @subscriptionPurchaseCustomMonthsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1–12'**
+  String get subscriptionPurchaseCustomMonthsHint;
+
+  /// No description provided for @subscriptionPurchaseCustomMonthsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter between 1 and 12 months'**
+  String get subscriptionPurchaseCustomMonthsHelper;
 
   /// No description provided for @subscriptionPurchaseMonths.
   ///
@@ -2313,6 +2349,42 @@ abstract class AppLocalizations {
   /// **'Mixin'**
   String get subscriptionProcessorMixin;
 
+  /// No description provided for @subscriptionPaymentMethodCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get subscriptionPaymentMethodCard;
+
+  /// No description provided for @subscriptionPaymentMethodWechat.
+  ///
+  /// In en, this message translates to:
+  /// **'WeChat'**
+  String get subscriptionPaymentMethodWechat;
+
+  /// No description provided for @subscriptionPaymentMethodAlipay.
+  ///
+  /// In en, this message translates to:
+  /// **'Alipay'**
+  String get subscriptionPaymentMethodAlipay;
+
+  /// No description provided for @subscriptionPaymentMethodBtc.
+  ///
+  /// In en, this message translates to:
+  /// **'BTC'**
+  String get subscriptionPaymentMethodBtc;
+
+  /// No description provided for @subscriptionPaymentMethodEth.
+  ///
+  /// In en, this message translates to:
+  /// **'ETH'**
+  String get subscriptionPaymentMethodEth;
+
+  /// No description provided for @subscriptionPaymentMethodDoge.
+  ///
+  /// In en, this message translates to:
+  /// **'Doge'**
+  String get subscriptionPaymentMethodDoge;
+
   /// No description provided for @subscriptionTotalPriceLabel.
   ///
   /// In en, this message translates to:
@@ -2330,42 +2402,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue to payment'**
   String get subscriptionContinueToPayment;
-
-  /// No description provided for @subscriptionBalancePurchaseDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Convert all available balance to subscription time.'**
-  String get subscriptionBalancePurchaseDescription;
-
-  /// No description provided for @subscriptionBalanceZeroMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Your balance is zero. Unable to purchase with balance.'**
-  String get subscriptionBalanceZeroMessage;
-
-  /// No description provided for @subscriptionPurchaseWithBalance.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase with balance'**
-  String get subscriptionPurchaseWithBalance;
-
-  /// No description provided for @subscriptionConfirmBalanceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase with balance?'**
-  String get subscriptionConfirmBalanceTitle;
-
-  /// No description provided for @subscriptionConfirmBalanceMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This will convert all available balance to subscription time.'**
-  String get subscriptionConfirmBalanceMessage;
-
-  /// No description provided for @subscriptionConfirmPurchase.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm purchase'**
-  String get subscriptionConfirmPurchase;
 
   /// No description provided for @subscriptionRedirectingToPayment.
   ///
@@ -2390,12 +2426,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Purchase failed'**
   String get subscriptionPurchaseFailed;
-
-  /// No description provided for @subscriptionPurchaseSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase successful'**
-  String get subscriptionPurchaseSuccess;
 
   /// No description provided for @subscriptionMobilePurchaseTitle.
   ///

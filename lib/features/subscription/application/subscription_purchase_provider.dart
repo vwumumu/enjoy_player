@@ -1,16 +1,14 @@
-/// Purchase and balance conversion mutations for Pro subscription.
+/// External checkout mutations for Pro subscription.
 library;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/subscription/application/subscription_status_provider.dart';
 import 'package:enjoy_player/features/subscription/data/subscription_repository.dart';
 import 'package:enjoy_player/features/subscription/domain/payment_processor.dart';
 import 'package:enjoy_player/features/subscription/domain/payment_session.dart';
 import 'package:enjoy_player/features/subscription/domain/purchase_request.dart';
-import 'package:enjoy_player/features/subscription/domain/subscription_status.dart';
 
 part 'subscription_purchase_provider.g.dart';
 
@@ -45,21 +43,6 @@ class SubscriptionPurchaseCtrl extends _$SubscriptionPurchaseCtrl {
         throw StateError('launch_failed');
       }
       return session;
-    } catch (e, st) {
-      state = AsyncError(e, st);
-      rethrow;
-    }
-  }
-
-  Future<SubscriptionStatus> purchaseWithBalance() async {
-    state = const AsyncLoading();
-    try {
-      final repo = ref.read(subscriptionRepositoryProvider);
-      final status = await repo.purchaseWithBalance();
-      ref.invalidate(subscriptionStatusProvider);
-      await ref.read(authCtrlProvider.notifier).refreshProfile();
-      state = const AsyncData(null);
-      return status;
     } catch (e, st) {
       state = AsyncError(e, st);
       rethrow;
