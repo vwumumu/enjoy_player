@@ -1698,13 +1698,13 @@ abstract class AppLocalizations {
   /// No description provided for @authSignInTitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to Enjoy'**
+  /// **'Welcome to Enjoy'**
   String get authSignInTitle;
 
   /// No description provided for @authSignInSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in with Google, Apple, or email. Your progress syncs when you are signed in.'**
+  /// **'Sign in to sync your library, track learning progress, and pick up where you left off.'**
   String get authSignInSubtitle;
 
   /// No description provided for @authSignInCta.
@@ -2217,12 +2217,6 @@ abstract class AppLocalizations {
   /// **'Profile, subscription, and sign out'**
   String get settingsSectionAccountHint;
 
-  /// No description provided for @settingsSectionDataMigrationHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Move guest data after you sign in'**
-  String get settingsSectionDataMigrationHint;
-
   /// No description provided for @settingsSectionSyncHint.
   ///
   /// In en, this message translates to:
@@ -2264,12 +2258,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cloud sync'**
   String get settingsSectionSync;
-
-  /// No description provided for @settingsSectionDataMigration.
-  ///
-  /// In en, this message translates to:
-  /// **'Local data'**
-  String get settingsSectionDataMigration;
 
   /// No description provided for @syncSettingsTileTitle.
   ///
@@ -2696,54 +2684,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expected size: unknown'**
   String get mediaLocateSizeUnknown;
-
-  /// No description provided for @migrationBannerTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Move your local data'**
-  String get migrationBannerTitle;
-
-  /// No description provided for @migrationBannerBody.
-  ///
-  /// In en, this message translates to:
-  /// **'We noticed you have media and practice history saved locally. Would you like to move it to your account?'**
-  String get migrationBannerBody;
-
-  /// No description provided for @migrationBannerActionMove.
-  ///
-  /// In en, this message translates to:
-  /// **'Move data'**
-  String get migrationBannerActionMove;
-
-  /// No description provided for @migrationBannerActionDismiss.
-  ///
-  /// In en, this message translates to:
-  /// **'Not now'**
-  String get migrationBannerActionDismiss;
-
-  /// No description provided for @settingsMigrationTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Migrate local data'**
-  String get settingsMigrationTitle;
-
-  /// No description provided for @settingsMigrationSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Move your guest media and history to this account'**
-  String get settingsMigrationSubtitle;
-
-  /// No description provided for @migrationSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Data moved successfully'**
-  String get migrationSuccess;
-
-  /// No description provided for @migrationMigrationFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not move data. Try again later.'**
-  String get migrationMigrationFailed;
 
   /// No description provided for @libraryDeleteMediaTitle.
   ///

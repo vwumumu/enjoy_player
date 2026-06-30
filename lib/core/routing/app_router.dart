@@ -6,13 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:enjoy_player/core/routing/auth_redirect.dart';
 import 'package:enjoy_player/core/routing/auth_router_tick.dart';
 import 'package:enjoy_player/core/routing/not_found_screen.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/features/ai/presentation/ai_playground_screen.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/presentation/profile_screen.dart';
 import 'package:enjoy_player/features/credits/presentation/credits_usage_screen.dart';
 import 'package:enjoy_player/features/auth/presentation/sign_in_screen.dart';
@@ -67,22 +66,7 @@ GoRouter appRouter(Ref ref) {
     errorBuilder: (context, state) => NotFoundScreen(uri: state.uri),
     redirect: (context, state) {
       final loc = state.matchedLocation;
-      final auth = ref.read(authCtrlProvider);
-      if (auth.isLoading || auth.hasError) return null;
-      final v = auth.valueOrNull;
-      if (loc.startsWith('/profile')) {
-        if (v is AuthSignedOut || v == null) {
-          return '/sign-in?from=profile';
-        }
-      }
-      if (loc.startsWith('/credits')) {
-        if (v is AuthSignedOut || v == null) {
-          return '/sign-in?from=credits';
-        }
-      }
-      if (loc.startsWith('/sign-in')) {
-        if (v is AuthSignedIn) return '/';
-      }
+
       if (kReleaseMode && loc.startsWith('/settings/ai-playground')) {
         return '/settings';
       }
@@ -96,9 +80,21 @@ GoRouter appRouter(Ref ref) {
           state.uri.queryParameters['section'] == 'keyboard') {
         return isDesktop ? '/settings/keyboard' : null;
       }
-      return null;
+
+      final auth = ref.read(authCtrlProvider);
+      return resolveAuthRedirect(matchedLocation: loc, auth: auth);
     },
     routes: [
+      GoRoute(
+        path: '/sign-in',
+        builder: (context, state) => const SignInScreen(),
+        routes: [
+          GoRoute(
+            path: 'email',
+            builder: (context, state) => const EmailEntryScreen(),
+          ),
+        ],
+      ),
       ShellRoute(
         builder: (context, state, child) => RootShell(child: child),
         routes: [
@@ -188,16 +184,6 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: '/credits',
             builder: (context, state) => const CreditsUsageScreen(),
-          ),
-          GoRoute(
-            path: '/sign-in',
-            builder: (context, state) => const SignInScreen(),
-            routes: [
-              GoRoute(
-                path: 'email',
-                builder: (context, state) => const EmailEntryScreen(),
-              ),
-            ],
           ),
         ],
       ),

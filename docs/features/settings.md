@@ -14,8 +14,7 @@ The Settings hub is reached at `/settings` and groups every preference surface i
 
 ## Sections
 
-- **Account hero** — `_AccountHeroCard` shows the signed-in profile (avatar, name, email) or a guest chip; `_AccountHeroSkeleton` is the loading state. Sign-out lives in the account hero's overflow menu with a confirmation dialog.
-- **Guest data migration** — visible only when signed out; explains that locally stored media will be claimed on sign-in.
+- **Account hero** — `_AccountHeroCard` shows the signed-in profile (avatar, name, email); `_AccountHeroSkeleton` is the loading state. Sign-out lives in Profile (and related account surfaces) with a confirmation dialog.
 - **Cloud sync** — links to `/settings/sync` and surfaces a `_SyncQueueStatusPill` (synced / queued / error) read from the sync status provider.
 - **Appearance & language** — display + native language pickers (`language_choice_sheet.dart`). Selection persists via `SettingsKeys.prefsDisplayLanguage` / `prefsNativeLanguage`.
 - **Focus learning language** — editable in Settings and Profile (English, Japanese, Korean, Spanish, French, plus Chinese variants). Drives Discover recommendation filtering, import defaults, and dictionary lookup fallbacks. Persisted locally and synced to the cloud profile when signed in. Azure pronunciation assessment and some AI features are **capability-gated** by locale — unsupported media languages show disabled controls with an explanation rather than silently assessing as English.
@@ -36,9 +35,10 @@ Cloud metadata sync status (see [`sync.md`](sync.md)). Shows the queue, last syn
 
 ## Account hero states
 
-- **Signed in** → avatar + display name + email, plus overflow menu with **Sign out** (with confirmation dialog that warns about cloud data).
+- **Signed in** → avatar + display name + email, plus link to profile.
 - **Loading** → `_AccountHeroSkeleton` shimmer.
-- **Signed out** → guest chip with **Sign in** CTA pointing at `/sign-in?from=/settings`.
+
+Settings requires a signed-in Enjoy account ([ADR-0031](../decisions/0031-login-only-access.md)); unsigned users are redirected to sign-in before reaching this screen.
 
 ## Sign-out flow
 

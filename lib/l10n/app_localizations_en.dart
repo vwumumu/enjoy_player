@@ -873,11 +873,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Stored assessment data could not be read.';
 
   @override
-  String get authSignInTitle => 'Sign in to Enjoy';
+  String get authSignInTitle => 'Welcome to Enjoy';
 
   @override
   String get authSignInSubtitle =>
-      'Sign in with Google, Apple, or email. Your progress syncs when you are signed in.';
+      'Sign in to sync your library, track learning progress, and pick up where you left off.';
 
   @override
   String get authSignInCta => 'Continue';
@@ -1156,10 +1156,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Profile, subscription, and sign out';
 
   @override
-  String get settingsSectionDataMigrationHint =>
-      'Move guest data after you sign in';
-
-  @override
   String get settingsSectionSyncHint =>
       'Upload queue, offline state, and manual sync';
 
@@ -1182,9 +1178,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSectionSync => 'Cloud sync';
-
-  @override
-  String get settingsSectionDataMigration => 'Local data';
 
   @override
   String get syncSettingsTileTitle => 'Sync status';
@@ -1422,33 +1415,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mediaLocateSizeUnknown => 'Expected size: unknown';
-
-  @override
-  String get migrationBannerTitle => 'Move your local data';
-
-  @override
-  String get migrationBannerBody =>
-      'We noticed you have media and practice history saved locally. Would you like to move it to your account?';
-
-  @override
-  String get migrationBannerActionMove => 'Move data';
-
-  @override
-  String get migrationBannerActionDismiss => 'Not now';
-
-  @override
-  String get settingsMigrationTitle => 'Migrate local data';
-
-  @override
-  String get settingsMigrationSubtitle =>
-      'Move your guest media and history to this account';
-
-  @override
-  String get migrationSuccess => 'Data moved successfully';
-
-  @override
-  String get migrationMigrationFailed =>
-      'Could not move data. Try again later.';
 
   @override
   String get libraryDeleteMediaTitle => 'Delete from library?';

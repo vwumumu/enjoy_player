@@ -18,7 +18,6 @@ import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/presentation/guest_migration_banner.dart';
 import 'package:enjoy_player/features/community/presentation/community_activity_card.dart';
 import 'package:enjoy_player/features/library/presentation/todays_goal_card.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
@@ -42,7 +41,6 @@ class HomeScreen extends ConsumerWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const GuestMigrationBanner(),
           Expanded(
             child: mediaAsync.when(
               data: (recent) {

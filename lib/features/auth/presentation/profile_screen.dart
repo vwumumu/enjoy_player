@@ -90,7 +90,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       await ref.read(authCtrlProvider.notifier).signOut();
       if (!mounted) return;
-      context.go('/');
+      context.go('/sign-in');
     } finally {
       if (mounted) setState(() => _saving = false);
     }

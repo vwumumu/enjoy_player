@@ -2,18 +2,20 @@
 
 ## Behavior
 
-Native-first sign-in ([ADR-0027](../decisions/0027-native-auth-v2.md)):
+Native-first sign-in ([ADR-0027](../decisions/0027-native-auth-v2.md)) with **login-only app access** ([ADR-0031](../decisions/0031-login-only-access.md)):
 
-- **Sign-in hub**: Continue with **Google** (Android/iOS/macOS), **Apple** (iOS/macOS), **Email OTP**, or **Other sign-in options** (OAuth PKCE in the system browser + deep link).
+- **Login gate**: Signed-out users can only open `/sign-in` and `/sign-in/email`. Home, library, discover, player, settings, profile, credits, and YouTube login routes redirect to sign-in until authenticated.
+- **Welcome sign-in hub**: Single screen with welcome copy plus **Continue with Google** (Android/iOS/macOS), **Apple** (iOS/macOS), **Email OTP**, or **Other sign-in options** (OAuth PKCE). No guest mode, skip, or cancel-to-home.
+- **Post-sign-in navigation**: Redirects preserve the intended destination via `?from=` (e.g. `profile`, `credits`, or an encoded path).
 - **Email OTP**: Single screen at `/sign-in/email` — enter email, then verify with a 6-digit pin on the same page. Shows the target email, supports resend with server-driven cooldown, and **Change email** to edit and resend. If the user opens the hub mid-OTP, a resume card links back to the email flow.
 - **No WebView poll flow** for Enjoy account auth — legacy `start_auth` + InAppWebView verification is removed from the client.
 - **Bearer + refresh tokens** in **flutter_secure_storage** (not Drift). On API `401`, the client refreshes once via `POST /api/v1/auth/refresh` before signing out.
 - Last **profile snapshot** cached in secure storage for fast cold start ([ADR-0012](../decisions/0012-per-user-sqlite-isolation.md)).
 - **Profile** via `GET/PATCH /api/v1/profile` (camelCase JSON over the wire from the client’s perspective).
 - **Locale / learning / native language** applied from server profile on login and refresh (unchanged).
-- **Guest → account migration** banner on Home when guest DB has data (unchanged).
+- **Sign out** returns to the welcome sign-in screen; the app is not usable without re-authenticating.
 
-YouTube account login remains a separate WebView flow ([features/youtube.md](youtube.md), ADR-0015).
+YouTube account login remains a separate WebView flow ([features/youtube.md](youtube.md), ADR-0015), reachable after Enjoy account sign-in.
 
 ## API endpoints (client)
 
@@ -62,3 +64,4 @@ The PKCE callback stream is owned by the auth controller and is now properly **c
 - [ADR-0012](../decisions/0012-per-user-sqlite-isolation.md)
 - [ADR-0016](../decisions/0016-enjoy-account-webview-sign-in.md) — superseded for Enjoy account delivery
 - [ADR-0027](../decisions/0027-native-auth-v2.md)
+- [ADR-0031](../decisions/0031-login-only-access.md)

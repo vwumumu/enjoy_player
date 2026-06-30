@@ -837,10 +837,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get assessmentInvalidStored => '无法读取已保存的评测数据。';
 
   @override
-  String get authSignInTitle => '登录 Enjoy';
+  String get authSignInTitle => '欢迎使用 Enjoy';
 
   @override
-  String get authSignInSubtitle => '使用 Google、Apple 或邮箱登录。登录后可同步学习进度。';
+  String get authSignInSubtitle => '登录后即可同步媒体库、记录学习进度，并在任意设备继续学习。';
 
   @override
   String get authSignInCta => '继续';
@@ -1110,9 +1110,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSectionAccountHint => '个人资料、订阅与退出登录';
 
   @override
-  String get settingsSectionDataMigrationHint => '登录后迁移访客数据';
-
-  @override
   String get settingsSectionSyncHint => '上传队列、离线状态与手动同步';
 
   @override
@@ -1132,9 +1129,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsSectionSync => '云端同步';
-
-  @override
-  String get settingsSectionDataMigration => '本地数据';
 
   @override
   String get syncSettingsTileTitle => '同步状态';
@@ -1362,30 +1356,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mediaLocateSizeUnknown => '预期大小：未知';
-
-  @override
-  String get migrationBannerTitle => '迁移本地数据';
-
-  @override
-  String get migrationBannerBody => '检测到你本地保存了媒体与学习记录。是否迁移到你的账号？';
-
-  @override
-  String get migrationBannerActionMove => '迁移数据';
-
-  @override
-  String get migrationBannerActionDismiss => '暂不';
-
-  @override
-  String get settingsMigrationTitle => '迁移本地数据';
-
-  @override
-  String get settingsMigrationSubtitle => '将访客媒体与记录迁移到当前账号';
-
-  @override
-  String get migrationSuccess => '数据迁移成功';
-
-  @override
-  String get migrationMigrationFailed => '无法迁移数据，请稍后重试。';
 
   @override
   String get libraryDeleteMediaTitle => '从资料库删除？';
@@ -2707,10 +2677,10 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get assessmentInvalidStored => '无法读取已保存的评测数据。';
 
   @override
-  String get authSignInTitle => '登录 Enjoy';
+  String get authSignInTitle => '欢迎使用 Enjoy';
 
   @override
-  String get authSignInSubtitle => '使用 Google、Apple 或邮箱登录。登录后可同步学习进度。';
+  String get authSignInSubtitle => '登录后即可同步媒体库、记录学习进度，并在任意设备继续学习。';
 
   @override
   String get authSignInCta => '继续';
@@ -2980,9 +2950,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsSectionAccountHint => '个人资料、订阅与退出登录';
 
   @override
-  String get settingsSectionDataMigrationHint => '登录后迁移访客数据';
-
-  @override
   String get settingsSectionSyncHint => '上传队列、离线状态与手动同步';
 
   @override
@@ -3002,9 +2969,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsSectionSync => '云端同步';
-
-  @override
-  String get settingsSectionDataMigration => '本地数据';
 
   @override
   String get syncSettingsTileTitle => '同步状态';
@@ -3232,30 +3196,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get mediaLocateSizeUnknown => '预期大小：未知';
-
-  @override
-  String get migrationBannerTitle => '迁移本地数据';
-
-  @override
-  String get migrationBannerBody => '检测到你本地保存了媒体与学习记录。是否迁移到你的账号？';
-
-  @override
-  String get migrationBannerActionMove => '迁移数据';
-
-  @override
-  String get migrationBannerActionDismiss => '暂不';
-
-  @override
-  String get settingsMigrationTitle => '迁移本地数据';
-
-  @override
-  String get settingsMigrationSubtitle => '将访客媒体与记录迁移到当前账号';
-
-  @override
-  String get migrationSuccess => '数据迁移成功';
-
-  @override
-  String get migrationMigrationFailed => '无法迁移数据，请稍后重试。';
 
   @override
   String get libraryDeleteMediaTitle => '从资料库删除？';

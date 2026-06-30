@@ -21,7 +21,6 @@ import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/application/guest_migration_providers.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_help_dialog.dart';
@@ -166,87 +165,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
 
           SliverToBoxAdapter(child: SizedBox(height: t.space8)),
-
-          // ── Guest data migration (signed-in + guest DB has data) ───────
-          Consumer(
-            builder: (context, ref, _) {
-              final auth = ref.watch(authCtrlProvider);
-              final signedIn = auth.maybeWhen(
-                data: (s) => s is AuthSignedIn,
-                orElse: () => false,
-              );
-              if (!signedIn) {
-                return const SliverToBoxAdapter(child: SizedBox.shrink());
-              }
-
-              final guestDataAsync = ref.watch(guestDatabaseHasDataProvider);
-              return guestDataAsync.when(
-                data: (hasGuestData) {
-                  if (!hasGuestData) {
-                    return const SliverToBoxAdapter(child: SizedBox.shrink());
-                  }
-                  final migration = ref.watch(guestMigrationCtrlProvider);
-                  return SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _SettingsSectionHeader(
-                          title: l10n.settingsSectionDataMigration,
-                          hint: l10n.settingsSectionDataMigrationHint,
-                          icon: Icons.folder_shared_outlined,
-                        ),
-                        _SettingsCard(
-                          padding: EdgeInsets.zero,
-                          child: _SettingsTile(
-                            leadingIcon: Icons.move_to_inbox_rounded,
-                            title: l10n.settingsMigrationTitle,
-                            subtitle: l10n.settingsMigrationSubtitle,
-                            showChevron: !migration.isLoading,
-                            trailing: migration.isLoading
-                                ? Skeleton.circle(diameter: 24)
-                                : null,
-                            onTap: migration.isLoading
-                                ? null
-                                : () async {
-                                    await ref
-                                        .read(
-                                          guestMigrationCtrlProvider.notifier,
-                                        )
-                                        .migrate();
-                                    if (!context.mounted) return;
-                                    final s = ref.read(
-                                      guestMigrationCtrlProvider,
-                                    );
-                                    s.when(
-                                      data: (_) {
-                                        AppNotice.success(
-                                          context,
-                                          l10n.migrationSuccess,
-                                        );
-                                      },
-                                      error: (Object e, StackTrace st) {
-                                        AppNotice.error(
-                                          context,
-                                          l10n.migrationMigrationFailed,
-                                        );
-                                      },
-                                      loading: () {},
-                                    );
-                                  },
-                          ),
-                        ),
-                        SizedBox(height: t.space8),
-                      ],
-                    ),
-                  );
-                },
-                loading: () =>
-                    const SliverToBoxAdapter(child: SizedBox.shrink()),
-                error: (Object error, StackTrace stackTrace) =>
-                    const SliverToBoxAdapter(child: SizedBox.shrink()),
-              );
-            },
-          ),
 
           SliverToBoxAdapter(child: SizedBox(height: t.space8)),
 

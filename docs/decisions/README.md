@@ -54,3 +54,4 @@ Trade-offs, follow-up work, risks.
 | [0028](0028-agentic-engine-choice.md) | Agentic workflow engine choice — third-party Anthropic-compatible proxy (proposed) |
 | [0029](0029-supply-chain-risk.md) | Supply-chain risk for pre-release and local-path dependencies |
 | [0030](0030-flutter-lints-baseline-no-custom-lint.md) | Expanded flutter_lints baseline; defer custom_lint |
+| [0031](0031-login-only-access.md) | Login-only application access — auth gate, welcome sign-in hub, guest migration removed |

@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
+import 'package:enjoy_player/core/routing/auth_redirect.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_platform_support.dart';
@@ -32,18 +33,12 @@ class SignInScreen extends ConsumerWidget {
 
     ref.listen(authCtrlProvider, (_, next) {
       if (next.valueOrNull is AuthSignedIn && context.mounted) {
-        context.go('/');
+        final from = GoRouterState.of(context).uri.queryParameters['from'];
+        context.go(resolvePostSignInPath(from));
       }
     });
 
     return SignInFlowScaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
-          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-          onPressed: () => _close(context, ref),
-        ),
-      ),
       child: auth.when(
         data: (state) {
           if (state is AuthSignedIn) {
@@ -75,7 +70,7 @@ class SignInScreen extends ConsumerWidget {
           if (state is AuthSigningInWebPkce) {
             return _WebPkceWaitingPane();
           }
-          return _SignInHub(onClose: () => _close(context, ref));
+          return const _SignInHub();
         },
         loading: () => const Center(child: SkeletonAppBootstrap()),
         error: (e, _) => Center(
@@ -106,22 +101,10 @@ class SignInScreen extends ConsumerWidget {
       ),
     );
   }
-
-  void _close(BuildContext context, WidgetRef ref) {
-    ref.read(authCtrlProvider.notifier).cancelSignIn();
-    if (!context.mounted) return;
-    if (context.canPop()) {
-      context.pop();
-    } else {
-      context.go('/');
-    }
-  }
 }
 
 class _SignInHub extends ConsumerWidget {
-  const _SignInHub({required this.onClose});
-
-  final VoidCallback onClose;
+  const _SignInHub();
 
   Future<void> _run(
     BuildContext context,
@@ -239,14 +222,6 @@ class _SignInHub extends ConsumerWidget {
                     child: Text(l10n.authOtherSignInOptions),
                   ),
                 ),
-                SizedBox(height: t.space12),
-                SizedBox(
-                  width: double.infinity,
-                  child: EnjoyButton.ghost(
-                    onPressed: onClose,
-                    child: Text(l10n.authCancel),
-                  ),
-                ),
               ],
             ),
           ),
@@ -262,6 +237,13 @@ class EmailEntryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+
+    ref.listen(authCtrlProvider, (_, next) {
+      if (next.valueOrNull is AuthSignedIn && context.mounted) {
+        final from = GoRouterState.of(context).uri.queryParameters['from'];
+        context.go(resolvePostSignInPath(from));
+      }
+    });
 
     return SignInFlowScaffold(
       appBar: AppBar(
