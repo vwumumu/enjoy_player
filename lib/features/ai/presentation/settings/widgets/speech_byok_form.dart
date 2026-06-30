@@ -55,6 +55,7 @@ class _SpeechByokFormState extends State<SpeechByokForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
     final apiKeyLabel = widget._isAzure
         ? l10n.settingsAiProvidersSpeechSubscriptionKeyLabel
         : l10n.settingsAiProvidersApiKeyLabel;
@@ -63,9 +64,9 @@ class _SpeechByokFormState extends State<SpeechByokForm> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (widget.mode == SpeechByokFormMode.speech) ...[
-          Text(
-            l10n.settingsAiProvidersSpeechKindLabel,
-            style: Theme.of(context).textTheme.labelLarge,
+          _SpeechSectionLabel(
+            icon: Icons.route_outlined,
+            text: l10n.settingsAiProvidersSpeechKindLabel,
           ),
           SizedBox(height: t.space8),
           SegmentedButton<SpeechByokKind>(
@@ -83,8 +84,19 @@ class _SpeechByokFormState extends State<SpeechByokForm> {
             onSelectionChanged: (selected) {
               widget.onKindChanged?.call(selected.first);
             },
+            style: SegmentedButton.styleFrom(
+              visualDensity: VisualDensity.comfortable,
+              selectedBackgroundColor: cs.primaryContainer.withValues(
+                alpha: 0.55,
+              ),
+              selectedForegroundColor: cs.onPrimaryContainer,
+              foregroundColor: cs.onSurfaceVariant,
+              side: BorderSide(
+                color: cs.outlineVariant.withValues(alpha: 0.32),
+              ),
+            ),
           ),
-          SizedBox(height: t.space12),
+          SizedBox(height: t.space16),
         ],
         if (!widget._isAzure && widget.baseUrlController != null) ...[
           TextField(
@@ -109,9 +121,11 @@ class _SpeechByokFormState extends State<SpeechByokForm> {
           TextField(
             controller: widget.modelController,
             decoration: InputDecoration(
-              labelText: widget.modelLabelText ??
+              labelText:
+                  widget.modelLabelText ??
                   l10n.settingsAiProvidersSpeechWhisperModelLabel,
-              hintText: widget.modelHintText ??
+              hintText:
+                  widget.modelHintText ??
                   l10n.settingsAiProvidersSpeechWhisperModelHint,
             ),
           ),
@@ -128,6 +142,34 @@ class _SpeechByokFormState extends State<SpeechByokForm> {
             autocorrect: false,
           ),
         ],
+      ],
+    );
+  }
+}
+
+class _SpeechSectionLabel extends StatelessWidget {
+  const _SpeechSectionLabel({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: cs.primary),
+        SizedBox(width: t.space8),
+        Text(
+          text,
+          style: tt.labelLarge?.copyWith(
+            color: cs.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ],
     );
   }

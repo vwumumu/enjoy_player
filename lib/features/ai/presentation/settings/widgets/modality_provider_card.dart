@@ -60,10 +60,17 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
       widget.modality == ModalityKind.tts;
 
   SpeechByokFormMode? get _speechFormMode => switch (widget.modality) {
-        ModalityKind.assessment => SpeechByokFormMode.assessment,
-        ModalityKind.asr || ModalityKind.tts => SpeechByokFormMode.speech,
-        _ => null,
-      };
+    ModalityKind.assessment => SpeechByokFormMode.assessment,
+    ModalityKind.asr || ModalityKind.tts => SpeechByokFormMode.speech,
+    _ => null,
+  };
+
+  IconData get _modalityIcon => switch (widget.modality) {
+    ModalityKind.llm => Icons.auto_awesome_outlined,
+    ModalityKind.asr => Icons.graphic_eq_rounded,
+    ModalityKind.tts => Icons.record_voice_over_outlined,
+    ModalityKind.assessment => Icons.verified_outlined,
+  };
 
   @override
   void initState() {
@@ -136,123 +143,222 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
     final tt = Theme.of(context).textTheme;
     final speechMode = _speechFormMode;
 
-    return Card(
+    return Material(
       elevation: 0,
-      color: cs.surfaceContainerLow,
+      color: cs.surfaceContainerLow.withValues(alpha: 0.9),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(t.radiusLg),
-        side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(t.radiusXl),
+        side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.22)),
       ),
-      child: Padding(
-        padding: EdgeInsets.all(t.space16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              widget.title,
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: t.space4),
-            Text(
-              widget.subtitle,
-              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-            SizedBox(height: t.space16),
-            RadioGroup<AIProvider>(
-              groupValue: _provider,
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() => _provider = value);
-              },
-              child: Column(
+      clipBehavior: Clip.antiAlias,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              cs.surfaceContainerHigh.withValues(alpha: 0.34),
+              cs.surfaceContainerLow.withValues(alpha: 0.04),
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(t.space20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  RadioListTile<AIProvider>(
-                    title: Text(l10n.settingsAiProvidersEnjoyAi),
+                  _ModalityIcon(icon: _modalityIcon),
+                  SizedBox(width: t.space12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.title,
+                                style: tt.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: t.space8),
+                            _ProviderPill(
+                              label: _provider == AIProvider.enjoy
+                                  ? l10n.settingsAiProvidersEnjoyAi
+                                  : l10n.settingsAiProvidersByok,
+                              selected: _provider == AIProvider.byok,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: t.space4),
+                        Text(
+                          widget.subtitle,
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: t.space16),
+              SegmentedButton<AIProvider>(
+                segments: [
+                  ButtonSegment(
                     value: AIProvider.enjoy,
+                    icon: const Icon(Icons.cloud_done_outlined),
+                    label: Text(l10n.settingsAiProvidersEnjoyAi),
                   ),
-                  RadioListTile<AIProvider>(
-                    title: Text(l10n.settingsAiProvidersByok),
+                  ButtonSegment(
                     value: AIProvider.byok,
+                    icon: const Icon(Icons.key_outlined),
+                    label: Text(l10n.settingsAiProvidersByok),
                   ),
                 ],
-              ),
-            ),
-            if (_provider == AIProvider.byok &&
-                widget.modality == ModalityKind.llm) ...[
-              SizedBox(height: t.space8),
-              LlmByokForm(
-                apiSpec: _apiSpec,
-                baseUrlController: _baseUrlController,
-                apiKeyController: _apiKeyController,
-                modelController: _modelController,
-                hasExistingKey: _hasExistingKey,
-                presetId: _presetId,
-                maskedApiKeyPreview: _maskedApiKeyPreview,
-                onSpecChanged: (spec) => setState(() {
-                  _apiSpec = spec;
-                  _presetId = null;
-                }),
-                onPresetSelected: (preset) => setState(() {
-                  _apiSpec = preset.apiSpec;
-                  _presetId = preset.id;
-                  _baseUrlController.text = preset.baseUrl;
-                  _modelController.text = preset.model;
-                }),
-              ),
-            ],
-            if (_provider == AIProvider.byok && speechMode != null) ...[
-              SizedBox(height: t.space8),
-              SpeechByokForm(
-                mode: speechMode,
-                kind: _speechKind,
-                apiKeyController: _apiKeyController,
-                regionController: _regionController,
-                baseUrlController: _baseUrlController,
-                modelController: _modelController,
-                hasExistingKey: _hasExistingKey,
-                maskedApiKeyPreview: _maskedApiKeyPreview,
-                onKindChanged: (kind) => setState(() => _speechKind = kind),
-                modelLabelText: widget.modality == ModalityKind.tts
-                    ? l10n.settingsAiProvidersSpeechTtsModelLabel
-                    : null,
-                modelHintText: widget.modality == ModalityKind.tts
-                    ? l10n.settingsAiProvidersSpeechTtsModelHint
-                    : null,
-              ),
-            ],
-            if (_provider == AIProvider.byok && !_supportsByokForm)
-              Padding(
-                padding: EdgeInsets.only(top: t.space8),
-                child: Text(
-                  l10n.settingsAiProvidersComingSoon,
-                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                ),
-              ),
-            SizedBox(height: t.space16),
-            Row(
-              children: [
-                Expanded(
-                  child: EnjoyButton.primary(
-                    onPressed: _saving ? null : _save,
-                    child: _saving
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.settingsAiProvidersSave),
+                selected: {_provider},
+                onSelectionChanged: _saving
+                    ? null
+                    : (selected) => setState(() => _provider = selected.first),
+                style: SegmentedButton.styleFrom(
+                  visualDensity: VisualDensity.comfortable,
+                  selectedBackgroundColor: cs.primaryContainer.withValues(
+                    alpha: 0.55,
+                  ),
+                  selectedForegroundColor: cs.onPrimaryContainer,
+                  foregroundColor: cs.onSurfaceVariant,
+                  side: BorderSide(
+                    color: cs.outlineVariant.withValues(alpha: 0.38),
                   ),
                 ),
-                if (widget.config.provider == AIProvider.byok) ...[
+              ),
+              AnimatedSwitcher(
+                duration: t.motionFast,
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: _provider == AIProvider.byok
+                    ? Padding(
+                        key: const ValueKey('byok-form'),
+                        padding: EdgeInsets.only(top: t.space16),
+                        child: _ByokPanel(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (widget.modality == ModalityKind.llm)
+                                LlmByokForm(
+                                  apiSpec: _apiSpec,
+                                  baseUrlController: _baseUrlController,
+                                  apiKeyController: _apiKeyController,
+                                  modelController: _modelController,
+                                  hasExistingKey: _hasExistingKey,
+                                  presetId: _presetId,
+                                  maskedApiKeyPreview: _maskedApiKeyPreview,
+                                  onSpecChanged: (spec) => setState(() {
+                                    _apiSpec = spec;
+                                    _presetId = null;
+                                  }),
+                                  onPresetSelected: (preset) => setState(() {
+                                    _apiSpec = preset.apiSpec;
+                                    _presetId = preset.id;
+                                    _baseUrlController.text = preset.baseUrl;
+                                    _modelController.text = preset.model;
+                                  }),
+                                ),
+                              if (speechMode != null)
+                                SpeechByokForm(
+                                  mode: speechMode,
+                                  kind: _speechKind,
+                                  apiKeyController: _apiKeyController,
+                                  regionController: _regionController,
+                                  baseUrlController: _baseUrlController,
+                                  modelController: _modelController,
+                                  hasExistingKey: _hasExistingKey,
+                                  maskedApiKeyPreview: _maskedApiKeyPreview,
+                                  onKindChanged: (kind) =>
+                                      setState(() => _speechKind = kind),
+                                  modelLabelText:
+                                      widget.modality == ModalityKind.tts
+                                      ? l10n.settingsAiProvidersSpeechTtsModelLabel
+                                      : null,
+                                  modelHintText:
+                                      widget.modality == ModalityKind.tts
+                                      ? l10n.settingsAiProvidersSpeechTtsModelHint
+                                      : null,
+                                ),
+                              if (!_supportsByokForm)
+                                Text(
+                                  l10n.settingsAiProvidersComingSoon,
+                                  style: tt.bodySmall?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(key: ValueKey('enjoy-empty')),
+              ),
+              SizedBox(height: t.space16),
+              Divider(
+                height: 1,
+                color: cs.outlineVariant.withValues(alpha: 0.2),
+              ),
+              SizedBox(height: t.space12),
+              Row(
+                children: [
+                  Icon(
+                    _provider == AIProvider.enjoy
+                        ? Icons.cloud_done_outlined
+                        : Icons.lock_outline_rounded,
+                    size: 18,
+                    color: cs.onSurfaceVariant,
+                  ),
                   SizedBox(width: t.space8),
-                  TextButton(
-                    onPressed: _saving ? null : _confirmRemove,
-                    child: Text(l10n.settingsAiProvidersRemoveByok),
+                  Expanded(
+                    child: Text(
+                      _provider == AIProvider.enjoy
+                          ? l10n.settingsAiProvidersEnjoyAi
+                          : l10n.settingsAiProvidersPrivacyNotice,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                  if (widget.config.provider == AIProvider.byok) ...[
+                    SizedBox(width: t.space12),
+                    TextButton(
+                      onPressed: _saving ? null : _confirmRemove,
+                      child: Text(l10n.settingsAiProvidersRemoveByok),
+                    ),
+                  ],
+                  SizedBox(width: t.space8),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: 132),
+                    child: EnjoyButton.primary(
+                      onPressed: _saving ? null : _save,
+                      child: _saving
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(l10n.settingsAiProvidersSave),
+                    ),
                   ),
                 ],
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -376,5 +482,90 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+}
+
+class _ModalityIcon extends StatelessWidget {
+  const _ModalityIcon({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(t.radiusMd),
+        color: cs.primaryContainer.withValues(alpha: 0.38),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.18)),
+      ),
+      child: Icon(icon, color: cs.primary, size: 22),
+    );
+  }
+}
+
+class _ProviderPill extends StatelessWidget {
+  const _ProviderPill({required this.label, required this.selected});
+
+  final String label;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: selected
+            ? cs.primaryContainer.withValues(alpha: 0.5)
+            : cs.surfaceContainerHighest.withValues(alpha: 0.34),
+        borderRadius: BorderRadius.circular(t.radiusFull),
+        border: Border.all(
+          color: selected
+              ? cs.primary.withValues(alpha: 0.34)
+              : cs.outlineVariant.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: t.space12,
+          vertical: t.space4,
+        ),
+        child: Text(
+          label,
+          style: tt.labelMedium?.copyWith(
+            color: selected ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ByokPanel extends StatelessWidget {
+  const _ByokPanel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest.withValues(alpha: 0.58),
+        borderRadius: BorderRadius.circular(t.radiusLg),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.18)),
+      ),
+      child: Padding(padding: EdgeInsets.all(t.space16), child: child),
+    );
   }
 }

@@ -44,12 +44,17 @@ class _LlmByokFormState extends State<LlmByokForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final presets = presetsForSpec(widget.apiSpec);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(l10n.settingsAiProvidersLlmSpecLabel, style: Theme.of(context).textTheme.labelLarge),
+        _FormSectionLabel(
+          icon: Icons.hub_outlined,
+          text: l10n.settingsAiProvidersLlmSpecLabel,
+        ),
         SizedBox(height: t.space8),
         SegmentedButton<LlmApiSpec>(
           segments: [
@@ -71,10 +76,22 @@ class _LlmByokFormState extends State<LlmByokForm> {
             final spec = selected.first;
             widget.onSpecChanged?.call(spec);
           },
+          style: SegmentedButton.styleFrom(
+            visualDensity: VisualDensity.comfortable,
+            selectedBackgroundColor: cs.primaryContainer.withValues(
+              alpha: 0.55,
+            ),
+            selectedForegroundColor: cs.onPrimaryContainer,
+            foregroundColor: cs.onSurfaceVariant,
+            side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.32)),
+          ),
         ),
-        SizedBox(height: t.space12),
+        SizedBox(height: t.space16),
         if (presets.isNotEmpty) ...[
-          Text(l10n.settingsAiProvidersPresetsLabel, style: Theme.of(context).textTheme.labelLarge),
+          _FormSectionLabel(
+            icon: Icons.bolt_outlined,
+            text: l10n.settingsAiProvidersPresetsLabel,
+          ),
           SizedBox(height: t.space8),
           Wrap(
             spacing: t.space8,
@@ -85,10 +102,20 @@ class _LlmByokFormState extends State<LlmByokForm> {
                   label: Text(preset.label),
                   selected: widget.presetId == preset.id,
                   onSelected: (_) => widget.onPresetSelected?.call(preset),
+                  showCheckmark: false,
+                  side: BorderSide(
+                    color: widget.presetId == preset.id
+                        ? cs.primary.withValues(alpha: 0.38)
+                        : cs.outlineVariant.withValues(alpha: 0.22),
+                  ),
+                  backgroundColor: cs.surfaceContainerHighest.withValues(
+                    alpha: 0.22,
+                  ),
+                  selectedColor: cs.primaryContainer.withValues(alpha: 0.48),
                 ),
             ],
           ),
-          SizedBox(height: t.space12),
+          SizedBox(height: t.space16),
         ],
         TextFormField(
           key: const Key('llm_byok_base_url'),
@@ -116,18 +143,41 @@ class _LlmByokFormState extends State<LlmByokForm> {
         ),
         if (widget.apiSpec == LlmApiSpec.openAiCompatible) ...[
           SizedBox(height: t.space12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton.icon(
-              onPressed: _fetchingModels ? null : _fetchModels,
-              icon: _fetchingModels
-                  ? SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.list_outlined),
-              label: Text(l10n.settingsAiProvidersFetchModels),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(t.radiusMd),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.18),
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(t.space12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.settingsAiProvidersFetchedModelsLabel,
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: t.space12),
+                  OutlinedButton.icon(
+                    onPressed: _fetchingModels ? null : _fetchModels,
+                    icon: _fetchingModels
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.list_outlined),
+                    label: Text(l10n.settingsAiProvidersFetchModels),
+                  ),
+                ],
+              ),
             ),
           ),
           if (_fetchModelsError != null) ...[
@@ -135,8 +185,8 @@ class _LlmByokFormState extends State<LlmByokForm> {
             Text(
               _fetchModelsError!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ],
           if (_fetchedModels.isNotEmpty) ...[
@@ -194,5 +244,33 @@ class _LlmByokFormState extends State<LlmByokForm> {
         setState(() => _fetchingModels = false);
       }
     }
+  }
+}
+
+class _FormSectionLabel extends StatelessWidget {
+  const _FormSectionLabel({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: cs.primary),
+        SizedBox(width: t.space8),
+        Text(
+          text,
+          style: tt.labelLarge?.copyWith(
+            color: cs.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -38,12 +38,9 @@ class AiProvidersScreen extends ConsumerWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(t.space16, 0, t.space16, t.space16),
-              child: Text(
-                l10n.settingsAiProvidersPrivacyNotice,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+              padding: EdgeInsets.fromLTRB(t.space16, 0, t.space16, t.space20),
+              child: _PrivacyCallout(
+                text: l10n.settingsAiProvidersPrivacyNotice,
               ),
             ),
           ),
@@ -57,21 +54,21 @@ class AiProvidersScreen extends ConsumerWidget {
                   subtitle: l10n.settingsAiProvidersModalityLlmHint,
                   config: configs.llm,
                 ),
-                SizedBox(height: t.space8),
+                SizedBox(height: t.space12),
                 ModalityProviderCard(
                   modality: ModalityKind.asr,
                   title: l10n.settingsAiProvidersModalityAsr,
                   subtitle: l10n.settingsAiProvidersModalityAsrHint,
                   config: configs.asr,
                 ),
-                SizedBox(height: t.space8),
+                SizedBox(height: t.space12),
                 ModalityProviderCard(
                   modality: ModalityKind.tts,
                   title: l10n.settingsAiProvidersModalityTts,
                   subtitle: l10n.settingsAiProvidersModalityTtsHint,
                   config: configs.tts,
                 ),
-                SizedBox(height: t.space8),
+                SizedBox(height: t.space12),
                 ModalityProviderCard(
                   modality: ModalityKind.assessment,
                   title: l10n.settingsAiProvidersModalityAssessment,
@@ -83,6 +80,46 @@ class AiProvidersScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PrivacyCallout extends StatelessWidget {
+  const _PrivacyCallout({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cs.primaryContainer.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(t.radiusLg),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.18)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(t.space16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.shield_outlined, color: cs.primary, size: 20),
+            SizedBox(width: t.space12),
+            Expanded(
+              child: Text(
+                text,
+                style: tt.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  height: 1.45,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
