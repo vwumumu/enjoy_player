@@ -4,6 +4,7 @@ library;
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/utils/stream_distinct.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
@@ -129,10 +130,14 @@ class DiscoverRepository {
       channelId: channel.channelId,
       displayName: channel.name,
       source: YoutubeSubscriptionSource.recommended,
+      language: canonicalMediaLanguageTag(channel.language),
     );
   }
 
-  Future<void> subscribeFromUserInput(String rawInput) async {
+  Future<void> subscribeFromUserInput(
+    String rawInput, {
+    String? language,
+  }) async {
     final resolved = await _channelResolver.resolveDetailed(rawInput);
     var displayName = resolved.displayName?.trim();
     displayName = (displayName != null && displayName.isNotEmpty)
@@ -142,6 +147,9 @@ class DiscoverRepository {
       channelId: resolved.channelId,
       displayName: displayName,
       source: YoutubeSubscriptionSource.user,
+      language: language == null
+          ? kUnknownMediaLanguageTag
+          : canonicalMediaLanguageTag(language),
     );
   }
 
@@ -150,6 +158,7 @@ class DiscoverRepository {
     required String displayName,
     required YoutubeSubscriptionSource source,
     String? thumbnailUrl,
+    String language = kUnknownMediaLanguageTag,
   }) async {
     final existing = await _db.youtubeChannelSubscriptionDao.getByChannelId(
       channelId,
@@ -163,6 +172,9 @@ class DiscoverRepository {
         source: source,
         subscribedAt: existing?.subscribedAt ?? now,
         lastFetchedAt: existing?.lastFetchedAt,
+        language: language != kUnknownMediaLanguageTag
+            ? language
+            : (existing?.language ?? kUnknownMediaLanguageTag),
       ),
     );
   }
@@ -170,6 +182,24 @@ class DiscoverRepository {
   Future<void> unsubscribe(String channelId) async {
     await _db.youtubeChannelSubscriptionDao.deleteChannelId(channelId);
     await _db.youtubeFeedEntryDao.deleteForChannel(channelId);
+  }
+
+  Future<void> updateSubscriptionLanguage(
+    String channelId,
+    String language,
+  ) async {
+    final canonical = canonicalMediaLanguageTag(language);
+    final row = await _db.youtubeChannelSubscriptionDao.getByChannelId(
+      channelId,
+    );
+    if (row == null) {
+      throw StateError('Subscription not found: $channelId');
+    }
+    if (tagsEqual(row.language, canonical)) return;
+    await _db.youtubeChannelSubscriptionDao.updateLanguage(
+      channelId,
+      canonical,
+    );
   }
 
   Future<bool> isVideoInLibrary(String videoId) async {
@@ -204,16 +234,27 @@ class DiscoverRepository {
   Future<String> addFeedEntryToLibrary(
     FeedEntry entry, {
     String? signedInUserId,
+    String? contentLanguage,
   }) async {
     final library = _libraryRepository;
     if (library == null) {
       throw StateError('DiscoverRepository library bridge not bound');
+    }
+    var lang = contentLanguage;
+    if (lang == null || lang.trim().isEmpty || lang == kUnknownMediaLanguageTag) {
+      final sub = await _db.youtubeChannelSubscriptionDao.getByChannelId(
+        entry.channelId,
+      );
+      if (sub != null && sub.language != kUnknownMediaLanguageTag) {
+        lang = sub.language;
+      }
     }
     return library.importYoutubeVideo(
       entry.videoId,
       signedInUserId: signedInUserId,
       prefetchedTitle: entry.title,
       prefetchedThumbnailUrl: entry.thumbnailUrl,
+      contentLanguage: lang ?? kUnknownMediaLanguageTag,
     );
   }
 
@@ -469,6 +510,7 @@ class DiscoverRepository {
             source: oldSub.source,
             subscribedAt: oldSub.subscribedAt,
             lastFetchedAt: null,
+            language: oldSub.language,
           ),
         );
       }
@@ -504,6 +546,7 @@ class DiscoverRepository {
       source: row.source,
       subscribedAt: row.subscribedAt,
       lastFetchedAt: row.lastFetchedAt,
+      language: row.language,
     );
   }
 

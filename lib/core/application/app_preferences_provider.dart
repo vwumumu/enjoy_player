@@ -41,8 +41,8 @@ class AppPreferencesState {
     nativeLanguage: null,
   );
 
-  /// MVP: learning is always English (US).
-  String get effectiveLearningLanguage => kDefaultLearningLanguageTag;
+  String get effectiveLearningLanguage =>
+      canonicalFocusLanguageTag(learningLanguage);
 
   /// Native tag for UX and APIs; never equals [effectiveLearningLanguage].
   String get effectiveNativeLanguage =>
@@ -80,7 +80,7 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
       SettingsKeys.prefsNativeLanguage,
     );
 
-    final learnCanonical = kDefaultLearningLanguageTag;
+    final learnCanonical = canonicalFocusLanguageTag(learnRaw);
     if (learnRaw == null ||
         learnRaw.isEmpty ||
         !tagsEqual(learnRaw, learnCanonical)) {
@@ -161,8 +161,38 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
         .syncLocaleToServerIfSignedIn(resolved);
   }
 
+  Future<void> setLearningLanguage(String tag) async {
+    final canonical = canonicalFocusLanguageTag(tag);
+    if (!kSupportedFocusLanguageTags.any((t) => tagsEqual(t, canonical))) {
+      _prefsLog.warning('prefs: rejected learning language tag: $tag');
+      return;
+    }
+    final nativeCoerced = coerceNativeIfEqualsLearning(
+      (await future).nativeLanguage,
+      canonical,
+    );
+    final next = (await future).copyWith(
+      learningLanguage: canonical,
+      nativeLanguage: nativeCoerced,
+    );
+    state = AsyncData(next);
+    final db = ref.read(appDatabaseProvider);
+    await db.settingsDao.setValue(
+      SettingsKeys.prefsLearningLanguage,
+      canonical,
+    );
+    await db.settingsDao.setValue(
+      SettingsKeys.prefsNativeLanguage,
+      nativeCoerced,
+    );
+    await _syncLanguageFieldsToServerIfSignedIn(
+      learningLanguage: canonical,
+      nativeLanguage: nativeCoerced,
+    );
+  }
+
   Future<void> setNativeLanguage(String tag) async {
-    final learn = kDefaultLearningLanguageTag;
+    final learn = (await future).effectiveLearningLanguage;
     final allowed = allowedNativeTags(learn);
     if (!allowed.any((t) => tagsEqual(t, tag))) {
       _prefsLog.warning('prefs: rejected native language tag: $tag');
@@ -194,7 +224,10 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
       nextLocale = displayLocaleFromRawOrDefault(profile.locale);
     }
 
-    final learnCanonical = kDefaultLearningLanguageTag;
+    final learnCanonical = profile.learningLanguage != null &&
+            profile.learningLanguage!.trim().isNotEmpty
+        ? canonicalFocusLanguageTag(profile.learningLanguage)
+        : canonicalFocusLanguageTag(prev.learningLanguage);
     final nativeCoerced = coerceNativeIfEqualsLearning(
       profile.nativeLanguage ?? prev.nativeLanguage,
       learnCanonical,

@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:media_kit/media_kit.dart' as mk;
 import 'package:path/path.dart' as p;
 
+import '../../../core/application/app_language_catalog.dart';
 import '../../../core/ids/enjoy_ids.dart';
 import '../../../core/logging/log.dart';
 import '../../../core/utils/youtube_video_identity.dart';
@@ -389,10 +390,10 @@ class TranscriptRepository {
     return pb ?? v;
   }
 
-  String _workerCaptionLanguage(VideoRow video) {
+  String? _workerCaptionLanguage(VideoRow video) {
     final lang = video.language.trim();
-    if (lang.isEmpty || lang == 'und') return 'en';
-    return lang;
+    if (lang.isEmpty || lang == 'und') return null;
+    return workerLanguageBase(lang);
   }
 
   Future<TranscriptCloudFetchResult> _fetchYoutubeWorkerTranscripts({
@@ -409,6 +410,11 @@ class TranscriptRepository {
 
     final workerVideoId = _workerYoutubeVideoId(video);
     final language = _workerCaptionLanguage(video);
+    if (language == null) {
+      return const TranscriptCloudFetchResult(
+        status: TranscriptCloudFetchStatus.skipped,
+      );
+    }
     final now = DateTime.now();
 
     for (var attempt = 0; attempt < _maxYoutubeWorkerPollAttempts; attempt++) {

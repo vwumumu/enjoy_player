@@ -6,6 +6,7 @@ import 'package:enjoy_player/features/discover/data/youtube_fetch.dart';
 import 'package:enjoy_player/features/discover/data/youtube_rss_parser.dart';
 import 'package:enjoy_player/data/db/youtube_subscription_source.dart';
 import 'package:enjoy_player/features/discover/domain/feed_entry.dart';
+import 'package:enjoy_player/features/discover/domain/recommended_channel.dart';
 import 'package:enjoy_player/features/library/data/library_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -79,6 +80,7 @@ void main() {
             source: YoutubeSubscriptionSource.recommended,
             subscribedAt: subscribedAt,
             lastFetchedAt: fetchedAt,
+            language: 'en',
           ),
         );
 
@@ -209,6 +211,76 @@ void main() {
       final row = await db.videoDao.getById(id);
       expect(row!.title, 'Discover RSS Title');
       expect(row.thumbnailUrl, 'https://i.ytimg.com/vi/$vid/hqdefault.jpg');
+    });
+
+    test('subscribeRecommended persists channel language', () async {
+      await repo.subscribeRecommended(
+        const RecommendedChannel(
+          channelId: 'UCja123456789',
+          name: 'Japanese Channel',
+          language: 'ja',
+          tags: ['education'],
+        ),
+      );
+
+      final row = await db.youtubeChannelSubscriptionDao.getByChannelId(
+        'UCja123456789',
+      );
+      expect(row!.language, 'ja-JP');
+    });
+
+    test('addFeedEntryToLibrary defaults to subscription language', () async {
+      const vid = 'dQw4w9WgXcQ';
+      const channelId = 'UCko123456789';
+      await db.youtubeChannelSubscriptionDao.upsert(
+        YoutubeChannelSubscriptionRow(
+          channelId: channelId,
+          displayName: 'Korean Channel',
+          source: YoutubeSubscriptionSource.user,
+          subscribedAt: DateTime.utc(2024, 1, 1),
+          language: 'ko',
+        ),
+      );
+
+      final library = MediaLibraryRepository(
+        db,
+        FileStorage(),
+        oembedClient: MockClient((_) async => http.Response('', 500)),
+      );
+      repo = DiscoverRepository(
+        db,
+        httpClient: MockClient((_) async => http.Response('', 404)),
+        rssParser: const YoutubeRssParser(),
+        libraryRepository: library,
+      );
+
+      final id = await repo.addFeedEntryToLibrary(
+        FeedEntry(
+          videoId: vid,
+          channelId: channelId,
+          title: 'Korean clip',
+          publishedAt: DateTime.utc(2024, 6, 1),
+        ),
+      );
+
+      final row = await db.videoDao.getById(id);
+      expect(row!.language, 'ko-KR');
+    });
+
+    test('updateSubscriptionLanguage updates persisted language', () async {
+      const channelId = 'UCfr123456789';
+      await repo.subscribeChannel(
+        channelId: channelId,
+        displayName: 'French Channel',
+        source: YoutubeSubscriptionSource.user,
+        language: 'und',
+      );
+
+      await repo.updateSubscriptionLanguage(channelId, 'fr');
+      final row = await db.youtubeChannelSubscriptionDao.getByChannelId(
+        channelId,
+      );
+      expect(row!.language, 'fr-FR');
     });
   });
 }

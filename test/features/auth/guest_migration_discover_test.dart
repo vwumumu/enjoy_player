@@ -34,6 +34,7 @@ void main() {
           source: YoutubeSubscriptionSource.recommended,
           subscribedAt: now,
           lastFetchedAt: now,
+          language: 'en',
         ),
       );
       await guest.youtubeFeedEntryDao.upsertEntry(

@@ -27,6 +27,8 @@ import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_help_dialog.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/widgets/kbd_chip.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/about_section_card.dart';
+import 'package:enjoy_player/core/presentation/language_labels.dart';
+import 'package:enjoy_player/features/library/presentation/widgets/content_language_picker.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/language_choice_sheet.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
@@ -387,15 +389,8 @@ class SettingsScreen extends ConsumerWidget {
                       );
                       final learn = state.effectiveLearningLanguage;
                       final native = state.effectiveNativeLanguage;
-                      final nativeChoices = allowedNativeTags(
-                        kDefaultLearningLanguageTag,
-                      );
-                      String labelForTag(String tag) {
-                        if (tagsEqual(tag, 'en-US')) {
-                          return l10n.settingsLanguageOptionEnUs;
-                        }
-                        return l10n.settingsLanguageOptionZhCn;
-                      }
+                      final nativeChoices = allowedNativeTags(learn);
+                      String labelForTag(String tag) => focusLanguageLabel(l10n, tag);
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -436,10 +431,21 @@ class SettingsScreen extends ConsumerWidget {
                           _SettingsTile(
                             leadingIcon: Icons.translate_rounded,
                             title: l10n.settingsAppearanceLearningLanguage,
-                            subtitle:
-                                l10n.settingsLearningLanguageFixedSubtitle,
-                            valueBadge: _SettingsValuePill(label: learn),
-                            showChevron: false,
+                            subtitle: l10n.settingsLearningLanguageSubtitle,
+                            valueBadge: _SettingsValuePill(
+                              label: labelForTag(learn),
+                            ),
+                            showChevron: true,
+                            onTap: () async {
+                              final picked = await showFocusLanguagePicker(
+                                context: context,
+                                selectedValue: learn,
+                              );
+                              if (picked == null || !context.mounted) return;
+                              await ref
+                                  .read(appPreferencesCtrlProvider.notifier)
+                                  .setLearningLanguage(picked);
+                            },
                           ),
                           const _SettingsDivider(),
                           _SettingsTile(

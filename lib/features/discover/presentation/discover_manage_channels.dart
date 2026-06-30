@@ -73,7 +73,7 @@ class DiscoverManageChannelsView extends ConsumerWidget {
     final t = EnjoyThemeTokens.of(context);
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    final recommendedAsync = ref.watch(recommendedChannelsProvider);
+    final recommendedAsync = ref.watch(filteredRecommendedChannelsProvider);
     final subscriptionsAsync = ref.watch(discoverSubscriptionsProvider);
     final isDialog = presentation == DiscoverManageChannelsPresentation.dialog;
 
@@ -86,7 +86,28 @@ class DiscoverManageChannelsView extends ConsumerWidget {
             l10n.discoverRecommendedHeading,
             style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
-          SizedBox(height: t.space12),
+          SizedBox(height: t.space8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () {
+                final cur = ref.read(
+                  discoverRecommendedShowAllLanguagesProvider,
+                );
+                ref
+                    .read(
+                      discoverRecommendedShowAllLanguagesProvider.notifier,
+                    )
+                    .setShowAll(!cur);
+              },
+              child: Text(
+                ref.watch(discoverRecommendedShowAllLanguagesProvider)
+                    ? l10n.discoverLanguageFilterLabel
+                    : l10n.discoverLanguageFilterAll,
+              ),
+            ),
+          ),
+          SizedBox(height: t.space4),
           recommendedAsync.when(
             loading: () => const SizedBox(
               height: DiscoverRecommendedAvatarStrip.rowHeight,

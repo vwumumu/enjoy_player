@@ -11,6 +11,7 @@ class DiscoverChannel {
     required this.source,
     required this.subscribedAt,
     this.lastFetchedAt,
+    this.language = 'und',
   });
 
   final String channelId;
@@ -21,6 +22,7 @@ class DiscoverChannel {
   final YoutubeSubscriptionSource source;
   final DateTime subscribedAt;
   final DateTime? lastFetchedAt;
+  final String language;
 
   bool get isSubscribed => true;
 
@@ -33,7 +35,8 @@ class DiscoverChannel {
         other.thumbnailUrl == thumbnailUrl &&
         other.source == source &&
         other.subscribedAt == subscribedAt &&
-        other.lastFetchedAt == lastFetchedAt;
+        other.lastFetchedAt == lastFetchedAt &&
+        other.language == language;
   }
 
   @override
@@ -44,5 +47,6 @@ class DiscoverChannel {
     source,
     subscribedAt,
     lastFetchedAt,
+    language,
   );
 }

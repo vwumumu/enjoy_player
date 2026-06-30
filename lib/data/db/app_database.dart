@@ -71,7 +71,7 @@ class AppDatabase extends _$AppDatabase {
   bool get isGuestDatabase => _dbName == guestDatabaseName;
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -109,6 +109,11 @@ class AppDatabase extends _$AppDatabase {
         await m.database.customStatement(
           'CREATE INDEX IF NOT EXISTS idx_transcript_fetch_states_target '
           'ON transcript_fetch_states (target_type, target_id)',
+        );
+      } else if (next == 10) {
+        await m.addColumn(
+          youtubeChannelSubscriptions,
+          youtubeChannelSubscriptions.language,
         );
       }
       current = next;
@@ -186,6 +191,18 @@ class VideoDao extends DatabaseAccessor<AppDatabase> with _$VideoDaoMixin {
     );
   }
 
+  Future<void> updateLanguage({
+    required String id,
+    required String language,
+  }) async {
+    await (update(videos)..where((t) => t.id.equals(id))).write(
+      VideosCompanion(
+        language: Value(language),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> deleteId(String id) =>
       (delete(videos)..where((t) => t.id.equals(id))).go();
 }
@@ -203,6 +220,18 @@ class AudioDao extends DatabaseAccessor<AppDatabase> with _$AudioDaoMixin {
 
   Future<void> insertRow(AudioRow row) =>
       into(audios).insert(row, mode: InsertMode.insertOrReplace);
+
+  Future<void> updateLanguage({
+    required String id,
+    required String language,
+  }) async {
+    await (update(audios)..where((t) => t.id.equals(id))).write(
+      AudiosCompanion(
+        language: Value(language),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 
   Future<void> deleteId(String id) =>
       (delete(audios)..where((t) => t.id.equals(id))).go();
@@ -318,6 +347,14 @@ class TranscriptFetchStateDao extends DatabaseAccessor<AppDatabase>
     ),
     mode: InsertMode.insertOrReplace,
   );
+
+  Future<void> clearForTarget(String targetType, String targetId) async {
+    await (delete(transcriptFetchStates)..where(
+          (t) =>
+              t.targetType.equals(targetType) & t.targetId.equals(targetId),
+        ))
+        .go();
+  }
 }
 
 @DriftAccessor(tables: [EchoSessions])
@@ -725,6 +762,14 @@ class YoutubeChannelSubscriptionDao extends DatabaseAccessor<AppDatabase>
       youtubeChannelSubscriptions,
     )..where((t) => t.channelId.equals(channelId))).write(
       YoutubeChannelSubscriptionsCompanion(thumbnailUrl: Value(thumbnailUrl)),
+    );
+  }
+
+  Future<void> updateLanguage(String channelId, String language) async {
+    await (update(
+      youtubeChannelSubscriptions,
+    )..where((t) => t.channelId.equals(channelId))).write(
+      YoutubeChannelSubscriptionsCompanion(language: Value(language)),
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:go_router/go_router.dart';
 
+import 'package:enjoy_player/core/presentation/language_labels.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/core/utils/sliver_key_index.dart';
 import 'package:enjoy_player/core/theme/generative_media_cover.dart';
@@ -407,6 +408,8 @@ class _HomeMediaTile extends ConsumerWidget {
       subtitle: isVideo
           ? l10n.miniPlayerMediaVideo
           : '${l10n.miniPlayerMediaAudio} · $dur',
+      badge: focusLanguageLabel(l10n, media.language),
+      onBadgeTap: () => editMediaLanguage(context, ref, media),
       durationLabel: isVideo && media.durationMs > 0 ? dur : null,
       thumbnailFile: thumb,
       providerBadge: media.provider == 'youtube' ? l10n.youtubeBadge : null,

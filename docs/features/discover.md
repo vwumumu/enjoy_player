@@ -16,7 +16,8 @@ Discover feeds are **not** library items until imported. Subscriptions are **Enj
 
 The Discover tab shows a **merged video feed** only (responsive grid of recent uploads). A horizontal **filter strip** sits below the header:
 
-- **All** — timeline across all subscribed channels
+- **All** — timeline across all subscribed channels (optionally filtered to the focus learning language; see below)
+- **Language scope** — toggle between focus-language filtering and **All languages** (recommended strip and merged feed when **All** channel filter is active)
 - **Channel avatars** — filter the feed to one subscription
 - **Manage channels** — opens subscription management (see below)
 
@@ -28,7 +29,8 @@ Opened from the filter strip (bottom sheet on narrow layouts, centered dialog at
 
 - **Subscribe** (paste URL / `@handle`) — same resolver as before
 - **Your channels** — list with **Unsubscribe** (does not navigate away from the modal)
-- **Recommended** — bundled catalog (`assets/discover/recommended_channels.json`) with **Subscribe** / **Subscribed** badges
+- **Recommended** — bundled catalog (`assets/discover/recommended_channels.json`) with **Subscribe** / **Subscribed** badges; channels are **language-tagged** (English, Japanese, Korean, Spanish, French in the first wave). The list is filtered to the user's focus learning language by default, with **All languages** to browse everything.
+- **Subscription language** — each subscription stores a channel language (from the catalog or **Unknown** for pasted URLs). Tap the language label on a subscription row to correct it. **Add to library** uses subscription language as the default media content language; unknown-language subscriptions prompt for content language before import.
 
 Empty Discover state (no subscriptions) prompts **Manage channels** so users can add recommended channels first.
 

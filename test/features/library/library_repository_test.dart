@@ -472,5 +472,87 @@ void main() {
 
       await sub.cancel();
     });
+
+    test('importMedia persists selected content language', () async {
+      final bytes = utf8.encode('lang-import');
+      final src = File(p.join(root.path, 'clip.mp3'));
+      await src.writeAsBytes(bytes);
+
+      final id = await repo.importMedia(
+        XFile(src.path),
+        contentLanguage: 'ja',
+      );
+      final media = await repo.getById(id);
+      expect(media!.language, 'ja-JP');
+    });
+
+    test('importYoutubeVideo persists content language', () async {
+      const vid = 'dQw4w9WgXcQ';
+      final ytRepo = MediaLibraryRepository(
+        db,
+        FileStorage(),
+        oembedClient: MockClient((_) async => http.Response('', 500)),
+      );
+
+      final id = await ytRepo.importYoutubeVideo(
+        vid,
+        prefetchedTitle: 'Korean clip',
+        contentLanguage: 'ko',
+      );
+      final row = await db.videoDao.getById(id);
+      expect(row!.language, 'ko-KR');
+    });
+
+    test('updateMediaLanguage updates row and clears transcript fetch state', () async {
+      var syncCalls = 0;
+      final syncingRepo = MediaLibraryRepository(
+        db,
+        FileStorage(),
+        enqueueSync: (_, _, _) async {
+          syncCalls++;
+        },
+      );
+
+      final now = DateTime.now();
+      const id = 'yt-lang';
+      await db.videoDao.insertRow(
+        VideoRow(
+          id: id,
+          vid: 'abcdefghijk',
+          provider: 'youtube',
+          title: 'Clip',
+          description: null,
+          thumbnailUrl: null,
+          durationSeconds: 0,
+          language: 'und',
+          source: 'youtube',
+          localUri: null,
+          md5: null,
+          size: null,
+          mediaUrl: 'https://www.youtube.com/watch?v=abcdefghijk',
+          syncStatus: null,
+          serverUpdatedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+      await db.transcriptFetchStateDao.upsertOutcome(
+        targetType: 'video',
+        targetId: id,
+        lastFetchedAt: now,
+        lastStatus: 'error',
+        lastError: 'wrong language',
+      );
+
+      await syncingRepo.updateMediaLanguage(id, 'fr');
+      final row = await db.videoDao.getById(id);
+      expect(row!.language, 'fr-FR');
+      expect(syncCalls, 1);
+      final fetchState = await db.transcriptFetchStateDao.getForTarget(
+        'video',
+        id,
+      );
+      expect(fetchState, isNull);
+    });
   });
 }

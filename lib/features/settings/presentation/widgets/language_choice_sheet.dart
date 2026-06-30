@@ -25,70 +25,88 @@ Future<String?> showLanguageChoiceSheet({
 }) {
   return showEnjoySheet<String>(
     context: context,
+    isScrollControlled: true,
     builder: (ctx) {
       final t = EnjoyThemeTokens.of(ctx);
       final cs = Theme.of(ctx).colorScheme;
+      final maxHeight = MediaQuery.sizeOf(ctx).height * 0.72;
       return SafeArea(
         child: Padding(
           padding: EdgeInsets.only(bottom: t.space8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const PaddedSheetDragHandle(),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  t.space20,
-                  t.space4,
-                  t.space20,
-                  t.space12,
-                ),
-                child: Text(
-                  title,
-                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const PaddedSheetDragHandle(),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    t.space20,
+                    t.space4,
+                    t.space20,
+                    t.space12,
                   ),
-                ),
-              ),
-              ...options.map((opt) {
-                final selected = opt.value == selectedValue;
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: Haptics.wrapTap(ctx, () {
-                      Navigator.of(ctx).pop(opt.value);
-                    }),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: t.space20,
-                        vertical: t.space12,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              opt.label,
-                              style: Theme.of(ctx).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    fontWeight: selected
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                  ),
-                            ),
-                          ),
-                          if (selected)
-                            Icon(
-                              Icons.check_rounded,
-                              color: cs.primary,
-                              size: 22,
-                            ),
-                        ],
-                      ),
+                  child: Text(
+                    title,
+                    style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                );
-              }),
-            ],
+                ),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final opt in options) ...[
+                        Builder(
+                          builder: (itemCtx) {
+                            final selected = opt.value == selectedValue;
+                            return Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: Haptics.wrapTap(itemCtx, () {
+                                  Navigator.of(itemCtx).pop(opt.value);
+                                }),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: t.space20,
+                                    vertical: t.space12,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          opt.label,
+                                          style: Theme.of(itemCtx)
+                                              .textTheme
+                                              .bodyLarge
+                                              ?.copyWith(
+                                                fontWeight: selected
+                                                    ? FontWeight.w600
+                                                    : FontWeight.w400,
+                                              ),
+                                        ),
+                                      ),
+                                      if (selected)
+                                        Icon(
+                                          Icons.check_rounded,
+                                          color: cs.primary,
+                                          size: 22,
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_assessment_controller.dart';
@@ -52,7 +53,11 @@ class RecordingAssessmentButton extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final lp = row.localPath;
-    final canInteract = echoActive && lp != null && lp.isNotEmpty;
+    final assessmentSupported = isAzurePronunciationAssessmentSupported(
+      row.language,
+    );
+    final canInteract =
+        echoActive && lp != null && lp.isNotEmpty && assessmentSupported;
 
     final ui = ref.watch(recordingAssessmentControllerProvider(row.id));
     final isAssessing = ui.isRunning;
@@ -61,11 +66,13 @@ class RecordingAssessmentButton extends ConsumerWidget {
     final hasStored =
         row.assessmentJson != null && row.assessmentJson!.trim().isNotEmpty;
 
-    final tooltip = hotkeyTooltipLabel(
-      ref,
-      'player.toggleAssessment',
-      hasStored ? l10n.assessmentView : l10n.assessmentRun,
-    );
+    final tooltip = !assessmentSupported
+        ? l10n.assessmentUnavailableLanguage
+        : hotkeyTooltipLabel(
+            ref,
+            'player.toggleAssessment',
+            hasStored ? l10n.assessmentView : l10n.assessmentRun,
+          );
 
     final Color? bg = score != null
         ? assessmentScoreBackground(scheme, assessmentScoreLevel(score))

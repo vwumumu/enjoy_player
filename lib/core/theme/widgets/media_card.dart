@@ -80,7 +80,7 @@ Widget _heroArtworkShell(String? mediaId, Widget child) {
   );
 }
 
-/// Meta block under 16:9 artwork: padding 8+12, title 14×1.25, gap 4, subtitle 13×1.2.
+/// Meta block under 16:9 artwork: padding 8+12, title 14×1.25, optional subtitle row.
 const double mediaCardTileMetaHeight = 58;
 
 /// [BoxDecoration.border] inset at rest / on hover (up to 1.5 logical px per edge).
@@ -188,6 +188,8 @@ class MediaCardTile extends StatefulWidget {
     this.deleteTooltip,
     this.providerBadge,
     this.durationLabel,
+    this.badge,
+    this.onBadgeTap,
     this.heroArtworkMediaId,
   });
 
@@ -219,6 +221,10 @@ class MediaCardTile extends StatefulWidget {
 
   /// When set, shown on the thumbnail (Discover-style) instead of the video icon.
   final String? durationLabel;
+
+  /// Optional language or metadata chip below the title.
+  final String? badge;
+  final VoidCallback? onBadgeTap;
 
   @override
   State<MediaCardTile> createState() => _MediaCardTileState();
@@ -326,7 +332,8 @@ class _MediaCardTileState extends State<MediaCardTile> {
                             bottom: t.space8,
                             child: _DurationBadge(label: widget.durationLabel!),
                           )
-                        else
+                        else if (widget.badge == null ||
+                            widget.onBadgeTap == null)
                           Positioned(
                             right: t.space8,
                             bottom: t.space8,
@@ -352,6 +359,15 @@ class _MediaCardTileState extends State<MediaCardTile> {
                                   color: Colors.white.withValues(alpha: 0.95),
                                 ),
                               ),
+                            ),
+                          ),
+                        if (widget.badge != null && widget.onBadgeTap != null)
+                          Positioned(
+                            left: t.space8,
+                            bottom: t.space8,
+                            child: _ThumbnailLanguageBadge(
+                              label: widget.badge!,
+                              onTap: widget.onBadgeTap!,
                             ),
                           ),
                         if (widget.onDelete != null &&
@@ -469,6 +485,7 @@ class MediaCardRow extends StatefulWidget {
     this.trailing,
     this.onDelete,
     this.deleteTooltip,
+    this.onBadgeTap,
     this.heroArtworkMediaId,
   });
 
@@ -479,6 +496,7 @@ class MediaCardRow extends StatefulWidget {
   final String? coverSeed;
   final String? subtitle;
   final String? badge;
+  final VoidCallback? onBadgeTap;
 
   /// Source label on thumbnail (e.g. YouTube).
   final String? providerBadge;
@@ -660,7 +678,12 @@ class _MediaCardRowState extends State<MediaCardRow> {
                           Row(
                             children: [
                               if (widget.badge != null) ...[
-                                _Badge(label: widget.badge!, cs: cs),
+                                _Badge(
+                                  label: widget.badge!,
+                                  cs: cs,
+                                  onTap: widget.onBadgeTap,
+                                  showLanguageIcon: widget.onBadgeTap != null,
+                                ),
                                 SizedBox(width: t.space8),
                               ],
                               if (widget.subtitle != null)
@@ -823,25 +846,120 @@ class _DurationBadge extends StatelessWidget {
 }
 
 class _Badge extends StatelessWidget {
-  const _Badge({required this.label, required this.cs});
+  const _Badge({
+    required this.label,
+    required this.cs,
+    this.onTap,
+    this.showLanguageIcon = false,
+  });
 
   final String label;
   final ColorScheme cs;
+  final VoidCallback? onTap;
+  final bool showLanguageIcon;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+    final child = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
+        color: onTap != null
+            ? cs.primaryContainer.withValues(alpha: 0.55)
+            : cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.4)),
+        border: Border.all(
+          color: onTap != null
+              ? cs.primary.withValues(alpha: 0.45)
+              : cs.outlineVariant.withValues(alpha: 0.4),
+        ),
       ),
-      child: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showLanguageIcon) ...[
+            Icon(
+              Icons.translate_rounded,
+              size: 14,
+              color: cs.primary,
+            ),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: onTap != null ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+              fontWeight: onTap != null ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+    Widget badge = child;
+    if (onTap != null) {
+      badge = Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Haptics.selection(context);
+            onTap!();
+          },
+          borderRadius: BorderRadius.circular(999),
+          child: child,
+        ),
+      );
+    }
+    return badge;
+  }
+}
+
+/// Language chip overlaid on grid tile artwork (bottom-left).
+class _ThumbnailLanguageBadge extends StatelessWidget {
+  const _ThumbnailLanguageBadge({
+    required this.label,
+    required this.onTap,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Haptics.selection(context);
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(999),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.78),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.translate_rounded,
+                  size: 13,
+                  color: Colors.white.withValues(alpha: 0.95),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

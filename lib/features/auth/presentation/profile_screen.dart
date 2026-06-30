@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/application/app_language_catalog.dart';
+import 'package:enjoy_player/core/presentation/language_labels.dart';
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
@@ -59,10 +60,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _goal.text = p.goal?.toString() ?? '';
   }
 
-  String _languageOptionLabel(AppLocalizations l10n, String tag) {
-    if (tagsEqual(tag, 'en-US')) return l10n.settingsLanguageOptionEnUs;
-    return l10n.settingsLanguageOptionZhCn;
-  }
+  String _languageOptionLabel(AppLocalizations l10n, String tag) =>
+      focusLanguageLabel(l10n, tag);
 
   Future<void> _confirmAndSignOut() async {
     final l10n = AppLocalizations.of(context)!;
@@ -260,17 +259,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                             .profileLearningLanguageReadOnly,
                                       ),
                                       items: [
-                                        DropdownMenuItem(
-                                          value: learnTag,
-                                          child: Text(
-                                            _languageOptionLabel(
-                                              l10n,
-                                              learnTag,
+                                        for (final tag
+                                            in kSupportedFocusLanguageTags)
+                                          DropdownMenuItem(
+                                            value: tag,
+                                            child: Text(
+                                              _languageOptionLabel(l10n, tag),
                                             ),
                                           ),
-                                        ),
                                       ],
-                                      onChanged: null,
+                                      onChanged: _saving
+                                          ? null
+                                          : (v) async {
+                                              if (v == null) return;
+                                              await ref
+                                                  .read(
+                                                    appPreferencesCtrlProvider
+                                                        .notifier,
+                                                  )
+                                                  .setLearningLanguage(v);
+                                            },
                                     ),
                                     SizedBox(height: t.space16),
                                     DropdownButtonFormField<String>(

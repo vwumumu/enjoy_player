@@ -8,6 +8,7 @@ import 'dart:isolate';
 import 'package:cross_file/cross_file.dart';
 import 'package:drift/drift.dart';
 
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/ids/enjoy_ids.dart';
 import 'package:enjoy_player/core/utils/youtube_video_identity.dart';
@@ -114,7 +115,12 @@ class MediaLibraryRepository {
   }
 
   /// [signedInUserId] when non-null enables web-aligned `aid`/`vid` + outbound sync.
-  Future<String> importMedia(XFile file, {String? signedInUserId}) async {
+  /// [contentLanguage] persisted on the new row (defaults to [kUnknownMediaLanguageTag]).
+  Future<String> importMedia(
+    XFile file, {
+    String? signedInUserId,
+    String contentLanguage = kUnknownMediaLanguageTag,
+  }) async {
     try {
       if (!isImportableLocalMediaFileName(file.name)) {
         throw const UnsupportedImportFileFailure();
@@ -151,7 +157,7 @@ class MediaLibraryRepository {
           description: null,
           thumbnailUrl: null,
           durationSeconds: 0,
-          language: 'und',
+          language: canonicalMediaLanguageTag(contentLanguage),
           source: null,
           localUri: result.fileUri,
           md5: contentHash,
@@ -193,7 +199,7 @@ class MediaLibraryRepository {
         description: null,
         thumbnailUrl: null,
         durationSeconds: 0,
-        language: 'und',
+        language: canonicalMediaLanguageTag(contentLanguage),
         translationKey: null,
         sourceText: null,
         voice: null,
@@ -226,6 +232,7 @@ class MediaLibraryRepository {
     String? signedInUserId,
     String? prefetchedTitle,
     String? prefetchedThumbnailUrl,
+    String contentLanguage = kUnknownMediaLanguageTag,
   }) async {
     final id = parseYoutubeVideoId(rawInput);
     if (id == null) {
@@ -264,7 +271,7 @@ class MediaLibraryRepository {
       description: null,
       thumbnailUrl: thumb,
       durationSeconds: 0,
-      language: 'und',
+      language: canonicalMediaLanguageTag(contentLanguage),
       source: 'youtube',
       localUri: null,
       md5: null,
@@ -451,6 +458,27 @@ class MediaLibraryRepository {
     final a = await _db.audioDao.getById(id);
     if (a != null) return _mediaFromAudio(a);
     return null;
+  }
+
+  /// Updates content language on an existing audio or video row.
+  Future<void> updateMediaLanguage(String id, String language) async {
+    final canonical = canonicalMediaLanguageTag(language);
+    final video = await _db.videoDao.getById(id);
+    if (video != null) {
+      if (tagsEqual(video.language, canonical)) return;
+      await _db.videoDao.updateLanguage(id: id, language: canonical);
+      await _db.transcriptFetchStateDao.clearForTarget('video', id);
+      await _enqueueSync?.call(SyncEntityType.video, id, SyncAction.update);
+      return;
+    }
+    final audio = await _db.audioDao.getById(id);
+    if (audio != null) {
+      if (tagsEqual(audio.language, canonical)) return;
+      await _db.audioDao.updateLanguage(id: id, language: canonical);
+      await _enqueueSync?.call(SyncEntityType.audio, id, SyncAction.update);
+      return;
+    }
+    throw const FileFailure('Media not found.');
   }
 
   /// Copy a user-picked file into app storage only if its chunked SHA-256 matches the

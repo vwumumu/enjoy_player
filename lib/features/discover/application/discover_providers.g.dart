@@ -99,6 +99,111 @@ final class RecommendedChannelsProvider
 String _$recommendedChannelsHash() =>
     r'7490234ebc0cf57d8766c20be2fb4e0caa946509';
 
+/// When false, recommended channels are filtered to the user's focus learning language.
+
+@ProviderFor(DiscoverRecommendedShowAllLanguages)
+final discoverRecommendedShowAllLanguagesProvider =
+    DiscoverRecommendedShowAllLanguagesProvider._();
+
+/// When false, recommended channels are filtered to the user's focus learning language.
+final class DiscoverRecommendedShowAllLanguagesProvider
+    extends $NotifierProvider<DiscoverRecommendedShowAllLanguages, bool> {
+  /// When false, recommended channels are filtered to the user's focus learning language.
+  DiscoverRecommendedShowAllLanguagesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'discoverRecommendedShowAllLanguagesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$discoverRecommendedShowAllLanguagesHash();
+
+  @$internal
+  @override
+  DiscoverRecommendedShowAllLanguages create() =>
+      DiscoverRecommendedShowAllLanguages();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$discoverRecommendedShowAllLanguagesHash() =>
+    r'eb8a9ae4970137b1b8863d44923e41eab4389979';
+
+/// When false, recommended channels are filtered to the user's focus learning language.
+
+abstract class _$DiscoverRecommendedShowAllLanguages extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(filteredRecommendedChannels)
+final filteredRecommendedChannelsProvider =
+    FilteredRecommendedChannelsProvider._();
+
+final class FilteredRecommendedChannelsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<RecommendedChannel>>,
+          List<RecommendedChannel>,
+          FutureOr<List<RecommendedChannel>>
+        >
+    with
+        $FutureModifier<List<RecommendedChannel>>,
+        $FutureProvider<List<RecommendedChannel>> {
+  FilteredRecommendedChannelsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'filteredRecommendedChannelsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$filteredRecommendedChannelsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<RecommendedChannel>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<RecommendedChannel>> create(Ref ref) {
+    return filteredRecommendedChannels(ref);
+  }
+}
+
+String _$filteredRecommendedChannelsHash() =>
+    r'cd33834b91388167f363ed46da25fd2d02a5de79';
+
 @ProviderFor(discoverSubscriptions)
 final discoverSubscriptionsProvider = DiscoverSubscriptionsProvider._();
 
@@ -179,6 +284,46 @@ final class DiscoverTimelineProvider
 }
 
 String _$discoverTimelineHash() => r'3e942de2ba42045ba9935cc68b25c1d12896de33';
+
+@ProviderFor(filteredDiscoverTimeline)
+final filteredDiscoverTimelineProvider = FilteredDiscoverTimelineProvider._();
+
+final class FilteredDiscoverTimelineProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<FeedEntry>>,
+          List<FeedEntry>,
+          Stream<List<FeedEntry>>
+        >
+    with $FutureModifier<List<FeedEntry>>, $StreamProvider<List<FeedEntry>> {
+  FilteredDiscoverTimelineProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'filteredDiscoverTimelineProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$filteredDiscoverTimelineHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<FeedEntry>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<FeedEntry>> create(Ref ref) {
+    return filteredDiscoverTimeline(ref);
+  }
+}
+
+String _$filteredDiscoverTimelineHash() =>
+    r'27a80d0997f03909c1568b35ddbaa62c7dc1141a';
 
 @ProviderFor(discoverChannelFeed)
 final discoverChannelFeedProvider = DiscoverChannelFeedFamily._();

@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:enjoy_player/core/presentation/language_labels.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -161,7 +162,8 @@ class LocalAudioRow extends ConsumerWidget {
     return MediaCardRow(
       title: media.title,
       subtitle: dur,
-      badge: media.language,
+      badge: focusLanguageLabel(l10n, media.language),
+      onBadgeTap: () => editMediaLanguage(context, ref, media),
       providerBadge: media.provider == 'youtube' ? l10n.youtubeBadge : null,
       thumbnailFile: thumb,
       thumbnailNetworkUrl: netThumb,
@@ -261,6 +263,8 @@ class LocalVideoTile extends ConsumerWidget {
     return MediaCardTile(
       title: media.title,
       subtitle: l10n.miniPlayerMediaVideo,
+      badge: focusLanguageLabel(l10n, media.language),
+      onBadgeTap: () => editMediaLanguage(context, ref, media),
       durationLabel: media.durationMs > 0 ? dur : null,
       thumbnailFile: thumb,
       providerBadge: media.provider == 'youtube' ? l10n.youtubeBadge : null,

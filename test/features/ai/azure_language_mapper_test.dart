@@ -6,7 +6,7 @@ void main() {
     expect(mapTranscriptLanguageToAzure('en'), 'en-US');
     expect(mapTranscriptLanguageToAzure('zh-TW'), 'zh-TW');
     expect(mapTranscriptLanguageToAzure('ja'), 'ja-JP');
-    expect(mapTranscriptLanguageToAzure(null), 'en-US');
+    expect(mapTranscriptLanguageToAzure('en-GB'), 'en-GB');
   });
 
   test(
@@ -16,9 +16,11 @@ void main() {
     },
   );
 
-  test('mapTranscriptLanguageToAzure maps undetermined ISO codes to en-US', () {
-    expect(mapTranscriptLanguageToAzure('und'), 'en-US');
-    expect(mapTranscriptLanguageToAzure('mul'), 'en-US');
-    expect(mapTranscriptLanguageToAzure('zxx'), 'en-US');
+  test('mapTranscriptLanguageToAzure returns null for invalid codes', () {
+    expect(mapTranscriptLanguageToAzure('und'), isNull);
+    expect(mapTranscriptLanguageToAzure('mul'), isNull);
+    expect(mapTranscriptLanguageToAzure('zxx'), isNull);
+    expect(mapTranscriptLanguageToAzure(null), isNull);
+    expect(mapTranscriptLanguageToAzure('xx'), isNull);
   });
 }

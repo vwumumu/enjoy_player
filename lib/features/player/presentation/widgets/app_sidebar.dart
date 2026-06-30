@@ -94,19 +94,20 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
       l10n.hotkeysDescLibrarySearch,
     );
 
-    return SizedBox(
-      width: t.sidebarWidth,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerLow,
-          border: Border(
-            right: BorderSide(
-              color: cs.outlineVariant.withValues(alpha: 0.35),
-              width: 1,
+    return Material(
+      color: cs.surfaceContainerLow,
+      child: SizedBox(
+        width: t.sidebarWidth,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              right: BorderSide(
+                color: cs.outlineVariant.withValues(alpha: 0.35),
+                width: 1,
+              ),
             ),
           ),
-        ),
-        child: FocusTraversalGroup(
+          child: FocusTraversalGroup(
           policy: WidgetOrderTraversalPolicy(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -222,6 +223,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -1530,10 +1530,58 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLanguageOptionEnUs => '英语（美国）';
 
   @override
+  String get settingsLanguageOptionEnGb => '英语（英国）';
+
+  @override
+  String get settingsLanguageOptionJaJp => '日语';
+
+  @override
+  String get settingsLanguageOptionKoKr => '韩语';
+
+  @override
+  String get settingsLanguageOptionEsEs => '西班牙语（西班牙）';
+
+  @override
+  String get settingsLanguageOptionEsMx => '西班牙语（墨西哥）';
+
+  @override
+  String get settingsLanguageOptionFrFr => '法语（法国）';
+
+  @override
+  String get settingsLanguageOptionFrCa => '法语（加拿大）';
+
+  @override
   String get settingsLanguageOptionZhCn => '中文（简体，中国）';
 
   @override
-  String get settingsLearningLanguageFixedSubtitle => '当前版本仅支持美式英语。';
+  String get settingsLearningLanguageSubtitle => '用于发现页推荐和导入时的默认语言。';
+
+  @override
+  String get settingsLanguagePickerTitleLearning => '学习语言';
+
+  @override
+  String get mediaLanguageUnknown => '未知';
+
+  @override
+  String get mediaLanguagePickerTitle => '内容语言';
+
+  @override
+  String get mediaEditLanguage => '编辑语言';
+
+  @override
+  String get mediaLanguageUpdated => '语言已更新。';
+
+  @override
+  String get mediaLanguageUpdateFailed => '无法更新语言。';
+
+  @override
+  String get assessmentUnavailableLanguage => '该语言暂不支持发音评估。';
+
+  @override
+  String get discoverLanguageFilterAll => '全部语言';
+
+  @override
+  String get discoverLanguageFilterLabel => '语言';
 
   @override
   String get settingsNativeMustDifferHint => '不能与学习语言相同。';
@@ -1548,7 +1596,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileFieldDisplayLanguage => '显示语言';
 
   @override
-  String get profileLearningLanguageReadOnly => '当前版本学习语言固定为英语（美国）。';
+  String get profileLearningLanguageReadOnly => '选择你正在学习的语言。';
 
   @override
   String get settingsKeyboardOpenCheatsheet => '打开快捷键速查';
@@ -3349,10 +3397,58 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsLanguageOptionEnUs => '英语（美国）';
 
   @override
+  String get settingsLanguageOptionEnGb => '英语（英国）';
+
+  @override
+  String get settingsLanguageOptionJaJp => '日语';
+
+  @override
+  String get settingsLanguageOptionKoKr => '韩语';
+
+  @override
+  String get settingsLanguageOptionEsEs => '西班牙语（西班牙）';
+
+  @override
+  String get settingsLanguageOptionEsMx => '西班牙语（墨西哥）';
+
+  @override
+  String get settingsLanguageOptionFrFr => '法语（法国）';
+
+  @override
+  String get settingsLanguageOptionFrCa => '法语（加拿大）';
+
+  @override
   String get settingsLanguageOptionZhCn => '中文（简体，中国）';
 
   @override
-  String get settingsLearningLanguageFixedSubtitle => '当前版本仅支持美式英语。';
+  String get settingsLearningLanguageSubtitle => '用于发现页推荐和导入时的默认语言。';
+
+  @override
+  String get settingsLanguagePickerTitleLearning => '学习语言';
+
+  @override
+  String get mediaLanguageUnknown => '未知';
+
+  @override
+  String get mediaLanguagePickerTitle => '内容语言';
+
+  @override
+  String get mediaEditLanguage => '编辑语言';
+
+  @override
+  String get mediaLanguageUpdated => '语言已更新。';
+
+  @override
+  String get mediaLanguageUpdateFailed => '无法更新语言。';
+
+  @override
+  String get assessmentUnavailableLanguage => '该语言暂不支持发音评估。';
+
+  @override
+  String get discoverLanguageFilterAll => '全部语言';
+
+  @override
+  String get discoverLanguageFilterLabel => '语言';
 
   @override
   String get settingsNativeMustDifferHint => '不能与学习语言相同。';
@@ -3367,7 +3463,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get profileFieldDisplayLanguage => '显示语言';
 
   @override
-  String get profileLearningLanguageReadOnly => '当前版本学习语言固定为英语（美国）。';
+  String get profileLearningLanguageReadOnly => '选择你正在学习的语言。';
 
   @override
   String get settingsKeyboardOpenCheatsheet => '打开快捷键速查';

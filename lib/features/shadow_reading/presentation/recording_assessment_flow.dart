@@ -23,6 +23,8 @@ String recordingAssessmentFailureMessage(
     RecordingAssessmentFailureKind.emptyReference =>
       l10n.assessmentEmptyReference,
     RecordingAssessmentFailureKind.fileTooSmall => l10n.assessmentNoRecording,
+    RecordingAssessmentFailureKind.unsupportedLanguage =>
+      l10n.assessmentUnavailableLanguage,
     RecordingAssessmentFailureKind.serviceError => l10n.assessmentRunFailed(() {
       final raw = debugMessage?.replaceAll(RegExp(r'\s+'), ' ').trim();
       if (raw == null || raw.isEmpty) return '—';

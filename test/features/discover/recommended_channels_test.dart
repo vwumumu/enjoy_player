@@ -12,10 +12,11 @@ void main() {
       'lists verified public channels with unique ids and handles',
       () async {
         final channels = await RecommendedChannelsLoader().load();
-        expect(channels, hasLength(1));
+        expect(channels.length, greaterThanOrEqualTo(5));
 
         final ids = <String>{};
         final handles = <String>{};
+        final languages = <String>{};
         for (final channel in channels) {
           expect(channel.channelId, matches(channelIdPattern));
           expect(ids.add(channel.channelId), isTrue, reason: channel.channelId);
@@ -26,13 +27,15 @@ void main() {
             canonicalCatalogChannelId(channel.channelId),
             channel.channelId,
           );
+          expect(channel.language.trim(), isNotEmpty);
+          languages.add(channel.language);
         }
 
-        expect(channels.map((c) => c.channelId).toList(), [
-          'UCAuUUnT6oDeKwE6v1NGQxug',
-        ]);
-        expect(channels.first.handle, '@TED');
-        expect(channels.first.name, 'TED');
+        expect(languages, containsAll(['en', 'ja', 'ko', 'es', 'fr']));
+        expect(
+          channels.any((c) => c.channelId == 'UCAuUUnT6oDeKwE6v1NGQxug'),
+          isTrue,
+        );
       },
     );
   });

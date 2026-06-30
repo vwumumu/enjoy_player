@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/data/files/media_resolver.dart';
@@ -20,7 +21,9 @@ import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/library_repository_provider.dart';
+import 'package:enjoy_player/features/library/presentation/widgets/content_language_picker.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
+import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// After native pickers / activity resume, the navigator can still be locked.
@@ -52,6 +55,9 @@ Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
   final path = pick.files.single.path;
   if (path == null) return;
   if (!context.mounted) return;
+
+  final contentLanguage = await showContentLanguagePicker(context: context, ref: ref);
+  if (contentLanguage == null || !context.mounted) return;
 
   final l10n = AppLocalizations.of(context)!;
   unawaited(
@@ -88,7 +94,11 @@ Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
     final userId = auth is AuthSignedIn ? auth.profile.id : null;
     final id = await ref
         .read(mediaLibraryRepositoryProvider)
-        .importMedia(XFile(path), signedInUserId: userId);
+        .importMedia(
+          XFile(path),
+          signedInUserId: userId,
+          contentLanguage: contentLanguage,
+        );
     if (!context.mounted) return;
     _dismissBlockingImportDialogThen(
       context,
@@ -240,6 +250,9 @@ Future<void> importYoutubeFromDialog(
   if (submitted == null || submitted.isEmpty) return;
   if (!context.mounted) return;
 
+  final contentLanguage = await showContentLanguagePicker(context: context, ref: ref);
+  if (contentLanguage == null || !context.mounted) return;
+
   unawaited(
     showEnjoyDialog<void>(
       context: context,
@@ -274,7 +287,11 @@ Future<void> importYoutubeFromDialog(
     final userId = auth is AuthSignedIn ? auth.profile.id : null;
     final id = await ref
         .read(mediaLibraryRepositoryProvider)
-        .importYoutubeVideo(submitted, signedInUserId: userId);
+        .importYoutubeVideo(
+          submitted,
+          signedInUserId: userId,
+          contentLanguage: contentLanguage,
+        );
     if (!context.mounted) return;
     _dismissBlockingImportDialogThen(
       context,
@@ -292,5 +309,40 @@ Future<void> importYoutubeFromDialog(
       context,
       () => AppNotice.error(context, l10n.youtubeImportInvalid),
     );
+  }
+}
+
+Future<void> editMediaLanguage(
+  BuildContext context,
+  WidgetRef ref,
+  Media media,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final picked = await showContentLanguagePicker(
+    context: context,
+    ref: ref,
+    selectedValue: media.language,
+    title: l10n.mediaEditLanguage,
+  );
+  if (picked == null || !context.mounted) return;
+  if (tagsEqual(picked, media.language)) return;
+
+  try {
+    await ref.read(mediaLibraryRepositoryProvider).updateMediaLanguage(
+      media.id,
+      picked,
+    );
+    final session = ref.read(playerControllerProvider);
+    if (session?.mediaId == media.id) {
+      ref.read(playerControllerProvider.notifier).applySessionPatch(
+        session!.copyWith(language: picked),
+      );
+    }
+    if (!context.mounted) return;
+    AppNotice.success(context, l10n.mediaLanguageUpdated);
+  } catch (_) {
+    if (context.mounted) {
+      AppNotice.error(context, l10n.mediaLanguageUpdateFailed);
+    }
   }
 }

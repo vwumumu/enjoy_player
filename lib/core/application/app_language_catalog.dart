@@ -1,4 +1,4 @@
-/// Supported display / learning / native language tags (MVP).
+/// Supported display / learning / native / media language tags.
 library;
 
 import 'package:flutter/material.dart';
@@ -16,7 +16,86 @@ const String kDefaultLearningLanguageTag = 'en-US';
 
 const String kDefaultNativeLanguageTag = 'zh-CN';
 
+const String kUnknownMediaLanguageTag = 'und';
+
 const List<String> kSupportedNativeLanguageTags = <String>['en-US', 'zh-CN'];
+
+/// Focus learning languages selectable in settings/profile (first wave).
+const List<String> kSupportedFocusLanguageTags = <String>[
+  'en-US',
+  'en-GB',
+  'ja-JP',
+  'ko-KR',
+  'es-ES',
+  'es-MX',
+  'fr-FR',
+  'fr-CA',
+];
+
+/// Media content language choices (includes Unknown).
+const List<String> kSupportedMediaLanguageTags = <String>[
+  kUnknownMediaLanguageTag,
+  ...kSupportedFocusLanguageTags,
+];
+
+/// Azure Speech pronunciation assessment locales (Microsoft language-support table).
+const Set<String> kAzurePronunciationAssessmentLocales = <String>{
+  'ar-EG',
+  'ar-SA',
+  'ca-ES',
+  'zh-HK',
+  'zh-CN',
+  'zh-TW',
+  'da-DK',
+  'nl-NL',
+  'en-AU',
+  'en-CA',
+  'en-IN',
+  'en-GB',
+  'en-US',
+  'fi-FI',
+  'fr-CA',
+  'fr-FR',
+  'de-DE',
+  'hi-IN',
+  'it-IT',
+  'ja-JP',
+  'ko-KR',
+  'ms-MY',
+  'nb-NO',
+  'pl-PL',
+  'pt-BR',
+  'pt-PT',
+  'ru-RU',
+  'es-MX',
+  'es-ES',
+  'sv-SE',
+  'ta-IN',
+  'th-TH',
+  'vi-VN',
+};
+
+/// Preferred Azure locale when a broad tag has multiple regional options.
+const Map<String, String> kAzureDefaultLocaleByPrimary = <String, String>{
+  'en': 'en-US',
+  'ja': 'ja-JP',
+  'ko': 'ko-KR',
+  'es': 'es-ES',
+  'fr': 'fr-FR',
+  'zh': 'zh-CN',
+};
+
+/// ISO 639-2 / legacy aliases → ISO 639-1 primary subtag.
+const Map<String, String> kLanguageTagAliases = <String, String>{
+  'eng': 'en',
+  'jpn': 'ja',
+  'kor': 'ko',
+  'spa': 'es',
+  'fre': 'fr',
+  'fra': 'fr',
+  'zho': 'zh',
+  'chi': 'zh',
+};
 
 /// ISO 639 / BCP-47 language subtags that must not be used for lookup or worker calls.
 const Set<String> kInvalidLanguageTags = <String>{
@@ -38,16 +117,39 @@ bool isValidLanguageTag(String? tag) {
   if (tag == null) return false;
   final trimmed = tag.trim();
   if (trimmed.isEmpty) return false;
-  final primary = trimmed.split(RegExp(r'[-_]')).first.toLowerCase();
+  final primary = _primarySubtag(trimmed);
   if (primary.isEmpty) return false;
   return !kInvalidLanguageTags.contains(primary);
+}
+
+/// Resolves legacy aliases such as `kor` → `ko`.
+String normalizeLanguageAlias(String tag) {
+  final trimmed = tag.trim();
+  if (trimmed.isEmpty) return trimmed;
+  final lower = trimmed.toLowerCase();
+  final alias = kLanguageTagAliases[lower];
+  if (alias != null) return alias;
+  if (lower.contains('-') || lower.contains('_')) {
+    final parts = lower.split(RegExp(r'[-_]'));
+    final primary = parts.first;
+    final aliased = kLanguageTagAliases[primary];
+    if (aliased != null && parts.length >= 2) {
+      return '$aliased-${parts[1].toUpperCase()}';
+    }
+  }
+  return trimmed;
+}
+
+String _primarySubtag(String tag) {
+  final normalized = normalizeLanguageAlias(tag);
+  return normalized.split(RegExp(r'[-_]')).first.toLowerCase();
 }
 
 /// Maps a tag to a supported native tag (`en-US` / `zh-CN`), or `null` if unknown/invalid.
 String? canonicalLookupTag(String? tag) {
   if (!isValidLanguageTag(tag)) return null;
-  final trimmed = tag!.trim();
-  final primary = trimmed.split(RegExp(r'[-_]')).first.toLowerCase();
+  final trimmed = normalizeLanguageAlias(tag!.trim());
+  final primary = _primarySubtag(trimmed);
   if (primary == 'en') return 'en-US';
   if (primary == 'zh') return 'zh-CN';
   final n = normalizeBcp47Tag(trimmed);
@@ -61,15 +163,93 @@ String? canonicalLookupTag(String? tag) {
 String coerceLookupSource(String? transcriptLanguage) =>
     canonicalLookupTag(transcriptLanguage) ?? kDefaultLearningLanguageTag;
 
+/// Maps [tag] to a supported focus learning tag, or [kDefaultLearningLanguageTag].
+String canonicalFocusLanguageTag(String? tag) {
+  if (tag == null || tag.trim().isEmpty) return kDefaultLearningLanguageTag;
+  final normalized = normalizeBcp47Tag(normalizeLanguageAlias(tag.trim()));
+  for (final supported in kSupportedFocusLanguageTags) {
+    if (tagsEqual(normalized, supported)) return supported;
+  }
+  final primary = _primarySubtag(normalized);
+  for (final supported in kSupportedFocusLanguageTags) {
+    if (_primarySubtag(supported) == primary) return supported;
+  }
+  return kDefaultLearningLanguageTag;
+}
+
+/// Maps [tag] to a supported media content tag, or [kUnknownMediaLanguageTag].
+String canonicalMediaLanguageTag(String? tag) {
+  if (tag == null || tag.trim().isEmpty) return kUnknownMediaLanguageTag;
+  final trimmed = tag.trim();
+  if (tagsEqual(trimmed, kUnknownMediaLanguageTag)) {
+    return kUnknownMediaLanguageTag;
+  }
+  final normalized = normalizeBcp47Tag(normalizeLanguageAlias(trimmed));
+  for (final supported in kSupportedMediaLanguageTags) {
+    if (supported == kUnknownMediaLanguageTag) continue;
+    if (tagsEqual(normalized, supported)) return supported;
+  }
+  final primary = _primarySubtag(normalized);
+  for (final supported in kSupportedMediaLanguageTags) {
+    if (supported == kUnknownMediaLanguageTag) continue;
+    if (_primarySubtag(supported) == primary) return supported;
+  }
+  if (isValidLanguageTag(normalized)) return normalized;
+  return kUnknownMediaLanguageTag;
+}
+
+/// True when [a] and [b] refer to the same language (broad or exact BCP-47 match).
+bool matchesLanguageBroad(String? a, String? b) {
+  if (a == null || b == null) return false;
+  if (tagsEqual(a, b)) return true;
+  return _primarySubtag(a) == _primarySubtag(b);
+}
+
+/// Resolves [tag] to an Azure pronunciation assessment locale, or `null` if unsupported.
+String? resolveAzureAssessmentLocale(String? tag) {
+  if (tag == null || tag.trim().isEmpty) return null;
+  if (!isValidLanguageTag(tag)) return null;
+
+  final normalized = normalizeBcp47Tag(normalizeLanguageAlias(tag.trim()));
+  if (kAzurePronunciationAssessmentLocales.contains(normalized)) {
+    return normalized;
+  }
+
+  final lower = normalized.toLowerCase();
+  for (final locale in kAzurePronunciationAssessmentLocales) {
+    if (locale.toLowerCase() == lower) return locale;
+  }
+
+  final primary = _primarySubtag(normalized);
+  for (final locale in kAzurePronunciationAssessmentLocales) {
+    if (_primarySubtag(locale) == primary) {
+      if (normalizeBcp47Tag(normalized) == normalizeBcp47Tag(locale)) {
+        return locale;
+      }
+    }
+  }
+
+  final defaultLocale = kAzureDefaultLocaleByPrimary[primary];
+  if (defaultLocale != null &&
+      kAzurePronunciationAssessmentLocales.contains(defaultLocale)) {
+    return defaultLocale;
+  }
+
+  return null;
+}
+
+bool isAzurePronunciationAssessmentSupported(String? tag) =>
+    resolveAzureAssessmentLocale(tag) != null;
+
 /// Worker / web short language code: first subtag lowercased (`en-US` → `en`).
 String workerLanguageBase(String tag) {
-  final t = tag.trim();
+  final t = normalizeLanguageAlias(tag.trim());
   if (t.isEmpty) return 'en';
   return t.split(RegExp(r'[-_]')).first.toLowerCase();
 }
 
 String normalizeBcp47Tag(String tag) {
-  final t = tag.trim();
+  final t = normalizeLanguageAlias(tag.trim());
   if (t.isEmpty) return t;
   final parts = t.split(RegExp(r'[-_]'));
   if (parts.length >= 2) {

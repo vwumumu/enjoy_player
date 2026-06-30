@@ -8,6 +8,7 @@ import 'package:azure_speech/azure_speech.dart';
 import 'package:meta/meta.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
@@ -52,6 +53,7 @@ enum RecordingAssessmentFailureKind {
   noRecording,
   emptyReference,
   fileTooSmall,
+  unsupportedLanguage,
   serviceError,
 }
 
@@ -103,6 +105,12 @@ class RecordingAssessmentController extends _$RecordingAssessmentController {
     if (len < 100) {
       return RecordingAssessmentFailure(
         RecordingAssessmentFailureKind.fileTooSmall,
+      );
+    }
+
+    if (!isAzurePronunciationAssessmentSupported(row.language)) {
+      return RecordingAssessmentFailure(
+        RecordingAssessmentFailureKind.unsupportedLanguage,
       );
     }
 

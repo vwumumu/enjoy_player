@@ -1599,11 +1599,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageOptionEnUs => 'English (United States)';
 
   @override
+  String get settingsLanguageOptionEnGb => 'English (United Kingdom)';
+
+  @override
+  String get settingsLanguageOptionJaJp => 'Japanese';
+
+  @override
+  String get settingsLanguageOptionKoKr => 'Korean';
+
+  @override
+  String get settingsLanguageOptionEsEs => 'Spanish (Spain)';
+
+  @override
+  String get settingsLanguageOptionEsMx => 'Spanish (Mexico)';
+
+  @override
+  String get settingsLanguageOptionFrFr => 'French (France)';
+
+  @override
+  String get settingsLanguageOptionFrCa => 'French (Canada)';
+
+  @override
   String get settingsLanguageOptionZhCn => 'Chinese (Simplified, China)';
 
   @override
-  String get settingsLearningLanguageFixedSubtitle =>
-      'English (US) only for now.';
+  String get settingsLearningLanguageSubtitle =>
+      'Default for Discover and import suggestions.';
+
+  @override
+  String get settingsLanguagePickerTitleLearning => 'Learning language';
+
+  @override
+  String get mediaLanguageUnknown => 'Unknown';
+
+  @override
+  String get mediaLanguagePickerTitle => 'Content language';
+
+  @override
+  String get mediaEditLanguage => 'Edit language';
+
+  @override
+  String get mediaLanguageUpdated => 'Language updated.';
+
+  @override
+  String get mediaLanguageUpdateFailed => 'Could not update language.';
+
+  @override
+  String get assessmentUnavailableLanguage =>
+      'Pronunciation assessment is not available for this language.';
+
+  @override
+  String get discoverLanguageFilterAll => 'All languages';
+
+  @override
+  String get discoverLanguageFilterLabel => 'Language';
 
   @override
   String get settingsNativeMustDifferHint =>
@@ -1620,7 +1669,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileLearningLanguageReadOnly =>
-      'Learning language is English (US) in this version.';
+      'Choose the language you are learning.';
 
   @override
   String get settingsKeyboardOpenCheatsheet => 'Open shortcuts cheatsheet';

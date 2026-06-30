@@ -3021,17 +3021,113 @@ abstract class AppLocalizations {
   /// **'English (United States)'**
   String get settingsLanguageOptionEnUs;
 
+  /// No description provided for @settingsLanguageOptionEnGb.
+  ///
+  /// In en, this message translates to:
+  /// **'English (United Kingdom)'**
+  String get settingsLanguageOptionEnGb;
+
+  /// No description provided for @settingsLanguageOptionJaJp.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese'**
+  String get settingsLanguageOptionJaJp;
+
+  /// No description provided for @settingsLanguageOptionKoKr.
+  ///
+  /// In en, this message translates to:
+  /// **'Korean'**
+  String get settingsLanguageOptionKoKr;
+
+  /// No description provided for @settingsLanguageOptionEsEs.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish (Spain)'**
+  String get settingsLanguageOptionEsEs;
+
+  /// No description provided for @settingsLanguageOptionEsMx.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish (Mexico)'**
+  String get settingsLanguageOptionEsMx;
+
+  /// No description provided for @settingsLanguageOptionFrFr.
+  ///
+  /// In en, this message translates to:
+  /// **'French (France)'**
+  String get settingsLanguageOptionFrFr;
+
+  /// No description provided for @settingsLanguageOptionFrCa.
+  ///
+  /// In en, this message translates to:
+  /// **'French (Canada)'**
+  String get settingsLanguageOptionFrCa;
+
   /// No description provided for @settingsLanguageOptionZhCn.
   ///
   /// In en, this message translates to:
   /// **'Chinese (Simplified, China)'**
   String get settingsLanguageOptionZhCn;
 
-  /// No description provided for @settingsLearningLanguageFixedSubtitle.
+  /// No description provided for @settingsLearningLanguageSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'English (US) only for now.'**
-  String get settingsLearningLanguageFixedSubtitle;
+  /// **'Default for Discover and import suggestions.'**
+  String get settingsLearningLanguageSubtitle;
+
+  /// No description provided for @settingsLanguagePickerTitleLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning language'**
+  String get settingsLanguagePickerTitleLearning;
+
+  /// No description provided for @mediaLanguageUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get mediaLanguageUnknown;
+
+  /// No description provided for @mediaLanguagePickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Content language'**
+  String get mediaLanguagePickerTitle;
+
+  /// No description provided for @mediaEditLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit language'**
+  String get mediaEditLanguage;
+
+  /// No description provided for @mediaLanguageUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Language updated.'**
+  String get mediaLanguageUpdated;
+
+  /// No description provided for @mediaLanguageUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update language.'**
+  String get mediaLanguageUpdateFailed;
+
+  /// No description provided for @assessmentUnavailableLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation assessment is not available for this language.'**
+  String get assessmentUnavailableLanguage;
+
+  /// No description provided for @discoverLanguageFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All languages'**
+  String get discoverLanguageFilterAll;
+
+  /// No description provided for @discoverLanguageFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get discoverLanguageFilterLabel;
 
   /// No description provided for @settingsNativeMustDifferHint.
   ///
@@ -3060,7 +3156,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileLearningLanguageReadOnly.
   ///
   /// In en, this message translates to:
-  /// **'Learning language is English (US) in this version.'**
+  /// **'Choose the language you are learning.'**
   String get profileLearningLanguageReadOnly;
 
   /// No description provided for @settingsKeyboardOpenCheatsheet.

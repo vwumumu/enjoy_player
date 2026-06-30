@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:enjoy_player/core/application/app_language_catalog.dart';
+import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
@@ -23,6 +25,29 @@ part 'discover_providers.g.dart';
 
 final _log = logNamed('discover');
 
+/// Filters Discover timeline entries by subscription language vs focus language.
+/// Channels with unknown language remain visible.
+List<FeedEntry> filterDiscoverFeedByFocusLanguage({
+  required List<FeedEntry> entries,
+  required List<DiscoverChannel> subscriptions,
+  required String focusLanguage,
+  required bool showAllLanguages,
+}) {
+  if (showAllLanguages) return entries;
+  final langByChannel = {
+    for (final sub in subscriptions) sub.channelId: sub.language,
+  };
+  final matched = entries
+      .where((entry) {
+        final lang =
+            langByChannel[entry.channelId] ?? kUnknownMediaLanguageTag;
+        if (lang == kUnknownMediaLanguageTag) return true;
+        return matchesLanguageBroad(lang, focusLanguage);
+      })
+      .toList(growable: false);
+  return matched.isEmpty ? entries : matched;
+}
+
 @Riverpod(keepAlive: true)
 DiscoverRepository discoverRepository(Ref ref) {
   final db = ref.watch(appDatabaseProvider);
@@ -34,6 +59,28 @@ DiscoverRepository discoverRepository(Ref ref) {
 @Riverpod(keepAlive: true)
 Future<List<RecommendedChannel>> recommendedChannels(Ref ref) {
   return ref.watch(discoverRepositoryProvider).loadRecommendedChannels();
+}
+
+/// When false, recommended channels are filtered to the user's focus learning language.
+@Riverpod(keepAlive: true)
+class DiscoverRecommendedShowAllLanguages extends _$DiscoverRecommendedShowAllLanguages {
+  @override
+  bool build() => false;
+
+  void setShowAll(bool value) => state = value;
+}
+
+@Riverpod(keepAlive: true)
+Future<List<RecommendedChannel>> filteredRecommendedChannels(Ref ref) async {
+  final all = await ref.watch(recommendedChannelsProvider.future);
+  final showAll = ref.watch(discoverRecommendedShowAllLanguagesProvider);
+  if (showAll) return all;
+  final prefs = ref.watch(appPreferencesCtrlProvider).valueOrNull;
+  final focus = prefs?.effectiveLearningLanguage ?? kDefaultLearningLanguageTag;
+  final matched = all
+      .where((c) => matchesLanguageBroad(c.language, focus))
+      .toList(growable: false);
+  return matched.isEmpty ? all : matched;
 }
 
 @Riverpod(keepAlive: true)
@@ -54,6 +101,26 @@ Future<void> waitForDiscoverSubscription(WidgetRef ref, String channelId) async 
 @Riverpod(keepAlive: true)
 Stream<List<FeedEntry>> discoverTimeline(Ref ref) {
   return ref.watch(discoverRepositoryProvider).watchTimeline();
+}
+
+@Riverpod(keepAlive: true)
+Stream<List<FeedEntry>> filteredDiscoverTimeline(Ref ref) {
+  final repo = ref.watch(discoverRepositoryProvider);
+  return repo.watchTimeline().map((entries) {
+    final showAll = ref.watch(discoverRecommendedShowAllLanguagesProvider);
+    if (showAll) return entries;
+    final subs =
+        ref.watch(discoverSubscriptionsProvider).valueOrNull ?? const [];
+    final focus =
+        ref.watch(appPreferencesCtrlProvider).valueOrNull?.effectiveLearningLanguage ??
+        kDefaultLearningLanguageTag;
+    return filterDiscoverFeedByFocusLanguage(
+      entries: entries,
+      subscriptions: subs,
+      focusLanguage: focus,
+      showAllLanguages: showAll,
+    );
+  });
 }
 
 @Riverpod(keepAlive: true)
@@ -196,13 +263,16 @@ class DiscoverFeedRefreshScheduler extends _$DiscoverFeedRefreshScheduler {
 
 Future<String> addDiscoverFeedEntryToLibrary(
   WidgetRef ref,
-  FeedEntry entry,
-) async {
+  FeedEntry entry, {
+  String? contentLanguage,
+}) async {
   final auth = ref.read(authCtrlProvider).valueOrNull;
   final userId = auth is AuthSignedIn ? auth.profile.id : null;
-  return ref
-      .read(discoverRepositoryProvider)
-      .addFeedEntryToLibrary(entry, signedInUserId: userId);
+  return ref.read(discoverRepositoryProvider).addFeedEntryToLibrary(
+    entry,
+    signedInUserId: userId,
+    contentLanguage: contentLanguage,
+  );
 }
 
 Future<bool> discoverVideoInLibrary(WidgetRef ref, String videoId) {

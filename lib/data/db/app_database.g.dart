@@ -7436,6 +7436,18 @@ class $YoutubeChannelSubscriptionsTable extends YoutubeChannelSubscriptions
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _languageMeta = const VerificationMeta(
+    'language',
+  );
+  @override
+  late final GeneratedColumn<String> language = GeneratedColumn<String>(
+    'language',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('und'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     channelId,
@@ -7444,6 +7456,7 @@ class $YoutubeChannelSubscriptionsTable extends YoutubeChannelSubscriptions
     source,
     subscribedAt,
     lastFetchedAt,
+    language,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -7505,6 +7518,12 @@ class $YoutubeChannelSubscriptionsTable extends YoutubeChannelSubscriptions
         ),
       );
     }
+    if (data.containsKey('language')) {
+      context.handle(
+        _languageMeta,
+        language.isAcceptableOrUnknown(data['language']!, _languageMeta),
+      );
+    }
     return context;
   }
 
@@ -7543,6 +7562,10 @@ class $YoutubeChannelSubscriptionsTable extends YoutubeChannelSubscriptions
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_fetched_at'],
       ),
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      )!,
     );
   }
 
@@ -7567,6 +7590,9 @@ class YoutubeChannelSubscriptionRow extends DataClass
   final YoutubeSubscriptionSource source;
   final DateTime subscribedAt;
   final DateTime? lastFetchedAt;
+
+  /// Channel content language for Discover filtering and import defaults.
+  final String language;
   const YoutubeChannelSubscriptionRow({
     required this.channelId,
     required this.displayName,
@@ -7574,6 +7600,7 @@ class YoutubeChannelSubscriptionRow extends DataClass
     required this.source,
     required this.subscribedAt,
     this.lastFetchedAt,
+    required this.language,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -7592,6 +7619,7 @@ class YoutubeChannelSubscriptionRow extends DataClass
     if (!nullToAbsent || lastFetchedAt != null) {
       map['last_fetched_at'] = Variable<DateTime>(lastFetchedAt);
     }
+    map['language'] = Variable<String>(language);
     return map;
   }
 
@@ -7607,6 +7635,7 @@ class YoutubeChannelSubscriptionRow extends DataClass
       lastFetchedAt: lastFetchedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastFetchedAt),
+      language: Value(language),
     );
   }
 
@@ -7624,6 +7653,7 @@ class YoutubeChannelSubscriptionRow extends DataClass
       ),
       subscribedAt: serializer.fromJson<DateTime>(json['subscribedAt']),
       lastFetchedAt: serializer.fromJson<DateTime?>(json['lastFetchedAt']),
+      language: serializer.fromJson<String>(json['language']),
     );
   }
   @override
@@ -7638,6 +7668,7 @@ class YoutubeChannelSubscriptionRow extends DataClass
       ),
       'subscribedAt': serializer.toJson<DateTime>(subscribedAt),
       'lastFetchedAt': serializer.toJson<DateTime?>(lastFetchedAt),
+      'language': serializer.toJson<String>(language),
     };
   }
 
@@ -7648,6 +7679,7 @@ class YoutubeChannelSubscriptionRow extends DataClass
     YoutubeSubscriptionSource? source,
     DateTime? subscribedAt,
     Value<DateTime?> lastFetchedAt = const Value.absent(),
+    String? language,
   }) => YoutubeChannelSubscriptionRow(
     channelId: channelId ?? this.channelId,
     displayName: displayName ?? this.displayName,
@@ -7657,6 +7689,7 @@ class YoutubeChannelSubscriptionRow extends DataClass
     lastFetchedAt: lastFetchedAt.present
         ? lastFetchedAt.value
         : this.lastFetchedAt,
+    language: language ?? this.language,
   );
   YoutubeChannelSubscriptionRow copyWithCompanion(
     YoutubeChannelSubscriptionsCompanion data,
@@ -7676,6 +7709,7 @@ class YoutubeChannelSubscriptionRow extends DataClass
       lastFetchedAt: data.lastFetchedAt.present
           ? data.lastFetchedAt.value
           : this.lastFetchedAt,
+      language: data.language.present ? data.language.value : this.language,
     );
   }
 
@@ -7687,7 +7721,8 @@ class YoutubeChannelSubscriptionRow extends DataClass
           ..write('thumbnailUrl: $thumbnailUrl, ')
           ..write('source: $source, ')
           ..write('subscribedAt: $subscribedAt, ')
-          ..write('lastFetchedAt: $lastFetchedAt')
+          ..write('lastFetchedAt: $lastFetchedAt, ')
+          ..write('language: $language')
           ..write(')'))
         .toString();
   }
@@ -7700,6 +7735,7 @@ class YoutubeChannelSubscriptionRow extends DataClass
     source,
     subscribedAt,
     lastFetchedAt,
+    language,
   );
   @override
   bool operator ==(Object other) =>
@@ -7710,7 +7746,8 @@ class YoutubeChannelSubscriptionRow extends DataClass
           other.thumbnailUrl == this.thumbnailUrl &&
           other.source == this.source &&
           other.subscribedAt == this.subscribedAt &&
-          other.lastFetchedAt == this.lastFetchedAt);
+          other.lastFetchedAt == this.lastFetchedAt &&
+          other.language == this.language);
 }
 
 class YoutubeChannelSubscriptionsCompanion
@@ -7721,6 +7758,7 @@ class YoutubeChannelSubscriptionsCompanion
   final Value<YoutubeSubscriptionSource> source;
   final Value<DateTime> subscribedAt;
   final Value<DateTime?> lastFetchedAt;
+  final Value<String> language;
   final Value<int> rowid;
   const YoutubeChannelSubscriptionsCompanion({
     this.channelId = const Value.absent(),
@@ -7729,6 +7767,7 @@ class YoutubeChannelSubscriptionsCompanion
     this.source = const Value.absent(),
     this.subscribedAt = const Value.absent(),
     this.lastFetchedAt = const Value.absent(),
+    this.language = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   YoutubeChannelSubscriptionsCompanion.insert({
@@ -7738,6 +7777,7 @@ class YoutubeChannelSubscriptionsCompanion
     this.source = const Value.absent(),
     required DateTime subscribedAt,
     this.lastFetchedAt = const Value.absent(),
+    this.language = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : channelId = Value(channelId),
        displayName = Value(displayName),
@@ -7749,6 +7789,7 @@ class YoutubeChannelSubscriptionsCompanion
     Expression<String>? source,
     Expression<DateTime>? subscribedAt,
     Expression<DateTime>? lastFetchedAt,
+    Expression<String>? language,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7758,6 +7799,7 @@ class YoutubeChannelSubscriptionsCompanion
       if (source != null) 'source': source,
       if (subscribedAt != null) 'subscribed_at': subscribedAt,
       if (lastFetchedAt != null) 'last_fetched_at': lastFetchedAt,
+      if (language != null) 'language': language,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -7769,6 +7811,7 @@ class YoutubeChannelSubscriptionsCompanion
     Value<YoutubeSubscriptionSource>? source,
     Value<DateTime>? subscribedAt,
     Value<DateTime?>? lastFetchedAt,
+    Value<String>? language,
     Value<int>? rowid,
   }) {
     return YoutubeChannelSubscriptionsCompanion(
@@ -7778,6 +7821,7 @@ class YoutubeChannelSubscriptionsCompanion
       source: source ?? this.source,
       subscribedAt: subscribedAt ?? this.subscribedAt,
       lastFetchedAt: lastFetchedAt ?? this.lastFetchedAt,
+      language: language ?? this.language,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -7805,6 +7849,9 @@ class YoutubeChannelSubscriptionsCompanion
     if (lastFetchedAt.present) {
       map['last_fetched_at'] = Variable<DateTime>(lastFetchedAt.value);
     }
+    if (language.present) {
+      map['language'] = Variable<String>(language.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -7820,6 +7867,7 @@ class YoutubeChannelSubscriptionsCompanion
           ..write('source: $source, ')
           ..write('subscribedAt: $subscribedAt, ')
           ..write('lastFetchedAt: $lastFetchedAt, ')
+          ..write('language: $language, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -11792,6 +11840,7 @@ typedef $$YoutubeChannelSubscriptionsTableCreateCompanionBuilder =
       Value<YoutubeSubscriptionSource> source,
       required DateTime subscribedAt,
       Value<DateTime?> lastFetchedAt,
+      Value<String> language,
       Value<int> rowid,
     });
 typedef $$YoutubeChannelSubscriptionsTableUpdateCompanionBuilder =
@@ -11802,6 +11851,7 @@ typedef $$YoutubeChannelSubscriptionsTableUpdateCompanionBuilder =
       Value<YoutubeSubscriptionSource> source,
       Value<DateTime> subscribedAt,
       Value<DateTime?> lastFetchedAt,
+      Value<String> language,
       Value<int> rowid,
     });
 
@@ -11848,6 +11898,11 @@ class $$YoutubeChannelSubscriptionsTableFilterComposer
     column: $table.lastFetchedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get language => $composableBuilder(
+    column: $table.language,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$YoutubeChannelSubscriptionsTableOrderingComposer
@@ -11888,6 +11943,11 @@ class $$YoutubeChannelSubscriptionsTableOrderingComposer
     column: $table.lastFetchedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get language => $composableBuilder(
+    column: $table.language,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$YoutubeChannelSubscriptionsTableAnnotationComposer
@@ -11925,6 +11985,9 @@ class $$YoutubeChannelSubscriptionsTableAnnotationComposer
     column: $table.lastFetchedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get language =>
+      $composableBuilder(column: $table.language, builder: (column) => column);
 }
 
 class $$YoutubeChannelSubscriptionsTableTableManager
@@ -11979,6 +12042,7 @@ class $$YoutubeChannelSubscriptionsTableTableManager
                 Value<YoutubeSubscriptionSource> source = const Value.absent(),
                 Value<DateTime> subscribedAt = const Value.absent(),
                 Value<DateTime?> lastFetchedAt = const Value.absent(),
+                Value<String> language = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => YoutubeChannelSubscriptionsCompanion(
                 channelId: channelId,
@@ -11987,6 +12051,7 @@ class $$YoutubeChannelSubscriptionsTableTableManager
                 source: source,
                 subscribedAt: subscribedAt,
                 lastFetchedAt: lastFetchedAt,
+                language: language,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -11997,6 +12062,7 @@ class $$YoutubeChannelSubscriptionsTableTableManager
                 Value<YoutubeSubscriptionSource> source = const Value.absent(),
                 required DateTime subscribedAt,
                 Value<DateTime?> lastFetchedAt = const Value.absent(),
+                Value<String> language = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => YoutubeChannelSubscriptionsCompanion.insert(
                 channelId: channelId,
@@ -12005,6 +12071,7 @@ class $$YoutubeChannelSubscriptionsTableTableManager
                 source: source,
                 subscribedAt: subscribedAt,
                 lastFetchedAt: lastFetchedAt,
+                language: language,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -39,6 +39,12 @@ final class EnjoyAssessmentCapability implements AssessmentCapability {
       );
 
       final azureLanguage = mapTranscriptLanguageToAzure(request.language);
+      if (azureLanguage == null) {
+        throw StateError(
+          'Pronunciation assessment is not supported for language '
+          '"${request.language}"',
+        );
+      }
       final referenceText = _cleanReferenceText(request.referenceText);
 
       AzureSpeechAssessmentOutcome outcome = await _assessPath(

@@ -394,6 +394,7 @@ void main() {
     Future<void> insertYoutubeVideo({
       required String mediaId,
       required String vid,
+      String language = 'und',
     }) async {
       final now = DateTime.now();
       await db.videoDao.insertRow(
@@ -405,7 +406,7 @@ void main() {
           description: null,
           thumbnailUrl: null,
           durationSeconds: 0,
-          language: 'und',
+          language: language,
           source: 'youtube',
           localUri: null,
           md5: null,
@@ -419,10 +420,54 @@ void main() {
       );
     }
 
-    test('YouTube worker poll sends videoId equal to VideoRow.vid', () async {
+    test('YouTube worker skips fetch when media language is und', () async {
       const vid = 'abcdefghijk';
       final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
       await insertYoutubeVideo(mediaId: mediaId, vid: vid);
+
+      final client = _CapturingYoutubeClient(
+        response: {
+          'status': 'ready',
+          'language': 'en',
+          'source': 'official',
+          'timeline': [
+            {'text': 'a', 'start': 1000, 'duration': 200},
+          ],
+        },
+      );
+      final repo = TranscriptRepository(db, null, client);
+      final result = await repo.resolveOnOpen(mediaId, fetchCloud: true);
+
+      expect(result.cloud.status, TranscriptCloudFetchStatus.skipped);
+      expect(client.lastVideoId, isNull);
+    });
+
+    test('YouTube worker uses media language base for captions', () async {
+      const vid = 'abcdefghijk';
+      final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
+      await insertYoutubeVideo(mediaId: mediaId, vid: vid, language: 'ja-JP');
+
+      final client = _CapturingYoutubeClient(
+        response: {
+          'status': 'ready',
+          'language': 'ja',
+          'source': 'official',
+          'timeline': [
+            {'text': 'a', 'start': 1000, 'duration': 200},
+          ],
+        },
+      );
+      final repo = TranscriptRepository(db, null, client);
+      final result = await repo.resolveOnOpen(mediaId, fetchCloud: true);
+
+      expect(result.cloud.status, TranscriptCloudFetchStatus.success);
+      expect(client.lastLanguage, 'ja');
+    });
+
+    test('YouTube worker poll sends videoId equal to VideoRow.vid', () async {
+      const vid = 'abcdefghijk';
+      final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
+      await insertYoutubeVideo(mediaId: mediaId, vid: vid, language: 'en');
 
       final client = _CapturingYoutubeClient(
         response: {
@@ -470,7 +515,7 @@ void main() {
       () async {
         const vid = 'abcdefghijk';
         final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
-        await insertYoutubeVideo(mediaId: mediaId, vid: vid);
+        await insertYoutubeVideo(mediaId: mediaId, vid: vid, language: 'en');
 
         final client = _CapturingYoutubeClient(
           response: {'status': 'failed', 'error': 'no captions'},
@@ -493,7 +538,7 @@ void main() {
       () async {
         const vid = 'abcdefghijk';
         final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
-        await insertYoutubeVideo(mediaId: mediaId, vid: vid);
+        await insertYoutubeVideo(mediaId: mediaId, vid: vid, language: 'en');
 
         final client = _SequencedYoutubeClient([
           {
@@ -713,6 +758,7 @@ class _CapturingYoutubeClient implements YoutubeTranscriptsClient {
 
   final Map<String, dynamic> response;
   String? lastVideoId;
+  String? lastLanguage;
 
   @override
   Future<Map<String, dynamic>> pollTranscript({
@@ -722,6 +768,7 @@ class _CapturingYoutubeClient implements YoutubeTranscriptsClient {
     bool? forceRefresh,
   }) async {
     lastVideoId = videoId;
+    lastLanguage = language;
     return Map<String, dynamic>.from(response);
   }
 }

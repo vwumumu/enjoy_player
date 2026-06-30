@@ -34,7 +34,7 @@ class DiscoverScreen extends ConsumerWidget {
     final subscriptionsAsync = ref.watch(discoverSubscriptionsProvider);
 
     final feedAsync = selectedChannelId == null
-        ? ref.watch(discoverTimelineProvider)
+        ? ref.watch(filteredDiscoverTimelineProvider)
         : ref.watch(discoverChannelFeedProvider(selectedChannelId));
 
     Future<void> onRefresh() async {

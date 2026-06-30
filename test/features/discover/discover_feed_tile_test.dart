@@ -25,6 +25,7 @@ class _ThrowingLibraryRepository extends MediaLibraryRepository {
     String? signedInUserId,
     String? prefetchedTitle,
     String? prefetchedThumbnailUrl,
+    String contentLanguage = 'und',
   }) async {
     throw Exception('import failed');
   }

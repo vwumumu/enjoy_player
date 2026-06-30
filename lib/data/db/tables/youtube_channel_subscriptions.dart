@@ -22,6 +22,9 @@ class YoutubeChannelSubscriptions extends Table {
   DateTimeColumn get subscribedAt => dateTime()();
   DateTimeColumn get lastFetchedAt => dateTime().nullable()();
 
+  /// Channel content language for Discover filtering and import defaults.
+  TextColumn get language => text().withDefault(const Constant('und'))();
+
   @override
   Set<Column<Object>> get primaryKey => {channelId};
 }

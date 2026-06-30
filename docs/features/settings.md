@@ -18,6 +18,7 @@ The Settings hub is reached at `/settings` and groups every preference surface i
 - **Guest data migration** — visible only when signed out; explains that locally stored media will be claimed on sign-in.
 - **Cloud sync** — links to `/settings/sync` and surfaces a `_SyncQueueStatusPill` (synced / queued / error) read from the sync status provider.
 - **Appearance & language** — display + native language pickers (`language_choice_sheet.dart`). Selection persists via `SettingsKeys.prefsDisplayLanguage` / `prefsNativeLanguage`.
+- **Focus learning language** — editable in Settings and Profile (English, Japanese, Korean, Spanish, French, plus Chinese variants). Drives Discover recommendation filtering, import defaults, and dictionary lookup fallbacks. Persisted locally and synced to the cloud profile when signed in. Azure pronunciation assessment and some AI features are **capability-gated** by locale — unsupported media languages show disabled controls with an explanation rather than silently assessing as English.
 - **Recording** — microphone picker (auto + every input device returned by `AudioRecorder.listInputDevices()`; see [`echo-mode.md`](echo-mode.md) for the virtual-device skip list).
 - **Keyboard shortcuts** — link to `/settings/hotkeys` (full editor).
 - **Developer** — API base URL editors for the **Worker** and the **AI gateway** (`_ApiBaseUrlEditor`, `_AiApiBaseUrlEditor`); visible only in debug builds. Also links to the AI playground (see [`ai.md`](ai.md)).
