@@ -118,7 +118,7 @@ final class AiApiBaseUrlProvider
   AiApiBaseUrl create() => AiApiBaseUrl();
 }
 
-String _$aiApiBaseUrlHash() => r'6bc8318cb2dca89aa460a03ca6ca2cef03c78f1e';
+String _$aiApiBaseUrlHash() => r'b093c820683094a85c21eb16637c050f7917023a';
 
 abstract class _$AiApiBaseUrl extends $AsyncNotifier<String> {
   FutureOr<String> build();

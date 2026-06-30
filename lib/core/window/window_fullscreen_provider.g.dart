@@ -56,7 +56,7 @@ final class WindowFullscreenProvider
   }
 }
 
-String _$windowFullscreenHash() => r'b6cb02231852532111b4bea14c0ce1001542272e';
+String _$windowFullscreenHash() => r'2bb74344d600a6d61e810331ddbaa976d75e94e7';
 
 /// Tracks and controls the OS fullscreen state of the application window.
 ///
