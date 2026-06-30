@@ -106,14 +106,14 @@ flutter::EncodableValue RunSynthesize(const flutter::EncodableMap& args) {
 
   if (speech_result->Reason == ResultReason::SynthesizingAudioCompleted) {
     const auto audio = speech_result->GetAudioData();
-    if (audio.empty()) {
+    if (!audio || audio->empty()) {
       return flutter::EncodableValue(flutter::EncodableMap{
           {flutter::EncodableValue("error"),
            flutter::EncodableValue("azure_speech_error")},
           {flutter::EncodableValue("message"),
            flutter::EncodableValue("Empty synthesis audio")}});
     }
-    return flutter::EncodableValue(Base64Encode(audio));
+    return flutter::EncodableValue(Base64Encode(*audio));
   }
 
   auto cancel = SpeechSynthesisCancellationDetails::FromResult(speech_result);
