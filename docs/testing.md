@@ -50,6 +50,10 @@ See [packaging.md](packaging.md) for signing, FFmpeg, Inno Setup installer, and 
 
 ## Guidelines
 
+- Every behavior change needs automated coverage or a documented manual verification reason.
 - Prefer **fast, deterministic** unit tests (no real `Player` in CI unless using integration harness).
-- For playback integration, plan dedicated integration tests / golden tests later.
+- Add unit tests for pure logic, parsers, repositories, Drift DAOs, Riverpod notifiers, and bug fixes.
+- Add widget or integration tests when navigation, input, localization, platform chrome, or shared UI behavior cannot be proven with unit tests alone.
+- Include a performance verification note for playback, startup, scrolling, transcript rendering, sync, and media import changes.
+- For playback integration, use a dedicated integration harness rather than constructing `media_kit` `Player()` directly in tests.
 - After changing `@DriftDatabase` or `@Riverpod` annotations, run `dart run build_runner build` before tests.

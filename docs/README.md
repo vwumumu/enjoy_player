@@ -4,6 +4,7 @@ Maintainers and agents should keep these files **accurate** when behavior or arc
 
 | Path | Audience | Update when |
 |------|----------|-------------|
+| [.specify/memory/constitution.md](../.specify/memory/constitution.md) | Everyone | Quality, testing, UX, performance, or governance principles change |
 | [AGENTS.md](../AGENTS.md) | AI agents | Global rules change |
 | [architecture.md](architecture.md) | Everyone | Layers, providers, or DB schema change |
 | [tech-stack.md](tech-stack.md) | Everyone | Dependencies or versions change |

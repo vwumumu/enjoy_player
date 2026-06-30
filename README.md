@@ -55,6 +55,7 @@ flutter test
 
 | Doc | Purpose |
 |-----|---------|
+| [.specify/memory/constitution.md](.specify/memory/constitution.md) | Quality, testing, UX, performance, and governance principles |
 | [AGENTS.md](AGENTS.md) | Rules for contributors & AI agents |
 | [docs/architecture.md](docs/architecture.md) | Structure & flows |
 | [docs/decisions/](docs/decisions/) | Architecture Decision Records |

@@ -6,6 +6,7 @@
 - **One `media_kit` `Player`** owned by [`MediaKitPlayerEngine`](../lib/features/player/application/player_engine.dart) for local/URL decode paths; **YouTube** uses a separate WebView engine (ADR-0003, ADR-0015).
 - **Drift** as single local SQLite source of truth (ADR-0002).
 - **Riverpod 3** for app state; codegen via `riverpod_annotation` where practical (ADR-0001).
+- **Constitution gates** require code quality, testing, UX consistency, and performance evidence for user-visible changes.
 
 ## Layer map
 
@@ -81,3 +82,4 @@ The `(target_type, target_id)` lookup on [`TranscriptFetchStates`](../lib/data/d
 ## Main-isolate performance (Windows)
 
 - **Do not** run `palette_generator` / heavy image analysis per item in large `GridView` / `ListView` builders on the UI isolate — see [features/library.md](features/library.md) § *Performance (signed-in cold start, Windows)*. Use Flutter DevTools **CPU profiler** on the UI thread when investigating jank or “Not responding” during scroll or startup.
+- Plans that affect playback, startup, scrolling, transcript rendering, sync, or media import must state the expected performance budget or verification path before implementation.

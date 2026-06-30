@@ -9,7 +9,7 @@ description: "Task list template for feature implementation"
 
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: Automated tests are required for changed behavior unless the plan documents why automation is impractical and names the manual verification path.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -21,10 +21,11 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+- **Feature code**: `lib/features/<feature>/{application,data,domain,presentation}/`
+- **Shared code**: `lib/core/`, `lib/data/`
+- **Tests**: `test/features/<feature>/`, `test/data/`, `integration_test/`
+- **Feature docs**: `docs/features/<feature>.md`
+- **ADRs**: `docs/decisions/NNNN-short-title.md`
 
 <!--
   ============================================================================
@@ -35,6 +36,8 @@ description: "Task list template for feature implementation"
   - Feature requirements from plan.md
   - Entities from data-model.md
   - Endpoints from contracts/
+- Constitution Check requirements from plan.md
+- Required quality, UX, performance, docs, and verification gates
 
   Tasks MUST be organized by user story so each story can be:
   - Implemented independently
@@ -50,8 +53,8 @@ description: "Task list template for feature implementation"
 **Purpose**: Project initialization and basic structure
 
 - [ ] T001 Create project structure per implementation plan
-- [ ] T002 Initialize [language] project with [framework] dependencies
-- [ ] T003 [P] Configure linting and formatting tools
+- [ ] T002 Confirm feature-first target paths under lib/features/[feature]/
+- [ ] T003 [P] Identify affected docs/features/[feature].md and ADR needs
 
 ---
 
@@ -63,12 +66,12 @@ description: "Task list template for feature implementation"
 
 Examples of foundational tasks (adjust based on your project):
 
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
-- [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
+- [ ] T004 Setup Drift schema, DAO, migration, or repository foundations if needed
+- [ ] T005 [P] Define Riverpod providers/notifiers shared by user stories
+- [ ] T006 [P] Prepare shared UI primitives, localization keys, or haptic/tooltip patterns
+- [ ] T007 Create domain models/entities that all stories depend on
+- [ ] T008 Configure error handling and package:logging instrumentation
+- [ ] T009 Define performance measurement or manual profiling approach
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -80,21 +83,21 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T010 [P] [US1] Unit test for [logic/repository/notifier] in test/features/[feature]/[name]_test.dart
+- [ ] T011 [P] [US1] Widget or integration test for [user journey] in test/features/[feature]/[name]_test.dart or integration_test/[name]_test.dart
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+- [ ] T012 [P] [US1] Create [Entity1] domain model in lib/features/[feature]/domain/[entity1].dart
+- [ ] T013 [P] [US1] Create [Entity2] data model/DAO support in lib/features/[feature]/data/[entity2].dart
+- [ ] T014 [US1] Implement [Notifier/Repository] in lib/features/[feature]/application/[name].dart (depends on T012, T013)
+- [ ] T015 [US1] Implement UI in lib/features/[feature]/presentation/[widget].dart using shared controls/localization
+- [ ] T016 [US1] Add validation, error handling, and package:logging instrumentation
+- [ ] T017 [US1] Verify performance budget for [flow] and document evidence or manual check
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -106,16 +109,16 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 2
 
-- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T018 [P] [US2] Unit test for [logic/repository/notifier] in test/features/[feature]/[name]_test.dart
+- [ ] T019 [P] [US2] Widget or integration test for [user journey] in test/features/[feature]/[name]_test.dart or integration_test/[name]_test.dart
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
-- [ ] T021 [US2] Implement [Service] in src/services/[service].py
-- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T020 [P] [US2] Create [Entity] model in lib/features/[feature]/domain/[entity].dart
+- [ ] T021 [US2] Implement [Notifier/Repository] in lib/features/[feature]/application/[name].dart
+- [ ] T022 [US2] Implement UI in lib/features/[feature]/presentation/[widget].dart
 - [ ] T023 [US2] Integrate with User Story 1 components (if needed)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
@@ -128,16 +131,16 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 3
 
-- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T024 [P] [US3] Unit test for [logic/repository/notifier] in test/features/[feature]/[name]_test.dart
+- [ ] T025 [P] [US3] Widget or integration test for [user journey] in test/features/[feature]/[name]_test.dart or integration_test/[name]_test.dart
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
-- [ ] T027 [US3] Implement [Service] in src/services/[service].py
-- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T026 [P] [US3] Create [Entity] model in lib/features/[feature]/domain/[entity].dart
+- [ ] T027 [US3] Implement [Notifier/Repository] in lib/features/[feature]/application/[name].dart
+- [ ] T028 [US3] Implement UI in lib/features/[feature]/presentation/[widget].dart
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -151,12 +154,15 @@ Examples of foundational tasks (adjust based on your project):
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] TXXX [P] Documentation updates in docs/
+- [ ] TXXX [P] Documentation updates in docs/features/[feature].md
 - [ ] TXXX Code cleanup and refactoring
-- [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
+- [ ] TXXX Performance verification and optimization across all stories
+- [ ] TXXX [P] Additional unit, widget, or integration tests for uncovered changed contracts
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
+- [ ] TXXX Run flutter analyze
+- [ ] TXXX Run flutter test
+- [ ] TXXX Run dart run build_runner build if Drift or Riverpod annotations changed
 
 ---
 
