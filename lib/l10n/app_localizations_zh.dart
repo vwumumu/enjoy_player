@@ -579,6 +579,198 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get settingsSectionAi => 'AI';
+
+  @override
+  String get settingsSectionAiHint => '选择 Enjoy AI 或自备 API 密钥。';
+
+  @override
+  String get settingsAiProvidersTileTitle => 'AI 提供商';
+
+  @override
+  String get settingsAiProvidersTileSubtitle => '默认使用 Enjoy AI，也可为各功能配置自己的密钥';
+
+  @override
+  String get settingsAiProvidersTitle => 'AI 提供商';
+
+  @override
+  String get settingsAiProvidersSubtitle => '配置 Enjoy Player 各 AI 功能的调用方式。';
+
+  @override
+  String get settingsAiProvidersPrivacyNotice =>
+      'API 密钥仅安全存储在本设备，不会同步到 Enjoy 云端。';
+
+  @override
+  String get settingsAiProvidersEnjoyAi => 'Enjoy AI';
+
+  @override
+  String get settingsAiProvidersByok => '自备密钥';
+
+  @override
+  String get settingsAiProvidersModalityLlm => '语言模型';
+
+  @override
+  String get settingsAiProvidersModalityLlmHint => '对话、翻译、词典与语境翻译';
+
+  @override
+  String get settingsAiProvidersModalityAsr => '语音识别';
+
+  @override
+  String get settingsAiProvidersModalityAsrHint => '将音频转写为文字';
+
+  @override
+  String get settingsAiProvidersModalityTts => '文字转语音';
+
+  @override
+  String get settingsAiProvidersModalityTtsHint => '将文字合成为语音';
+
+  @override
+  String get settingsAiProvidersModalityAssessment => '发音评估';
+
+  @override
+  String get settingsAiProvidersModalityAssessmentHint =>
+      '使用 Azure Speech 为跟读录音打分';
+
+  @override
+  String get settingsAiProvidersLlmSpecLabel => '协议';
+
+  @override
+  String get settingsAiProvidersLlmSpecOpenAi => 'OpenAI 兼容';
+
+  @override
+  String get settingsAiProvidersLlmSpecAnthropic => 'Anthropic 兼容';
+
+  @override
+  String get settingsAiProvidersLlmSpecGoogle => 'Google 兼容';
+
+  @override
+  String get settingsAiProvidersPresetsLabel => '预设';
+
+  @override
+  String get settingsAiProvidersBaseUrlLabel => 'Base URL';
+
+  @override
+  String get settingsAiProvidersBaseUrlHint => 'https://api.example.com/v1';
+
+  @override
+  String get settingsAiProvidersApiKeyLabel => 'API 密钥';
+
+  @override
+  String get settingsAiProvidersApiKeyExistingHint => '留空则保留已保存的密钥';
+
+  @override
+  String get settingsAiProvidersShowApiKey => '显示 API 密钥';
+
+  @override
+  String get settingsAiProvidersHideApiKey => '隐藏 API 密钥';
+
+  @override
+  String get settingsAiProvidersModelLabel => '模型';
+
+  @override
+  String get settingsAiProvidersFetchModels => '获取模型列表';
+
+  @override
+  String get settingsAiProvidersFetchedModelsLabel => '已获取的模型';
+
+  @override
+  String get settingsAiProvidersFetchModelsFailed =>
+      '无法获取模型列表，请检查 Base URL 和 API 密钥。';
+
+  @override
+  String get settingsAiProvidersFetchModelsEmpty => '此端点未返回任何模型。';
+
+  @override
+  String get settingsAiProvidersSave => '保存';
+
+  @override
+  String get settingsAiProvidersSaveSuccess => 'AI 提供商设置已保存。';
+
+  @override
+  String get settingsAiProvidersRemoveByok => '移除 BYOK';
+
+  @override
+  String get settingsAiProvidersRemoveByokTitle => '移除 BYOK 凭据？';
+
+  @override
+  String get settingsAiProvidersRemoveByokBody =>
+      '将删除本设备上保存的 API 密钥，并将该功能恢复为 Enjoy AI。';
+
+  @override
+  String get settingsAiProvidersRemoveByokSuccess => 'BYOK 凭据已移除。';
+
+  @override
+  String get settingsAiProvidersCancel => '取消';
+
+  @override
+  String get settingsAiProvidersComingSoon => '此功能的 BYOK 配置即将推出。';
+
+  @override
+  String get settingsAiProvidersSpeechSubscriptionKeyLabel => 'Azure 订阅密钥';
+
+  @override
+  String get settingsAiProvidersSpeechRegionLabel => 'Azure 区域';
+
+  @override
+  String get settingsAiProvidersSpeechRegionHint => 'eastus';
+
+  @override
+  String get settingsAiProvidersSpeechKindLabel => '供应商';
+
+  @override
+  String get settingsAiProvidersSpeechKindOpenAi => 'OpenAI Whisper';
+
+  @override
+  String get settingsAiProvidersSpeechKindAzure => 'Azure Speech';
+
+  @override
+  String get settingsAiProvidersSpeechWhisperModelLabel => 'Whisper 模型';
+
+  @override
+  String get settingsAiProvidersSpeechWhisperModelHint => 'whisper-1';
+
+  @override
+  String get settingsAiProvidersSpeechTtsModelLabel => 'TTS 模型';
+
+  @override
+  String get settingsAiProvidersSpeechTtsModelHint => 'tts-1';
+
+  @override
+  String get settingsAiProvidersApiKeySavedMask => '••••••••••••';
+
+  @override
+  String get settingsAiProvidersApiKeyEdit => '编辑密钥';
+
+  @override
+  String byokNotConfiguredMessage(String modality) {
+    return '已为 $modality 选择 BYOK，但本设备未保存 API 密钥。';
+  }
+
+  @override
+  String get byokNotConfiguredOpenSettings => '请打开 设置 → AI 提供商 添加密钥。';
+
+  @override
+  String get byokValidationApiKeyRequired => '需要 API 密钥。';
+
+  @override
+  String get byokValidationBaseUrlRequired => '需要 Base URL。';
+
+  @override
+  String get byokValidationBaseUrlInvalid => 'Base URL 必须是公网 HTTPS 地址。';
+
+  @override
+  String get byokValidationModelRequired => '需要填写模型。';
+
+  @override
+  String get byokValidationRegionRequired => '需要 Azure 区域。';
+
+  @override
+  String get byokValidationApiSpecRequired => '协议配置不完整。';
+
+  @override
+  String get byokValidationAzureKindRequired => '发音评估 BYOK 需要使用 Azure Speech。';
+
+  @override
   String get settingsSectionRecording => '录音';
 
   @override
@@ -1625,7 +1817,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiPlaygroundIntro =>
-      '使用已保存的基础地址与访问令牌调用 Enjoy API。Flutter 上尚未接入 TTS；登录后发音评测通过原生插件使用 Azure Speech。';
+      '通过 Enjoy 云端或「设置 → AI 提供商」中的 BYOK 凭据测试各 AI 能力。翻译与词典跟随 LLM 提供商。';
+
+  @override
+  String get aiPlaygroundActiveProviders => '当前提供商';
+
+  @override
+  String aiPlaygroundProviderByokDetail(String detail) {
+    return 'BYOK · $detail';
+  }
+
+  @override
+  String get aiPlaygroundProviderLocal => '本地（不可用）';
 
   @override
   String get aiPlaygroundPickAudio => '选择音频文件';
@@ -1677,7 +1880,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiPlaygroundAssessmentTtsNote =>
-      '本版本暂不提供 TTS（Azure Speech 集成进行中）。';
+      'Enjoy TTS 尚未接入；可在 AI 提供商中配置 TTS BYOK。评测使用上方所示提供商。';
 
   @override
   String get aiPlaygroundOutput => '输出';

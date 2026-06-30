@@ -57,6 +57,9 @@ abstract final class SettingsKeys {
   /// JSON map of custom hotkey action id → binding string.
   static const String hotkeysCustomBindings = 'hotkeys_custom_bindings';
 
+  /// JSON blob: per-modality AI provider config (BYOK non-secrets only).
+  static const String aiModalityConfigsV1 = 'ai.modality_configs_v1';
+
   static const _staticKeys = {
     apiBaseUrl,
     apiAiBaseUrl,
@@ -75,6 +78,7 @@ abstract final class SettingsKeys {
     diagnosticsVerboseEnabled,
     playerPreferencesV1,
     hotkeysCustomBindings,
+    aiModalityConfigsV1,
   };
 
   /// Whether [key] is a known static or dynamic settings key.

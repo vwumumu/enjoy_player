@@ -1,7 +1,17 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:enjoy_player/data/api/byok_secret_store.dart';
 import 'package:enjoy_player/data/api/services/ai/ai_api_providers.dart';
+import 'package:enjoy_player/features/ai/application/ai_modality_config_controller.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_configs.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_asr_azure_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_asr_openai_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_assessment_azure_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_dictionary_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_llm_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_tts_azure_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_tts_openai_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/enjoy/enjoy_asr_capability.dart';
 import 'package:enjoy_player/features/ai/data/enjoy/enjoy_assessment_capability.dart';
 import 'package:enjoy_player/features/ai/data/enjoy/enjoy_contextual_translation_capability.dart';
@@ -19,6 +29,7 @@ import 'package:enjoy_player/features/ai/domain/capabilities/dictionary_capabili
 import 'package:enjoy_player/features/ai/domain/capabilities/llm_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/tts_capability.dart';
+import 'package:enjoy_player/features/ai/domain/speech_byok_kind.dart';
 
 part 'ai_capability_providers.g.dart';
 
@@ -27,6 +38,18 @@ AsrCapability resolveAsrCapability(Ref ref, AIServiceConfig config) {
     case AIProvider.enjoy:
       return EnjoyAsrCapability(ref.read(asrApiProvider));
     case AIProvider.byok:
+      final speechByok = config.speechByok;
+      if (speechByok == null) return const ByokNotConfiguredAsrCapability();
+      return switch (speechByok.kind) {
+        SpeechByokKind.openAiCompatible => ByokAsrOpenAiCapability(
+          config: speechByok,
+          secrets: ref.read(byokSecretStoreProvider),
+        ),
+        SpeechByokKind.azureSpeech => ByokAsrAzureCapability(
+          config: speechByok,
+          secrets: ref.read(byokSecretStoreProvider),
+        ),
+      };
     case AIProvider.local:
       return const UnimplementedAsrCapability();
   }
@@ -37,6 +60,9 @@ LlmCapability resolveLlmCapability(Ref ref, AIServiceConfig config) {
     case AIProvider.enjoy:
       return EnjoyLlmCapability(ref.read(chatApiProvider));
     case AIProvider.byok:
+      final llmByok = config.llmByok;
+      if (llmByok == null) return const ByokNotConfiguredLlmCapability();
+      return ByokLlmCapability(llmByok, ref.read(byokSecretStoreProvider));
     case AIProvider.local:
       return const UnimplementedLlmCapability();
   }
@@ -50,6 +76,7 @@ TranslationCapability resolveTranslationCapability(
     case AIProvider.enjoy:
       return EnjoyTranslationCapability(ref.read(translationApiProvider));
     case AIProvider.byok:
+      return ByokTranslationCapability(resolveLlmCapability(ref, config));
     case AIProvider.local:
       return const UnimplementedTranslationCapability();
   }
@@ -63,6 +90,7 @@ DictionaryCapability resolveDictionaryCapability(
     case AIProvider.enjoy:
       return EnjoyDictionaryCapability(ref.read(dictionaryApiProvider));
     case AIProvider.byok:
+      return ByokDictionaryCapability(resolveLlmCapability(ref, config));
     case AIProvider.local:
       return const UnimplementedDictionaryCapability();
   }
@@ -78,6 +106,9 @@ ContextualTranslationCapability resolveContextualTranslationCapability(
         ref.read(llmCapabilityProvider),
       );
     case AIProvider.byok:
+      return EnjoyContextualTranslationCapability(
+        resolveLlmCapability(ref, config),
+      );
     case AIProvider.local:
       return const UnimplementedContextualTranslationCapability();
   }
@@ -88,6 +119,18 @@ TtsCapability resolveTtsCapability(Ref ref, AIServiceConfig config) {
     case AIProvider.enjoy:
       return const EnjoyTtsCapability();
     case AIProvider.byok:
+      final speechByok = config.speechByok;
+      if (speechByok == null) return const ByokNotConfiguredTtsCapability();
+      return switch (speechByok.kind) {
+        SpeechByokKind.openAiCompatible => ByokTtsOpenAiCapability(
+          config: speechByok,
+          secrets: ref.read(byokSecretStoreProvider),
+        ),
+        SpeechByokKind.azureSpeech => ByokTtsAzureCapability(
+          config: speechByok,
+          secrets: ref.read(byokSecretStoreProvider),
+        ),
+      };
     case AIProvider.local:
       return const UnimplementedTtsCapability();
   }
@@ -103,13 +146,21 @@ AssessmentCapability resolveAssessmentCapability(
         tokenCache: ref.read(azureTokenCacheProvider),
       );
     case AIProvider.byok:
+      final speechByok = config.speechByok;
+      if (speechByok == null) return const ByokNotConfiguredAssessmentCapability();
+      return ByokAssessmentAzureCapability(
+        config: speechByok,
+        secrets: ref.read(byokSecretStoreProvider),
+      );
     case AIProvider.local:
       return const UnimplementedAssessmentCapability();
   }
 }
 
 @Riverpod(keepAlive: true)
-AiModalityConfigs aiModalityConfigs(Ref ref) => AiModalityConfigs.defaults;
+AiModalityConfigs aiModalityConfigs(Ref ref) {
+  return ref.watch(aiModalityConfigCtrlProvider);
+}
 
 @Riverpod(keepAlive: true)
 AsrCapability asrCapability(Ref ref) {

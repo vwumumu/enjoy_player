@@ -54,7 +54,7 @@ final class AiModalityConfigsProvider
   }
 }
 
-String _$aiModalityConfigsHash() => r'638fd08494d4f4a649f0bea0bbfcc6b3ec7b8830';
+String _$aiModalityConfigsHash() => r'1a2970afd8fca341156447bd24e7d23f4cf31ad0';
 
 @ProviderFor(asrCapability)
 final asrCapabilityProvider = AsrCapabilityProvider._();

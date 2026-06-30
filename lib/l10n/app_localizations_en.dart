@@ -602,6 +602,213 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settingsSectionAi => 'AI';
+
+  @override
+  String get settingsSectionAiHint =>
+      'Choose Enjoy AI or bring your own API keys.';
+
+  @override
+  String get settingsAiProvidersTileTitle => 'AI providers';
+
+  @override
+  String get settingsAiProvidersTileSubtitle =>
+      'Enjoy AI by default, or use your own keys per feature';
+
+  @override
+  String get settingsAiProvidersTitle => 'AI providers';
+
+  @override
+  String get settingsAiProvidersSubtitle =>
+      'Configure how Enjoy Player calls AI for each feature.';
+
+  @override
+  String get settingsAiProvidersPrivacyNotice =>
+      'API keys are stored securely on this device only and are never synced to Enjoy cloud.';
+
+  @override
+  String get settingsAiProvidersEnjoyAi => 'Enjoy AI';
+
+  @override
+  String get settingsAiProvidersByok => 'Your API key';
+
+  @override
+  String get settingsAiProvidersModalityLlm => 'Language models';
+
+  @override
+  String get settingsAiProvidersModalityLlmHint =>
+      'Chat, translation, dictionary, and contextual translation';
+
+  @override
+  String get settingsAiProvidersModalityAsr => 'Speech recognition';
+
+  @override
+  String get settingsAiProvidersModalityAsrHint => 'Transcribe audio to text';
+
+  @override
+  String get settingsAiProvidersModalityTts => 'Text-to-speech';
+
+  @override
+  String get settingsAiProvidersModalityTtsHint =>
+      'Synthesize spoken audio from text';
+
+  @override
+  String get settingsAiProvidersModalityAssessment =>
+      'Pronunciation assessment';
+
+  @override
+  String get settingsAiProvidersModalityAssessmentHint =>
+      'Score shadow-reading takes with Azure Speech';
+
+  @override
+  String get settingsAiProvidersLlmSpecLabel => 'Protocol';
+
+  @override
+  String get settingsAiProvidersLlmSpecOpenAi => 'OpenAI-compatible';
+
+  @override
+  String get settingsAiProvidersLlmSpecAnthropic => 'Anthropic-compatible';
+
+  @override
+  String get settingsAiProvidersLlmSpecGoogle => 'Google-compatible';
+
+  @override
+  String get settingsAiProvidersPresetsLabel => 'Presets';
+
+  @override
+  String get settingsAiProvidersBaseUrlLabel => 'Base URL';
+
+  @override
+  String get settingsAiProvidersBaseUrlHint => 'https://api.example.com/v1';
+
+  @override
+  String get settingsAiProvidersApiKeyLabel => 'API key';
+
+  @override
+  String get settingsAiProvidersApiKeyExistingHint =>
+      'Leave blank to keep saved key';
+
+  @override
+  String get settingsAiProvidersShowApiKey => 'Show API key';
+
+  @override
+  String get settingsAiProvidersHideApiKey => 'Hide API key';
+
+  @override
+  String get settingsAiProvidersModelLabel => 'Model';
+
+  @override
+  String get settingsAiProvidersFetchModels => 'Fetch models';
+
+  @override
+  String get settingsAiProvidersFetchedModelsLabel => 'Fetched models';
+
+  @override
+  String get settingsAiProvidersFetchModelsFailed =>
+      'Could not fetch models. Check base URL and API key.';
+
+  @override
+  String get settingsAiProvidersFetchModelsEmpty =>
+      'No models returned from this endpoint.';
+
+  @override
+  String get settingsAiProvidersSave => 'Save';
+
+  @override
+  String get settingsAiProvidersSaveSuccess => 'AI provider settings saved.';
+
+  @override
+  String get settingsAiProvidersRemoveByok => 'Remove BYOK';
+
+  @override
+  String get settingsAiProvidersRemoveByokTitle => 'Remove BYOK credentials?';
+
+  @override
+  String get settingsAiProvidersRemoveByokBody =>
+      'This deletes the saved API key on this device and reverts the feature to Enjoy AI.';
+
+  @override
+  String get settingsAiProvidersRemoveByokSuccess =>
+      'BYOK credentials removed.';
+
+  @override
+  String get settingsAiProvidersCancel => 'Cancel';
+
+  @override
+  String get settingsAiProvidersComingSoon =>
+      'BYOK configuration for this feature is coming soon.';
+
+  @override
+  String get settingsAiProvidersSpeechSubscriptionKeyLabel =>
+      'Azure subscription key';
+
+  @override
+  String get settingsAiProvidersSpeechRegionLabel => 'Azure region';
+
+  @override
+  String get settingsAiProvidersSpeechRegionHint => 'eastus';
+
+  @override
+  String get settingsAiProvidersSpeechKindLabel => 'Vendor';
+
+  @override
+  String get settingsAiProvidersSpeechKindOpenAi => 'OpenAI Whisper';
+
+  @override
+  String get settingsAiProvidersSpeechKindAzure => 'Azure Speech';
+
+  @override
+  String get settingsAiProvidersSpeechWhisperModelLabel => 'Whisper model';
+
+  @override
+  String get settingsAiProvidersSpeechWhisperModelHint => 'whisper-1';
+
+  @override
+  String get settingsAiProvidersSpeechTtsModelLabel => 'TTS model';
+
+  @override
+  String get settingsAiProvidersSpeechTtsModelHint => 'tts-1';
+
+  @override
+  String get settingsAiProvidersApiKeySavedMask => '••••••••••••';
+
+  @override
+  String get settingsAiProvidersApiKeyEdit => 'Edit key';
+
+  @override
+  String byokNotConfiguredMessage(String modality) {
+    return 'BYOK is selected for $modality, but no API key is saved on this device.';
+  }
+
+  @override
+  String get byokNotConfiguredOpenSettings =>
+      'Open Settings → AI providers to add your key.';
+
+  @override
+  String get byokValidationApiKeyRequired => 'API key is required.';
+
+  @override
+  String get byokValidationBaseUrlRequired => 'Base URL is required.';
+
+  @override
+  String get byokValidationBaseUrlInvalid =>
+      'Base URL must be a public HTTPS endpoint.';
+
+  @override
+  String get byokValidationModelRequired => 'Model is required.';
+
+  @override
+  String get byokValidationRegionRequired => 'Azure region is required.';
+
+  @override
+  String get byokValidationApiSpecRequired =>
+      'Protocol configuration is incomplete.';
+
+  @override
+  String get byokValidationAzureKindRequired =>
+      'Assessment BYOK requires Azure Speech.';
+
+  @override
   String get settingsSectionRecording => 'Recording';
 
   @override
@@ -1690,7 +1897,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiPlaygroundIntro =>
-      'Calls the Enjoy API using your saved base URL and access token. TTS is not wired on Flutter yet; pronunciation assessment uses Azure Speech via a native plugin when signed in.';
+      'Exercise AI modalities using Enjoy cloud or your BYOK credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.';
+
+  @override
+  String get aiPlaygroundActiveProviders => 'Active providers';
+
+  @override
+  String aiPlaygroundProviderByokDetail(String detail) {
+    return 'BYOK · $detail';
+  }
+
+  @override
+  String get aiPlaygroundProviderLocal => 'Local (unavailable)';
 
   @override
   String get aiPlaygroundPickAudio => 'Pick audio file';
@@ -1743,7 +1961,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiPlaygroundAssessmentTtsNote =>
-      'TTS is not available in this build (Azure Speech integration pending).';
+      'Enjoy TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.';
 
   @override
   String get aiPlaygroundOutput => 'Output';

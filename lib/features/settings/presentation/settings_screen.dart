@@ -426,6 +426,28 @@ class SettingsScreen extends ConsumerWidget {
 
           SliverToBoxAdapter(child: SizedBox(height: t.space8)),
 
+          // ── AI providers ───────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _SettingsSectionHeader(
+              title: l10n.settingsSectionAi,
+              hint: l10n.settingsSectionAiHint,
+              icon: Icons.auto_awesome_outlined,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: _SettingsCard(
+              padding: EdgeInsets.zero,
+              child: _SettingsTile(
+                leadingIcon: Icons.tune_outlined,
+                title: l10n.settingsAiProvidersTileTitle,
+                subtitle: l10n.settingsAiProvidersTileSubtitle,
+                onTap: () => context.push('/settings/ai-providers'),
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(child: SizedBox(height: t.space8)),
+
           // ── Recording (microphone) ─────────────────────────────────────
           SliverToBoxAdapter(
             child: _SettingsSectionHeader(

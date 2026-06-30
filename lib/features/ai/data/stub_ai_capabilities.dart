@@ -1,4 +1,5 @@
 import 'package:enjoy_player/features/ai/domain/capabilities/asr_capability.dart';
+import 'package:enjoy_player/features/ai/domain/byok_not_configured_failure.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/assessment_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/dictionary_capability.dart';
@@ -15,16 +16,26 @@ import 'package:enjoy_player/features/ai/domain/models/contextual_translation_re
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/tts_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/tts_result.dart';
+import 'package:enjoy_player/features/ai/domain/modality_kind.dart';
 
-/// BYOK / local AI is not implemented in the player yet.
+/// Local on-device AI is not implemented in the player yet.
 final class UnimplementedAsrCapability implements AsrCapability {
   const UnimplementedAsrCapability();
 
   @override
   Future<AsrResult> transcribe(AsrRequest request) {
     throw UnimplementedError(
-      'ASR with BYOK or local models is not implemented yet.',
+      'ASR with local on-device models is not implemented yet.',
     );
+  }
+}
+
+final class ByokNotConfiguredAsrCapability implements AsrCapability {
+  const ByokNotConfiguredAsrCapability();
+
+  @override
+  Future<AsrResult> transcribe(AsrRequest request) {
+    throw const ByokNotConfiguredFailure(ModalityKind.asr);
   }
 }
 
@@ -39,7 +50,7 @@ final class UnimplementedLlmCapability implements LlmCapability {
     Map<String, dynamic>? responseFormat,
   }) {
     throw UnimplementedError(
-      'LLM with BYOK or local models is not implemented yet.',
+      'LLM with local on-device models is not implemented yet.',
     );
   }
 
@@ -51,8 +62,32 @@ final class UnimplementedLlmCapability implements LlmCapability {
     int? maxTokens,
   }) {
     throw UnimplementedError(
-      'LLM with BYOK or local models is not implemented yet.',
+      'LLM with local on-device models is not implemented yet.',
     );
+  }
+}
+
+final class ByokNotConfiguredLlmCapability implements LlmCapability {
+  const ByokNotConfiguredLlmCapability();
+
+  @override
+  Future<String> generateChatCompletion({
+    required List<ChatMessage> messages,
+    double? temperature,
+    int? maxTokens,
+    Map<String, dynamic>? responseFormat,
+  }) {
+    throw const ByokNotConfiguredFailure(ModalityKind.llm);
+  }
+
+  @override
+  Future<String> generateText({
+    String? systemPrompt,
+    required String userPrompt,
+    double? temperature,
+    int? maxTokens,
+  }) {
+    throw const ByokNotConfiguredFailure(ModalityKind.llm);
   }
 }
 
@@ -68,7 +103,7 @@ final class UnimplementedTranslationCapability
     bool? forceRefresh,
   }) {
     throw UnimplementedError(
-      'Translation with BYOK or local models is not implemented yet.',
+      'Translation with local on-device models is not implemented yet.',
     );
   }
 }
@@ -85,7 +120,7 @@ final class UnimplementedContextualTranslationCapability
     String? context,
   }) {
     throw UnimplementedError(
-      'Contextual translation with BYOK or local models is not implemented yet.',
+      'Contextual translation with local on-device models is not implemented yet.',
     );
   }
 }
@@ -101,7 +136,7 @@ final class UnimplementedDictionaryCapability implements DictionaryCapability {
     bool? forceRefresh,
   }) {
     throw UnimplementedError(
-      'Dictionary with BYOK or local models is not implemented yet.',
+      'Dictionary with local on-device models is not implemented yet.',
     );
   }
 }
@@ -112,8 +147,17 @@ final class UnimplementedTtsCapability implements TtsCapability {
   @override
   Future<TtsResult> synthesize(TtsRequest request) {
     throw UnimplementedError(
-      'TTS with BYOK or local models is not implemented yet.',
+      'TTS with local on-device models is not implemented yet.',
     );
+  }
+}
+
+final class ByokNotConfiguredTtsCapability implements TtsCapability {
+  const ByokNotConfiguredTtsCapability();
+
+  @override
+  Future<TtsResult> synthesize(TtsRequest request) {
+    throw const ByokNotConfiguredFailure(ModalityKind.tts);
   }
 }
 
@@ -123,7 +167,16 @@ final class UnimplementedAssessmentCapability implements AssessmentCapability {
   @override
   Future<AssessmentResult> assess(AssessmentRequest request) {
     throw UnimplementedError(
-      'Assessment with BYOK or local models is not implemented yet.',
+      'Assessment with local on-device models is not implemented yet.',
     );
+  }
+}
+
+final class ByokNotConfiguredAssessmentCapability implements AssessmentCapability {
+  const ByokNotConfiguredAssessmentCapability();
+
+  @override
+  Future<AssessmentResult> assess(AssessmentRequest request) {
+    throw const ByokNotConfiguredFailure(ModalityKind.assessment);
   }
 }

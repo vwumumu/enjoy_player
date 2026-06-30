@@ -11,6 +11,7 @@ import 'package:enjoy_player/core/routing/auth_router_tick.dart';
 import 'package:enjoy_player/core/routing/not_found_screen.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/features/ai/presentation/ai_playground_screen.dart';
+import 'package:enjoy_player/features/ai/presentation/settings/ai_providers_screen.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/presentation/profile_screen.dart';
 import 'package:enjoy_player/features/credits/presentation/credits_usage_screen.dart';
@@ -173,6 +174,10 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: '/settings/keyboard',
             builder: (context, state) => const HotkeysSettingsScreen(),
+          ),
+          GoRoute(
+            path: '/settings/ai-providers',
+            builder: (context, state) => const AiProvidersScreen(),
           ),
           GoRoute(
             path: '/settings/ai-playground',

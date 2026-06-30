@@ -232,6 +232,259 @@
       }
     }
   },
+  "settingsSectionAi": "AI",
+  "@settingsSectionAi": {
+    "description": "Header for the AI provider settings section."
+  },
+  "settingsSectionAiHint": "Choose Enjoy AI or bring your own API keys.",
+  "@settingsSectionAiHint": {
+    "description": "Subtitle under the AI settings section header."
+  },
+  "settingsAiProvidersTileTitle": "AI providers",
+  "@settingsAiProvidersTileTitle": {
+    "description": "Settings tile title for AI provider configuration."
+  },
+  "settingsAiProvidersTileSubtitle": "Enjoy AI by default, or use your own keys per feature",
+  "@settingsAiProvidersTileSubtitle": {
+    "description": "Settings tile subtitle for AI provider configuration."
+  },
+  "settingsAiProvidersTitle": "AI providers",
+  "@settingsAiProvidersTitle": {
+    "description": "Screen title for AI provider settings."
+  },
+  "settingsAiProvidersSubtitle": "Configure how Enjoy Player calls AI for each feature.",
+  "@settingsAiProvidersSubtitle": {
+    "description": "Screen subtitle for AI provider settings."
+  },
+  "settingsAiProvidersPrivacyNotice": "API keys are stored securely on this device only and are never synced to Enjoy cloud.",
+  "@settingsAiProvidersPrivacyNotice": {
+    "description": "Privacy notice on the AI providers settings screen."
+  },
+  "settingsAiProvidersEnjoyAi": "Enjoy AI",
+  "@settingsAiProvidersEnjoyAi": {
+    "description": "Label when a modality uses Enjoy cloud AI."
+  },
+  "settingsAiProvidersByok": "Your API key",
+  "@settingsAiProvidersByok": {
+    "description": "Label when a modality uses BYOK credentials."
+  },
+  "settingsAiProvidersModalityLlm": "Language models",
+  "@settingsAiProvidersModalityLlm": {
+    "description": "Card title for LLM-backed features (chat, translation, dictionary)."
+  },
+  "settingsAiProvidersModalityLlmHint": "Chat, translation, dictionary, and contextual translation",
+  "@settingsAiProvidersModalityLlmHint": {
+    "description": "Card subtitle for LLM modality."
+  },
+  "settingsAiProvidersModalityAsr": "Speech recognition",
+  "@settingsAiProvidersModalityAsr": {
+    "description": "Card title for ASR modality."
+  },
+  "settingsAiProvidersModalityAsrHint": "Transcribe audio to text",
+  "@settingsAiProvidersModalityAsrHint": {
+    "description": "Card subtitle for ASR modality."
+  },
+  "settingsAiProvidersModalityTts": "Text-to-speech",
+  "@settingsAiProvidersModalityTts": {
+    "description": "Card title for TTS modality."
+  },
+  "settingsAiProvidersModalityTtsHint": "Synthesize spoken audio from text",
+  "@settingsAiProvidersModalityTtsHint": {
+    "description": "Card subtitle for TTS modality."
+  },
+  "settingsAiProvidersModalityAssessment": "Pronunciation assessment",
+  "@settingsAiProvidersModalityAssessment": {
+    "description": "Card title for pronunciation assessment modality."
+  },
+  "settingsAiProvidersModalityAssessmentHint": "Score shadow-reading takes with Azure Speech",
+  "@settingsAiProvidersModalityAssessmentHint": {
+    "description": "Card subtitle for assessment modality."
+  },
+  "settingsAiProvidersLlmSpecLabel": "Protocol",
+  "@settingsAiProvidersLlmSpecLabel": {
+    "description": "Label for LLM protocol spec selector."
+  },
+  "settingsAiProvidersLlmSpecOpenAi": "OpenAI-compatible",
+  "@settingsAiProvidersLlmSpecOpenAi": {
+    "description": "OpenAI-compatible LLM protocol spec option."
+  },
+  "settingsAiProvidersLlmSpecAnthropic": "Anthropic-compatible",
+  "@settingsAiProvidersLlmSpecAnthropic": {
+    "description": "Anthropic-compatible LLM protocol spec option."
+  },
+  "settingsAiProvidersLlmSpecGoogle": "Google-compatible",
+  "@settingsAiProvidersLlmSpecGoogle": {
+    "description": "Google-compatible LLM protocol spec option."
+  },
+  "settingsAiProvidersPresetsLabel": "Presets",
+  "@settingsAiProvidersPresetsLabel": {
+    "description": "Label for BYOK provider preset chips."
+  },
+  "settingsAiProvidersBaseUrlLabel": "Base URL",
+  "@settingsAiProvidersBaseUrlLabel": {
+    "description": "BYOK base URL field label."
+  },
+  "settingsAiProvidersBaseUrlHint": "https://api.example.com/v1",
+  "@settingsAiProvidersBaseUrlHint": {
+    "description": "BYOK base URL field hint."
+  },
+  "settingsAiProvidersApiKeyLabel": "API key",
+  "@settingsAiProvidersApiKeyLabel": {
+    "description": "BYOK API key field label."
+  },
+  "settingsAiProvidersApiKeyExistingHint": "Leave blank to keep saved key",
+  "@settingsAiProvidersApiKeyExistingHint": {
+    "description": "Hint when a BYOK key is already stored."
+  },
+  "settingsAiProvidersShowApiKey": "Show API key",
+  "@settingsAiProvidersShowApiKey": {
+    "description": "Tooltip to reveal BYOK API key field."
+  },
+  "settingsAiProvidersHideApiKey": "Hide API key",
+  "@settingsAiProvidersHideApiKey": {
+    "description": "Tooltip to mask BYOK API key field."
+  },
+  "settingsAiProvidersModelLabel": "Model",
+  "@settingsAiProvidersModelLabel": {
+    "description": "BYOK model field label."
+  },
+  "settingsAiProvidersFetchModels": "Fetch models",
+  "@settingsAiProvidersFetchModels": {
+    "description": "Button to list models from OpenAI-compatible endpoint."
+  },
+  "settingsAiProvidersFetchedModelsLabel": "Fetched models",
+  "@settingsAiProvidersFetchedModelsLabel": {
+    "description": "Dropdown label for fetched OpenAI-compatible models."
+  },
+  "settingsAiProvidersFetchModelsFailed": "Could not fetch models. Check base URL and API key.",
+  "@settingsAiProvidersFetchModelsFailed": {
+    "description": "Error when OpenAI-compatible model list fails."
+  },
+  "settingsAiProvidersFetchModelsEmpty": "No models returned from this endpoint.",
+  "@settingsAiProvidersFetchModelsEmpty": {
+    "description": "Message when model list is empty."
+  },
+  "settingsAiProvidersSave": "Save",
+  "@settingsAiProvidersSave": {
+    "description": "Save BYOK settings button."
+  },
+  "settingsAiProvidersSaveSuccess": "AI provider settings saved.",
+  "@settingsAiProvidersSaveSuccess": {
+    "description": "Success notice after saving BYOK settings."
+  },
+  "settingsAiProvidersRemoveByok": "Remove BYOK",
+  "@settingsAiProvidersRemoveByok": {
+    "description": "Remove BYOK credentials action."
+  },
+  "settingsAiProvidersRemoveByokTitle": "Remove BYOK credentials?",
+  "@settingsAiProvidersRemoveByokTitle": {
+    "description": "Confirm dialog title for removing BYOK."
+  },
+  "settingsAiProvidersRemoveByokBody": "This deletes the saved API key on this device and reverts the feature to Enjoy AI.",
+  "@settingsAiProvidersRemoveByokBody": {
+    "description": "Confirm dialog body for removing BYOK."
+  },
+  "settingsAiProvidersRemoveByokSuccess": "BYOK credentials removed.",
+  "@settingsAiProvidersRemoveByokSuccess": {
+    "description": "Success notice after removing BYOK."
+  },
+  "settingsAiProvidersCancel": "Cancel",
+  "@settingsAiProvidersCancel": {
+    "description": "Cancel action in BYOK dialogs."
+  },
+  "settingsAiProvidersComingSoon": "BYOK configuration for this feature is coming soon.",
+  "@settingsAiProvidersComingSoon": {
+    "description": "Placeholder for modalities not yet configurable in UI."
+  },
+  "settingsAiProvidersSpeechSubscriptionKeyLabel": "Azure subscription key",
+  "@settingsAiProvidersSpeechSubscriptionKeyLabel": {
+    "description": "Label for Azure Speech subscription key field in assessment BYOK form"
+  },
+  "settingsAiProvidersSpeechRegionLabel": "Azure region",
+  "@settingsAiProvidersSpeechRegionLabel": {
+    "description": "Label for Azure Speech region field in assessment BYOK form"
+  },
+  "settingsAiProvidersSpeechRegionHint": "eastus",
+  "@settingsAiProvidersSpeechRegionHint": {
+    "description": "Hint for Azure Speech region field"
+  },
+  "settingsAiProvidersSpeechKindLabel": "Vendor",
+  "@settingsAiProvidersSpeechKindLabel": {
+    "description": "Label for ASR/TTS BYOK vendor selector"
+  },
+  "settingsAiProvidersSpeechKindOpenAi": "OpenAI Whisper",
+  "@settingsAiProvidersSpeechKindOpenAi": {
+    "description": "OpenAI-compatible Whisper option for speech BYOK"
+  },
+  "settingsAiProvidersSpeechKindAzure": "Azure Speech",
+  "@settingsAiProvidersSpeechKindAzure": {
+    "description": "Azure Speech option for speech BYOK"
+  },
+  "settingsAiProvidersSpeechWhisperModelLabel": "Whisper model",
+  "@settingsAiProvidersSpeechWhisperModelLabel": {
+    "description": "Label for Whisper model field in ASR BYOK form"
+  },
+  "settingsAiProvidersSpeechWhisperModelHint": "whisper-1",
+  "@settingsAiProvidersSpeechWhisperModelHint": {
+    "description": "Hint for Whisper model field"
+  },
+  "settingsAiProvidersSpeechTtsModelLabel": "TTS model",
+  "@settingsAiProvidersSpeechTtsModelLabel": {
+    "description": "Label for OpenAI-compatible TTS model field"
+  },
+  "settingsAiProvidersSpeechTtsModelHint": "tts-1",
+  "@settingsAiProvidersSpeechTtsModelHint": {
+    "description": "Hint for OpenAI-compatible TTS model field"
+  },
+  "settingsAiProvidersApiKeySavedMask": "••••••••••••",
+  "@settingsAiProvidersApiKeySavedMask": {
+    "description": "Placeholder shown when a BYOK API key is saved but hidden"
+  },
+  "settingsAiProvidersApiKeyEdit": "Edit key",
+  "@settingsAiProvidersApiKeyEdit": {
+    "description": "Button to replace a saved BYOK API key"
+  },
+  "byokNotConfiguredMessage": "BYOK is selected for {modality}, but no API key is saved on this device.",
+  "@byokNotConfiguredMessage": {
+    "description": "Runtime error when BYOK modality has no secure key",
+    "placeholders": {
+      "modality": {
+        "type": "String"
+      }
+    }
+  },
+  "byokNotConfiguredOpenSettings": "Open Settings → AI providers to add your key.",
+  "@byokNotConfiguredOpenSettings": {
+    "description": "Hint to open AI provider settings after BYOK misconfiguration"
+  },
+  "byokValidationApiKeyRequired": "API key is required.",
+  "@byokValidationApiKeyRequired": {
+    "description": "BYOK validation: missing API key."
+  },
+  "byokValidationBaseUrlRequired": "Base URL is required.",
+  "@byokValidationBaseUrlRequired": {
+    "description": "BYOK validation: missing base URL."
+  },
+  "byokValidationBaseUrlInvalid": "Base URL must be a public HTTPS endpoint.",
+  "@byokValidationBaseUrlInvalid": {
+    "description": "BYOK validation: URL guard failure."
+  },
+  "byokValidationModelRequired": "Model is required.",
+  "@byokValidationModelRequired": {
+    "description": "BYOK validation: missing model."
+  },
+  "byokValidationRegionRequired": "Azure region is required.",
+  "@byokValidationRegionRequired": {
+    "description": "BYOK validation: missing Azure region."
+  },
+  "byokValidationApiSpecRequired": "Protocol configuration is incomplete.",
+  "@byokValidationApiSpecRequired": {
+    "description": "BYOK validation: missing LLM spec or speech kind."
+  },
+  "byokValidationAzureKindRequired": "Assessment BYOK requires Azure Speech.",
+  "@byokValidationAzureKindRequired": {
+    "description": "BYOK validation: assessment must use Azure Speech."
+  },
   "settingsSectionRecording": "Recording",
   "@settingsSectionRecording": {
     "description": "Header for the recording settings section."
@@ -708,7 +961,22 @@
   "settingsAiPlaygroundTileTitle": "AI playground",
   "settingsAiPlaygroundTileSubtitle": "Exercise ASR, chat, translation, and dictionary APIs",
   "aiPlaygroundTitle": "AI playground",
-  "aiPlaygroundIntro": "Calls the Enjoy API using your saved base URL and access token. TTS is not wired on Flutter yet; pronunciation assessment uses Azure Speech via a native plugin when signed in.",
+  "aiPlaygroundIntro": "Exercise AI modalities using Enjoy cloud or your BYOK credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.",
+  "aiPlaygroundActiveProviders": "Active providers",
+  "aiPlaygroundProviderByokDetail": "BYOK · {detail}",
+  "@aiPlaygroundProviderByokDetail": {
+    "description": "BYOK provider label with preset or vendor detail",
+    "placeholders": {
+      "detail": {
+        "type": "String",
+        "example": "DeepSeek"
+      }
+    }
+  },
+  "aiPlaygroundProviderLocal": "Local (unavailable)",
+  "@aiPlaygroundProviderLocal": {
+    "description": "Label when AIProvider.local is selected"
+  },
   "aiPlaygroundPickAudio": "Pick audio file",
   "aiPlaygroundTranscribe": "Transcribe",
   "aiPlaygroundChatSystem": "System (optional)",
@@ -725,7 +993,7 @@
   "aiPlaygroundAssessmentReference": "Reference text (what you spoke)",
   "aiPlaygroundAssessmentLanguage": "Language (e.g. en, en-US)",
   "aiPlaygroundAssess": "Run pronunciation assessment",
-  "aiPlaygroundAssessmentTtsNote": "TTS is not available in this build (Azure Speech integration pending).",
+  "aiPlaygroundAssessmentTtsNote": "Enjoy TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.",
   "aiPlaygroundOutput": "Output",
   "aiPlaygroundClearOutput": "Clear output",
   "aiPlaygroundSectionAsr": "ASR",

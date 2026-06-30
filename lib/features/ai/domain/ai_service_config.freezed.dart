@@ -283,7 +283,7 @@ as String?,
 /// @nodoc
 mixin _$AIServiceConfig {
 
- AIProvider get provider; BYOKConfig? get byok; String? get localModelId;
+ AIProvider get provider;@Deprecated('Use llmByok / speechByok; secrets live in ByokSecretStore') BYOKConfig? get byok; LlmByokConfig? get llmByok; SpeechByokConfig? get speechByok; String? get localModelId;
 /// Create a copy of AIServiceConfig
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -294,16 +294,16 @@ $AIServiceConfigCopyWith<AIServiceConfig> get copyWith => _$AIServiceConfigCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AIServiceConfig&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.byok, byok) || other.byok == byok)&&(identical(other.localModelId, localModelId) || other.localModelId == localModelId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AIServiceConfig&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.byok, byok) || other.byok == byok)&&(identical(other.llmByok, llmByok) || other.llmByok == llmByok)&&(identical(other.speechByok, speechByok) || other.speechByok == speechByok)&&(identical(other.localModelId, localModelId) || other.localModelId == localModelId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,provider,byok,localModelId);
+int get hashCode => Object.hash(runtimeType,provider,byok,llmByok,speechByok,localModelId);
 
 @override
 String toString() {
-  return 'AIServiceConfig(provider: $provider, byok: $byok, localModelId: $localModelId)';
+  return 'AIServiceConfig(provider: $provider, byok: $byok, llmByok: $llmByok, speechByok: $speechByok, localModelId: $localModelId)';
 }
 
 
@@ -314,11 +314,11 @@ abstract mixin class $AIServiceConfigCopyWith<$Res>  {
   factory $AIServiceConfigCopyWith(AIServiceConfig value, $Res Function(AIServiceConfig) _then) = _$AIServiceConfigCopyWithImpl;
 @useResult
 $Res call({
- AIProvider provider, BYOKConfig? byok, String? localModelId
+ AIProvider provider,@Deprecated('Use llmByok / speechByok; secrets live in ByokSecretStore') BYOKConfig? byok, LlmByokConfig? llmByok, SpeechByokConfig? speechByok, String? localModelId
 });
 
 
-$BYOKConfigCopyWith<$Res>? get byok;
+$BYOKConfigCopyWith<$Res>? get byok;$LlmByokConfigCopyWith<$Res>? get llmByok;$SpeechByokConfigCopyWith<$Res>? get speechByok;
 
 }
 /// @nodoc
@@ -331,11 +331,13 @@ class _$AIServiceConfigCopyWithImpl<$Res>
 
 /// Create a copy of AIServiceConfig
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? provider = null,Object? byok = freezed,Object? localModelId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? provider = null,Object? byok = freezed,Object? llmByok = freezed,Object? speechByok = freezed,Object? localModelId = freezed,}) {
   return _then(_self.copyWith(
 provider: null == provider ? _self.provider : provider // ignore: cast_nullable_to_non_nullable
 as AIProvider,byok: freezed == byok ? _self.byok : byok // ignore: cast_nullable_to_non_nullable
-as BYOKConfig?,localModelId: freezed == localModelId ? _self.localModelId : localModelId // ignore: cast_nullable_to_non_nullable
+as BYOKConfig?,llmByok: freezed == llmByok ? _self.llmByok : llmByok // ignore: cast_nullable_to_non_nullable
+as LlmByokConfig?,speechByok: freezed == speechByok ? _self.speechByok : speechByok // ignore: cast_nullable_to_non_nullable
+as SpeechByokConfig?,localModelId: freezed == localModelId ? _self.localModelId : localModelId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -350,6 +352,30 @@ $BYOKConfigCopyWith<$Res>? get byok {
 
   return $BYOKConfigCopyWith<$Res>(_self.byok!, (value) {
     return _then(_self.copyWith(byok: value));
+  });
+}/// Create a copy of AIServiceConfig
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LlmByokConfigCopyWith<$Res>? get llmByok {
+    if (_self.llmByok == null) {
+    return null;
+  }
+
+  return $LlmByokConfigCopyWith<$Res>(_self.llmByok!, (value) {
+    return _then(_self.copyWith(llmByok: value));
+  });
+}/// Create a copy of AIServiceConfig
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SpeechByokConfigCopyWith<$Res>? get speechByok {
+    if (_self.speechByok == null) {
+    return null;
+  }
+
+  return $SpeechByokConfigCopyWith<$Res>(_self.speechByok!, (value) {
+    return _then(_self.copyWith(speechByok: value));
   });
 }
 }
@@ -433,10 +459,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AIProvider provider,  BYOKConfig? byok,  String? localModelId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AIProvider provider, @Deprecated('Use llmByok / speechByok; secrets live in ByokSecretStore')  BYOKConfig? byok,  LlmByokConfig? llmByok,  SpeechByokConfig? speechByok,  String? localModelId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AIServiceConfig() when $default != null:
-return $default(_that.provider,_that.byok,_that.localModelId);case _:
+return $default(_that.provider,_that.byok,_that.llmByok,_that.speechByok,_that.localModelId);case _:
   return orElse();
 
 }
@@ -454,10 +480,10 @@ return $default(_that.provider,_that.byok,_that.localModelId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AIProvider provider,  BYOKConfig? byok,  String? localModelId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AIProvider provider, @Deprecated('Use llmByok / speechByok; secrets live in ByokSecretStore')  BYOKConfig? byok,  LlmByokConfig? llmByok,  SpeechByokConfig? speechByok,  String? localModelId)  $default,) {final _that = this;
 switch (_that) {
 case _AIServiceConfig():
-return $default(_that.provider,_that.byok,_that.localModelId);case _:
+return $default(_that.provider,_that.byok,_that.llmByok,_that.speechByok,_that.localModelId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -474,10 +500,10 @@ return $default(_that.provider,_that.byok,_that.localModelId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AIProvider provider,  BYOKConfig? byok,  String? localModelId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AIProvider provider, @Deprecated('Use llmByok / speechByok; secrets live in ByokSecretStore')  BYOKConfig? byok,  LlmByokConfig? llmByok,  SpeechByokConfig? speechByok,  String? localModelId)?  $default,) {final _that = this;
 switch (_that) {
 case _AIServiceConfig() when $default != null:
-return $default(_that.provider,_that.byok,_that.localModelId);case _:
+return $default(_that.provider,_that.byok,_that.llmByok,_that.speechByok,_that.localModelId);case _:
   return null;
 
 }
@@ -489,11 +515,13 @@ return $default(_that.provider,_that.byok,_that.localModelId);case _:
 
 
 class _AIServiceConfig implements AIServiceConfig {
-  const _AIServiceConfig({required this.provider, this.byok, this.localModelId});
+  const _AIServiceConfig({required this.provider, @Deprecated('Use llmByok / speechByok; secrets live in ByokSecretStore') this.byok, this.llmByok, this.speechByok, this.localModelId});
   
 
 @override final  AIProvider provider;
-@override final  BYOKConfig? byok;
+@override@Deprecated('Use llmByok / speechByok; secrets live in ByokSecretStore') final  BYOKConfig? byok;
+@override final  LlmByokConfig? llmByok;
+@override final  SpeechByokConfig? speechByok;
 @override final  String? localModelId;
 
 /// Create a copy of AIServiceConfig
@@ -506,16 +534,16 @@ _$AIServiceConfigCopyWith<_AIServiceConfig> get copyWith => __$AIServiceConfigCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AIServiceConfig&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.byok, byok) || other.byok == byok)&&(identical(other.localModelId, localModelId) || other.localModelId == localModelId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AIServiceConfig&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.byok, byok) || other.byok == byok)&&(identical(other.llmByok, llmByok) || other.llmByok == llmByok)&&(identical(other.speechByok, speechByok) || other.speechByok == speechByok)&&(identical(other.localModelId, localModelId) || other.localModelId == localModelId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,provider,byok,localModelId);
+int get hashCode => Object.hash(runtimeType,provider,byok,llmByok,speechByok,localModelId);
 
 @override
 String toString() {
-  return 'AIServiceConfig(provider: $provider, byok: $byok, localModelId: $localModelId)';
+  return 'AIServiceConfig(provider: $provider, byok: $byok, llmByok: $llmByok, speechByok: $speechByok, localModelId: $localModelId)';
 }
 
 
@@ -526,11 +554,11 @@ abstract mixin class _$AIServiceConfigCopyWith<$Res> implements $AIServiceConfig
   factory _$AIServiceConfigCopyWith(_AIServiceConfig value, $Res Function(_AIServiceConfig) _then) = __$AIServiceConfigCopyWithImpl;
 @override @useResult
 $Res call({
- AIProvider provider, BYOKConfig? byok, String? localModelId
+ AIProvider provider,@Deprecated('Use llmByok / speechByok; secrets live in ByokSecretStore') BYOKConfig? byok, LlmByokConfig? llmByok, SpeechByokConfig? speechByok, String? localModelId
 });
 
 
-@override $BYOKConfigCopyWith<$Res>? get byok;
+@override $BYOKConfigCopyWith<$Res>? get byok;@override $LlmByokConfigCopyWith<$Res>? get llmByok;@override $SpeechByokConfigCopyWith<$Res>? get speechByok;
 
 }
 /// @nodoc
@@ -543,11 +571,13 @@ class __$AIServiceConfigCopyWithImpl<$Res>
 
 /// Create a copy of AIServiceConfig
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? provider = null,Object? byok = freezed,Object? localModelId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? provider = null,Object? byok = freezed,Object? llmByok = freezed,Object? speechByok = freezed,Object? localModelId = freezed,}) {
   return _then(_AIServiceConfig(
 provider: null == provider ? _self.provider : provider // ignore: cast_nullable_to_non_nullable
 as AIProvider,byok: freezed == byok ? _self.byok : byok // ignore: cast_nullable_to_non_nullable
-as BYOKConfig?,localModelId: freezed == localModelId ? _self.localModelId : localModelId // ignore: cast_nullable_to_non_nullable
+as BYOKConfig?,llmByok: freezed == llmByok ? _self.llmByok : llmByok // ignore: cast_nullable_to_non_nullable
+as LlmByokConfig?,speechByok: freezed == speechByok ? _self.speechByok : speechByok // ignore: cast_nullable_to_non_nullable
+as SpeechByokConfig?,localModelId: freezed == localModelId ? _self.localModelId : localModelId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -563,6 +593,30 @@ $BYOKConfigCopyWith<$Res>? get byok {
 
   return $BYOKConfigCopyWith<$Res>(_self.byok!, (value) {
     return _then(_self.copyWith(byok: value));
+  });
+}/// Create a copy of AIServiceConfig
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LlmByokConfigCopyWith<$Res>? get llmByok {
+    if (_self.llmByok == null) {
+    return null;
+  }
+
+  return $LlmByokConfigCopyWith<$Res>(_self.llmByok!, (value) {
+    return _then(_self.copyWith(llmByok: value));
+  });
+}/// Create a copy of AIServiceConfig
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SpeechByokConfigCopyWith<$Res>? get speechByok {
+    if (_self.speechByok == null) {
+    return null;
+  }
+
+  return $SpeechByokConfigCopyWith<$Res>(_self.speechByok!, (value) {
+    return _then(_self.copyWith(speechByok: value));
   });
 }
 }

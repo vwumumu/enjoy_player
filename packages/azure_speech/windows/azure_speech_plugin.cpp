@@ -7,6 +7,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <speechapi_cxx.h>
 
@@ -19,6 +20,8 @@ using Microsoft::CognitiveServices::Speech::PronunciationAssessmentGradingSystem
 using Microsoft::CognitiveServices::Speech::ResultReason;
 using Microsoft::CognitiveServices::Speech::SpeechConfig;
 using Microsoft::CognitiveServices::Speech::SpeechRecognizer;
+using Microsoft::CognitiveServices::Speech::SpeechSynthesizer;
+using Microsoft::CognitiveServices::Speech::SpeechSynthesisCancellationDetails;
 
 namespace azure_speech {
 
@@ -52,11 +55,82 @@ PronunciationAssessmentGranularity ParseGranularity(const std::string& s) {
   return PronunciationAssessmentGranularity::Phoneme;
 }
 
+std::string Base64Encode(const std::vector<uint8_t>& data) {
+  static const char kTable[] =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  std::string out;
+  out.reserve(((data.size() + 2) / 3) * 4);
+  size_t i = 0;
+  while (i + 2 < data.size()) {
+    const uint32_t n = (static_cast<uint32_t>(data[i]) << 16) |
+                       (static_cast<uint32_t>(data[i + 1]) << 8) |
+                       static_cast<uint32_t>(data[i + 2]);
+    out.push_back(kTable[(n >> 18) & 63]);
+    out.push_back(kTable[(n >> 12) & 63]);
+    out.push_back(kTable[(n >> 6) & 63]);
+    out.push_back(kTable[n & 63]);
+    i += 3;
+  }
+  if (i < data.size()) {
+    const uint32_t n = static_cast<uint32_t>(data[i]) << 16;
+    out.push_back(kTable[(n >> 18) & 63]);
+    if (i + 1 < data.size()) {
+      const uint32_t n2 = n | (static_cast<uint32_t>(data[i + 1]) << 8);
+      out.push_back(kTable[(n2 >> 12) & 63]);
+      out.push_back(kTable[(n2 >> 6) & 63]);
+      out.push_back('=');
+    } else {
+      out.push_back(kTable[(n >> 12) & 63]);
+      out.push_back('=');
+      out.push_back('=');
+    }
+  }
+  return out;
+}
+
+flutter::EncodableValue RunSynthesize(const flutter::EncodableMap& args) {
+  const std::string text = GetString(args, "text");
+  const std::string language = GetString(args, "language");
+  const std::string subscription_key = GetString(args, "subscriptionKey");
+  const std::string region = GetString(args, "region");
+  const std::string voice = GetString(args, "voice");
+
+  auto config = SpeechConfig::FromSubscription(subscription_key, region);
+  config->SetSpeechSynthesisLanguage(language);
+  if (!voice.empty()) {
+    config->SetSpeechSynthesisVoiceName(voice);
+  }
+
+  auto synthesizer = SpeechSynthesizer::FromConfig(config);
+  auto speech_result = synthesizer->SpeakTextAsync(text).get();
+
+  if (speech_result->Reason == ResultReason::SynthesizingAudioCompleted) {
+    const auto audio = speech_result->GetAudioData();
+    if (audio.empty()) {
+      return flutter::EncodableValue(flutter::EncodableMap{
+          {flutter::EncodableValue("error"),
+           flutter::EncodableValue("azure_speech_error")},
+          {flutter::EncodableValue("message"),
+           flutter::EncodableValue("Empty synthesis audio")}});
+    }
+    return flutter::EncodableValue(Base64Encode(audio));
+  }
+
+  auto cancel = SpeechSynthesisCancellationDetails::FromResult(speech_result);
+  std::ostringstream oss;
+  oss << static_cast<int>(cancel->Reason) << ": " << cancel->ErrorDetails;
+  const std::string msg = oss.str();
+  return flutter::EncodableValue(flutter::EncodableMap{
+      {flutter::EncodableValue("error"), flutter::EncodableValue("azure_speech_error")},
+      {flutter::EncodableValue("message"), flutter::EncodableValue(msg)}});
+}
+
 flutter::EncodableValue RunAssess(const flutter::EncodableMap& args) {
   const std::string audio_path = GetString(args, "audioPath");
   const std::string reference_text = GetString(args, "referenceText");
   const std::string language = GetString(args, "language");
   const std::string token = GetString(args, "token");
+  const std::string subscription_key = GetString(args, "subscriptionKey");
   const std::string region = GetString(args, "region");
   const bool enable_prosody = GetBool(args, "enableProsody", true);
   const bool enable_miscue = GetBool(args, "enableMiscue", true);
@@ -66,7 +140,9 @@ flutter::EncodableValue RunAssess(const flutter::EncodableMap& args) {
   std::string gran_s = GetString(args, "granularity");
   if (gran_s.empty()) gran_s = "Phoneme";
 
-  auto config = SpeechConfig::FromAuthorizationToken(token, region);
+  auto config = !subscription_key.empty()
+                    ? SpeechConfig::FromSubscription(subscription_key, region)
+                    : SpeechConfig::FromAuthorizationToken(token, region);
   config->SetSpeechRecognitionLanguage(language);
 
   auto audio_config = AudioConfig::FromWavFileInput(audio_path);
@@ -113,6 +189,38 @@ flutter::EncodableValue RunAssess(const flutter::EncodableMap& args) {
       {flutter::EncodableValue("message"), flutter::EncodableValue(msg)}});
 }
 
+flutter::EncodableValue RunTranscribe(const flutter::EncodableMap& args) {
+  const std::string audio_path = GetString(args, "audioPath");
+  const std::string language = GetString(args, "language");
+  const std::string subscription_key = GetString(args, "subscriptionKey");
+  const std::string region = GetString(args, "region");
+
+  auto config = SpeechConfig::FromSubscription(subscription_key, region);
+  config->SetSpeechRecognitionLanguage(language);
+
+  auto audio_config = AudioConfig::FromWavFileInput(audio_path);
+  auto recognizer = SpeechRecognizer::FromConfig(config, audio_config);
+  auto speech_result = recognizer->RecognizeOnceAsync().get();
+
+  if (speech_result->Reason == ResultReason::RecognizedSpeech) {
+    return flutter::EncodableValue(speech_result->Text);
+  }
+  if (speech_result->Reason == ResultReason::NoMatch) {
+    return flutter::EncodableValue(flutter::EncodableMap{
+        {flutter::EncodableValue("error"), flutter::EncodableValue("no_speech")},
+        {flutter::EncodableValue("message"),
+         flutter::EncodableValue("No speech detected")}});
+  }
+
+  auto cancel = CancellationDetails::FromResult(speech_result);
+  std::ostringstream oss;
+  oss << static_cast<int>(cancel->Reason) << ": " << cancel->ErrorDetails;
+  const std::string msg = oss.str();
+  return flutter::EncodableValue(flutter::EncodableMap{
+      {flutter::EncodableValue("error"), flutter::EncodableValue("azure_speech_error")},
+      {flutter::EncodableValue("message"), flutter::EncodableValue(msg)}});
+}
+
 }  // namespace
 
 void AzureSpeechPlugin::RegisterWithRegistrar(
@@ -137,19 +245,13 @@ AzureSpeechPlugin::~AzureSpeechPlugin() = default;
 void AzureSpeechPlugin::HandleMethodCall(
     const flutter::MethodCall<flutter::EncodableValue>& method_call,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-  if (method_call.method_name() != "assess") {
-    result->NotImplemented();
-    return;
-  }
-
   const auto* args = std::get_if<flutter::EncodableMap>(method_call.arguments());
   if (!args) {
     result->Error("bad_args", "Expected map arguments");
     return;
   }
 
-  try {
-    flutter::EncodableValue out = RunAssess(*args);
+  const auto dispatch = [&](flutter::EncodableValue out) {
     if (const auto* err_map = std::get_if<flutter::EncodableMap>(&out)) {
       auto e_it = err_map->find(flutter::EncodableValue("error"));
       if (e_it != err_map->end()) {
@@ -161,15 +263,32 @@ void AzureSpeechPlugin::HandleMethodCall(
             message = *ms;
           }
         }
-        result->Error(code ? *code : "azure_speech_error", message, flutter::EncodableValue());
+        result->Error(code ? *code : "azure_speech_error", message,
+                      flutter::EncodableValue());
         return;
       }
     }
-    if (const auto* json = std::get_if<std::string>(&out)) {
-      result->Success(flutter::EncodableValue(*json));
+    if (const auto* text = std::get_if<std::string>(&out)) {
+      result->Success(flutter::EncodableValue(*text));
       return;
     }
     result->Error("azure_speech_error", "Unexpected native result shape");
+  };
+
+  try {
+    if (method_call.method_name() == "assess") {
+      dispatch(RunAssess(*args));
+      return;
+    }
+    if (method_call.method_name() == "transcribe") {
+      dispatch(RunTranscribe(*args));
+      return;
+    }
+    if (method_call.method_name() == "synthesize") {
+      dispatch(RunSynthesize(*args));
+      return;
+    }
+    result->NotImplemented();
   } catch (const std::exception& e) {
     result->Error("azure_speech_error", e.what());
   } catch (...) {

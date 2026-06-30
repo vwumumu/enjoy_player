@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -6,6 +7,10 @@ import 'azure_speech_exception.dart';
 import 'azure_speech_params.dart';
 import 'azure_speech_assessment_outcome.dart';
 import 'azure_speech_platform.dart';
+import 'azure_speech_synthesis_outcome.dart';
+import 'azure_speech_synthesis_params.dart';
+import 'azure_speech_transcription_outcome.dart';
+import 'azure_speech_transcription_params.dart';
 import 'models.dart';
 
 /// Default [MethodChannel] implementation (`azure_speech`).
@@ -38,6 +43,70 @@ final class MethodChannelAzureSpeech extends AzureSpeechPlatform {
       final root = Map<String, dynamic>.from(decoded);
       final detail = AzurePronunciationAssessmentResult.fromJson(root);
       return AzureSpeechAssessmentOutcome(detail: detail, rawJson: root);
+    } on PlatformException catch (e, st) {
+      Error.throwWithStackTrace(
+        AzureSpeechException(
+          code: e.code,
+          message: e.message ?? e.code,
+          details: e.details,
+        ),
+        st,
+      );
+    } on FormatException catch (e, st) {
+      Error.throwWithStackTrace(
+        AzureSpeechException(code: 'parse_error', message: e.message),
+        st,
+      );
+    }
+  }
+
+  @override
+  Future<AzureSpeechTranscriptionOutcome> transcribe(
+    AzureSpeechTranscriptionParams params,
+  ) async {
+    try {
+      final raw = await _channel.invokeMethod<String>(
+        'transcribe',
+        params.toMap(),
+      );
+      if (raw == null) {
+        throw const AzureSpeechException(
+          code: 'empty_result',
+          message: 'Native layer returned no transcription text.',
+        );
+      }
+      return AzureSpeechTranscriptionOutcome(text: raw);
+    } on PlatformException catch (e, st) {
+      Error.throwWithStackTrace(
+        AzureSpeechException(
+          code: e.code,
+          message: e.message ?? e.code,
+          details: e.details,
+        ),
+        st,
+      );
+    }
+  }
+
+  @override
+  Future<AzureSpeechSynthesisOutcome> synthesize(
+    AzureSpeechSynthesisParams params,
+  ) async {
+    try {
+      final raw = await _channel.invokeMethod<String>(
+        'synthesize',
+        params.toMap(),
+      );
+      if (raw == null || raw.isEmpty) {
+        throw const AzureSpeechException(
+          code: 'empty_result',
+          message: 'Native layer returned no synthesis audio.',
+        );
+      }
+      final bytes = base64Decode(raw);
+      return AzureSpeechSynthesisOutcome(
+        audioBytes: Uint8List.fromList(bytes),
+      );
     } on PlatformException catch (e, st) {
       Error.throwWithStackTrace(
         AzureSpeechException(

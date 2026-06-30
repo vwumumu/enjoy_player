@@ -9,6 +9,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "92.0.0"
+  ai_sdk_anthropic:
+    dependency: "direct main"
+    description:
+      name: ai_sdk_anthropic
+      sha256: "068e143464748dc7c6a7fbbe15aa25800503ad8a9b33301d84cb452a74c6b717"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
+  ai_sdk_dart:
+    dependency: "direct main"
+    description:
+      name: ai_sdk_dart
+      sha256: "6d3e683fc9ee0609cb32cb21be62544881181bd31b176cf8ec298e0df3c4b012"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
+  ai_sdk_google:
+    dependency: "direct main"
+    description:
+      name: ai_sdk_google
+      sha256: "37711fdd3a1bed5d4e6bf36cb7beda7c3294bba0f640b0613c15b36361d156b9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
+  ai_sdk_openai:
+    dependency: "direct main"
+    description:
+      name: ai_sdk_openai
+      sha256: "4e8fc6bc11cfbbd20900bd515062064e307c237617425d4e405bcbfaa0f1c3ee"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
+  ai_sdk_provider:
+    dependency: "direct main"
+    description:
+      name: ai_sdk_provider
+      sha256: ebd6301a8edc18897f573a800a6b30c798e7fb72ab3ff0d61c77f73ada471fa5
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   analyzer:
     dependency: transitive
     description:
@@ -328,6 +368,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.12"
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      sha256: ea2bad3c89a27635ce2d85cce4d6b199da49a5a48ec77b03e45b65a3b90922b0
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.10.0"
+  dio_web_adapter:
+    dependency: transitive
+    description:
+      name: dio_web_adapter
+      sha256: dd58dc3861eb36edb13b217efc006a1c21e5bbc341de8c229b85634fa5e362e4
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   drift:
     dependency: "direct main"
     description:

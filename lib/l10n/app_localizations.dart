@@ -1191,6 +1191,378 @@ abstract class AppLocalizations {
   /// **'Couldn\'t save recording: {reason}'**
   String shadowRecordingSaveFailed(String reason);
 
+  /// Header for the AI provider settings section.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get settingsSectionAi;
+
+  /// Subtitle under the AI settings section header.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Enjoy AI or bring your own API keys.'**
+  String get settingsSectionAiHint;
+
+  /// Settings tile title for AI provider configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'AI providers'**
+  String get settingsAiProvidersTileTitle;
+
+  /// Settings tile subtitle for AI provider configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy AI by default, or use your own keys per feature'**
+  String get settingsAiProvidersTileSubtitle;
+
+  /// Screen title for AI provider settings.
+  ///
+  /// In en, this message translates to:
+  /// **'AI providers'**
+  String get settingsAiProvidersTitle;
+
+  /// Screen subtitle for AI provider settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure how Enjoy Player calls AI for each feature.'**
+  String get settingsAiProvidersSubtitle;
+
+  /// Privacy notice on the AI providers settings screen.
+  ///
+  /// In en, this message translates to:
+  /// **'API keys are stored securely on this device only and are never synced to Enjoy cloud.'**
+  String get settingsAiProvidersPrivacyNotice;
+
+  /// Label when a modality uses Enjoy cloud AI.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy AI'**
+  String get settingsAiProvidersEnjoyAi;
+
+  /// Label when a modality uses BYOK credentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Your API key'**
+  String get settingsAiProvidersByok;
+
+  /// Card title for LLM-backed features (chat, translation, dictionary).
+  ///
+  /// In en, this message translates to:
+  /// **'Language models'**
+  String get settingsAiProvidersModalityLlm;
+
+  /// Card subtitle for LLM modality.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat, translation, dictionary, and contextual translation'**
+  String get settingsAiProvidersModalityLlmHint;
+
+  /// Card title for ASR modality.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition'**
+  String get settingsAiProvidersModalityAsr;
+
+  /// Card subtitle for ASR modality.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcribe audio to text'**
+  String get settingsAiProvidersModalityAsrHint;
+
+  /// Card title for TTS modality.
+  ///
+  /// In en, this message translates to:
+  /// **'Text-to-speech'**
+  String get settingsAiProvidersModalityTts;
+
+  /// Card subtitle for TTS modality.
+  ///
+  /// In en, this message translates to:
+  /// **'Synthesize spoken audio from text'**
+  String get settingsAiProvidersModalityTtsHint;
+
+  /// Card title for pronunciation assessment modality.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation assessment'**
+  String get settingsAiProvidersModalityAssessment;
+
+  /// Card subtitle for assessment modality.
+  ///
+  /// In en, this message translates to:
+  /// **'Score shadow-reading takes with Azure Speech'**
+  String get settingsAiProvidersModalityAssessmentHint;
+
+  /// Label for LLM protocol spec selector.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol'**
+  String get settingsAiProvidersLlmSpecLabel;
+
+  /// OpenAI-compatible LLM protocol spec option.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI-compatible'**
+  String get settingsAiProvidersLlmSpecOpenAi;
+
+  /// Anthropic-compatible LLM protocol spec option.
+  ///
+  /// In en, this message translates to:
+  /// **'Anthropic-compatible'**
+  String get settingsAiProvidersLlmSpecAnthropic;
+
+  /// Google-compatible LLM protocol spec option.
+  ///
+  /// In en, this message translates to:
+  /// **'Google-compatible'**
+  String get settingsAiProvidersLlmSpecGoogle;
+
+  /// Label for BYOK provider preset chips.
+  ///
+  /// In en, this message translates to:
+  /// **'Presets'**
+  String get settingsAiProvidersPresetsLabel;
+
+  /// BYOK base URL field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL'**
+  String get settingsAiProvidersBaseUrlLabel;
+
+  /// BYOK base URL field hint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://api.example.com/v1'**
+  String get settingsAiProvidersBaseUrlHint;
+
+  /// BYOK API key field label.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get settingsAiProvidersApiKeyLabel;
+
+  /// Hint when a BYOK key is already stored.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave blank to keep saved key'**
+  String get settingsAiProvidersApiKeyExistingHint;
+
+  /// Tooltip to reveal BYOK API key field.
+  ///
+  /// In en, this message translates to:
+  /// **'Show API key'**
+  String get settingsAiProvidersShowApiKey;
+
+  /// Tooltip to mask BYOK API key field.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide API key'**
+  String get settingsAiProvidersHideApiKey;
+
+  /// BYOK model field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get settingsAiProvidersModelLabel;
+
+  /// Button to list models from OpenAI-compatible endpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch models'**
+  String get settingsAiProvidersFetchModels;
+
+  /// Dropdown label for fetched OpenAI-compatible models.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetched models'**
+  String get settingsAiProvidersFetchedModelsLabel;
+
+  /// Error when OpenAI-compatible model list fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch models. Check base URL and API key.'**
+  String get settingsAiProvidersFetchModelsFailed;
+
+  /// Message when model list is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No models returned from this endpoint.'**
+  String get settingsAiProvidersFetchModelsEmpty;
+
+  /// Save BYOK settings button.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get settingsAiProvidersSave;
+
+  /// Success notice after saving BYOK settings.
+  ///
+  /// In en, this message translates to:
+  /// **'AI provider settings saved.'**
+  String get settingsAiProvidersSaveSuccess;
+
+  /// Remove BYOK credentials action.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove BYOK'**
+  String get settingsAiProvidersRemoveByok;
+
+  /// Confirm dialog title for removing BYOK.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove BYOK credentials?'**
+  String get settingsAiProvidersRemoveByokTitle;
+
+  /// Confirm dialog body for removing BYOK.
+  ///
+  /// In en, this message translates to:
+  /// **'This deletes the saved API key on this device and reverts the feature to Enjoy AI.'**
+  String get settingsAiProvidersRemoveByokBody;
+
+  /// Success notice after removing BYOK.
+  ///
+  /// In en, this message translates to:
+  /// **'BYOK credentials removed.'**
+  String get settingsAiProvidersRemoveByokSuccess;
+
+  /// Cancel action in BYOK dialogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get settingsAiProvidersCancel;
+
+  /// Placeholder for modalities not yet configurable in UI.
+  ///
+  /// In en, this message translates to:
+  /// **'BYOK configuration for this feature is coming soon.'**
+  String get settingsAiProvidersComingSoon;
+
+  /// Label for Azure Speech subscription key field in assessment BYOK form
+  ///
+  /// In en, this message translates to:
+  /// **'Azure subscription key'**
+  String get settingsAiProvidersSpeechSubscriptionKeyLabel;
+
+  /// Label for Azure Speech region field in assessment BYOK form
+  ///
+  /// In en, this message translates to:
+  /// **'Azure region'**
+  String get settingsAiProvidersSpeechRegionLabel;
+
+  /// Hint for Azure Speech region field
+  ///
+  /// In en, this message translates to:
+  /// **'eastus'**
+  String get settingsAiProvidersSpeechRegionHint;
+
+  /// Label for ASR/TTS BYOK vendor selector
+  ///
+  /// In en, this message translates to:
+  /// **'Vendor'**
+  String get settingsAiProvidersSpeechKindLabel;
+
+  /// OpenAI-compatible Whisper option for speech BYOK
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI Whisper'**
+  String get settingsAiProvidersSpeechKindOpenAi;
+
+  /// Azure Speech option for speech BYOK
+  ///
+  /// In en, this message translates to:
+  /// **'Azure Speech'**
+  String get settingsAiProvidersSpeechKindAzure;
+
+  /// Label for Whisper model field in ASR BYOK form
+  ///
+  /// In en, this message translates to:
+  /// **'Whisper model'**
+  String get settingsAiProvidersSpeechWhisperModelLabel;
+
+  /// Hint for Whisper model field
+  ///
+  /// In en, this message translates to:
+  /// **'whisper-1'**
+  String get settingsAiProvidersSpeechWhisperModelHint;
+
+  /// Label for OpenAI-compatible TTS model field
+  ///
+  /// In en, this message translates to:
+  /// **'TTS model'**
+  String get settingsAiProvidersSpeechTtsModelLabel;
+
+  /// Hint for OpenAI-compatible TTS model field
+  ///
+  /// In en, this message translates to:
+  /// **'tts-1'**
+  String get settingsAiProvidersSpeechTtsModelHint;
+
+  /// Placeholder shown when a BYOK API key is saved but hidden
+  ///
+  /// In en, this message translates to:
+  /// **'••••••••••••'**
+  String get settingsAiProvidersApiKeySavedMask;
+
+  /// Button to replace a saved BYOK API key
+  ///
+  /// In en, this message translates to:
+  /// **'Edit key'**
+  String get settingsAiProvidersApiKeyEdit;
+
+  /// Runtime error when BYOK modality has no secure key
+  ///
+  /// In en, this message translates to:
+  /// **'BYOK is selected for {modality}, but no API key is saved on this device.'**
+  String byokNotConfiguredMessage(String modality);
+
+  /// Hint to open AI provider settings after BYOK misconfiguration
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings → AI providers to add your key.'**
+  String get byokNotConfiguredOpenSettings;
+
+  /// BYOK validation: missing API key.
+  ///
+  /// In en, this message translates to:
+  /// **'API key is required.'**
+  String get byokValidationApiKeyRequired;
+
+  /// BYOK validation: missing base URL.
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL is required.'**
+  String get byokValidationBaseUrlRequired;
+
+  /// BYOK validation: URL guard failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL must be a public HTTPS endpoint.'**
+  String get byokValidationBaseUrlInvalid;
+
+  /// BYOK validation: missing model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model is required.'**
+  String get byokValidationModelRequired;
+
+  /// BYOK validation: missing Azure region.
+  ///
+  /// In en, this message translates to:
+  /// **'Azure region is required.'**
+  String get byokValidationRegionRequired;
+
+  /// BYOK validation: missing LLM spec or speech kind.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol configuration is incomplete.'**
+  String get byokValidationApiSpecRequired;
+
+  /// BYOK validation: assessment must use Azure Speech.
+  ///
+  /// In en, this message translates to:
+  /// **'Assessment BYOK requires Azure Speech.'**
+  String get byokValidationAzureKindRequired;
+
   /// Header for the recording settings section.
   ///
   /// In en, this message translates to:
@@ -3198,8 +3570,26 @@ abstract class AppLocalizations {
   /// No description provided for @aiPlaygroundIntro.
   ///
   /// In en, this message translates to:
-  /// **'Calls the Enjoy API using your saved base URL and access token. TTS is not wired on Flutter yet; pronunciation assessment uses Azure Speech via a native plugin when signed in.'**
+  /// **'Exercise AI modalities using Enjoy cloud or your BYOK credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.'**
   String get aiPlaygroundIntro;
+
+  /// No description provided for @aiPlaygroundActiveProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Active providers'**
+  String get aiPlaygroundActiveProviders;
+
+  /// BYOK provider label with preset or vendor detail
+  ///
+  /// In en, this message translates to:
+  /// **'BYOK · {detail}'**
+  String aiPlaygroundProviderByokDetail(String detail);
+
+  /// Label when AIProvider.local is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Local (unavailable)'**
+  String get aiPlaygroundProviderLocal;
 
   /// No description provided for @aiPlaygroundPickAudio.
   ///
@@ -3300,7 +3690,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiPlaygroundAssessmentTtsNote.
   ///
   /// In en, this message translates to:
-  /// **'TTS is not available in this build (Azure Speech integration pending).'**
+  /// **'Enjoy TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.'**
   String get aiPlaygroundAssessmentTtsNote;
 
   /// No description provided for @aiPlaygroundOutput.

@@ -2,6 +2,7 @@ package dev.enjoy_player.azure_speech
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
 import com.microsoft.cognitiveservices.speech.*
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -26,10 +27,6 @@ class AzureSpeechPlugin : FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
-    if (call.method != "assess") {
-      result.notImplemented()
-      return
-    }
     @Suppress("UNCHECKED_CAST")
     val args = call.arguments as? Map<String, Any?>
     if (args == null) {
@@ -38,8 +35,16 @@ class AzureSpeechPlugin : FlutterPlugin, MethodCallHandler {
     }
     executor.execute {
       try {
-        val json = assess(args)
-        mainHandler.post { result.success(json) }
+        val payload = when (call.method) {
+          "assess" -> assess(args)
+          "transcribe" -> transcribe(args)
+          "synthesize" -> synthesize(args)
+          else -> {
+            mainHandler.post { result.notImplemented() }
+            return@execute
+          }
+        }
+        mainHandler.post { result.success(payload) }
       } catch (e: Exception) {
         val code = mapErrorCode(e)
         mainHandler.post {
@@ -53,7 +58,8 @@ class AzureSpeechPlugin : FlutterPlugin, MethodCallHandler {
     val audioPath = args["audioPath"] as String
     val referenceText = args["referenceText"] as String
     val language = args["language"] as String
-    val token = args["token"] as String
+    val token = args["token"] as? String
+    val subscriptionKey = args["subscriptionKey"] as? String
     val region = args["region"] as String
     val enableProsody = args["enableProsody"] as? Boolean ?: true
     val enableMiscue = args["enableMiscue"] as? Boolean ?: true
@@ -62,7 +68,12 @@ class AzureSpeechPlugin : FlutterPlugin, MethodCallHandler {
     val granularityStr = args["granularity"] as? String ?: "Phoneme"
     val granularity = parseGranularity(granularityStr)
 
-    val config = SpeechConfig.fromAuthorizationToken(token, region)
+    val config =
+      if (!subscriptionKey.isNullOrBlank()) {
+        SpeechConfig.fromSubscription(subscriptionKey, region)
+      } else {
+        SpeechConfig.fromAuthorizationToken(token!!, region)
+      }
     try {
       config.speechRecognitionLanguage = language
       val audioConfig = AudioConfig.fromWavFileInput(audioPath)
@@ -113,6 +124,88 @@ class AzureSpeechPlugin : FlutterPlugin, MethodCallHandler {
         }
       } finally {
         audioConfig.close()
+      }
+    } finally {
+      config.close()
+    }
+  }
+
+  private fun transcribe(args: Map<String, Any?>): String {
+    val audioPath = args["audioPath"] as String
+    val language = args["language"] as String
+    val subscriptionKey = args["subscriptionKey"] as String
+    val region = args["region"] as String
+
+    val config = SpeechConfig.fromSubscription(subscriptionKey, region)
+    try {
+      config.speechRecognitionLanguage = language
+      val audioConfig = AudioConfig.fromWavFileInput(audioPath)
+      try {
+        val recognizer = SpeechRecognizer(config, audioConfig)
+        try {
+          val speechResult = recognizer.recognizeOnceAsync().get()
+          when (speechResult.reason) {
+            ResultReason.RecognizedSpeech -> {
+              val text = speechResult.text
+              if (text.isNullOrBlank()) {
+                throw IllegalStateException("Azure returned empty transcription text")
+              }
+              return text
+            }
+            ResultReason.NoMatch -> {
+              throw NoSpeechException()
+            }
+            else -> {
+              val cancel = CancellationDetails.fromResult(speechResult)
+              throw IllegalStateException(
+                "${cancel.reason}: ${cancel.errorDetails}",
+              )
+            }
+          }
+        } finally {
+          recognizer.close()
+        }
+      } finally {
+        audioConfig.close()
+      }
+    } finally {
+      config.close()
+    }
+  }
+
+  private fun synthesize(args: Map<String, Any?>): String {
+    val text = args["text"] as String
+    val language = args["language"] as String
+    val subscriptionKey = args["subscriptionKey"] as String
+    val region = args["region"] as String
+    val voice = args["voice"] as? String
+
+    val config = SpeechConfig.fromSubscription(subscriptionKey, region)
+    try {
+      config.speechSynthesisLanguage = language
+      if (!voice.isNullOrBlank()) {
+        config.speechSynthesisVoiceName = voice
+      }
+      val synthesizer = SpeechSynthesizer(config)
+      try {
+        val speechResult = synthesizer.SpeakTextAsync(text).get()
+        when (speechResult.reason) {
+          ResultReason.SynthesizingAudioCompleted -> {
+            val audio = speechResult.audioData
+            if (audio == null || audio.isEmpty()) {
+              throw IllegalStateException("Azure returned empty synthesis audio")
+            }
+            return Base64.encodeToString(audio, Base64.NO_WRAP)
+          }
+          else -> {
+            val cancel = SpeechSynthesisCancellationDetails.fromResult(speechResult)
+            throw IllegalStateException(
+              "${cancel.reason}: ${cancel.errorDetails}",
+            )
+          }
+        }
+      } finally {
+        synthesizer.close()
       }
     } finally {
       config.close()

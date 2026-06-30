@@ -7,14 +7,19 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/logging/log.dart';
+import 'package:enjoy_player/features/ai/application/ai_byok_error_mapping.dart';
+import 'package:enjoy_player/features/ai/application/ai_modality_config_controller.dart';
 import 'package:enjoy_player/features/ai/application/ai_services.dart';
+import 'package:enjoy_player/features/ai/domain/byok_not_configured_failure.dart';
 import 'package:enjoy_player/features/ai/domain/chat_message.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_request.dart';
 import 'package:enjoy_player/features/ai/presentation/ai_playground_azure_error.dart';
+import 'package:enjoy_player/features/ai/presentation/ai_playground_provider_label.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
 
@@ -67,8 +72,26 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
   }
 
   String _err(Object e) {
+    if (e is ByokNotConfiguredFailure) {
+      final l10n = AppLocalizations.of(context)!;
+      return formatByokNotConfiguredWithSettingsHint(e, l10n);
+    }
     if (e is AppFailure) return e.message;
     return e.toString();
+  }
+
+  void _maybePromptByokSettings(Object e) {
+    if (e is! ByokNotConfiguredFailure || !mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(formatByokNotConfiguredMessage(e, l10n)),
+        action: SnackBarAction(
+          label: l10n.settingsAiProvidersTileTitle,
+          onPressed: () => context.push(aiProvidersSettingsPath),
+        ),
+      ),
+    );
   }
 
   Future<void> _pickAudio() async {
@@ -115,6 +138,7 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
       _append('ASR text:\n${result.text}');
     } catch (e, st) {
       _log.warning('ASR failed', e, st);
+      _maybePromptByokSettings(e);
       _append('ASR ${_err(e)}');
     }
   }
@@ -135,6 +159,7 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
       _append('Chat reply:\n$reply');
     } catch (e, st) {
       _log.warning('Chat failed', e, st);
+      _maybePromptByokSettings(e);
       _append('Chat ${_err(e)}');
     }
   }
@@ -151,6 +176,7 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
       _append('Translation:\n${r.translatedText}');
     } catch (e, st) {
       _log.warning('Translate failed', e, st);
+      _maybePromptByokSettings(e);
       _append('Translate ${_err(e)}');
     }
   }
@@ -177,6 +203,7 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
       _append(buf.toString());
     } catch (e, st) {
       _log.warning('Dictionary failed', e, st);
+      _maybePromptByokSettings(e);
       _append('Dictionary ${_err(e)}');
     }
   }
@@ -232,6 +259,7 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
       _append(buf.toString());
     } catch (e, st) {
       _log.warning('Assessment failed', e, st);
+      _maybePromptByokSettings(e);
       if (isAzureSpeechException(e)) {
         _append('Assessment ${formatAzureSpeechError(e)}');
       } else {
@@ -244,6 +272,9 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final configs = ref.watch(aiModalityConfigCtrlProvider);
+    final llmLabel = formatPlaygroundProviderLabel(l10n, configs.llm);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.aiPlaygroundTitle)),
@@ -251,8 +282,61 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           Text(l10n.aiPlaygroundIntro, style: tt.bodyMedium),
+          const SizedBox(height: 12),
+          Card(
+            elevation: 0,
+            color: cs.surfaceContainerLow,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.aiPlaygroundActiveProviders,
+                    style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  _ProviderRow(
+                    label: l10n.settingsAiProvidersModalityLlm,
+                    providerLabel: llmLabel,
+                  ),
+                  _ProviderRow(
+                    label: l10n.settingsAiProvidersModalityAsr,
+                    providerLabel: formatPlaygroundProviderLabel(
+                      l10n,
+                      configs.asr,
+                    ),
+                  ),
+                  _ProviderRow(
+                    label: l10n.settingsAiProvidersModalityTts,
+                    providerLabel: formatPlaygroundProviderLabel(
+                      l10n,
+                      configs.tts,
+                    ),
+                  ),
+                  _ProviderRow(
+                    label: l10n.settingsAiProvidersModalityAssessment,
+                    providerLabel: formatPlaygroundProviderLabel(
+                      l10n,
+                      configs.assessment,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => context.push(aiProvidersSettingsPath),
+                      child: Text(l10n.settingsAiProvidersTileTitle),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
-          _SectionTitle(text: l10n.aiPlaygroundSectionAsr),
+          _SectionTitle(
+            text: l10n.aiPlaygroundSectionAsr,
+            providerLabel: formatPlaygroundProviderLabel(l10n, configs.asr),
+          ),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -268,7 +352,10 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          _SectionTitle(text: l10n.aiPlaygroundSectionChat),
+          _SectionTitle(
+            text: l10n.aiPlaygroundSectionChat,
+            providerLabel: llmLabel,
+          ),
           TextField(
             controller: _systemCtrl,
             decoration: InputDecoration(labelText: l10n.aiPlaygroundChatSystem),
@@ -288,7 +375,10 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          _SectionTitle(text: l10n.aiPlaygroundSectionTranslation),
+          _SectionTitle(
+            text: l10n.aiPlaygroundSectionTranslation,
+            providerLabel: llmLabel,
+          ),
           Row(
             children: [
               Expanded(
@@ -327,7 +417,10 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          _SectionTitle(text: l10n.aiPlaygroundSectionDictionary),
+          _SectionTitle(
+            text: l10n.aiPlaygroundSectionDictionary,
+            providerLabel: llmLabel,
+          ),
           TextField(
             controller: _dictWordCtrl,
             decoration: InputDecoration(labelText: l10n.aiPlaygroundDictWord),
@@ -363,7 +456,13 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          _SectionTitle(text: l10n.aiPlaygroundSectionTtsAssessment),
+          _SectionTitle(
+            text: l10n.aiPlaygroundSectionTtsAssessment,
+            providerLabel: formatPlaygroundProviderLabel(
+              l10n,
+              configs.assessment,
+            ),
+          ),
           Text(l10n.aiPlaygroundAssessmentTtsNote, style: tt.bodySmall),
           const SizedBox(height: 12),
           TextField(
@@ -406,19 +505,61 @@ class _AiPlaygroundScreenState extends ConsumerState<AiPlaygroundScreen> {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.text});
+  const _SectionTitle({required this.text, this.providerLabel});
 
   final String text;
+  final String? providerLabel;
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        text,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ),
+          if (providerLabel != null) ...[
+            const SizedBox(width: 8),
+            Text(
+              providerLabel!,
+              style: tt.labelMedium?.copyWith(color: cs.primary),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ProviderRow extends StatelessWidget {
+  const _ProviderRow({required this.label, required this.providerLabel});
+
+  final String label;
+  final String providerLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Expanded(child: Text(label, style: tt.bodyMedium)),
+          Text(
+            providerLabel,
+            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+          ),
+        ],
       ),
     );
   }

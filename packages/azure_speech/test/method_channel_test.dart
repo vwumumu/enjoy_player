@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:azure_speech/azure_speech.dart';
 import 'package:flutter/services.dart';
@@ -70,6 +71,97 @@ void main() {
     expect(r.nBest, isNotEmpty);
     expect(r.nBest.first.pronunciationAssessment.pronScore, 91);
     expect(r.nBest.first.words.single.word, 'hello');
+  });
+
+  test('assess sends subscriptionKey when provided', () async {
+    const json = '{"RecognitionStatus":"Success","DisplayText":"Hi.","NBest":[]}';
+
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          expect(call.method, 'assess');
+          final args = Map<String, dynamic>.from(
+            call.arguments as Map<Object?, Object?>,
+          );
+          expect(args['subscriptionKey'], 'sub-key');
+          expect(args.containsKey('token'), isFalse);
+          return json;
+        });
+
+    await AzureSpeech.instance.assess(
+      const AzurePronunciationAssessmentParams(
+        audioPath: '/tmp/x.wav',
+        referenceText: 'Hi',
+        language: 'en-US',
+        subscriptionKey: 'sub-key',
+        region: 'eastus',
+      ),
+    );
+  });
+
+  test('transcribe returns text from native channel', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          expect(call.method, 'transcribe');
+          final args = Map<String, dynamic>.from(
+            call.arguments as Map<Object?, Object?>,
+          );
+          expect(args['subscriptionKey'], 'sub-key');
+          expect(args['region'], 'eastus');
+          return 'Recognized text.';
+        });
+
+    final outcome = await AzureSpeech.instance.transcribe(
+      const AzureSpeechTranscriptionParams(
+        audioPath: '/tmp/x.wav',
+        language: 'en-US',
+        subscriptionKey: 'sub-key',
+        region: 'eastus',
+      ),
+    );
+
+    expect(outcome.text, 'Recognized text.');
+  });
+
+  test('synthesize returns audio bytes from native channel', () async {
+    final audio = Uint8List.fromList([1, 2, 3, 4]);
+    final encoded = base64Encode(audio);
+
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          expect(call.method, 'synthesize');
+          final args = Map<String, dynamic>.from(
+            call.arguments as Map<Object?, Object?>,
+          );
+          expect(args['subscriptionKey'], 'sub-key');
+          expect(args['region'], 'eastus');
+          expect(args['text'], 'Hello');
+          expect(args['language'], 'en-US');
+          return encoded;
+        });
+
+    final outcome = await AzureSpeech.instance.synthesize(
+      const AzureSpeechSynthesisParams(
+        text: 'Hello',
+        language: 'en-US',
+        subscriptionKey: 'sub-key',
+        region: 'eastus',
+      ),
+    );
+
+    expect(outcome.audioBytes, audio);
+    expect(outcome.format, 'wav');
+  });
+
+  test('toMap rejects missing auth', () {
+    expect(
+      () => const AzurePronunciationAssessmentParams(
+        audioPath: '/tmp/x.wav',
+        referenceText: 'Hi',
+        language: 'en-US',
+        region: 'eastus',
+      ).toMap(),
+      throwsArgumentError,
+    );
   });
 
   test(
