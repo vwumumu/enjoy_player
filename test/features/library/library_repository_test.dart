@@ -473,6 +473,22 @@ void main() {
       await sub.cancel();
     });
 
+    test('watchAll emits once for an empty library', () async {
+      // Regression test: `lastEmitted` used to start as `const <Media>[]`,
+      // which compared equal to the first (empty) merged snapshot from both
+      // DAOs and silently swallowed it — so `watchAll()` never emitted for a
+      // brand-new/empty library and every provider built on it (home
+      // recents, filtered lists) stayed stuck in `AsyncLoading` forever.
+      final emissions = <List<Media>>[];
+      final sub = repo.watchAll().listen(emissions.add);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(emissions, hasLength(1));
+      expect(emissions.single, isEmpty);
+
+      await sub.cancel();
+    });
+
     test('importMedia persists selected content language', () async {
       final bytes = utf8.encode('lang-import');
       final src = File(p.join(root.path, 'clip.mp3'));

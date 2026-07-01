@@ -86,14 +86,24 @@ class MediaLibraryRepository {
     // `updatedAt`, or a duration probe that flips one row) currently re-emits
     // the entire library — forcing `libraryHomeRecentsProvider` to re-sort and
     // `libraryFilteredListsProvider` to re-filter + re-sort both lists.
-    var lastEmitted = const <Media>[];
+    //
+    // `lastEmitted` is nullable (rather than starting as `const <Media>[]`) so
+    // an empty library still produces its first emission: when both DAOs'
+    // initial snapshots are empty, `merged` is `[]`, which used to compare
+    // equal to the empty starting value and get swallowed by the dedupe
+    // check — leaving `watchAll()` never emitting and every `StreamProvider`
+    // built on it (library home/recents/filtered lists) stuck in
+    // `AsyncLoading` forever whenever the local library has zero rows.
+    List<Media>? lastEmitted;
 
     void emit(StreamController<List<Media>> c) {
       final merged = <Media>[
         ...videos.map(_mediaFromVideo),
         ...audios.map(_mediaFromAudio),
       ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      if (_listEqualsMedia(lastEmitted, merged)) return;
+      if (lastEmitted != null && _listEqualsMedia(lastEmitted!, merged)) {
+        return;
+      }
       lastEmitted = merged;
       c.add(merged);
     }
