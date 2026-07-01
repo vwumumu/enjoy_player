@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-01
+
 ### Added
 
 - NotFoundScreen fallback route for unknown go_router locations (en/zh/zh-CN localized).
@@ -14,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PlayerEngine.supportsSubtitleDisabling` to skip the no-op `disableRenderedSubtitles` await on YouTube opens.
 - `kPositionBucketEchoApplyMs`, `kPositionBucketDisplayMs`, `kPositionBucketScrubberMs` constants in `lib/features/player/application/position_buckets.dart` consolidating three previously inline quantization values.
 - `SyncMissingUpdatedAtError` thrown by `SyncUploadService` when the server omits `updatedAt`, preserving local `serverUpdatedAt` instead of silently bumping it to `DateTime.now()`.
+- Redesigned **Settings** hub with search, a two-pane layout, and default-collapsed sections; inline Account profile card in the two-pane layout.
+- Developer contact bottom sheet from the About section.
 
 ### Changed
 
@@ -33,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auth deep-link stream subscription now stored + cancelled in `dispose()`; `getInitialLink()` has an `onError` handler.
 - `YoutubePlayerEngine.idleAfterClear()` removed a dead branch where `_videoId.isNotEmpty` was checked after `_videoId = ''`.
 - Two `kIsWeb` branches removed from `log_file_sink.dart` and `practice_poster_export.dart` per AGENTS.md hard rule.
+- Library empty state now shows insight cards alongside the empty-state illustration on the home screen.
 
 ### Security
 
