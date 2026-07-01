@@ -44,19 +44,6 @@ class HomeScreen extends ConsumerWidget {
           Expanded(
             child: mediaAsync.when(
               data: (recent) {
-                if (recent.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.collections_bookmark_rounded,
-                    illustrationAsset: EnjoyIllustrations.emptyLibrary,
-                    title: l10n.homeEmptyTitle,
-                    subtitle: l10n.homeEmptyHint,
-                    action: () => showImportChooser(context, ref),
-                    actionLabel: l10n.actionImport,
-                    secondaryAction: () => context.go('/discover'),
-                    secondaryActionLabel: l10n.discoverBrowseAction,
-                  );
-                }
-
                 return CustomScrollView(
                   slivers: [
                     // Editorial header
@@ -71,67 +58,89 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
 
-                    // Today's goal + community (signed-in, responsive grid)
+                    // Today's goal + community (signed-in, responsive grid) —
+                    // always rendered, even when the recents grid below is
+                    // replaced by the empty state, so returning users still
+                    // see their streak/community progress on a fresh library.
                     const SliverToBoxAdapter(child: _HomeInsightCards()),
 
-                    // Recents section label
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(
-                        t.space24,
-                        0,
-                        t.space24,
-                        t.space12,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: Text(
-                          l10n.homeRecentMedia,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    if (recent.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: EmptyState(
+                          icon: Icons.collections_bookmark_rounded,
+                          illustrationAsset: EnjoyIllustrations.emptyLibrary,
+                          title: l10n.homeEmptyTitle,
+                          subtitle: l10n.homeEmptyHint,
+                          action: () => showImportChooser(context, ref),
+                          actionLabel: l10n.actionImport,
+                          secondaryAction: () => context.go('/discover'),
+                          secondaryActionLabel: l10n.discoverBrowseAction,
+                        ),
+                      )
+                    else ...[
+                      // Recents section label
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(
+                          t.space24,
+                          0,
+                          t.space24,
+                          t.space12,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Text(
+                            l10n.homeRecentMedia,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
                         ),
                       ),
-                    ),
 
-                    // Media grid — aspect ratio tracks actual tile width so rows stay tight.
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(horizontal: t.space24),
-                      sliver: SliverLayoutBuilder(
-                        builder: (context, constraints) {
-                          return SliverGrid(
-                            gridDelegate:
-                                mediaCardTileGridDelegateForMinTileWidth(
-                                  crossAxisExtent: constraints.crossAxisExtent,
-                                  mainAxisSpacing: t.space12,
-                                  crossAxisSpacing: t.space12,
-                                ),
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                final m = recent[index];
-                                return Align(
-                                  key: ValueKey<String>('home-media-${m.id}'),
-                                  alignment: Alignment.topCenter,
-                                  child: _HomeMediaTile(media: m),
-                                );
-                              },
-                              childCount: recent.length,
-                              findChildIndexCallback: (key) =>
-                                  findSliverIndexByPrefixedId(
-                                    items: recent,
-                                    key: key,
-                                    prefix: 'home-media-',
-                                    idOf: (m) => m.id,
+                      // Media grid — aspect ratio tracks actual tile width so rows stay tight.
+                      SliverPadding(
+                        padding: EdgeInsets.symmetric(horizontal: t.space24),
+                        sliver: SliverLayoutBuilder(
+                          builder: (context, constraints) {
+                            return SliverGrid(
+                              gridDelegate:
+                                  mediaCardTileGridDelegateForMinTileWidth(
+                                    crossAxisExtent:
+                                        constraints.crossAxisExtent,
+                                    mainAxisSpacing: t.space12,
+                                    crossAxisSpacing: t.space12,
                                   ),
-                            ),
-                          );
-                        },
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final m = recent[index];
+                                  return Align(
+                                    key: ValueKey<String>(
+                                      'home-media-${m.id}',
+                                    ),
+                                    alignment: Alignment.topCenter,
+                                    child: _HomeMediaTile(media: m),
+                                  );
+                                },
+                                childCount: recent.length,
+                                findChildIndexCallback: (key) =>
+                                    findSliverIndexByPrefixedId(
+                                      items: recent,
+                                      key: key,
+                                      prefix: 'home-media-',
+                                      idOf: (m) => m.id,
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
 
-                    SliverToBoxAdapter(child: SizedBox(height: t.space24)),
+                      SliverToBoxAdapter(child: SizedBox(height: t.space24)),
+                    ],
                   ],
                 );
               },
