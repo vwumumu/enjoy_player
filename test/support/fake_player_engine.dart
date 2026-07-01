@@ -52,8 +52,10 @@ class FakePlayerEngine implements PlayerEngine {
   @override
   Stream<mk.Tracks>? get mkTracksStream => null;
 
+  bool supportsVideoPosterCaptureValue = true;
+
   @override
-  bool get supportsVideoPosterCapture => true;
+  bool get supportsVideoPosterCapture => supportsVideoPosterCaptureValue;
 
   @override
   bool get supportsSubtitleDisabling => true;

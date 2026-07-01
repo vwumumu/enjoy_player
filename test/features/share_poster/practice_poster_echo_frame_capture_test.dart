@@ -94,5 +94,28 @@ void main() {
       expect(bytes, fake.screenshotReturnValue);
       expect(fake.screenshotCalls, 1);
     });
+
+    test('returns null without capturing when engine has no poster surface '
+        '(e.g. YouTube WebView, to avoid a black frame)', () async {
+      final fake = FakePlayerEngine()..supportsVideoPosterCaptureValue = false;
+      fake.screenshotReturnValue = Uint8List.fromList(const [9, 8, 7]);
+      const echo = EchoState(
+        active: true,
+        startLineIndex: 0,
+        endLineIndex: 1,
+        startTimeSeconds: 0,
+        endTimeSeconds: 2,
+      );
+
+      final bytes = await capturePracticePosterEchoFrame(
+        engine: fake,
+        echo: echo,
+        session: _videoSession(mediaId: 'm1'),
+        mediaId: 'm1',
+      );
+
+      expect(bytes, isNull);
+      expect(fake.screenshotCalls, 0);
+    });
   });
 }

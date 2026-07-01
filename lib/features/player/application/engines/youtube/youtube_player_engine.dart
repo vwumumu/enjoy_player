@@ -190,17 +190,6 @@ class YoutubePlayerEngine implements PlayerEngine {
   @override
   Future<Uint8List?> screenshot({String? format}) async => null;
 
-  Future<Uint8List?> captureWebViewScreenshot() async {
-    final controller = _webView.webController;
-    if (controller == null || _session.disposed) return null;
-    try {
-      return await controller.takeScreenshot();
-    } on Object catch (e, st) {
-      _logYoutube.fine('WebView screenshot failed', e, st);
-      return null;
-    }
-  }
-
   @override
   void warmVideoSurface() => ensureWebViewAttached();
 
