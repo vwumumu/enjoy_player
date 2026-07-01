@@ -80,6 +80,15 @@ _Localized _localize(SettingsEntryDescriptor d, AppLocalizations l10n) {
           ]);
       }
     case SettingsSectionIds.about:
+      if (d.rowId == 'contact') {
+        return _Localized(l10n.settingsAboutContactTitle, const [
+          'email',
+          'wechat',
+          'mixin',
+          'feedback',
+          'bug report',
+        ]);
+      }
       return _Localized(l10n.settingsSectionAbout, [
         l10n.settingsSectionAboutHint,
       ]);

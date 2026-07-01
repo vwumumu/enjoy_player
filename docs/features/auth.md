@@ -17,6 +17,10 @@ Native-first sign-in ([ADR-0027](../decisions/0027-native-auth-v2.md)) with **lo
 
 YouTube account login remains a separate WebView flow ([features/youtube.md](youtube.md), ADR-0015), reachable after Enjoy account sign-in.
 
+## Profile
+
+The `/profile` route (`ProfileScreen`) is a thin `Scaffold`/`AppBar` wrapper around `ProfileContent` (`lib/features/auth/presentation/widgets/profile_content.dart`) — the shared, chrome-free body with the identity hero card, practice stats, subscription/credits nav, name/goal/language preferences form, and sign out. The **same** `ProfileContent` widget is also rendered directly inline by the two-pane Settings Account tab (`showRefreshIndicator: false`; see [`settings.md`](settings.md#account-section)) so desktop users never have to leave Settings to manage their profile. The standalone route (`showRefreshIndicator: true`, the default) keeps pull-to-refresh; the inline embed shows a small manual refresh icon button instead, since it already lives inside the Settings hub's own scroll view.
+
 ## API endpoints (client)
 
 | Method | Path | Purpose |

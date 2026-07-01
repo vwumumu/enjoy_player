@@ -149,4 +149,8 @@ const List<SettingsEntryDescriptor> kSettingsRegistry = [
     sectionId: SettingsSectionIds.about,
     collapsedByDefault: true,
   ),
+  SettingsEntryDescriptor(
+    sectionId: SettingsSectionIds.about,
+    rowId: 'contact',
+  ),
 ];

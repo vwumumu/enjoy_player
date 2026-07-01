@@ -1177,6 +1177,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTitle => 'Profile';
 
   @override
+  String get profileRefreshTooltip => 'Refresh profile';
+
+  @override
   String get profileFieldName => 'Name';
 
   @override
@@ -2152,6 +2155,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAboutOpenSourceSubtitle => 'View source code on GitHub';
+
+  @override
+  String get settingsAboutContactTitle => 'Contact the developer';
+
+  @override
+  String get settingsAboutContactSubtitle =>
+      'Send feedback or report a bug directly';
+
+  @override
+  String get settingsAboutContactEmailLabel => 'Email';
+
+  @override
+  String get settingsAboutContactWeChatLabel => 'WeChat';
+
+  @override
+  String get settingsAboutContactMixinLabel => 'Mixin';
+
+  @override
+  String get settingsAboutContactCopiedEmail => 'Email copied to clipboard';
+
+  @override
+  String get settingsAboutContactCopiedWeChat =>
+      'WeChat ID copied to clipboard';
+
+  @override
+  String get settingsAboutContactCopiedMixin => 'Mixin ID copied to clipboard';
 
   @override
   String get settingsDiagnosticsLoggingTitle => 'Diagnostic logging';

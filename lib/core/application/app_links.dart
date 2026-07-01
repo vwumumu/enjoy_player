@@ -14,3 +14,8 @@ const String kEnjoyPlayerAppcastUrl =
 /// JSON manifest for semver checks and Android sideload APK URLs.
 const String kEnjoyPlayerLatestJsonUrl =
     '$kEnjoyPlayerDownloadBaseUrl/latest.json';
+
+/// Developer contact details shown in Settings → About for feedback/support.
+const String kDeveloperContactEmail = 'an.lee.work@gmail.com';
+const String kDeveloperContactWeChatId = 'an-lee';
+const String kDeveloperContactMixinId = '1051445';

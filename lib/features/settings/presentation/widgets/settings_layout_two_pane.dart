@@ -19,8 +19,8 @@ import 'package:enjoy_player/features/settings/application/settings_registry_loc
 import 'package:enjoy_player/features/settings/application/settings_search_query_provider.dart';
 import 'package:enjoy_player/features/settings/application/settings_selected_section_provider.dart';
 import 'package:enjoy_player/features/settings/domain/settings_search_entry.dart';
+import 'package:enjoy_player/features/auth/presentation/widgets/profile_content.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/about_section.dart';
-import 'package:enjoy_player/features/settings/presentation/widgets/sections/account_hero_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/ai_providers_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/appearance_language_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/cloud_sync_section.dart';
@@ -51,7 +51,7 @@ List<String> _railSectionIds() {
 Widget _sectionBody(String sectionId) {
   switch (sectionId) {
     case SettingsSectionIds.account:
-      return const AccountHeroSection();
+      return const ProfileContent(showRefreshIndicator: false);
     case SettingsSectionIds.cloudSync:
       return const CloudSyncSectionBody();
     case SettingsSectionIds.appearanceLanguage:
@@ -180,10 +180,8 @@ class _DetailPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (sectionId == SettingsSectionIds.account) {
-      return _sectionBody(sectionId);
-    }
-    if (sectionId == SettingsSectionIds.about) {
+    if (sectionId == SettingsSectionIds.account ||
+        sectionId == SettingsSectionIds.about) {
       final t = EnjoyThemeTokens.of(context);
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

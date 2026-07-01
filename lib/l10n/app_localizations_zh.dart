@@ -1125,6 +1125,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileTitle => '个人资料';
 
   @override
+  String get profileRefreshTooltip => '刷新个人资料';
+
+  @override
   String get profileFieldName => '姓名';
 
   @override
@@ -2061,6 +2064,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsAboutOpenSourceSubtitle => '在 GitHub 查看源代码';
+
+  @override
+  String get settingsAboutContactTitle => '联系开发者';
+
+  @override
+  String get settingsAboutContactSubtitle => '向开发者反馈问题或建议';
+
+  @override
+  String get settingsAboutContactEmailLabel => '邮箱';
+
+  @override
+  String get settingsAboutContactWeChatLabel => '微信';
+
+  @override
+  String get settingsAboutContactMixinLabel => 'Mixin';
+
+  @override
+  String get settingsAboutContactCopiedEmail => '邮箱已复制到剪贴板';
+
+  @override
+  String get settingsAboutContactCopiedWeChat => '微信号已复制到剪贴板';
+
+  @override
+  String get settingsAboutContactCopiedMixin => 'Mixin ID 已复制到剪贴板';
 
   @override
   String get settingsDiagnosticsLoggingTitle => '诊断日志';
@@ -3234,6 +3261,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get profileTitle => '个人资料';
 
   @override
+  String get profileRefreshTooltip => '刷新个人资料';
+
+  @override
   String get profileFieldName => '姓名';
 
   @override
@@ -3922,6 +3952,30 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsAboutOpenSourceSubtitle => '在 GitHub 查看源代码';
+
+  @override
+  String get settingsAboutContactTitle => '联系开发者';
+
+  @override
+  String get settingsAboutContactSubtitle => '向开发者反馈问题或建议';
+
+  @override
+  String get settingsAboutContactEmailLabel => '邮箱';
+
+  @override
+  String get settingsAboutContactWeChatLabel => '微信';
+
+  @override
+  String get settingsAboutContactMixinLabel => 'Mixin';
+
+  @override
+  String get settingsAboutContactCopiedEmail => '邮箱已复制到剪贴板';
+
+  @override
+  String get settingsAboutContactCopiedWeChat => '微信号已复制到剪贴板';
+
+  @override
+  String get settingsAboutContactCopiedMixin => 'Mixin ID 已复制到剪贴板';
 
   @override
   String get settingsDiagnosticsLoggingTitle => '诊断日志';
