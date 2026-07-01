@@ -41,6 +41,8 @@ OpenAPI contract: [native-auth-v2.openapi.yaml](../api/native-auth-v2.openapi.ya
 
 This is the only redirect URI whitelisted in enjoy_web's `config/native_auth_clients.yml`; a universal/app link (`https://enjoy.bot/app/auth/callback`) was considered but dropped to avoid the backend needing to host `apple-app-site-association` / `assetlinks.json`. Windows installer registers the `enjoyplayer://` protocol; Android and iOS register it via manifest/Info.plist intent filters.
 
+**Windows single-instance forwarding**: Windows always launches a *new* `enjoy_player.exe` process to handle a registered `enjoyplayer://` URL — there is no OS-level concept of routing it to an already-running instance. [`windows/runner/main.cpp`](../../windows/runner/main.cpp) therefore calls `SendAppLinkToInstance()` before creating any window: it looks up the existing top-level window (class `FLUTTER_RUNNER_WIN32_WINDOW`, title `Enjoy Player`) with `FindWindow`, and if found, forwards the new process's command-line URI to it via `app_links`'s exported `SendAppLink()` (a `WM_COPYDATA` message the plugin already listens for on the first instance), restores/foregrounds that window, and exits immediately. Without this, the second process has no in-memory PKCE state (code verifier / OAuth `state`) and the original instance's `AuthDeepLinkListener` never receives the callback, so sign-in silently stalls until timeout and a stray second window is left open.
+
 ## Platform notes
 
 - **Windows**: native Google hidden; email OTP + PKCE fallback.
