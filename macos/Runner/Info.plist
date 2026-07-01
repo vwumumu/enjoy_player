@@ -34,6 +34,17 @@
 	<string>XnT9Tv0IiX0mWTgWUGu8wit0C+6+G27hSCaCD3OTjWY=</string>
 	<key>FlutterDeepLinkingEnabled</key>
 	<true/>
+	<!--
+	  TODO(google-oauth): GIDClientID must be a real macOS-type OAuth client ID
+	  created in Google Cloud Console for bundle ID ai.enjoy.player, matching
+	  `google.macos_client_id` (or `ios_client_id` as fallback) in enjoy_web's
+	  Rails credentials. The second CFBundleURLSchemes entry below must be
+	  that client ID reversed, e.g.
+	  "com.googleusercontent.apps.<CLIENT_ID_PREFIX>" (see
+	  https://developers.google.com/identity/sign-in/ios/start-integrating).
+	-->
+	<key>GIDClientID</key>
+	<string>REPLACE_WITH_MACOS_OAUTH_CLIENT_ID.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -42,6 +53,14 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>enjoyplayer</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>ai.enjoy.player.google-signin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>REPLACE_WITH_REVERSED_MACOS_CLIENT_ID</string>
 			</array>
 		</dict>
 	</array>

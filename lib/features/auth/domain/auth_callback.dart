@@ -9,17 +9,9 @@ class AuthCallbackParams {
 }
 
 bool isAuthCallbackUri(Uri uri) {
-  if (uri.scheme == 'enjoyplayer' &&
+  return uri.scheme == 'enjoyplayer' &&
       uri.host == 'auth' &&
-      uri.path == '/callback') {
-    return true;
-  }
-  if (uri.scheme == 'https' &&
-      uri.host == 'enjoy.bot' &&
-      uri.path == '/app/auth/callback') {
-    return true;
-  }
-  return false;
+      uri.path == '/callback';
 }
 
 AuthCallbackParams? parseAuthCallbackUri(Uri uri) {

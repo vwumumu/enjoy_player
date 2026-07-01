@@ -33,10 +33,9 @@ OpenAPI contract: [native-auth-v2.openapi.yaml](../api/native-auth-v2.openapi.ya
 
 ## Deep links (PKCE callback)
 
-- Universal / App Links: `https://enjoy.bot/app/auth/callback`
-- Custom scheme (Windows fallback): `enjoyplayer://auth/callback`
+- Custom scheme (all platforms): `enjoyplayer://auth/callback`
 
-Backend must host `apple-app-site-association` and Android `assetlinks.json`. Windows installer registers the `enjoyplayer://` protocol.
+This is the only redirect URI whitelisted in enjoy_web's `config/native_auth_clients.yml`; a universal/app link (`https://enjoy.bot/app/auth/callback`) was considered but dropped to avoid the backend needing to host `apple-app-site-association` / `assetlinks.json`. Windows installer registers the `enjoyplayer://` protocol; Android and iOS register it via manifest/Info.plist intent filters.
 
 ## Platform notes
 
@@ -44,6 +43,17 @@ Backend must host `apple-app-site-association` and Android `assetlinks.json`. Wi
 - **Android**: no Apple button; Google OAuth client requires release SHA-1 in Google Cloud Console.
 - **iOS**: Sign in with Apple required when Google is offered; enable capability in Xcode.
 - **macOS**: Keychain Sharing entitlements still required for secure storage (see ADR-0012).
+
+## Google OAuth client setup (manual, one-time)
+
+`GoogleSignInService` and `ios/Runner/Info.plist` / `macos/Runner/Info.plist` currently ship with `REPLACE_WITH_*` placeholders. Someone with access to the Google Cloud project backing `google.client_id` in enjoy_web's Rails credentials must:
+
+1. **Android** — no new OAuth client needed. `GoogleSignInService` already passes the existing **Web application** client ID (`kGoogleWebClientId` in [`google_auth_config.dart`](../../lib/features/auth/domain/google_auth_config.dart)) as `serverClientId`; enjoy_web's `NativeAuth::GoogleIdTokenVerifier` already accepts it for `platform=android` (falls back to `google.client_id` when `google.android_client_id` is unset). You only need to register the app's **SHA-1 fingerprints** (debug + release keystores, `keytool -list -v -keystore <path>`) against package `ai.enjoy.player` in Google Cloud Console → Credentials, or Google Sign-In will reject the app at runtime.
+2. **iOS** — create an **iOS** type OAuth client for bundle ID `ai.enjoy.player`. Replace:
+   - `ios/Runner/Info.plist`: `GIDClientID` value with the new client ID, and the second `CFBundleURLSchemes` entry with that client ID reversed (e.g. `com.googleusercontent.apps.123456-abc`).
+   - enjoy_web Rails credentials: `google.ios_client_id` with the same client ID (`bin/rails credentials:edit`).
+3. **macOS** — same as iOS: create a **macOS** (or reuse the iOS) type OAuth client, update `macos/Runner/Info.plist`'s `GIDClientID` + reversed `CFBundleURLSchemes`, and set `google.macos_client_id` in Rails credentials (optional — falls back to `ios_client_id`).
+4. Rebuild the app on each platform and confirm `signInForIdToken()` returns a non-null token, then that `POST /api/v1/auth/google` succeeds.
 
 ## Secure storage configuration
 

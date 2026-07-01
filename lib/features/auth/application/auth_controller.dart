@@ -158,7 +158,7 @@ class AuthCtrl extends _$AuthCtrl {
     _cancelPkceTimeout();
     final pkce = generatePkcePair();
     final oauthState = generateOAuthState();
-    final redirectUri = authPkceRedirectUri(preferUniversalLink: true);
+    final redirectUri = authPkceRedirectUri();
     final authorizeUri = await repo.buildPkceAuthorizeUri(
       redirectUri: redirectUri,
       codeChallenge: pkce.challenge,

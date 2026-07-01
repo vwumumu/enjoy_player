@@ -14,15 +14,14 @@ bool get nativeAppleSignInSupported =>
     defaultTargetPlatform == TargetPlatform.macOS;
 
 /// OAuth PKCE redirect URI for the current platform.
-String authPkceRedirectUri({required bool preferUniversalLink}) {
-  if (preferUniversalLink &&
-      (defaultTargetPlatform == TargetPlatform.iOS ||
-          defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.macOS)) {
-    return 'https://enjoy.bot/app/auth/callback';
-  }
-  return 'enjoyplayer://auth/callback';
-}
+///
+/// Always the custom URL scheme: the backend's client registry
+/// (`config/native_auth_clients.yml` in enjoy_web) only whitelists
+/// `enjoyplayer://auth/callback` (plus loopback URLs for dev). A universal
+/// link (`https://enjoy.bot/app/auth/callback`) would also require the
+/// backend to host `apple-app-site-association` / `assetlinks.json`, which
+/// it does not.
+String authPkceRedirectUri() => 'enjoyplayer://auth/callback';
 
 /// Platform string sent to `POST /api/v1/auth/google`.
 String? authGooglePlatformParam() {

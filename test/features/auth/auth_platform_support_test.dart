@@ -3,22 +3,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('authPkceRedirectUri uses https on mobile-like targets', () {
+  test('authPkceRedirectUri uses the custom scheme on mobile-like targets', () {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
     addTearDown(() => debugDefaultTargetPlatformOverride = null);
-    expect(
-      authPkceRedirectUri(preferUniversalLink: true),
-      'https://enjoy.bot/app/auth/callback',
-    );
+    expect(authPkceRedirectUri(), 'enjoyplayer://auth/callback');
   });
 
-  test('authPkceRedirectUri uses custom scheme when universal disabled', () {
+  test('authPkceRedirectUri uses the custom scheme on windows', () {
     debugDefaultTargetPlatformOverride = TargetPlatform.windows;
     addTearDown(() => debugDefaultTargetPlatformOverride = null);
-    expect(
-      authPkceRedirectUri(preferUniversalLink: false),
-      'enjoyplayer://auth/callback',
-    );
+    expect(authPkceRedirectUri(), 'enjoyplayer://auth/callback');
   });
 
   test('nativeAppleSignInSupported only on Apple platforms', () {
