@@ -1,6 +1,7 @@
 /// `GET /credits/usages` — authenticated Worker credits audit log.
 library;
 
+import 'package:enjoy_player/core/json/json_cast.dart';
 import 'package:enjoy_player/data/api/query_params.dart';
 import 'package:enjoy_player/data/api/rest_api.dart';
 import 'package:enjoy_player/features/credits/domain/credits_usage_log.dart';
@@ -33,16 +34,9 @@ class CreditsApi extends RestApi {
     final logs = <CreditsUsageLog>[];
     if (raw is List) {
       for (final e in raw) {
-        if (e is Map<String, dynamic>) {
-          logs.add(CreditsUsageLog.fromJson(e));
-        } else if (e is Map) {
-          logs.add(
-            CreditsUsageLog.fromJson(
-              Map<String, dynamic>.from(
-                e.map((k, v) => MapEntry(k.toString(), v)),
-              ),
-            ),
-          );
+        final entry = castJsonObjectOrNull(e);
+        if (entry != null) {
+          logs.add(CreditsUsageLog.fromJson(entry));
         }
       }
     }
