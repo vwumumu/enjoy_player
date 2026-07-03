@@ -1,5 +1,16 @@
 # Sync version in windows/installer/enjoy_player.iss from pubspec.yaml (semver only).
+# Prefer sync_release_version.sh for release bumps (covers all platforms).
 $ErrorActionPreference = "Stop"
+
+$bash = @(
+  "${env:ProgramFiles}\Git\bin\bash.exe",
+  "${env:ProgramFiles(x86)}\Git\bin\bash.exe"
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+if ($bash) {
+  & $bash ".github/scripts/sync_release_version.sh"
+  exit $LASTEXITCODE
+}
 
 $pubspec = Get-Content "pubspec.yaml" -Raw
 if ($pubspec -notmatch '(?m)^version:\s*([\d.]+)') {

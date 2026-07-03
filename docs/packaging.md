@@ -21,10 +21,11 @@ See [ADR-0024](decisions/0024-download-landing-page.md) for hosting decisions an
 
 ## Quick start
 
-1. Bump `version:` in [`pubspec.yaml`](../pubspec.yaml).
-2. Run the release script for your platform (see [Host matrix](#host-matrix) below).
-3. Confirm artifacts in the [output paths](#artifacts).
-4. When ready, wire up CI — see [GitHub Actions](#github-actions-later).
+1. Bump `version:` in [`pubspec.yaml`](../pubspec.yaml) and update [`CHANGELOG.md`](../CHANGELOG.md).
+2. Sync platform metadata: `bash .github/scripts/sync_release_version.sh` (Windows installer; Android/iOS/macOS read pubspec at build).
+3. Run the release script for your platform (see [Host matrix](#host-matrix) below).
+4. Confirm artifacts in the [output paths](#artifacts).
+5. When ready, wire up CI — see [GitHub Actions](#github-actions-later).
 
 ---
 

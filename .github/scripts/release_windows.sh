@@ -47,7 +47,7 @@ if [[ "${RELEASE_SKIP_BUILD}" != true ]]; then
 
   if [[ "${BUILD_INSTALLER}" == true ]]; then
     echo ">>> Build Inno Setup installer"
-    release_pwsh "${root}/.github/scripts/sync_windows_installer_version.ps1"
+    release_pwsh "${root}/.github/scripts/sync_release_version.sh"
     release_pwsh "${root}/.github/scripts/ensure_inno_setup.ps1"
     iscc "${root}/windows/installer/enjoy_player.iss"
   fi
