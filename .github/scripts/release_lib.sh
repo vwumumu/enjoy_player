@@ -75,6 +75,20 @@ release_repo_root() {
   cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd
 }
 
+# Stop stale Gradle daemons so the next bundle build picks up gradle.properties
+# jvmargs (avoids OOM in packageStoreReleaseBundle after heavy flutter test runs).
+release_stop_gradle_daemons() {
+  local root="$1"
+  local android_dir="${root}/android"
+  if [[ -x "${android_dir}/gradlew" ]]; then
+    echo ">>> Stop Gradle daemons (fresh JVM for Android release build)"
+    (cd "${android_dir}" && ./gradlew --stop) || true
+  elif [[ -f "${android_dir}/gradlew.bat" ]]; then
+    echo ">>> Stop Gradle daemons (fresh JVM for Android release build)"
+    (cd "${android_dir}" && cmd.exe //c gradlew.bat --stop) || true
+  fi
+}
+
 release_version() {
   bash "$(dirname "${BASH_SOURCE[0]}")/read_pubspec_version.sh"
 }

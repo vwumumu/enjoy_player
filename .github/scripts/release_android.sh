@@ -57,6 +57,8 @@ if [[ "${RELEASE_SKIP_BUILD}" != true ]]; then
   echo ">>> Prune stale Android JNI merge cache (flutter/flutter#187553)"
   bash "${root}/tool/prune_android_jni_merge_cache.sh"
 
+  release_stop_gradle_daemons "${root}"
+
   if [[ "${BUILD_AAB}" == true ]]; then
     echo ">>> Build App Bundle (store / Play)"
     flutter build appbundle --release --flavor store
