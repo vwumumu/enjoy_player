@@ -10,12 +10,11 @@ The workflow runs on the **self-hosted** `enjoy-player-win` runner (`runs-on: [s
 2. Builds **Windows release** (`flutter build windows --release`)
 3. Syncs **Inno Setup** `AppVersion` from `pubspec.yaml`
 4. Builds **EnjoyPlayerSetup-vX.Y.Z.exe** installer (optional on manual runs)
-5. Optionally **publishes** to dl.enjoy.bot (S3/R2) when the publish input or tag push triggers it — no GitHub artifact upload (avoids storage billing)
+5. Optionally **publishes** to dl.enjoy.bot (S3/R2) when the publish input is enabled — no GitHub artifact upload (avoids storage billing)
 
 **Triggers**
 
-- Push a version tag: `git tag v1.0.0 && git push origin v1.0.0`
-- Manual: GitHub → Actions → **Release Windows** → **Run workflow**
+- **Manual only**: GitHub → Actions → **Release Windows** → **Run workflow**. There is no tag-push trigger — releases are always started explicitly.
 
 ---
 
@@ -52,23 +51,12 @@ Already configured: the workflow's `runs-on: [self-hosted, windows, flutter]` ta
 
 ## Step 4 — Run a release
 
-### Manual test (no tag)
-
 1. Bump `version:` in `pubspec.yaml` if needed.
 2. GitHub → **Actions** → **Release Windows** → **Run workflow**.
-3. Toggle **Build Inno Setup installer** as needed.
-4. Collect outputs from the runner workspace (self-hosted) or enable **Publish** to upload to dl.enjoy.bot:
+3. Toggle **Build Inno Setup installer** and **Publish** as needed.
+4. Collect outputs from the runner workspace (self-hosted) or check dl.enjoy.bot when **Publish** was enabled:
    - `build/windows/x64/runner/Release/` — portable app folder
    - `build/windows/installer/EnjoyPlayerSetup-vX.Y.Z.exe` — when the installer step ran
-
-### Tag release
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-Tag pushes always build the **installer** and publish to dl.enjoy.bot when S3 secrets are configured.
 
 ---
 

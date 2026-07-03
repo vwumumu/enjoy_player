@@ -363,7 +363,7 @@ After local verification, enable CI. Each workflow calls the same platform scrip
 | [`release_android.yml`](../.github/workflows/release_android.yml) | self-hosted Linux | `bash .github/scripts/release.sh --platform android` |
 | [`release_apple.yml`](../.github/workflows/release_apple.yml) | self-hosted macOS | `bash .github/scripts/release.sh --platform apple --notarize --testflight` |
 
-Trigger: push tag `v*` or manual workflow dispatch.
+Trigger: manual only (`workflow_dispatch`) — GitHub → Actions → pick the release workflow → **Run workflow**.
 
 Platform CI setup (secrets, runners):
 

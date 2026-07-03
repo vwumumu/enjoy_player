@@ -15,8 +15,7 @@ The workflow runs on your **self-hosted macOS runner** (`runs-on: [self-hosted, 
 
 **Triggers**
 
-- Push a version tag: `git tag v1.0.0 && git push origin v1.0.0`
-- Manual: GitHub → Actions → **Release Apple** → **Run workflow**
+- **Manual only**: GitHub → Actions → **Release Apple** → **Run workflow**. There is no tag-push trigger — releases are always started explicitly.
 
 ---
 
@@ -152,25 +151,16 @@ Runner user must be able to run `codesign`, `xcrun notarytool`, and access Keych
 
 ## Step 5 — Run a release
 
-### Manual test (no tag)
-
 1. Bump version in `pubspec.yaml` if needed.
 2. GitHub → **Actions** → **Release Apple** → **Run workflow**.
-3. Toggle **Upload TestFlight** / **Notarize macOS** as needed.
-4. Collect outputs from the runner workspace, or enable **Publish** for macOS direct download:
+3. Toggle **Upload TestFlight** / **Notarize macOS** / **Publish** as needed.
+4. Collect outputs from the runner workspace, or check dl.enjoy.bot when **Publish** was enabled:
    - `build/ios/ipa/EnjoyPlayer-vX.Y.Z.ipa`
    - `EnjoyPlayer-macOS-vX.Y.Z.zip` (repo root after rename step)
 
-### Tag release
+When **Publish** is enabled, a **Publish macOS direct-download feeds** step uploads `EnjoyPlayer-macOS-vX.Y.Z.zip` plus `latest.json` / `appcast.xml` to `dl.enjoy.bot` (S3-compatible storage).
 
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-Tag pushes always attempt TestFlight upload and macOS notarization (when secrets are configured). They also run a **Publish macOS direct-download feeds** step that uploads `EnjoyPlayer-macOS-vX.Y.Z.zip` plus `latest.json` / `appcast.xml` to `dl.enjoy.bot` (S3-compatible storage).
-
-### Optional secrets (S3 / R2 publish on tag push)
+### Optional secrets (S3 / R2 publish)
 
 | Secret name | Purpose |
 |-------------|---------|

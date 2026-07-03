@@ -1,9 +1,22 @@
 name: Build Windows
 
 on:
+  pull_request:
+    paths: &build_windows_paths
+      - "lib/**"
+      - "packages/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "analysis_options.yaml"
+      - "windows/**"
+      - ".github/flutter-version"
+      - ".github/actions/setup-flutter/**"
+      - ".github/scripts/use_short_windows_workdir.ps1"
+      - ".github/scripts/ensure_nuget_feed.ps1"
+      - ".github/workflows/build_windows.yml"
   push:
     branches: [main, master]
-  pull_request:
+    paths: *build_windows_paths
   workflow_dispatch:
 
 concurrency:

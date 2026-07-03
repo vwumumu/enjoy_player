@@ -14,8 +14,7 @@ The workflow runs on your **self-hosted Linux runner** (`runs-on: [self-hosted, 
 
 **Triggers**
 
-- Push a version tag: `git tag v1.0.0 && git push origin v1.0.0`
-- Manual: GitHub → Actions → **Release Android** → **Run workflow**
+- **Manual only**: GitHub → Actions → **Release Android** → **Run workflow**. There is no tag-push trigger — releases are always started explicitly.
 
 Smoke builds (debug keystore) stay in [`android_apk_smoke.yml`](../.github/workflows/android_apk_smoke.yml).
 
@@ -84,23 +83,12 @@ sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
 ## Step 4 — Run a release
 
-### Manual test (no tag)
-
 1. Bump `version:` in `pubspec.yaml` if needed.
 2. GitHub → **Actions** → **Release Android** → **Run workflow**.
-3. Toggle **Also build release APK** as needed.
-4. Collect outputs from the runner workspace, or enable **Publish** to upload to dl.enjoy.bot:
+3. Toggle **Also build release APK** and **Publish** as needed.
+4. Collect outputs from the runner workspace, or check dl.enjoy.bot when **Publish** was enabled:
    - `build/app/outputs/bundle/release/EnjoyPlayer-vX.Y.Z.aab`
    - `build/app/outputs/flutter-apk/EnjoyPlayer-vX.Y.Z-*.apk` (when APK step ran)
-
-### Tag release
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-Tag pushes build both **AAB** and **per-ABI APKs** (`arm64-v8a`, `armeabi-v7a`, `x86_64`).
 
 Most sideload users want **`EnjoyPlayer-vX.Y.Z-arm64-v8a.apk`** only.
 

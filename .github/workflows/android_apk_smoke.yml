@@ -2,8 +2,21 @@ name: Android APK smoke
 
 on:
   pull_request:
+    paths: &android_apk_smoke_paths
+      - "lib/**"
+      - "packages/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "analysis_options.yaml"
+      - "android/**"
+      - "tool/patch_agp9_pub_plugins.sh"
+      - ".github/flutter-version"
+      - ".github/actions/setup-flutter/**"
+      - ".github/scripts/ensure_linux_tooling.sh"
+      - ".github/workflows/android_apk_smoke.yml"
   push:
     branches: [main, master]
+    paths: *android_apk_smoke_paths
   workflow_dispatch:
 
 concurrency:

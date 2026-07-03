@@ -2,8 +2,24 @@ name: Build Apple (iOS + macOS)
 
 on:
   pull_request:
+    paths: &build_apple_paths
+      - "lib/**"
+      - "packages/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "analysis_options.yaml"
+      - "ios/**"
+      - "macos/**"
+      - ".github/flutter-version"
+      - ".github/actions/setup-flutter/**"
+      - ".github/actions/setup-macos-runner-env/**"
+      - ".github/scripts/ensure_ios_ci_toolchain.sh"
+      - ".github/scripts/build_ios_ci.sh"
+      - ".github/scripts/build_macos_ci.sh"
+      - ".github/workflows/build_apple.yml"
   push:
     branches: main
+    paths: *build_apple_paths
   workflow_dispatch:
 
 concurrency:

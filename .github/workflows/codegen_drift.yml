@@ -2,8 +2,17 @@ name: Codegen drift
 
 on:
   pull_request:
+    paths: &codegen_drift_paths
+      - "lib/**"
+      - "packages/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/flutter-version"
+      - ".github/actions/setup-flutter/**"
+      - ".github/workflows/codegen_drift.yml"
   push:
     branches: [main]
+    paths: *codegen_drift_paths
   workflow_dispatch:
 
 concurrency:

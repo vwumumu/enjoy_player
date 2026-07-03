@@ -15,9 +15,6 @@ on:
         description: Upload macOS zip + update feeds on dl.enjoy.bot
         type: boolean
         default: false
-  push:
-    tags:
-      - "v*"
 
 concurrency:
   group: release-apple-${{ github.ref }}
@@ -53,20 +50,16 @@ jobs:
           APP_STORE_CONNECT_API_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
         run: |
           args=()
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/v* ]] ||
-             [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.notarize_macos }}" == "true" ]]; then
+          if [[ "${{ inputs.notarize_macos }}" == "true" ]]; then
             args+=(--notarize)
           fi
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/v* ]] ||
-             [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.upload_testflight }}" == "true" ]]; then
+          if [[ "${{ inputs.upload_testflight }}" == "true" ]]; then
             args+=(--testflight)
           fi
           bash .github/scripts/release_apple.sh "${args[@]}"
 
       - name: Publish macOS direct-download feeds
-        if: >-
-          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-          (github.event_name == 'workflow_dispatch' && inputs.publish)
+        if: inputs.publish
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
