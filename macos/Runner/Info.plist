@@ -47,6 +47,11 @@
 	  that client ID reversed, e.g.
 	  "com.googleusercontent.apps.<CLIENT_ID_PREFIX>" (see
 	  https://developers.google.com/identity/sign-in/ios/start-integrating).
+	  The placeholder below uses hyphens (not underscores) so it still
+	  satisfies Apple's URL-scheme format check (RFC1738: alphanumeric,
+	  period, hyphen, plus only) — underscores fail `flutter build ipa`
+	  export with "URL schemes ... not in the correct format" (macOS
+	  release currently ships this Info.plist verbatim into the .app too).
 	-->
 	<key>GIDClientID</key>
 	<string>REPLACE_WITH_MACOS_OAUTH_CLIENT_ID.apps.googleusercontent.com</string>
@@ -65,7 +70,7 @@
 			<string>ai.enjoy.player.google-signin</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>REPLACE_WITH_REVERSED_MACOS_CLIENT_ID</string>
+				<string>replace-with-reversed-macos-client-id</string>
 			</array>
 		</dict>
 	</array>

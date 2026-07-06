@@ -84,6 +84,10 @@
 	  CFBundleURLSchemes entry below must be that client ID reversed, e.g.
 	  "com.googleusercontent.apps.<CLIENT_ID_PREFIX>" (see
 	  https://developers.google.com/identity/sign-in/ios/start-integrating).
+	  The placeholder below uses hyphens (not underscores) so it still
+	  satisfies Apple's URL-scheme format check (RFC1738: alphanumeric,
+	  period, hyphen, plus only) — underscores fail `flutter build ipa`
+	  export with "URL schemes ... not in the correct format".
 	-->
 	<key>GIDClientID</key>
 	<string>REPLACE_WITH_IOS_OAUTH_CLIENT_ID.apps.googleusercontent.com</string>
@@ -102,7 +106,7 @@
 			<string>ai.enjoy.player.google-signin</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>REPLACE_WITH_REVERSED_IOS_CLIENT_ID</string>
+				<string>replace-with-reversed-ios-client-id</string>
 			</array>
 		</dict>
 	</array>
