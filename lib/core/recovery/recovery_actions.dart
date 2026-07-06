@@ -95,13 +95,21 @@ bool _runAndCheck(String exe, List<String> args) {
   }
 }
 
+/// Directory where `drift_flutter`'s `driftDatabase()` places local SQLite
+/// files by default. [AppDatabase] never passes `native:` overrides, so
+/// every `.sqlite` file (guest + per-user) lives directly here — *not*
+/// under `getApplicationSupportDirectory()/databases/`, which is a
+/// different directory that nothing in this app actually writes SQLite
+/// files into.
+Future<Directory> _localDatabaseDirectory() =>
+    getApplicationDocumentsDirectory();
+
 /// Backs up the on-disk Drift database file (best-effort) before a
 /// destructive wipe. Returns the absolute path of the backup, or `null`
 /// if the backup failed.
 Future<String?> backupLocalDatabaseFile() async {
   try {
-    final support = await getApplicationSupportDirectory();
-    final dbDir = Directory(p.join(support.path, 'databases'));
+    final dbDir = await _localDatabaseDirectory();
     if (!dbDir.existsSync()) {
       return null;
     }
@@ -110,6 +118,7 @@ Future<String?> backupLocalDatabaseFile() async {
         .toIso8601String()
         .replaceAll(':', '-')
         .replaceAll('.', '-');
+    final support = await getApplicationSupportDirectory();
     final backupDir = Directory(p.join(support.path, 'migrations'));
     if (!backupDir.existsSync()) {
       await backupDir.create(recursive: true);
@@ -139,8 +148,7 @@ Future<String?> backupLocalDatabaseFile() async {
 /// next read.
 Future<void> wipeLocalDatabaseFiles() async {
   try {
-    final support = await getApplicationSupportDirectory();
-    final dbDir = Directory(p.join(support.path, 'databases'));
+    final dbDir = await _localDatabaseDirectory();
     if (!dbDir.existsSync()) {
       return;
     }
@@ -189,15 +197,19 @@ Future<RecoveryResetOutcome> resetLocalLibraryWithBackup() async {
 
 enum RecoveryResetOutcome { success, backupFailed, wipeFailed }
 
-/// Tells the caller whether [error] looks like an "unopenable local
-/// database" failure (corrupt file, schema-version gap, …) so the
-/// caller can route the user to the recovery surface.
+/// Tells the caller whether [error] looks like an "unopenable / stale
+/// local database" failure (corrupt file, schema-version gap, a migration
+/// step that no longer matches the on-disk schema, …) so the caller can
+/// route the user to the recovery surface.
 bool isUnrecoverableDatabaseError(Object error) {
   final msg = error.toString().toLowerCase();
-  return msg.contains('sqlite_exception') ||
+  return msg.contains('sqliteexception') ||
       msg.contains('database is corrupt') ||
+      msg.contains('database disk image is malformed') ||
       msg.contains('file is not a database') ||
       msg.contains('unable to open') ||
       msg.contains('no such table') ||
+      msg.contains('no such column') ||
+      msg.contains('duplicate column name') ||
       msg.contains('unsupported schema');
 }

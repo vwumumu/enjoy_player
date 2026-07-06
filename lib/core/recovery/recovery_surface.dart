@@ -13,10 +13,22 @@ import 'package:enjoy_player/core/theme/widgets/enjoy_card.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class RecoverySurface extends StatefulWidget {
-  const RecoverySurface({required this.error, this.stack, super.key});
+  const RecoverySurface({
+    required this.error,
+    this.stack,
+    this.onReset,
+    super.key,
+  });
 
   final Object error;
   final StackTrace? stack;
+
+  /// Performs the actual backup + wipe, and (unlike the bare
+  /// [resetLocalLibraryWithBackup] it defaults to) is responsible for also
+  /// closing and re-initializing any live Drift connections so the app can
+  /// recover in place. Injected by `app.dart`, which has Riverpod `ref`
+  /// access; defaults to the plain file-only reset for standalone use/tests.
+  final Future<RecoveryResetOutcome> Function()? onReset;
 
   @override
   State<RecoverySurface> createState() => _RecoverySurfaceState();
@@ -201,7 +213,7 @@ class _RecoverySurfaceState extends State<RecoverySurface> {
   Future<void> _onResetConfirm() async {
     setState(() => _busy = true);
     try {
-      final outcome = await resetLocalLibraryWithBackup();
+      final outcome = await (widget.onReset ?? resetLocalLibraryWithBackup)();
       if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
       switch (outcome) {

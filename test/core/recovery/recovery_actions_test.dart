@@ -8,14 +8,18 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 class _MockPathProvider extends PathProviderPlatform {
-  _MockPathProvider(this.tmpRoot);
-  final Directory tmpRoot;
+  _MockPathProvider({required this.supportRoot, required this.docsRoot});
+  final Directory supportRoot;
+  final Directory docsRoot;
 
   @override
-  Future<String?> getApplicationSupportPath() async => tmpRoot.path;
+  Future<String?> getApplicationSupportPath() async => supportRoot.path;
 
   @override
-  Future<String?> getTemporaryPath() async => tmpRoot.path;
+  Future<String?> getApplicationDocumentsPath() async => docsRoot.path;
+
+  @override
+  Future<String?> getTemporaryPath() async => supportRoot.path;
 }
 
 void main() {
@@ -23,17 +27,25 @@ void main() {
 
   group('recovery_actions', () {
     late Directory tmpRoot;
+    // drift_flutter's driftDatabase() (no `native:` override) puts every
+    // .sqlite file directly under getApplicationDocumentsDirectory() — this
+    // must match AppDatabase's real on-disk location, not an arbitrary
+    // "databases" subfolder, or backup/wipe silently no-op against an
+    // empty directory (see the "wrong directory" bug this regression-tests).
     late Directory dbDir;
     late Directory logsDir;
     late List<MethodCall> clipboardCalls;
 
     setUp(() async {
       tmpRoot = await Directory.systemTemp.createTemp('recovery_actions_');
-      dbDir = Directory(p.join(tmpRoot.path, 'databases'));
-      logsDir = Directory(p.join(tmpRoot.path, 'logs'));
+      dbDir = Directory(p.join(tmpRoot.path, 'documents'));
+      logsDir = Directory(p.join(tmpRoot.path, 'support', 'logs'));
       await dbDir.create(recursive: true);
       await logsDir.create(recursive: true);
-      PathProviderPlatform.instance = _MockPathProvider(tmpRoot);
+      PathProviderPlatform.instance = _MockPathProvider(
+        supportRoot: Directory(p.join(tmpRoot.path, 'support')),
+        docsRoot: dbDir,
+      );
       clipboardCalls = <MethodCall>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, (call) async {
@@ -132,6 +144,20 @@ void main() {
     );
 
     test(
+      'wipeLocalDatabaseFiles also removes per-user session DB files',
+      () async {
+        final perUserFile = File(
+          p.join(dbDir.path, '${AppDatabase.guestDatabaseName}_abc123.sqlite'),
+        );
+        await perUserFile.writeAsString('x');
+
+        await wipeLocalDatabaseFiles();
+
+        expect(perUserFile.existsSync(), isFalse);
+      },
+    );
+
+    test(
       'resetLocalLibraryWithBackup returns backupFailed when no DB exists',
       () async {
         final outcome = await resetLocalLibraryWithBackup();
@@ -174,5 +200,40 @@ void main() {
         isFalse,
       );
     });
+
+    test(
+      'isUnrecoverableDatabaseError matches a real SqliteException.toString()',
+      () {
+        // SqliteException's actual toString() has no underscore
+        // ("SqliteException(1): ..."), unlike an earlier version of this
+        // matcher which looked for "sqlite_exception" and never matched.
+        expect(
+          isUnrecoverableDatabaseError(
+            Exception(
+              'SqliteException(1): while executing, duplicate column '
+              'name: duration_seconds, SQL logic error (code 1)',
+            ),
+          ),
+          isTrue,
+        );
+      },
+    );
+
+    test(
+      'isUnrecoverableDatabaseError matches stale-schema and disk-corruption '
+      'phrasings',
+      () {
+        expect(
+          isUnrecoverableDatabaseError(Exception('no such column: foo')),
+          isTrue,
+        );
+        expect(
+          isUnrecoverableDatabaseError(
+            Exception('database disk image is malformed'),
+          ),
+          isTrue,
+        );
+      },
+    );
   });
 }

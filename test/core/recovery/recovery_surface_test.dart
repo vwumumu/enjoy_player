@@ -1,3 +1,4 @@
+import 'package:enjoy_player/core/recovery/recovery_actions.dart';
 import 'package:enjoy_player/core/recovery/recovery_surface.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -57,4 +58,39 @@ void main() {
     expect(find.text('Reset everything'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
   });
+
+  testWidgets(
+    'Confirming reset calls the injected onReset instead of the default '
+    'file-only reset',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 1800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      var resetCalls = 0;
+      await tester.pumpWidget(
+        _wrap(
+          RecoverySurface(
+            error: 'SqliteException: oops',
+            onReset: () async {
+              resetCalls++;
+              return RecoveryResetOutcome.success;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.widgetWithText(FilledButton, 'Reset local library'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reset everything'));
+      await tester.pumpAndSettle();
+
+      expect(resetCalls, 1);
+      expect(find.textContaining('Reloading your data'), findsOneWidget);
+    },
+  );
 }

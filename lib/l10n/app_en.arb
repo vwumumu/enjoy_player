@@ -1160,7 +1160,7 @@
   "recoveryResetLibraryConfirmBody": "This permanently deletes your local library, recordings, transcripts, and sync queue. The cloud library (if signed in) is preserved. A backup is written to the application support directory first.",
   "recoveryResetLibraryConfirmAction": "Reset everything",
   "recoveryResetLibraryBackupError": "Backup failed — the local database was not wiped. The error has been logged.",
-  "recoveryResetLibrarySuccess": "Local library reset. Enjoy Player will restart shortly.",
+  "recoveryResetLibrarySuccess": "Local library reset. Reloading your data…",
   "recoveryResetLibraryError": "Could not reset the local library.",
   "widgetErrorTitle": "Something went wrong",
   "widgetErrorSubtitle": "This screen hit an unexpected error. You can copy the details below and try navigating elsewhere.",

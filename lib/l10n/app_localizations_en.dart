@@ -2403,7 +2403,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recoveryResetLibrarySuccess =>
-      'Local library reset. Enjoy Player will restart shortly.';
+      'Local library reset. Reloading your data…';
 
   @override
   String get recoveryResetLibraryError => 'Could not reset the local library.';

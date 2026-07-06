@@ -974,7 +974,7 @@
   "recoveryResetLibraryConfirmBody": "这将永久删除你的本地资料库、录音、转写和同步队列。如果已登录,云端资料库会保留。清除前会先在应用支持目录写入一份备份。",
   "recoveryResetLibraryConfirmAction": "全部清除",
   "recoveryResetLibraryBackupError": "备份失败,本地数据库未被清除。错误已记录。",
-  "recoveryResetLibrarySuccess": "本地资料库已重置,Enjoy Player 即将重启。",
+  "recoveryResetLibrarySuccess": "本地资料库已重置，正在重新加载数据……",
   "recoveryResetLibraryError": "无法重置本地资料库。",
   "widgetErrorTitle": "出了点问题",
   "widgetErrorSubtitle": "此界面遇到意外错误。你可以复制下面的详情，然后尝试前往其他页面。",

@@ -4500,7 +4500,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoveryResetLibrarySuccess.
   ///
   /// In en, this message translates to:
-  /// **'Local library reset. Enjoy Player will restart shortly.'**
+  /// **'Local library reset. Reloading your data…'**
   String get recoveryResetLibrarySuccess;
 
   /// No description provided for @recoveryResetLibraryError.

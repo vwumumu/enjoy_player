@@ -33,6 +33,36 @@ void main() {
     },
   );
 
+  test(
+    'AppDatabase migration is a no-op when the on-disk version is newer '
+    'than schemaVersion (downgrade)',
+    () async {
+      final file = File(
+        '${Directory.systemTemp.path}/app_database_test_downgrade_${DateTime.now().microsecondsSinceEpoch}.sqlite',
+      );
+      addTearDown(() {
+        if (file.existsSync()) file.deleteSync();
+      });
+
+      // Simulate opening a DB file that was last written by a newer app
+      // build (e.g. a rolled-back release, or a downgrade during testing).
+      // `onUpgrade` still fires whenever `versionBefore != versionNow`
+      // (drift doesn't distinguish upgrade from downgrade), so
+      // `_runMigrations`'s `from >= to` guard must short-circuit before any
+      // migration step tries to touch tables/columns that may not match
+      // this schemaVersion's expectations.
+      final seed = AppDatabase(executor: NativeDatabase(file));
+      await seed.customStatement('PRAGMA user_version = 999');
+      await seed.close();
+
+      final reopened = AppDatabase(executor: NativeDatabase(file));
+      addTearDown(reopened.close);
+
+      // Opening triggers onUpgrade(from: 999, to: 10); it must not throw.
+      await reopened.customStatement('SELECT 1');
+    },
+  );
+
   test('AppDatabase can insert and read audio', () async {
     final db = AppDatabase(executor: NativeDatabase.memory());
     addTearDown(db.close);

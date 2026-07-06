@@ -2299,7 +2299,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recoveryResetLibraryBackupError => '备份失败,本地数据库未被清除。错误已记录。';
 
   @override
-  String get recoveryResetLibrarySuccess => '本地资料库已重置,Enjoy Player 即将重启。';
+  String get recoveryResetLibrarySuccess => '本地资料库已重置，正在重新加载数据……';
 
   @override
   String get recoveryResetLibraryError => '无法重置本地资料库。';
@@ -4187,7 +4187,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get recoveryResetLibraryBackupError => '备份失败,本地数据库未被清除。错误已记录。';
 
   @override
-  String get recoveryResetLibrarySuccess => '本地资料库已重置,Enjoy Player 即将重启。';
+  String get recoveryResetLibrarySuccess => '本地资料库已重置，正在重新加载数据……';
 
   @override
   String get recoveryResetLibraryError => '无法重置本地资料库。';
