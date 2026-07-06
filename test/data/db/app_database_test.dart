@@ -1,9 +1,38 @@
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'AppDatabase migration tolerates a column already added by an '
+    'interrupted previous migration',
+    () async {
+      final file = File(
+        '${Directory.systemTemp.path}/app_database_test_${DateTime.now().microsecondsSinceEpoch}.sqlite',
+      );
+      addTearDown(() {
+        if (file.existsSync()) file.deleteSync();
+      });
+
+      // Simulate a migration that added `duration_seconds` /
+      // `language` on a previous launch but crashed before the schema
+      // version pragma was bumped past 6 (see the "duplicate column
+      // name" bug this regression-tests).
+      final seed = AppDatabase(executor: NativeDatabase(file));
+      await seed.customStatement('PRAGMA user_version = 6');
+      await seed.close();
+
+      final reopened = AppDatabase(executor: NativeDatabase(file));
+      addTearDown(reopened.close);
+
+      // Opening triggers onUpgrade(from: 6, to: 10); it must not throw.
+      await reopened.customStatement('SELECT 1');
+    },
+  );
+
   test('AppDatabase can insert and read audio', () async {
     final db = AppDatabase(executor: NativeDatabase.memory());
     addTearDown(db.close);

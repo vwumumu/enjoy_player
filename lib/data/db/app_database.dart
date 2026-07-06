@@ -101,7 +101,8 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(youtubeChannelSubscriptions);
         await m.createTable(youtubeFeedEntries);
       } else if (next == 8) {
-        await m.addColumn(
+        await _addColumnIfMissing(
+          m,
           youtubeFeedEntries,
           youtubeFeedEntries.durationSeconds,
         );
@@ -111,13 +112,41 @@ class AppDatabase extends _$AppDatabase {
           'ON transcript_fetch_states (target_type, target_id)',
         );
       } else if (next == 10) {
-        await m.addColumn(
+        await _addColumnIfMissing(
+          m,
           youtubeChannelSubscriptions,
           youtubeChannelSubscriptions.language,
         );
       }
       current = next;
     }
+  }
+
+  /// Adds [column] to [table] unless it already exists.
+  ///
+  /// Unlike `CREATE TABLE IF NOT EXISTS` (which drift's [Migrator.createTable]
+  /// uses by default), `ALTER TABLE ... ADD COLUMN` has no idempotent form in
+  /// SQLite. A migration that ran partway on a previous launch (e.g. crashed
+  /// on a later step) can leave the column already present with
+  /// `schemaVersion` unchanged, so re-running this step unconditionally would
+  /// throw `duplicate column name` on every subsequent launch — before
+  /// logging is even initialized, silently hanging the app at a blank window.
+  static Future<void> _addColumnIfMissing(
+    Migrator m,
+    TableInfo table,
+    GeneratedColumn column,
+  ) async {
+    final rows = await m.database
+        .customSelect(
+          'SELECT 1 FROM pragma_table_info(?) WHERE name = ?',
+          variables: [
+            Variable.withString(table.actualTableName),
+            Variable.withString(column.name),
+          ],
+        )
+        .get();
+    if (rows.isNotEmpty) return;
+    await m.addColumn(table, column);
   }
 
   Future<void> _dropLegacyTables(Migrator m) async {

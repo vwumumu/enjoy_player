@@ -30,6 +30,14 @@ class DiagnosticLogConfig {
         SettingsKeys.diagnosticsVerboseEnabled,
       );
       verboseEnabled = raw == 'true';
+    } on Object {
+      // Runs before logging/error reporting is initialized, so any uncaught
+      // error here is silently swallowed by main()'s zone guard, leaving a
+      // permanently blank window with no mounted widget tree (no crash, no
+      // log line). Never let a guest-DB hiccup block startup — fall back to
+      // the default and let the real AppDatabase (opened later, once logging
+      // is up) surface genuine errors through the normal error UI.
+      verboseEnabled = false;
     } finally {
       await db.close();
     }
