@@ -17,8 +17,11 @@ import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
+import 'subtitle_track_picker_actions.dart';
+import 'subtitle_track_picker_helpers.dart';
+import 'subtitle_track_picker_sections.dart';
+import 'subtitle_track_picker_tiles.dart';
 import 'import_subtitle_language_dialog.dart';
-import 'transcript_busy_action.dart';
 import 'transcript_embedded_extract.dart';
 import '../../player/application/player_controller.dart';
 import '../application/active_transcript_provider.dart';
@@ -29,88 +32,7 @@ import '../application/video_row_for_media_provider.dart';
 import '../domain/transcript_fetch_status.dart';
 import '../domain/transcript_track.dart';
 
-/// Horizontal inset aligned with section headers and list rows.
-double _sheetHorizontalPadding(EnjoyThemeTokens t) => t.space16 + t.space4;
-
-/// Inner padding for track options inside a collapsible card.
-EdgeInsetsDirectional _trackOptionPadding(EnjoyThemeTokens t) =>
-    EdgeInsetsDirectional.fromSTEB(t.space8, t.space4, t.space8, t.space4);
-
-ThemeData _trackPickerRadioTheme(BuildContext context) {
-  final cs = Theme.of(context).colorScheme;
-  return Theme.of(context).copyWith(
-    splashColor: cs.primary.withValues(alpha: 0.08),
-    highlightColor: Colors.transparent,
-    hoverColor: cs.onSurface.withValues(alpha: 0.04),
-    radioTheme: RadioThemeData(
-      fillColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return cs.primary;
-        return cs.onSurfaceVariant.withValues(alpha: 0.55);
-      }),
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    ),
-    listTileTheme: ListTileThemeData(
-      tileColor: Colors.transparent,
-      selectedTileColor: Colors.transparent,
-      iconColor: cs.onSurfaceVariant,
-      contentPadding: EdgeInsets.zero,
-      dense: true,
-      visualDensity: VisualDensity.compact,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(EnjoyThemeTokens.of(context).radiusSm),
-      ),
-    ),
-  );
-}
-
 enum SubtitleTrackPickerPresentation { sheet, dialog }
-
-enum _PickerSection { primary, secondary }
-
-/// Max height for an expanded track list before it scrolls internally.
-const double _kExpandedTrackListMaxHeight = 280;
-
-String _trackLabel(TranscriptTrack track) =>
-    track.label.isNotEmpty ? track.label : track.language;
-
-TranscriptTrack? _findTrack(List<TranscriptTrack> tracks, String? id) {
-  if (id == null) return null;
-  for (final track in tracks) {
-    if (track.id == id) return track;
-  }
-  return null;
-}
-
-String _providerLabel(AppLocalizations l10n, String source) {
-  switch (source) {
-    case 'official':
-      return l10n.subtitlesProviderOfficial;
-    case 'auto':
-      return l10n.subtitlesProviderAuto;
-    case 'ai':
-      return l10n.subtitlesProviderAi;
-    case 'user':
-      return l10n.subtitlesProviderUser;
-    default:
-      return source.toUpperCase();
-  }
-}
-
-({Color bg, Color fg}) _providerBadgeColors(ColorScheme cs, String source) {
-  switch (source) {
-    case 'official':
-      return (bg: cs.primaryContainer, fg: cs.onPrimaryContainer);
-    case 'auto':
-      return (bg: cs.tertiaryContainer, fg: cs.onTertiaryContainer);
-    case 'ai':
-      return (bg: cs.secondaryContainer, fg: cs.onSecondaryContainer);
-    case 'user':
-      return (bg: cs.surfaceContainerHighest, fg: cs.onSurfaceVariant);
-    default:
-      return (bg: cs.surfaceContainerHigh, fg: cs.onSurfaceVariant);
-  }
-}
 
 /// Shows a modal bottom sheet (narrow) or centered dialog (wide) for picking subtitles.
 Future<void> showSubtitleTrackPicker(
@@ -177,7 +99,7 @@ class SubtitleTrackPickerSheet extends ConsumerStatefulWidget {
 class _SubtitleTrackPickerSheetState
     extends ConsumerState<SubtitleTrackPickerSheet> {
   ScrollController? _dialogScroll;
-  _PickerSection? _expandedSection;
+  PickerSection? _expandedSection;
 
   @override
   void initState() {
@@ -270,7 +192,7 @@ class _SubtitleTrackPickerSheetState
     await ref.read(transcriptRepositoryProvider).deleteTranscript(track.id);
   }
 
-  void _toggleSection(_PickerSection section) {
+  void _toggleSection(PickerSection section) {
     setState(() {
       _expandedSection = _expandedSection == section ? null : section;
     });
@@ -300,9 +222,9 @@ class _SubtitleTrackPickerSheetState
       if (isFetching)
         Padding(
           padding: EdgeInsets.fromLTRB(
-            _sheetHorizontalPadding(t),
+            sheetHorizontalPadding(t),
             t.space8,
-            _sheetHorizontalPadding(t),
+            sheetHorizontalPadding(t),
             t.space8,
           ),
           child: Row(
@@ -329,7 +251,7 @@ class _SubtitleTrackPickerSheetState
         ),
       if (tracks.isEmpty)
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: _sheetHorizontalPadding(t)),
+          padding: EdgeInsets.symmetric(horizontal: sheetHorizontalPadding(t)),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerLow.withValues(
@@ -337,9 +259,7 @@ class _SubtitleTrackPickerSheetState
               ),
               borderRadius: BorderRadius.circular(t.radiusLg),
               border: Border.all(
-                color: theme.colorScheme.outlineVariant.withValues(
-                  alpha: 0.16,
-                ),
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.16),
               ),
             ),
             child: Padding(
@@ -355,18 +275,18 @@ class _SubtitleTrackPickerSheetState
           ),
         )
       else
-        _CollapsibleTrackSection(
+        CollapsibleTrackSection(
           title: l10n.subtitlesPrimary,
-          isExpanded: _expandedSection == _PickerSection.primary,
-          onToggle: () => _toggleSection(_PickerSection.primary),
+          isExpanded: _expandedSection == PickerSection.primary,
+          onToggle: () => _toggleSection(PickerSection.primary),
           inlineExpandedList: inlineExpandedLists,
           selectionLabel: () {
-            final selected = _findTrack(tracks, primaryId);
+            final selected = findTrack(tracks, primaryId);
             return selected == null
                 ? l10n.subtitlesNotSelected
-                : _trackLabel(selected);
+                : trackLabel(selected);
           }(),
-          selectedTrack: _findTrack(tracks, primaryId),
+          selectedTrack: findTrack(tracks, primaryId),
           child: RadioGroup<String>(
             groupValue: primaryId,
             onChanged: (id) {
@@ -379,15 +299,15 @@ class _SubtitleTrackPickerSheetState
               );
             },
             child: Theme(
-              data: _trackPickerRadioTheme(context),
+              data: trackPickerRadioTheme(context),
               child: Column(
                 children: tracks
                     .map(
-                      (track) => _TrackOptionTile<String>(
+                      (track) => TrackOptionTile<String>(
                         value: track.id,
                         selected: primaryId == track.id,
                         track: track,
-                        padding: _trackOptionPadding(t),
+                        padding: trackOptionPadding(t),
                         onDelete: () => _deleteTrack(track),
                       ),
                     )
@@ -397,19 +317,19 @@ class _SubtitleTrackPickerSheetState
           ),
         ),
       SizedBox(height: t.space12),
-      _CollapsibleTrackSection(
+      CollapsibleTrackSection(
         title: l10n.subtitlesTranslation,
-        isExpanded: _expandedSection == _PickerSection.secondary,
-        onToggle: () => _toggleSection(_PickerSection.secondary),
+        isExpanded: _expandedSection == PickerSection.secondary,
+        onToggle: () => _toggleSection(PickerSection.secondary),
         inlineExpandedList: inlineExpandedLists,
         selectionLabel: () {
           if (secondaryId == null) return l10n.subtitlesNone;
-          final selected = _findTrack(tracks, secondaryId);
+          final selected = findTrack(tracks, secondaryId);
           return selected == null
               ? l10n.subtitlesNotSelected
-              : _trackLabel(selected);
+              : trackLabel(selected);
         }(),
-        selectedTrack: _findTrack(tracks, secondaryId),
+        selectedTrack: findTrack(tracks, secondaryId),
         child: RadioGroup<String?>(
           groupValue: secondaryId,
           onChanged: (id) {
@@ -421,20 +341,20 @@ class _SubtitleTrackPickerSheetState
             );
           },
           child: Theme(
-            data: _trackPickerRadioTheme(context),
+            data: trackPickerRadioTheme(context),
             child: Column(
               children: [
-                _NoneOptionTile(
-                  padding: _trackOptionPadding(t),
+                NoneOptionTile(
+                  padding: trackOptionPadding(t),
                   label: l10n.subtitlesNone,
                   selected: secondaryId == null,
                 ),
                 ...tracks.map(
-                  (track) => _TrackOptionTile<String?>(
+                  (track) => TrackOptionTile<String?>(
                     value: track.id,
                     selected: secondaryId == track.id,
                     track: track,
-                    padding: _trackOptionPadding(t),
+                    padding: trackOptionPadding(t),
                     onDelete: () => _deleteTrack(track),
                   ),
                 ),
@@ -444,8 +364,8 @@ class _SubtitleTrackPickerSheetState
         ),
       ),
       SizedBox(height: t.space16),
-      _SubtitleActionsSection(
-        horizontalPadding: _sheetHorizontalPadding(t),
+      SubtitleActionsSection(
+        horizontalPadding: sheetHorizontalPadding(t),
         showExtractEmbedded: showExtractEmbedded,
         showImportFile: showImportFile,
         onExtractEmbedded: _extractEmbedded,
@@ -461,9 +381,9 @@ class _SubtitleTrackPickerSheetState
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        _sheetHorizontalPadding(t),
+        sheetHorizontalPadding(t),
         t.space4,
-        _sheetHorizontalPadding(t),
+        sheetHorizontalPadding(t),
         t.space4,
       ),
       child: Row(
@@ -560,18 +480,14 @@ class _SubtitleTrackPickerSheetState
       data: whenData,
       loading: () => isDialog
           ? Padding(
-              padding: EdgeInsets.all(_sheetHorizontalPadding(t)),
+              padding: EdgeInsets.all(sheetHorizontalPadding(t)),
               child: const SkeletonTranscript(lineCount: 4),
             )
           : SkeletonTranscript(lineCount: 12, controller: scrollCtrl),
       error: (error, _) {
         final errorBody = [
           SizedBox(height: t.space24),
-          Icon(
-            Icons.error_outline_rounded,
-            size: 40,
-            color: cs.error,
-          ),
+          Icon(Icons.error_outline_rounded, size: 40, color: cs.error),
           SizedBox(height: t.space12),
           Text(
             l10n.transcriptErrorFriendlyTitle,
@@ -581,33 +497,29 @@ class _SubtitleTrackPickerSheetState
           Text(
             l10n.transcriptErrorFriendlyHint,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           ),
           SizedBox(height: t.space16),
           FilledButton.tonal(
-            onPressed: () => ref.invalidate(
-              allTranscriptsForMediaProvider(widget.mediaId),
-            ),
+            onPressed: () =>
+                ref.invalidate(allTranscriptsForMediaProvider(widget.mediaId)),
             child: Text(l10n.retry),
           ),
         ];
 
         if (isDialog) {
           return Padding(
-            padding: EdgeInsets.all(_sheetHorizontalPadding(t)),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: errorBody,
-            ),
+            padding: EdgeInsets.all(sheetHorizontalPadding(t)),
+            child: Column(mainAxisSize: MainAxisSize.min, children: errorBody),
           );
         }
 
         return ListView(
           controller: scrollCtrl,
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.all(_sheetHorizontalPadding(t)),
+          padding: EdgeInsets.all(sheetHorizontalPadding(t)),
           children: errorBody,
         );
       },
@@ -646,9 +558,9 @@ class _SubtitleTrackPickerSheetState
           widget.presentation == SubtitleTrackPickerPresentation.dialog;
       final divider = Divider(
         height: 1,
-        color: Theme.of(context).colorScheme.outlineVariant.withValues(
-          alpha: 0.18,
-        ),
+        color: Theme.of(
+          context,
+        ).colorScheme.outlineVariant.withValues(alpha: 0.18),
       );
       final tracksContent = _buildTracksContent(
         context: context,
@@ -705,549 +617,6 @@ class _SubtitleTrackPickerSheetState
       maxChildSize: 0.92,
       expand: false,
       builder: (ctx, sc) => columnBody(sc),
-    );
-  }
-}
-
-class _CollapsibleTrackSection extends StatelessWidget {
-  const _CollapsibleTrackSection({
-    required this.title,
-    required this.isExpanded,
-    required this.onToggle,
-    required this.selectionLabel,
-    this.selectedTrack,
-    required this.child,
-    this.inlineExpandedList = false,
-  });
-
-  final String title;
-  final bool isExpanded;
-  final VoidCallback onToggle;
-  final String selectionLabel;
-  final TranscriptTrack? selectedTrack;
-  final Widget child;
-  final bool inlineExpandedList;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    final horizontal = _sheetHorizontalPadding(t);
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontal),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerLow.withValues(alpha: 0.92),
-          borderRadius: BorderRadius.circular(t.radiusLg),
-          border: Border.all(
-            color: isExpanded
-                ? cs.primary.withValues(alpha: 0.28)
-                : cs.outlineVariant.withValues(alpha: 0.16),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: cs.shadow.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(t.radiusLg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Material(
-                color: isExpanded
-                    ? cs.primaryContainer.withValues(alpha: 0.12)
-                    : Colors.transparent,
-                child: InkWell(
-                  onTap: onToggle,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      t.space16,
-                      t.space12,
-                      t.space12,
-                      isExpanded ? t.space12 : t.space16,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: tt.labelLarge?.copyWith(
-                                  color: cs.primary,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
-                              if (!isExpanded) ...[
-                                SizedBox(height: t.space8),
-                                _SelectionSummary(
-                                  label: selectionLabel,
-                                  track: selectedTrack,
-                                  compact: true,
-                                ),
-                              ] else ...[
-                                SizedBox(height: t.space4),
-                                Text(
-                                  selectionLabel,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: tt.bodySmall?.copyWith(
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: t.space8),
-                        AnimatedContainer(
-                          duration: t.motionFast,
-                          curve: Curves.easeOut,
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: cs.surfaceContainerHighest.withValues(
-                              alpha: 0.75,
-                            ),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: cs.outlineVariant.withValues(alpha: 0.2),
-                            ),
-                          ),
-                          child: AnimatedRotation(
-                            turns: isExpanded ? 0.5 : 0,
-                            duration: t.motionFast,
-                            curve: Curves.easeOut,
-                            child: Icon(
-                              Icons.expand_more_rounded,
-                              size: 20,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              AnimatedSize(
-                duration: t.motionStandard,
-                curve: Curves.easeOutCubic,
-                alignment: Alignment.topCenter,
-                clipBehavior: Clip.hardEdge,
-                child: isExpanded
-                    ? DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerLowest.withValues(
-                            alpha: 0.55,
-                          ),
-                          border: Border(
-                            top: BorderSide(
-                              color: cs.outlineVariant.withValues(alpha: 0.14),
-                            ),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            t.space8,
-                            t.space8,
-                            t.space8,
-                            t.space12,
-                          ),
-                          child: inlineExpandedList
-                              ? child
-                              : ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxHeight: _kExpandedTrackListMaxHeight,
-                                  ),
-                                  child: SingleChildScrollView(
-                                    child: child,
-                                  ),
-                                ),
-                        ),
-                      )
-                    : const SizedBox(width: double.infinity),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SelectionSummary extends StatelessWidget {
-  const _SelectionSummary({
-    required this.label,
-    this.track,
-    this.compact = false,
-  });
-
-  final String label;
-  final TranscriptTrack? track;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    final muted = track == null;
-    final selected = track;
-    final badgeColors = selected == null
-        ? null
-        : _providerBadgeColors(cs, selected.source);
-
-    if (compact && selected != null && badgeColors != null) {
-      return Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: tt.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.1,
-              ),
-            ),
-          ),
-          SizedBox(width: t.space8),
-          _MetaChip(
-            label: _providerLabel(l10n, selected.source),
-            background: badgeColors.bg,
-            foreground: badgeColors.fg,
-          ),
-          if (selected.language.isNotEmpty && selected.language != 'und') ...[
-            SizedBox(width: t.space8),
-            _MetaChip(
-              label: selected.language.toUpperCase(),
-              background: cs.surfaceContainerHighest,
-              foreground: cs.onSurfaceVariant,
-            ),
-          ],
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: (compact ? tt.titleSmall : tt.bodyMedium)?.copyWith(
-            color: muted ? cs.onSurfaceVariant : cs.onSurface,
-            fontWeight: muted ? FontWeight.w400 : FontWeight.w600,
-          ),
-        ),
-        if (selected != null && badgeColors != null) ...[
-          SizedBox(height: t.space8),
-          Wrap(
-            spacing: t.space8,
-            runSpacing: t.space4,
-            children: [
-              _MetaChip(
-                label: _providerLabel(l10n, selected.source),
-                background: badgeColors.bg,
-                foreground: badgeColors.fg,
-              ),
-              if (selected.language.isNotEmpty && selected.language != 'und')
-                _MetaChip(
-                  label: selected.language.toUpperCase(),
-                  background: cs.surfaceContainerHighest,
-                  foreground: cs.onSurfaceVariant,
-                ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _TrackOptionTile<T> extends StatelessWidget {
-  const _TrackOptionTile({
-    required this.value,
-    required this.selected,
-    required this.track,
-    required this.padding,
-    required this.onDelete,
-  });
-
-  final T value;
-  final bool selected;
-  final TranscriptTrack track;
-  final EdgeInsetsGeometry padding;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    final label = _trackLabel(track);
-    final badgeColors = _providerBadgeColors(cs, track.source);
-
-    return Padding(
-      padding: padding,
-      child: Material(
-        color: selected
-            ? cs.primaryContainer.withValues(alpha: 0.34)
-            : cs.surfaceContainerHighest.withValues(alpha: 0.28),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(t.radiusSm),
-          side: BorderSide(
-            color: selected
-                ? cs.primary.withValues(alpha: 0.42)
-                : cs.outlineVariant.withValues(alpha: 0.14),
-          ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: RadioListTile<T>(
-          value: value,
-          selected: selected,
-          contentPadding: EdgeInsets.fromLTRB(
-            t.space8,
-            t.space8,
-            t.space4,
-            t.space8,
-          ),
-          controlAffinity: ListTileControlAffinity.leading,
-          title: Text(
-            label,
-            style: tt.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
-          ),
-          subtitle: Padding(
-            padding: EdgeInsets.only(top: t.space8),
-            child: Wrap(
-              spacing: t.space8,
-              runSpacing: t.space4,
-              children: [
-                _MetaChip(
-                  label: _providerLabel(l10n, track.source),
-                  background: badgeColors.bg,
-                  foreground: badgeColors.fg,
-                ),
-                if (track.language.isNotEmpty && track.language != 'und')
-                  _MetaChip(
-                    label: track.language.toUpperCase(),
-                    background: cs.surfaceContainerHighest,
-                    foreground: cs.onSurfaceVariant,
-                  ),
-              ],
-            ),
-          ),
-          secondary: IconButton(
-            style: IconButton.styleFrom(
-              minimumSize: const Size(36, 36),
-              fixedSize: const Size(36, 36),
-              backgroundColor: cs.surface.withValues(alpha: 0.35),
-            ),
-            icon: Icon(
-              Icons.delete_outline_rounded,
-              size: 18,
-              color: cs.onSurfaceVariant,
-            ),
-            tooltip: l10n.subtitlesDeleteTrack,
-            onPressed: onDelete,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NoneOptionTile extends StatelessWidget {
-  const _NoneOptionTile({
-    required this.padding,
-    required this.label,
-    required this.selected,
-  });
-
-  final EdgeInsetsGeometry padding;
-  final String label;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: padding,
-      child: Material(
-        color: selected
-            ? cs.primaryContainer.withValues(alpha: 0.34)
-            : cs.surfaceContainerHighest.withValues(alpha: 0.28),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(t.radiusSm),
-          side: BorderSide(
-            color: selected
-                ? cs.primary.withValues(alpha: 0.42)
-                : cs.outlineVariant.withValues(alpha: 0.14),
-          ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: RadioListTile<String?>(
-          value: null,
-          selected: selected,
-          contentPadding: EdgeInsets.fromLTRB(
-            t.space8,
-            t.space12,
-            t.space12,
-            t.space12,
-          ),
-          controlAffinity: ListTileControlAffinity.leading,
-          title: Text(
-            label,
-            style: tt.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SubtitleActionsSection extends StatelessWidget {
-  const _SubtitleActionsSection({
-    required this.horizontalPadding,
-    required this.showExtractEmbedded,
-    required this.showImportFile,
-    required this.onExtractEmbedded,
-    required this.onRefreshCloud,
-    required this.onImportFile,
-  });
-
-  final double horizontalPadding;
-  final bool showExtractEmbedded;
-  final bool showImportFile;
-  final Future<void> Function() onExtractEmbedded;
-  final Future<void> Function() onRefreshCloud;
-  final Future<void> Function() onImportFile;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
-
-    final tiles = <Widget>[
-      if (showExtractEmbedded)
-        TranscriptBusyListTile(
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: t.space12,
-            vertical: t.space4,
-          ),
-          icon: Icons.subtitles_outlined,
-          title: l10n.subtitlesExtractEmbedded,
-          onTap: onExtractEmbedded,
-        ),
-      TranscriptBusyListTile(
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: t.space12,
-          vertical: t.space4,
-        ),
-        icon: Icons.cloud_download_outlined,
-        title: l10n.subtitlesRefreshCloud,
-        onTap: onRefreshCloud,
-      ),
-      if (showImportFile)
-        TranscriptBusyListTile(
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: t.space12,
-            vertical: t.space4,
-          ),
-          icon: Icons.upload_file_rounded,
-          title: l10n.subtitlesImportFile,
-          onTap: onImportFile,
-        ),
-    ];
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerLow.withValues(alpha: 0.92),
-          borderRadius: BorderRadius.circular(t.radiusLg),
-          border: Border.all(
-            color: cs.outlineVariant.withValues(alpha: 0.16),
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(t.radiusLg),
-          child: Column(
-            children: [
-              for (var i = 0; i < tiles.length; i++) ...[
-                if (i > 0)
-                  Divider(
-                    height: 1,
-                    indent: t.space16 + 24 + t.space16,
-                    endIndent: t.space16,
-                    color: cs.outlineVariant.withValues(alpha: 0.14),
-                  ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: t.space4),
-                  child: tiles[i],
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MetaChip extends StatelessWidget {
-  const _MetaChip({
-    required this.label,
-    required this.background,
-    required this.foreground,
-  });
-
-  final String label;
-  final Color background;
-  final Color foreground;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: t.space8,
-        vertical: t.space4 - 1,
-      ),
-      decoration: BoxDecoration(
-        color: background.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(t.radiusFull),
-        border: Border.all(color: foreground.withValues(alpha: 0.14)),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: foreground,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.25,
-          height: 1.1,
-        ),
-      ),
     );
   }
 }
