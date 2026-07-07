@@ -75,10 +75,10 @@ class EmptyState extends StatelessWidget {
     }
 
     return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: t.contentMaxWidth),
-        child: Padding(
-          padding: EdgeInsets.all(t.space40),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(t.space40),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: t.contentMaxWidth),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

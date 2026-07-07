@@ -37,17 +37,16 @@ void main() {
   });
 
   test(
-    'nativeGoogleSignInSupported stays hidden on iOS/macOS until '
-    'kGoogleNativeSignInConfiguredOnApple is flipped on — calling '
-    'GIDSignIn.signIn() beforehand crashes the app with an uncatchable '
-    'native exception (see docs/features/auth.md)',
+    'nativeGoogleSignInSupported is true on iOS/macOS once '
+    'kGoogleNativeSignInConfiguredOnApple is flipped on together with real '
+    'GIDClientID/CFBundleURLSchemes in Info.plist (see docs/features/auth.md)',
     () {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       addTearDown(() => debugDefaultTargetPlatformOverride = null);
-      expect(nativeGoogleSignInSupported, isFalse);
+      expect(nativeGoogleSignInSupported, isTrue);
 
       debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-      expect(nativeGoogleSignInSupported, isFalse);
+      expect(nativeGoogleSignInSupported, isTrue);
     },
   );
 }

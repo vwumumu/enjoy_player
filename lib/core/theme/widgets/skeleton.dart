@@ -198,39 +198,64 @@ class SkeletonMediaList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: t.space16, vertical: t.space8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+
+    Widget rowAt(int i) {
+      return Row(
         children: [
-          for (var i = 0; i < itemCount; i++) ...[
-            if (i > 0) SizedBox(height: t.space8),
-            Row(
+          Skeleton.box(
+            width: 56,
+            height: 56,
+            borderRadius: BorderRadius.circular(t.radiusMd),
+          ),
+          SizedBox(width: t.space16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Skeleton.box(
-                  width: 56,
-                  height: 56,
-                  borderRadius: BorderRadius.circular(t.radiusMd),
-                ),
-                SizedBox(width: t.space16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Skeleton.line(width: double.infinity, height: 16),
-                      SizedBox(height: t.space8),
-                      Skeleton.line(
-                        width: i.isEven ? 180.0 : 220.0,
-                        height: 12,
-                      ),
-                    ],
-                  ),
+                Skeleton.line(width: double.infinity, height: 16),
+                SizedBox(height: t.space8),
+                Skeleton.line(
+                  width: i.isEven ? 180.0 : 220.0,
+                  height: 12,
                 ),
               ],
             ),
-          ],
+          ),
         ],
-      ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final padding = EdgeInsets.symmetric(
+          horizontal: t.space16,
+          vertical: t.space8,
+        );
+
+        // Bounded tab bodies: scroll instead of overflowing.
+        if (constraints.maxHeight.isFinite) {
+          return ListView.separated(
+            padding: padding,
+            itemCount: itemCount,
+            separatorBuilder: (context, _) => SizedBox(height: t.space8),
+            itemBuilder: (context, i) => rowAt(i),
+          );
+        }
+
+        // Sliver/box adapters: shrink-wrap a fixed number of placeholder rows.
+        return Padding(
+          padding: padding,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < itemCount; i++) ...[
+                if (i > 0) SizedBox(height: t.space8),
+                rowAt(i),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }

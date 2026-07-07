@@ -1,37 +1,24 @@
-import 'package:enjoy_player/features/auth/data/google_sign_in_service.dart';
+import 'package:enjoy_player/features/auth/domain/auth_platform_support.dart';
+import 'package:enjoy_player/features/auth/domain/google_auth_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('GoogleSignInService.signInForIdToken', () {
+  group('GoogleSignInService Apple guard', () {
     tearDown(() => debugDefaultTargetPlatformOverride = null);
 
     test(
-      'throws before touching the native SDK on iOS while '
-      'kGoogleNativeSignInConfiguredOnApple is false, instead of letting '
-      'GIDSignIn.signIn() crash the process with an uncatchable native '
-      'exception',
-      () async {
+      'nativeGoogleSignInSupported is true on Apple targets once '
+      'kGoogleNativeSignInConfiguredOnApple is true, so sign-in UI and service '
+      'may call into the native SDK',
+      () {
+        expect(kGoogleNativeSignInConfiguredOnApple, isTrue);
+
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-        final service = GoogleSignInService();
+        expect(nativeGoogleSignInSupported, isTrue);
 
-        await expectLater(
-          service.signInForIdToken(),
-          throwsA(isA<StateError>()),
-        );
-      },
-    );
-
-    test(
-      'throws the same guard on macOS',
-      () async {
         debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-        final service = GoogleSignInService();
-
-        await expectLater(
-          service.signInForIdToken(),
-          throwsA(isA<StateError>()),
-        );
+        expect(nativeGoogleSignInSupported, isTrue);
       },
     );
   });

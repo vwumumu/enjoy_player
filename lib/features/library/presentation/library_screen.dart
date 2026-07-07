@@ -115,33 +115,22 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         ? Duration.zero
         : const Duration(milliseconds: 220);
 
-    Widget fadeLayer({required bool visible, required Widget child}) {
-      return IgnorePointer(
-        ignoring: !visible,
-        child: AnimatedOpacity(
-          opacity: visible ? 1 : 0,
-          duration: duration,
-          curve: Curves.easeOutCubic,
-          child: child,
-        ),
-      );
-    }
+    final child = switch (source) {
+      LibrarySource.local => LocalLibraryTabView(
+        key: const ValueKey('library-local-body'),
+        tabController: _localKindController,
+      ),
+      LibrarySource.cloud => CloudLibraryBody(
+        key: _cloudBodyKey,
+        tabController: _cloudKindController,
+      ),
+    };
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        fadeLayer(
-          visible: source == LibrarySource.local,
-          child: LocalLibraryTabView(tabController: _localKindController),
-        ),
-        fadeLayer(
-          visible: source == LibrarySource.cloud,
-          child: CloudLibraryBody(
-            key: _cloudBodyKey,
-            tabController: _cloudKindController,
-          ),
-        ),
-      ],
+    return AnimatedSwitcher(
+      duration: duration,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeOutCubic,
+      child: child,
     );
   }
 

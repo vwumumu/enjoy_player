@@ -54,7 +54,7 @@
 	  release currently ships this Info.plist verbatim into the .app too).
 	-->
 	<key>GIDClientID</key>
-	<string>REPLACE_WITH_MACOS_OAUTH_CLIENT_ID.apps.googleusercontent.com</string>
+	<string>93185289922-ostq1e99j92mq3l5dokeb904rgetkcvu.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -70,7 +70,7 @@
 			<string>ai.enjoy.player.google-signin</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>replace-with-reversed-macos-client-id</string>
+				<string>com.googleusercontent.apps.93185289922-ostq1e99j92mq3l5dokeb904rgetkcvu</string>
 			</array>
 		</dict>
 	</array>
