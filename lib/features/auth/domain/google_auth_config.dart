@@ -33,4 +33,4 @@ const String kGoogleWebClientId =
 /// Flip this to `true` in the same change that fills in the real
 /// `GIDClientID`/`CFBundleURLSchemes` values (see
 /// `docs/features/auth.md#google-oauth-client-setup-manual-one-time`).
-const bool kGoogleNativeSignInConfiguredOnApple = false;
+const bool kGoogleNativeSignInConfiguredOnApple = true;
