@@ -698,8 +698,6 @@
   "syncScreenRetryFailed": "重试失败项",
   "syncScreenSignedOutBody": "使用 Enjoy 账号登录以在设备间同步元数据。",
   "syncScreenGoSignIn": "登录",
-  "syncPendingRekeyLabel": "导入待关联账号",
-  "syncPendingRekeyHint": "这些项目在退出登录状态下添加。登录后将关联到你的账号并排队上传。",
   "cloudScreenTitle": "云端",
   "cloudTabAudio": "音频",
   "cloudTabVideo": "视频",

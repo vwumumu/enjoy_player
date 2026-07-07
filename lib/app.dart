@@ -34,19 +34,19 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 /// tapped button's callback, so the meaningful test for this logic runs
 /// with a real event loop instead of pumped widget frames.
 Future<RecoveryResetOutcome> performRecoveryReset(Ref ref) async {
-  // Close whatever Drift connection is currently open (guest or the
+  // Close whatever Drift connection is currently open (device-global or the
   // signed-in user's per-user DB) before touching files on disk — some
   // platforms refuse to delete a file that's still memory-mapped by an
   // open connection.
   try {
-    await ref.read(appDatabaseProvider).close();
+    await closeAndClearAllAppDatabases();
   } on Object {
     // Never opened / already closed — fine, we're about to delete the file.
   }
 
   final outcome = await resetLocalLibraryWithBackup();
   if (outcome == RecoveryResetOutcome.success) {
-    ref.invalidate(guestAppDatabaseProvider);
+    ref.invalidate(deviceGlobalAppDatabaseProvider);
     ref.invalidate(appDatabaseProvider);
     ref.invalidate(appPreferencesCtrlProvider);
   }

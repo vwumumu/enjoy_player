@@ -1604,12 +1604,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get syncScreenGoSignIn => '登录';
 
   @override
-  String get syncPendingRekeyLabel => '导入待关联账号';
-
-  @override
-  String get syncPendingRekeyHint => '这些项目在退出登录状态下添加。登录后将关联到你的账号并排队上传。';
-
-  @override
   String get cloudScreenTitle => '云端';
 
   @override
@@ -3501,12 +3495,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get syncScreenGoSignIn => '登录';
-
-  @override
-  String get syncPendingRekeyLabel => '导入待关联账号';
-
-  @override
-  String get syncPendingRekeyHint => '这些项目在退出登录状态下添加。登录后将关联到你的账号并排队上传。';
 
   @override
   String get cloudScreenTitle => '云端';

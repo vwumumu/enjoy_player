@@ -134,7 +134,7 @@ No caption availability in RSS. After import, transcript loading follows [`trans
 - ~15 recent videos per channel per RSS fetch
 - **YouTube Shorts** are excluded (RSS alternate link uses `/shorts/`)
 - Handle → `channel_id` resolution may fail if YouTube HTML changes
-- Subscriptions and feed cache are per local SQLite file (guest vs signed-in user DB)
+- Subscriptions and feed cache live in the signed-in per-user SQLite file (`enjoy_player_<userId>`)
 - Avatar LRU cache is per-process (not per-DB); the 256-entry cap evicts
   the least-recently-used channel id on overflow
 

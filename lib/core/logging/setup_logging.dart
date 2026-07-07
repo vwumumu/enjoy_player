@@ -21,7 +21,7 @@ bool _loggingHooked = false;
 
 /// Call once after [WidgetsFlutterBinding.ensureInitialized].
 ///
-/// Call [DiagnosticLogConfig.loadFromGuestSettings] before this when possible.
+/// Call [DiagnosticLogConfig.loadFromDeviceGlobalSettings] before this when possible.
 Future<void> setupAppLogging() async {
   if (_loggingHooked) return;
   _loggingHooked = true;

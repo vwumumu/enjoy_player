@@ -20,7 +20,6 @@ import 'package:enjoy_player/features/settings/presentation/widgets/settings_lay
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_layout_two_pane.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_section_rail_item.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
-import 'package:enjoy_player/features/sync/application/pending_rekey_provider.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -95,7 +94,7 @@ Widget _twoPaneHarness() {
 Widget _singleColumnHarness(AppDatabase db) {
   return _themedApp(
     overrides: [
-      guestAppDatabaseProvider.overrideWithValue(db),
+      deviceGlobalAppDatabaseProvider.overrideWithValue(db),
       appDatabaseProvider.overrideWithValue(db),
       authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
       appPreferencesCtrlProvider.overrideWith(_FakePrefsCtrl.new),
@@ -115,7 +114,6 @@ Widget _singleColumnHarness(AppDatabase db) {
         ),
       ),
       syncLastFullSyncAtProvider.overrideWith((ref) async => null),
-      pendingRekeyRowCountProvider.overrideWith((ref) => Stream.value(0)),
     ],
     home: const SettingsScreen(),
   );

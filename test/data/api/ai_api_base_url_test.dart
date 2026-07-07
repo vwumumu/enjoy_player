@@ -24,7 +24,7 @@ void main() {
     addTearDown(db.close);
 
     container = ProviderContainer(
-      overrides: [guestAppDatabaseProvider.overrideWithValue(db)],
+      overrides: [deviceGlobalAppDatabaseProvider.overrideWithValue(db)],
     );
     addTearDown(container.dispose);
   });

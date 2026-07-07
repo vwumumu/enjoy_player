@@ -1675,13 +1675,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncScreenGoSignIn => 'Sign in';
 
   @override
-  String get syncPendingRekeyLabel => 'Imports pending account link';
-
-  @override
-  String get syncPendingRekeyHint =>
-      'These items were added while signed out. They will be linked to your account and queued for upload after you sign in.';
-
-  @override
   String get cloudScreenTitle => 'Cloud';
 
   @override

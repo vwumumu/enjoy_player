@@ -16,12 +16,18 @@ part 'app_database_provider.g.dart';
 
 /// Maximum number of per-user [AppDatabase] instances kept open simultaneously.
 ///
-/// Only the guest DB and the most recently used per-user DB need to be live at
-/// the same time — signing in as a new user closes the previous one. Two is
-/// enough because the guest DB is owned by [guestAppDatabaseProvider] (a
-/// separate keep-alive provider with its own onDispose), and only one
-/// per-user DB is "current" at a time. Anything older is evicted.
+/// Only the device-global settings DB and the most recently used per-user DB
+/// need to be live at the same time — signing in as a new user closes the
+/// previous one. Two is enough because the device-global DB is owned by
+/// [deviceGlobalAppDatabaseProvider] (a separate keep-alive provider with its
+/// own onDispose), and only one per-user DB is "current" at a time. Anything
+/// older is evicted.
 const int _kMaxUserSessionDatabases = 2;
+
+/// Process-wide device-global [AppDatabase] (`enjoy_player.sqlite`) — Drift
+/// warns when two instances wrap the same `driftDatabase(name: …)` executor.
+AppDatabase? _deviceGlobalDatabaseInstance;
+int _deviceGlobalDatabaseRefCount = 0;
 
 /// One [AppDatabase] per signed-in session name — avoids constructing a new
 /// [AppDatabase] on every [appDatabase] rebuild (Drift multiple-instances warning).
@@ -31,44 +37,98 @@ const int _kMaxUserSessionDatabases = 2;
 final LinkedHashMap<String, AppDatabase> _userSessionDatabases =
     LinkedHashMap<String, AppDatabase>();
 
-/// Drift file base name for the current auth session (guest vs per-user).
-///
-/// Used with [AuthCtrl] `.select` so [appDatabase] does not rebuild on every
-/// profile refresh — otherwise a second [AppDatabase] can wrap the same
-/// `driftDatabase` executor and trigger Drift's multiple-databases warning.
-String _sessionDbBaseName(AsyncValue<AuthState> auth) {
+AppDatabase _acquireDeviceGlobalDatabase() {
+  _deviceGlobalDatabaseRefCount++;
+  return _deviceGlobalDatabaseInstance ??=
+      AppDatabase(name: AppDatabase.deviceGlobalDatabaseName);
+}
+
+Future<void> _releaseDeviceGlobalDatabase() async {
+  if (_deviceGlobalDatabaseRefCount <= 0) return;
+  _deviceGlobalDatabaseRefCount--;
+  // Intentionally keep [_deviceGlobalDatabaseInstance] open until
+  // [closeAndClearAllAppDatabases] — closing on every Riverpod dispose
+  // (widget tests, hot restart) and re-opening the same drift file triggers
+  // Drift's multiple-[AppDatabase] warning while the prior close is still
+  // settling.
+}
+
+/// Closes every open device-global / per-user [AppDatabase] and clears caches.
+Future<void> closeAndClearAllAppDatabases() async {
+  _deviceGlobalDatabaseRefCount = 0;
+  final deviceGlobal = _deviceGlobalDatabaseInstance;
+  _deviceGlobalDatabaseInstance = null;
+
+  final userDbs = List<AppDatabase>.from(_userSessionDatabases.values);
+  _userSessionDatabases.clear();
+
+  final toClose = <AppDatabase>{};
+  if (deviceGlobal != null) toClose.add(deviceGlobal);
+  toClose.addAll(userDbs);
+
+  for (final db in toClose) {
+    try {
+      await db.close();
+    } on Object {
+      // Best-effort — recovery is about to delete files anyway.
+    }
+  }
+}
+
+/// Signed-in user's Drift file base name, or `null` when unauthenticated.
+String? _signedInSessionDbBaseName(AsyncValue<AuthState> auth) {
   return auth.when(
     data: (state) {
       if (state is AuthSignedIn && state.profile.id.isNotEmpty) {
         final safe = _sanitizeUserIdForDbName(state.profile.id);
-        return '${AppDatabase.guestDatabaseName}_$safe';
+        return '${AppDatabase.deviceGlobalDatabaseName}_$safe';
       }
-      return AppDatabase.guestDatabaseName;
+      return null;
     },
-    loading: () => AppDatabase.guestDatabaseName,
-    error: (Object? error, StackTrace stackTrace) =>
-        AppDatabase.guestDatabaseName,
+    loading: () => null,
+    error: (Object? error, StackTrace stackTrace) => null,
   );
 }
 
-/// Device-global Drift DB (`enjoy_player`) — API base URL and other non-user data.
+/// Device-global Drift DB (`enjoy_player`) — API base URL, diagnostics, and
+/// other settings that must be readable before sign-in (ADR-0012, ADR-0031).
 ///
 /// Kept separate from [appDatabaseProvider] so [ApiBaseUrl] does not depend on
 /// auth-scoped DB (avoids Riverpod cycles with [authCtrlProvider]).
 @Riverpod(keepAlive: true)
-AppDatabase guestAppDatabase(Ref ref) {
-  final db = AppDatabase(name: AppDatabase.guestDatabaseName);
-  ref.onDispose(db.close);
+AppDatabase deviceGlobalAppDatabase(Ref ref) {
+  final db = _acquireDeviceGlobalDatabase();
+  ref.onDispose(() {
+    unawaited(_releaseDeviceGlobalDatabase());
+  });
   return db;
 }
 
-/// Per-session library + prefs: guest file when signed out; `enjoy_player_<userId>` when signed in.
+/// Short-lived device-global DB access before [ProviderScope] exists (startup).
+Future<T> withDeviceGlobalAppDatabaseForBootstrap<T>(
+  Future<T> Function(AppDatabase db) run,
+) async {
+  final db = _acquireDeviceGlobalDatabase();
+  try {
+    return await run(db);
+  } finally {
+    await _releaseDeviceGlobalDatabase();
+  }
+}
+
+/// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
+/// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
+/// device-global settings.
 @Riverpod(keepAlive: true)
 AppDatabase appDatabase(Ref ref) {
-  final sessionName = ref.watch(authCtrlProvider.select(_sessionDbBaseName));
-
-  if (sessionName == AppDatabase.guestDatabaseName) {
-    return ref.watch(guestAppDatabaseProvider);
+  final sessionName = ref.watch(
+    authCtrlProvider.select(_signedInSessionDbBaseName),
+  );
+  if (sessionName == null) {
+    throw StateError(
+      'appDatabaseProvider requires AuthSignedIn; '
+      'use deviceGlobalAppDatabaseProvider for device-global settings.',
+    );
   }
 
   // Re-inserting an existing key moves it to the end (most recently used) so

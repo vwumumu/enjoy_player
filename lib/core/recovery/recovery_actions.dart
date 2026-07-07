@@ -97,7 +97,7 @@ bool _runAndCheck(String exe, List<String> args) {
 
 /// Directory where `drift_flutter`'s `driftDatabase()` places local SQLite
 /// files by default. [AppDatabase] never passes `native:` overrides, so
-/// every `.sqlite` file (guest + per-user) lives directly here — *not*
+/// every `.sqlite` file (device-global + per-user) lives directly here — *not*
 /// under `getApplicationSupportDirectory()/databases/`, which is a
 /// different directory that nothing in this app actually writes SQLite
 /// files into.
@@ -124,7 +124,7 @@ Future<String?> backupLocalDatabaseFile() async {
       await backupDir.create(recursive: true);
     }
     final source = File(
-      p.join(dbDir.path, '${AppDatabase.guestDatabaseName}.sqlite'),
+      p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite'),
     );
     if (!source.existsSync()) {
       return null;
@@ -153,9 +153,9 @@ Future<void> wipeLocalDatabaseFiles() async {
       return;
     }
     final candidates = <String>{
-      '${AppDatabase.guestDatabaseName}.sqlite',
-      '${AppDatabase.guestDatabaseName}.sqlite-wal',
-      '${AppDatabase.guestDatabaseName}.sqlite-shm',
+      '${AppDatabase.deviceGlobalDatabaseName}.sqlite',
+      '${AppDatabase.deviceGlobalDatabaseName}.sqlite-wal',
+      '${AppDatabase.deviceGlobalDatabaseName}.sqlite-shm',
     };
     for (final entity in dbDir.listSync(followLinks: false)) {
       if (entity is! File) continue;

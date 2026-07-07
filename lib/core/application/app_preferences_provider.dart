@@ -71,6 +71,15 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
   Future<AppPreferencesState> build() async {
     final sw = Stopwatch()..start();
     _prefsLog.info('prefs: build start');
+
+    final auth = ref.watch(authCtrlProvider).valueOrNull;
+    if (auth is! AuthSignedIn) {
+      _prefsLog.info(
+        'prefs: unsigned — defaults only (${sw.elapsedMilliseconds}ms)',
+      );
+      return AppPreferencesState.initial;
+    }
+
     final db = ref.watch(appDatabaseProvider);
     var localeRaw = await db.settingsDao.getValue(SettingsKeys.prefsLocale);
     var learnRaw = await db.settingsDao.getValue(

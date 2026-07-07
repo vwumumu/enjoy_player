@@ -29,12 +29,10 @@ Future<void> _bootstrap() async {
   if (!kDebugMode) {
     installReleaseWidgetErrorBuilder();
   }
-  // Two AppDatabase instances are expected: the device-global `guest` DB
-  // (settings such as API base URL) and the per-user signed-in DB. They use
-  // separate files and separate isolate executors, so Drift's runtime check
-  // for "multiple databases" is a false positive here.
+  // Device-global settings DB + per-user signed-in DB use separate files and
+  // executors; Drift's runtime "multiple databases" check is a false positive.
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-  await DiagnosticLogConfig.loadFromGuestSettings();
+  await DiagnosticLogConfig.loadFromDeviceGlobalSettings();
   await setupAppLogging();
   _installFrameworkErrorHandlers();
   if (defaultTargetPlatform == TargetPlatform.windows) {

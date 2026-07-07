@@ -16,16 +16,13 @@ When the user opens a media item in the player **while signed in**, the app pull
 
 ### Import IDs (web parity)
 
-Local file fingerprints use the same **partial SHA-256** strategy as the Enjoy web `hashBlob` helper in `apps/web/src/db/id-generator.ts` (first / middle / last 4 MiB). Signed-in imports use `aid` / `vid` = `SHA-256(contentHash + ":" + userId)` then UUID v5 (`audio:user:{aid}` / `video:user:{vid}`), matching `generateLocalAudioAid` / `generateLocalVideoVid` on web.
-
-Imports while **signed out** use `aid`/`vid` = raw `contentHash` and `sync_status = local-pending-rekey`. On **sign-in**, [`rekeyLocalMediaRowsOnSignIn`](../../lib/features/sync/application/rekey_local_rows.dart) rewrites rows to the canonical ids and updates `transcripts`, `recordings`, `echo_sessions`, `dictations`, `transcript_fetch_states`, and `sync_queue` references, then enqueues upload where appropriate.
+Local file fingerprints use the same **partial SHA-256** strategy as the Enjoy web `hashBlob` helper in `apps/web/src/db/id-generator.ts` (first / middle / last 4 MiB). Signed-in imports use `aid` / `vid` = `SHA-256(contentHash + ":" + userId)` then UUID v5 (`audio:user:{aid}` / `video:user:{vid}`), matching `generateLocalAudioAid` / `generateLocalVideoVid` on web. Imports require a signed-in session (ADR-0031); there is no signed-out import or re-key path.
 
 ## Sync status (Settings)
 
 **Settings → Cloud sync → Sync status** opens a screen that:
 
 - Streams live counts from the local `sync_queue` table (**waiting to upload** vs **failed permanently** after max retries).
-- Shows how many library rows are still **`local-pending-rekey`** (imported offline, waiting for the next sign-in migration).
 - Shows **last successful full sync** time (stored in settings KV as `sync.last_full_sync_at` after a successful `fullSync`).
 - Offers **Sync now** (queue processing only) and **Retry failed items** (resets exhausted rows then runs `fullSync`).
 
@@ -33,8 +30,7 @@ When signed out, the sync screen explains that sign-in is required and links to 
 
 ## Triggers
 
-- Signing in schedules **re-key** (if needed) then [`SyncEngine.fullSync`](../../lib/features/sync/application/sync_engine.dart) via [`SyncCtrl`](../../lib/features/sync/application/sync_controller.dart) on the **first frame after** auth transitions to signed-in (`addPostFrameCallback`).
-- **Re-key** runs pending `local-pending-rekey` video/audio rows inside a **single Drift transaction** so dependent tables update in one batch (fewer `watchAll` emissions than per-row transactions).
+- Signing in schedules [`SyncEngine.fullSync`](../../lib/features/sync/application/sync_engine.dart) via [`SyncCtrl`](../../lib/features/sync/application/sync_controller.dart) on the **first frame after** auth transitions to signed-in (`addPostFrameCallback`).
 - While signed in, queue drain repeats on a **5-minute** timer.
 - Library import/delete and shadow-reading recording save/delete call [`syncEnqueueProvider`](../../lib/features/sync/application/sync_providers.dart).
 

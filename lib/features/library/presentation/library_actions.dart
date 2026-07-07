@@ -91,12 +91,12 @@ Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
 
   try {
     final auth = ref.read(authCtrlProvider).valueOrNull;
-    final userId = auth is AuthSignedIn ? auth.profile.id : null;
+    if (auth is! AuthSignedIn) return;
     final id = await ref
         .read(mediaLibraryRepositoryProvider)
         .importMedia(
           XFile(path),
-          signedInUserId: userId,
+          signedInUserId: auth.profile.id,
           contentLanguage: contentLanguage,
         );
     if (!context.mounted) return;
@@ -284,12 +284,11 @@ Future<void> importYoutubeFromDialog(
 
   try {
     final auth = ref.read(authCtrlProvider).valueOrNull;
-    final userId = auth is AuthSignedIn ? auth.profile.id : null;
+    if (auth is! AuthSignedIn) return;
     final id = await ref
         .read(mediaLibraryRepositoryProvider)
         .importYoutubeVideo(
           submitted,
-          signedInUserId: userId,
           contentLanguage: contentLanguage,
         );
     if (!context.mounted) return;

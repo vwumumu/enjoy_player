@@ -3171,18 +3171,6 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get syncScreenGoSignIn;
 
-  /// No description provided for @syncPendingRekeyLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Imports pending account link'**
-  String get syncPendingRekeyLabel;
-
-  /// No description provided for @syncPendingRekeyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'These items were added while signed out. They will be linked to your account and queued for upload after you sign in.'**
-  String get syncPendingRekeyHint;
-
   /// No description provided for @cloudScreenTitle.
   ///
   /// In en, this message translates to:

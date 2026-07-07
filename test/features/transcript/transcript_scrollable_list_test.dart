@@ -1,4 +1,7 @@
+import 'package:drift/native.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
@@ -13,6 +16,13 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 const _mediaId = 'media-scroll-test';
+
+late AppDatabase _scrollTestDb;
+
+List<Override> _scrollTestDbOverrides() => [
+  deviceGlobalAppDatabaseProvider.overrideWithValue(_scrollTestDb),
+  appDatabaseProvider.overrideWithValue(_scrollTestDb),
+];
 
 class _TestHighlightIndexNotifier extends Notifier<int> {
   @override
@@ -34,13 +44,25 @@ List<TranscriptLine> _sampleLines(int count) => List.generate(
   ),
 );
 
+Future<void> _disposeHarness(WidgetTester tester) async {
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 50));
+}
+
 List<Override> _scrollTestOverrides({
   int highlightIndex = 0,
   Map<int, int>? recordingCounts,
   bool echoLinkedRecordingCounts = false,
+  List<TranscriptLine>? lines,
 }) {
+  final lineList = lines ?? const <TranscriptLine>[];
   return [
+    ..._scrollTestDbOverrides(),
     playerIsPlayingProvider.overrideWith((ref) => Stream.value(true)),
+    transcriptLinesForMediaProvider(
+      _mediaId,
+    ).overrideWith((ref) => Stream.value(lineList)),
     secondaryTranscriptLinesForMediaProvider(
       _mediaId,
     ).overrideWith((ref) => Stream.value(const <TranscriptLine>[])),
@@ -60,9 +82,15 @@ List<Override> _scrollTestOverrides({
   ];
 }
 
-List<Override> _scrollTestOverridesWithMutableHighlight() {
+List<Override> _scrollTestOverridesWithMutableHighlight({
+  required List<TranscriptLine> lines,
+}) {
   return [
+    ..._scrollTestDbOverrides(),
     playerIsPlayingProvider.overrideWith((ref) => Stream.value(true)),
+    transcriptLinesForMediaProvider(
+      _mediaId,
+    ).overrideWith((ref) => Stream.value(lines)),
     secondaryTranscriptLinesForMediaProvider(
       _mediaId,
     ).overrideWith((ref) => Stream.value(const <TranscriptLine>[])),
@@ -137,6 +165,14 @@ class _EchoLineAdvanceHarnessState
 }
 
 void main() {
+  setUp(() {
+    _scrollTestDb = AppDatabase(executor: NativeDatabase.memory());
+  });
+
+  tearDown(() async {
+    await _scrollTestDb.close();
+  });
+
   testWidgets('rapid echo line changes do not throw framework assertions', (
     tester,
   ) async {
@@ -144,7 +180,7 @@ void main() {
 
     await tester.pumpWidget(
       _harness(
-        overrides: _scrollTestOverrides(),
+        overrides: _scrollTestOverrides(lines: lines),
         child: _EchoLineAdvanceHarness(lines: lines),
       ),
     );
@@ -156,6 +192,7 @@ void main() {
     }
 
     expect(find.text('Transcript line 5'), findsOneWidget);
+    await _disposeHarness(tester);
   });
 
   testWidgets('recording count updates during echo navigation stay stable', (
@@ -166,7 +203,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: _scrollTestOverrides(echoLinkedRecordingCounts: true),
+        overrides: _scrollTestOverrides(
+          echoLinkedRecordingCounts: true,
+          lines: lines,
+        ),
         child: Builder(
           builder: (context) {
             container = ProviderScope.containerOf(context);
@@ -212,6 +252,7 @@ void main() {
     }
 
     expect(find.text('4'), findsOneWidget);
+    await _disposeHarness(tester);
   });
 
   testWidgets(
@@ -222,7 +263,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: _scrollTestOverrides(highlightIndex: 2),
+          overrides: _scrollTestOverrides(highlightIndex: 2, lines: lines),
           child: Builder(
             builder: (context) {
               container = ProviderScope.containerOf(context);
@@ -280,7 +321,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: _scrollTestOverridesWithMutableHighlight(),
+        overrides: _scrollTestOverridesWithMutableHighlight(lines: lines),
         child: Builder(
           builder: (context) {
             container = ProviderScope.containerOf(context);
@@ -332,5 +373,6 @@ void main() {
     expect(viewportRect.overlaps(activeRect), isTrue);
     expect(activeRect.top, greaterThan(viewportRect.top + 24));
     expect(activeRect.bottom, lessThan(viewportRect.bottom));
+    await _disposeHarness(tester);
   });
 }

@@ -13,7 +13,6 @@ import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_row.dart';
-import 'package:enjoy_player/features/sync/application/pending_rekey_provider.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -122,7 +121,6 @@ class _SignedInBody extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
     final snapshotAsync = ref.watch(syncQueueSnapshotProvider);
     final lastSyncAsync = ref.watch(syncLastFullSyncAtProvider);
-    final pendingRekeyAsync = ref.watch(pendingRekeyRowCountProvider);
 
     final dateFmt = DateFormat.yMMMd().add_jm();
 
@@ -147,32 +145,6 @@ class _SignedInBody extends ConsumerWidget {
                 showChevron: false,
                 valueBadge: lastSyncAsync.when(
                   data: (iso) => SettingsValuePill(label: lastSyncLine(l10n, iso)),
-                  loading: () => const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  error: (e, _) => SettingsValuePill(
-                    icon: Icons.error_outline_rounded,
-                    label: l10n.error,
-                    foregroundColor: cs.error,
-                  ),
-                ),
-              ),
-              const SettingsRowDivider(insetForLeading: false),
-              SettingsRow(
-                leadingIcon: Icons.link_rounded,
-                title: l10n.syncPendingRekeyLabel,
-                subtitle: pendingRekeyAsync.maybeWhen(
-                  data: (count) => count > 0 ? l10n.syncPendingRekeyHint : null,
-                  orElse: () => null,
-                ),
-                showChevron: false,
-                valueBadge: pendingRekeyAsync.when(
-                  data: (count) => SettingsValuePill(
-                    label: '$count',
-                    foregroundColor: count > 0 ? cs.primary : null,
-                  ),
                   loading: () => const SizedBox(
                     height: 18,
                     width: 18,

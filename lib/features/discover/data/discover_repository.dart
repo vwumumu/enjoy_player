@@ -233,7 +233,6 @@ class DiscoverRepository {
 
   Future<String> addFeedEntryToLibrary(
     FeedEntry entry, {
-    String? signedInUserId,
     String? contentLanguage,
   }) async {
     final library = _libraryRepository;
@@ -251,7 +250,6 @@ class DiscoverRepository {
     }
     return library.importYoutubeVideo(
       entry.videoId,
-      signedInUserId: signedInUserId,
       prefetchedTitle: entry.title,
       prefetchedThumbnailUrl: entry.thumbnailUrl,
       contentLanguage: lang ?? kUnknownMediaLanguageTag,

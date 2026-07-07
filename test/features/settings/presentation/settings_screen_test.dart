@@ -16,7 +16,6 @@ import 'package:enjoy_player/features/settings/presentation/settings_screen.dart
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_layout_single_column.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_layout_two_pane.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
-import 'package:enjoy_player/features/sync/application/pending_rekey_provider.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -43,14 +42,14 @@ class _FakeRecordingInputDeviceCtrl extends RecordingInputDeviceCtrl {
       );
 }
 
-/// Common test overrides. Sync/rekey providers are pinned to static values
+/// Common test overrides. Sync providers are pinned to static values
 /// (rather than left to hit real drift `.watch()` streams) so widget tests
 /// can safely dispose without tripping flutter_test's pending-timer check.
 ///
 /// (Untyped: Riverpod 3.x's `Override` type isn't part of its public API.)
 // ignore: strict_top_level_inference
 _settingsTestOverrides(AppDatabase db) => [
-  guestAppDatabaseProvider.overrideWithValue(db),
+  deviceGlobalAppDatabaseProvider.overrideWithValue(db),
   appDatabaseProvider.overrideWithValue(db),
   authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
   appPreferencesCtrlProvider.overrideWith(_StaticPrefsCtrl.new),
@@ -67,7 +66,6 @@ _settingsTestOverrides(AppDatabase db) => [
     ),
   ),
   syncLastFullSyncAtProvider.overrideWith((ref) async => null),
-  pendingRekeyRowCountProvider.overrideWith((ref) => Stream.value(0)),
 ];
 
 Widget _harness({required AppDatabase db}) {

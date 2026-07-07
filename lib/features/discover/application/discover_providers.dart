@@ -267,10 +267,11 @@ Future<String> addDiscoverFeedEntryToLibrary(
   String? contentLanguage,
 }) async {
   final auth = ref.read(authCtrlProvider).valueOrNull;
-  final userId = auth is AuthSignedIn ? auth.profile.id : null;
+  if (auth is! AuthSignedIn) {
+    throw StateError('addDiscoverFeedEntryToLibrary requires AuthSignedIn');
+  }
   return ref.read(discoverRepositoryProvider).addFeedEntryToLibrary(
     entry,
-    signedInUserId: userId,
     contentLanguage: contentLanguage,
   );
 }

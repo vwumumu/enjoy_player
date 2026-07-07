@@ -42,7 +42,7 @@ Widget _harness({required AppDatabase db, required String learningLanguage}) {
   );
   return ProviderScope(
     overrides: [
-      guestAppDatabaseProvider.overrideWithValue(db),
+      deviceGlobalAppDatabaseProvider.overrideWithValue(db),
       appDatabaseProvider.overrideWithValue(db),
       authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
       appPreferencesCtrlProvider.overrideWith(

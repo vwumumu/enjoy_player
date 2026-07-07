@@ -867,8 +867,6 @@
   "syncScreenRetryFailed": "Retry failed items",
   "syncScreenSignedOutBody": "Sign in with your Enjoy account to sync metadata across devices.",
   "syncScreenGoSignIn": "Sign in",
-  "syncPendingRekeyLabel": "Imports pending account link",
-  "syncPendingRekeyHint": "These items were added while signed out. They will be linked to your account and queued for upload after you sign in.",
   "cloudScreenTitle": "Cloud",
   "cloudTabAudio": "Audio",
   "cloudTabVideo": "Video",

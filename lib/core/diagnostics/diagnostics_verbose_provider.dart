@@ -31,14 +31,14 @@ Future<void> writeDiagnosticsVerboseEnabledToDb(
 class DiagnosticsVerbose extends _$DiagnosticsVerbose {
   @override
   Future<bool> build() async {
-    final db = ref.watch(guestAppDatabaseProvider);
+    final db = ref.watch(deviceGlobalAppDatabaseProvider);
     final enabled = await readDiagnosticsVerboseEnabledFromDb(db);
     DiagnosticLogConfig.setVerboseEnabled(enabled);
     return enabled;
   }
 
   Future<void> setEnabled(bool enabled) async {
-    final db = ref.read(guestAppDatabaseProvider);
+    final db = ref.read(deviceGlobalAppDatabaseProvider);
     await writeDiagnosticsVerboseEnabledToDb(db, enabled: enabled);
     DiagnosticLogConfig.setVerboseEnabled(enabled);
     state = AsyncData(enabled);

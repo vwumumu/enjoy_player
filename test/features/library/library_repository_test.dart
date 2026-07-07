@@ -19,6 +19,8 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 
 import '../../support/test_path_provider.dart';
 
+const _testUserId = 'test-user';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -79,17 +81,24 @@ void main() {
     test('importMedia stores file and returns deterministic id', () async {
       final bytes = utf8.encode('hello-import');
       final hash = sha256.convert(bytes).toString();
-      final expectedId = enjoyAudioId(aid: hash);
+      final expectedAid = enjoyLocalAudioAid(
+        contentHashHex: hash,
+        userId: _testUserId,
+      );
+      final expectedId = enjoyAudioId(aid: expectedAid);
 
       final src = File(p.join(root.path, 'lesson.mp3'));
       await src.writeAsBytes(bytes);
 
-      final id = await repo.importMedia(XFile(src.path));
+      final id = await repo.importMedia(
+        XFile(src.path),
+        signedInUserId: _testUserId,
+      );
       expect(id, expectedId);
 
       final media = await repo.getById(id);
       expect(media, isNotNull);
-      expect(media!.contentHash, hash);
+      expect(media!.contentHash, expectedAid);
       expect(media.kind, MediaKind.audio);
     });
 
@@ -98,7 +107,10 @@ void main() {
       await src.writeAsBytes([1, 2, 3]);
 
       await expectLater(
-        repo.importMedia(XFile(src.path, name: 'photo.jpg')),
+        repo.importMedia(
+          XFile(src.path, name: 'photo.jpg'),
+          signedInUserId: _testUserId,
+        ),
         throwsA(isA<UnsupportedImportFileFailure>()),
       );
 
@@ -496,6 +508,7 @@ void main() {
 
       final id = await repo.importMedia(
         XFile(src.path),
+        signedInUserId: _testUserId,
         contentLanguage: 'ja',
       );
       final media = await repo.getById(id);

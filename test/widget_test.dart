@@ -81,7 +81,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          guestAppDatabaseProvider.overrideWithValue(db),
+          deviceGlobalAppDatabaseProvider.overrideWithValue(db),
           appDatabaseProvider.overrideWithValue(db),
           authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
           appPreferencesCtrlProvider.overrideWith(_StaticPrefsCtrl.new),

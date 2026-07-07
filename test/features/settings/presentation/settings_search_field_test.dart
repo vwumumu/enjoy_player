@@ -12,7 +12,6 @@ import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_screen.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
-import 'package:enjoy_player/features/sync/application/pending_rekey_provider.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -72,7 +71,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          guestAppDatabaseProvider.overrideWithValue(db),
+          deviceGlobalAppDatabaseProvider.overrideWithValue(db),
           appDatabaseProvider.overrideWithValue(db),
           authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
           appPreferencesCtrlProvider.overrideWith(_StaticPrefsCtrl.new),
@@ -89,7 +88,6 @@ void main() {
             ),
           ),
           syncLastFullSyncAtProvider.overrideWith((ref) async => null),
-          pendingRekeyRowCountProvider.overrideWith((ref) => Stream.value(0)),
         ],
         child: MaterialApp(
           theme: ThemeData(

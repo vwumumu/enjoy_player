@@ -41,7 +41,7 @@ final class UpdateCtrlProvider
   }
 }
 
-String _$updateCtrlHash() => r'b02167e7ec95ee9b01468b433d3b7c2ca650e489';
+String _$updateCtrlHash() => r'47e02f6cea9856bc03465e9b3458209551b3aa7a';
 
 abstract class _$UpdateCtrl extends $Notifier<UpdateCheckResult?> {
   UpdateCheckResult? build();

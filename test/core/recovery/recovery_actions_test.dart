@@ -91,10 +91,10 @@ void main() {
     });
 
     test(
-      'backupLocalDatabaseFile copies the guest DB and returns its path',
+      'backupLocalDatabaseFile copies the device-global DB and returns its path',
       () async {
         final dbFile = File(
-          p.join(dbDir.path, '${AppDatabase.guestDatabaseName}.sqlite'),
+          p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite'),
         );
         await dbFile.writeAsString('sqlite-blob');
         final backup = await backupLocalDatabaseFile();
@@ -114,11 +114,11 @@ void main() {
     );
 
     test(
-      'wipeLocalDatabaseFiles removes the guest + wal + shm files',
+      'wipeLocalDatabaseFiles removes the device-global + wal + shm files',
       () async {
         for (final ext in <String>['', '-wal', '-shm']) {
           await File(
-            p.join(dbDir.path, '${AppDatabase.guestDatabaseName}.sqlite$ext'),
+            p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite$ext'),
           ).writeAsString('x');
         }
         // Add an unrelated file to make sure we don't over-delete.
@@ -129,10 +129,10 @@ void main() {
         for (final ext in <String>['', '-wal', '-shm']) {
           expect(
             File(
-              p.join(dbDir.path, '${AppDatabase.guestDatabaseName}.sqlite$ext'),
+              p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite$ext'),
             ).existsSync(),
             isFalse,
-            reason: 'guest DB $ext should be deleted',
+            reason: 'device-global DB $ext should be deleted',
           );
         }
         expect(
@@ -147,7 +147,7 @@ void main() {
       'wipeLocalDatabaseFiles also removes per-user session DB files',
       () async {
         final perUserFile = File(
-          p.join(dbDir.path, '${AppDatabase.guestDatabaseName}_abc123.sqlite'),
+          p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}_abc123.sqlite'),
         );
         await perUserFile.writeAsString('x');
 
@@ -169,13 +169,13 @@ void main() {
       'resetLocalLibraryWithBackup returns success when the DB can be backed up',
       () async {
         await File(
-          p.join(dbDir.path, '${AppDatabase.guestDatabaseName}.sqlite'),
+          p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite'),
         ).writeAsString('sqlite-blob');
         final outcome = await resetLocalLibraryWithBackup();
         expect(outcome, RecoveryResetOutcome.success);
         expect(
           File(
-            p.join(dbDir.path, '${AppDatabase.guestDatabaseName}.sqlite'),
+            p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite'),
           ).existsSync(),
           isFalse,
         );

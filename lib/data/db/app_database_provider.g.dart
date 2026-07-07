@@ -8,39 +8,42 @@ part of 'app_database_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Device-global Drift DB (`enjoy_player`) — API base URL and other non-user data.
+/// Device-global Drift DB (`enjoy_player`) — API base URL, diagnostics, and
+/// other settings that must be readable before sign-in (ADR-0012, ADR-0031).
 ///
 /// Kept separate from [appDatabaseProvider] so [ApiBaseUrl] does not depend on
 /// auth-scoped DB (avoids Riverpod cycles with [authCtrlProvider]).
 
-@ProviderFor(guestAppDatabase)
-final guestAppDatabaseProvider = GuestAppDatabaseProvider._();
+@ProviderFor(deviceGlobalAppDatabase)
+final deviceGlobalAppDatabaseProvider = DeviceGlobalAppDatabaseProvider._();
 
-/// Device-global Drift DB (`enjoy_player`) — API base URL and other non-user data.
+/// Device-global Drift DB (`enjoy_player`) — API base URL, diagnostics, and
+/// other settings that must be readable before sign-in (ADR-0012, ADR-0031).
 ///
 /// Kept separate from [appDatabaseProvider] so [ApiBaseUrl] does not depend on
 /// auth-scoped DB (avoids Riverpod cycles with [authCtrlProvider]).
 
-final class GuestAppDatabaseProvider
+final class DeviceGlobalAppDatabaseProvider
     extends $FunctionalProvider<AppDatabase, AppDatabase, AppDatabase>
     with $Provider<AppDatabase> {
-  /// Device-global Drift DB (`enjoy_player`) — API base URL and other non-user data.
+  /// Device-global Drift DB (`enjoy_player`) — API base URL, diagnostics, and
+  /// other settings that must be readable before sign-in (ADR-0012, ADR-0031).
   ///
   /// Kept separate from [appDatabaseProvider] so [ApiBaseUrl] does not depend on
   /// auth-scoped DB (avoids Riverpod cycles with [authCtrlProvider]).
-  GuestAppDatabaseProvider._()
+  DeviceGlobalAppDatabaseProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'guestAppDatabaseProvider',
+        name: r'deviceGlobalAppDatabaseProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$guestAppDatabaseHash();
+  String debugGetCreateSourceHash() => _$deviceGlobalAppDatabaseHash();
 
   @$internal
   @override
@@ -49,7 +52,7 @@ final class GuestAppDatabaseProvider
 
   @override
   AppDatabase create(Ref ref) {
-    return guestAppDatabase(ref);
+    return deviceGlobalAppDatabase(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -61,19 +64,26 @@ final class GuestAppDatabaseProvider
   }
 }
 
-String _$guestAppDatabaseHash() => r'104228fd0537e40c9dcc9276b27b47c823966b38';
+String _$deviceGlobalAppDatabaseHash() =>
+    r'86a373429642aeb371e25fd31d82629a0bef6491';
 
-/// Per-session library + prefs: guest file when signed out; `enjoy_player_<userId>` when signed in.
+/// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
+/// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
+/// device-global settings.
 
 @ProviderFor(appDatabase)
 final appDatabaseProvider = AppDatabaseProvider._();
 
-/// Per-session library + prefs: guest file when signed out; `enjoy_player_<userId>` when signed in.
+/// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
+/// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
+/// device-global settings.
 
 final class AppDatabaseProvider
     extends $FunctionalProvider<AppDatabase, AppDatabase, AppDatabase>
     with $Provider<AppDatabase> {
-  /// Per-session library + prefs: guest file when signed out; `enjoy_player_<userId>` when signed in.
+  /// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
+  /// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
+  /// device-global settings.
   AppDatabaseProvider._()
     : super(
         from: null,
@@ -107,4 +117,4 @@ final class AppDatabaseProvider
   }
 }
 
-String _$appDatabaseHash() => r'aa053e43bf8cea0faad401ab24c4f4f54373f9b3';
+String _$appDatabaseHash() => r'798886c51a483a4cf3d0a80d1bbbc5a9a764439f';

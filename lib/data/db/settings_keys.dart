@@ -36,9 +36,6 @@ abstract final class SettingsKeys {
   /// ISO-8601 UTC timestamp of last fully successful full sync (downloads + queue).
   static const String syncLastFullSyncAt = 'sync.last_full_sync_at';
 
-  /// User dismissed the guest-data migration banner (`true` / absent).
-  static const String migrationGuestDismissed = 'migration.guest_dismissed';
-
   /// ISO-8601 UTC timestamp of the last successful update feed check.
   static const String updateLastCheckAt = 'update.last_check_at';
 
@@ -71,7 +68,6 @@ abstract final class SettingsKeys {
     syncCursorVideo,
     syncCursorRecording,
     syncLastFullSyncAt,
-    migrationGuestDismissed,
     updateLastCheckAt,
     updateSnoozeUntil,
     updateSnoozeVersion,

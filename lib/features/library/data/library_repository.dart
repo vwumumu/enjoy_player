@@ -124,11 +124,10 @@ class MediaLibraryRepository {
     });
   }
 
-  /// [signedInUserId] when non-null enables web-aligned `aid`/`vid` + outbound sync.
-  /// [contentLanguage] persisted on the new row (defaults to [kUnknownMediaLanguageTag]).
+  /// Imports a local file into the signed-in user's library.
   Future<String> importMedia(
     XFile file, {
-    String? signedInUserId,
+    required String signedInUserId,
     String contentLanguage = kUnknownMediaLanguageTag,
   }) async {
     try {
@@ -141,24 +140,13 @@ class MediaLibraryRepository {
           : MediaKind.audio;
       final now = DateTime.now();
       final contentHash = result.contentHashHex;
-      final signedIn = signedInUserId != null && signedInUserId.isNotEmpty;
 
       if (kind == MediaKind.video) {
-        late final String id;
-        late final String vid;
-        late final String syncStatus;
-        if (signedIn) {
-          vid = enjoyLocalVideoVid(
-            contentHashHex: contentHash,
-            userId: signedInUserId,
-          );
-          id = enjoyVideoId(vid: vid);
-          syncStatus = 'pending';
-        } else {
-          vid = contentHash;
-          id = enjoyVideoId(vid: vid);
-          syncStatus = 'local-pending-rekey';
-        }
+        final vid = enjoyLocalVideoVid(
+          contentHashHex: contentHash,
+          userId: signedInUserId,
+        );
+        final id = enjoyVideoId(vid: vid);
         final row = VideoRow(
           id: id,
           vid: vid,
@@ -173,34 +161,22 @@ class MediaLibraryRepository {
           md5: contentHash,
           size: result.fileSize,
           mediaUrl: null,
-          syncStatus: syncStatus,
+          syncStatus: 'pending',
           serverUpdatedAt: null,
           createdAt: now,
           updatedAt: now,
         );
         await _db.videoDao.insertRow(row);
         unawaited(_probeAndPatchDuration(id, result.fileUri, video: true));
-        if (signedIn) {
-          await _enqueueSync?.call(SyncEntityType.video, id, SyncAction.create);
-        }
+        await _enqueueSync?.call(SyncEntityType.video, id, SyncAction.create);
         return id;
       }
 
-      late final String id;
-      late final String aid;
-      late final String syncStatus;
-      if (signedIn) {
-        aid = enjoyLocalAudioAid(
-          contentHashHex: contentHash,
-          userId: signedInUserId,
-        );
-        id = enjoyAudioId(aid: aid);
-        syncStatus = 'pending';
-      } else {
-        aid = contentHash;
-        id = enjoyAudioId(aid: aid);
-        syncStatus = 'local-pending-rekey';
-      }
+      final aid = enjoyLocalAudioAid(
+        contentHashHex: contentHash,
+        userId: signedInUserId,
+      );
+      final id = enjoyAudioId(aid: aid);
       final audioRow = AudioRow(
         id: id,
         aid: aid,
@@ -218,16 +194,14 @@ class MediaLibraryRepository {
         md5: contentHash,
         size: result.fileSize,
         mediaUrl: null,
-        syncStatus: syncStatus,
+        syncStatus: 'pending',
         serverUpdatedAt: null,
         createdAt: now,
         updatedAt: now,
       );
       await _db.audioDao.insertRow(audioRow);
       unawaited(_probeAndPatchDuration(id, result.fileUri, video: false));
-      if (signedIn) {
-        await _enqueueSync?.call(SyncEntityType.audio, id, SyncAction.create);
-      }
+      await _enqueueSync?.call(SyncEntityType.audio, id, SyncAction.create);
       return id;
     } on AppFailure {
       rethrow;
@@ -239,7 +213,6 @@ class MediaLibraryRepository {
   /// Imports a YouTube video by pasted URL or bare video id.
   Future<String> importYoutubeVideo(
     String rawInput, {
-    String? signedInUserId,
     String? prefetchedTitle,
     String? prefetchedThumbnailUrl,
     String contentLanguage = kUnknownMediaLanguageTag,
@@ -271,7 +244,6 @@ class MediaLibraryRepository {
 
     final rowId = enjoyVideoId(provider: 'youtube', vid: id);
     final now = DateTime.now();
-    final signedIn = signedInUserId != null && signedInUserId.isNotEmpty;
 
     final row = VideoRow(
       id: rowId,
@@ -287,15 +259,13 @@ class MediaLibraryRepository {
       md5: null,
       size: null,
       mediaUrl: 'https://www.youtube.com/watch?v=$id',
-      syncStatus: signedIn ? 'pending' : 'local-pending-rekey',
+      syncStatus: 'pending',
       serverUpdatedAt: null,
       createdAt: now,
       updatedAt: now,
     );
     await _db.videoDao.insertRow(row);
-    if (signedIn) {
-      await _enqueueSync?.call(SyncEntityType.video, rowId, SyncAction.create);
-    }
+    await _enqueueSync?.call(SyncEntityType.video, rowId, SyncAction.create);
     return rowId;
   }
 

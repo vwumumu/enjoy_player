@@ -104,7 +104,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            guestAppDatabaseProvider.overrideWithValue(db),
+            deviceGlobalAppDatabaseProvider.overrideWithValue(db),
             appDatabaseProvider.overrideWithValue(db),
             authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
             appPreferencesCtrlProvider.overrideWith(
@@ -166,13 +166,13 @@ void main() {
     });
 
     test(
-      'wipes the guest DB file and invalidates DB + prefs providers on '
+      'wipes the device-global DB file and invalidates DB + prefs providers on '
       'success',
       () async {
-        final guestDbFile = File(
-          p.join(docsDir.path, '${AppDatabase.guestDatabaseName}.sqlite'),
+        final deviceGlobalDbFile = File(
+          p.join(docsDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite'),
         );
-        guestDbFile.writeAsStringSync('not-a-real-sqlite-file');
+        deviceGlobalDbFile.writeAsStringSync('not-a-real-sqlite-file');
 
         var prefsBuildCount = 0;
         final container = ProviderContainer(
@@ -199,7 +199,7 @@ void main() {
         );
 
         expect(outcome, RecoveryResetOutcome.success);
-        expect(guestDbFile.existsSync(), isFalse);
+        expect(deviceGlobalDbFile.existsSync(), isFalse);
         // Invalidating a provider with an active listener schedules its
         // rebuild rather than running it inline, so wait for the rebuilt
         // future to settle before counting builds.

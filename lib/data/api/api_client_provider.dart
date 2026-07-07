@@ -38,7 +38,7 @@ http.Client httpClient(Ref ref) {
 class ApiBaseUrl extends _$ApiBaseUrl {
   @override
   Future<String> build() async {
-    final db = ref.watch(guestAppDatabaseProvider);
+    final db = ref.watch(deviceGlobalAppDatabaseProvider);
     final raw = await db.settingsDao.getValue(SettingsKeys.apiBaseUrl);
     return normalizeApiBaseUrl(raw ?? kDefaultApiBaseUrl, kDefaultApiBaseUrl);
   }
@@ -47,7 +47,7 @@ class ApiBaseUrl extends _$ApiBaseUrl {
   Future<void> setBaseUrl(String input) async {
     final normalized = normalizeApiBaseUrl(input, kDefaultApiBaseUrl);
     await ref
-        .read(guestAppDatabaseProvider)
+        .read(deviceGlobalAppDatabaseProvider)
         .settingsDao
         .setValue(SettingsKeys.apiBaseUrl, normalized);
     state = AsyncData(normalized);
@@ -59,7 +59,7 @@ class ApiBaseUrl extends _$ApiBaseUrl {
 class AiApiBaseUrl extends _$AiApiBaseUrl {
   @override
   Future<String> build() async {
-    final db = ref.watch(guestAppDatabaseProvider);
+    final db = ref.watch(deviceGlobalAppDatabaseProvider);
     // Worker routes (chat, ASR, translation, YouTube transcripts, …) live
     // on a separate origin from the public API, so with no persisted
     // override we always default to the worker origin. Following
@@ -82,7 +82,7 @@ class AiApiBaseUrl extends _$AiApiBaseUrl {
   Future<void> setBaseUrl(String input) async {
     final normalized = normalizeApiBaseUrl(input, kDefaultAiApiBaseUrl);
     await ref
-        .read(guestAppDatabaseProvider)
+        .read(deviceGlobalAppDatabaseProvider)
         .settingsDao
         .setValue(SettingsKeys.apiAiBaseUrl, normalized);
     state = AsyncData(normalized);
@@ -91,7 +91,7 @@ class AiApiBaseUrl extends _$AiApiBaseUrl {
 
   /// Clears the override and falls back to following [apiBaseUrlProvider].
   Future<void> clearOverride() async {
-    final db = ref.read(guestAppDatabaseProvider);
+    final db = ref.read(deviceGlobalAppDatabaseProvider);
     await db.settingsDao.deleteValue(SettingsKeys.apiAiBaseUrl);
     state = AsyncData(await ref.read(apiBaseUrlProvider.future));
     ref.invalidate(aiApiClientProvider);

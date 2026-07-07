@@ -53,22 +53,24 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase({QueryExecutor? executor, String name = guestDatabaseName})
+  AppDatabase({QueryExecutor? executor, String name = deviceGlobalDatabaseName})
     : _dbName = name,
       super(executor ?? driftDatabase(name: name));
 
-  /// Default Drift database name (guest / signed-out local data).
-  static const String guestDatabaseName = 'enjoy_player';
+  /// Drift file name for device-global settings (`enjoy_player.sqlite`).
+  ///
+  /// Per-user library data uses `enjoy_player_<userId>`.
+  static const String deviceGlobalDatabaseName = 'enjoy_player';
 
   /// Drift / sqlite file name (no path) for this instance.
   ///
   /// Used by callers (e.g. `SyncCtrl._onSignedIn`) that need to know
-  /// whether they are about to read the guest DB or a per-user DB
+  /// whether they are about to read the device-global DB or a per-user DB
   /// without having to inspect the executor.
   final String _dbName;
 
-  /// True when this instance serves the device-global guest file.
-  bool get isGuestDatabase => _dbName == guestDatabaseName;
+  /// True when this instance serves the device-global settings file.
+  bool get isDeviceGlobalDatabase => _dbName == deviceGlobalDatabaseName;
 
   @override
   int get schemaVersion => 10;

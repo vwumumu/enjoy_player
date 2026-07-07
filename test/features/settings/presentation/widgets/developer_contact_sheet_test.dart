@@ -20,7 +20,7 @@ Widget _harness({required AppDatabase db}) {
   );
   return ProviderScope(
     overrides: [
-      guestAppDatabaseProvider.overrideWithValue(db),
+      deviceGlobalAppDatabaseProvider.overrideWithValue(db),
       appDatabaseProvider.overrideWithValue(db),
     ],
     child: MaterialApp(

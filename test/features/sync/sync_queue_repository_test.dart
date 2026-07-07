@@ -150,20 +150,20 @@ void main() {
 
   test('per-user databases keep isolated sync queues', () async {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-    final guestDb = AppDatabase(executor: NativeDatabase.memory());
-    addTearDown(guestDb.close);
+    final deviceGlobalDb = AppDatabase(executor: NativeDatabase.memory());
+    addTearDown(deviceGlobalDb.close);
     final userDb = AppDatabase(
       executor: NativeDatabase.memory(),
       name: 'enjoy_player_user-test',
     );
     addTearDown(userDb.close);
 
-    final guestRepo = SyncQueueRepository(guestDb);
+    final deviceGlobalRepo = SyncQueueRepository(deviceGlobalDb);
     final userRepo = SyncQueueRepository(userDb);
 
-    await guestRepo.addOrUpsert(
+    await deviceGlobalRepo.addOrUpsert(
       entityType: 'audio',
-      entityId: 'guest-only',
+      entityId: 'device-global-only',
       action: 'create',
       payloadJson: '{}',
     );
@@ -174,14 +174,15 @@ void main() {
       payloadJson: '{}',
     );
 
-    expect(await guestDb.select(guestDb.syncQueue).get(), hasLength(1));
+    expect(await deviceGlobalDb.select(deviceGlobalDb.syncQueue).get(), hasLength(1));
     expect(await userDb.select(userDb.syncQueue).get(), hasLength(1));
-    expect(guestDb.isGuestDatabase, isTrue);
-    expect(userDb.isGuestDatabase, isFalse);
+    expect(deviceGlobalDb.isDeviceGlobalDatabase, isTrue);
+    expect(userDb.isDeviceGlobalDatabase, isFalse);
 
-    final guestRow = await guestDb.select(guestDb.syncQueue).getSingle();
+    final deviceGlobalRow =
+        await deviceGlobalDb.select(deviceGlobalDb.syncQueue).getSingle();
     final userRow = await userDb.select(userDb.syncQueue).getSingle();
-    expect(guestRow.entityId, 'guest-only');
+    expect(deviceGlobalRow.entityId, 'device-global-only');
     expect(userRow.entityId, 'user-only');
   });
 

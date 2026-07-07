@@ -34,7 +34,7 @@ final class DiagnosticsVerboseProvider
 }
 
 String _$diagnosticsVerboseHash() =>
-    r'adee79bb3afb55c187a93b720f79b613f391c5ff';
+    r'584e668db5aac10a4124169f0e810c0ca1251627';
 
 abstract class _$DiagnosticsVerbose extends $AsyncNotifier<bool> {
   FutureOr<bool> build();
