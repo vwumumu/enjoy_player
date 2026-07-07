@@ -47,8 +47,8 @@ This is the only redirect URI whitelisted in enjoy_web's `config/native_auth_cli
 
 - **Windows**: native Google hidden; email OTP + PKCE fallback.
 - **Android**: no Apple button; Google OAuth client requires release SHA-1 in Google Cloud Console.
-- **iOS**: Sign in with Apple required when Google is offered; enable capability in Xcode.
-- **macOS**: Keychain Sharing entitlements still required for secure storage (see ADR-0012).
+- **iOS**: Sign in with Apple required when Google is offered. Enable the capability on App ID `ai.enjoy.player` in Apple Developer, and ship `ios/Runner/Runner.entitlements` with `com.apple.developer.applesignin` referenced from all Runner build configurations (`CODE_SIGN_ENTITLEMENTS`). Missing entitlements surface as `AuthorizationError error 1000` before any API call.
+- **macOS**: Same Apple entitlement in `macos/Runner/DebugProfile.entitlements` and `Release.entitlements`. Keychain Sharing entitlements still required for secure storage (see ADR-0012).
 
 ## Google OAuth client setup (manual, one-time)
 
@@ -63,6 +63,29 @@ OAuth client IDs are **public identifiers**, not secrets — they are safe to em
 3. **macOS** — same as iOS: create a **macOS** (or reuse the iOS) type OAuth client, update `macos/Runner/Info.plist`'s `GIDClientID` + reversed `CFBundleURLSchemes`, and set `google.macos_client_id` in Rails credentials (optional — falls back to `ios_client_id`).
 4. **Flip `kGoogleNativeSignInConfiguredOnApple` to `true`** in [`google_auth_config.dart`](../../lib/features/auth/domain/google_auth_config.dart) in the same change as steps 2–3. Until both Info.plist files *and* this flag are updated together, `nativeGoogleSignInSupported` keeps the "Continue with Google" button hidden on iOS/macOS by design: `google_sign_in`'s iOS/macOS implementation reads `GIDClientID` straight from Info.plist and calling `GIDSignIn.signIn()` while it's still the placeholder throws an **uncaught, uncatchable native `NSInvalidArgumentException`** ("Your app is missing support for the following URL schemes: com.googleusercontent.apps...") that kills the whole app process — Dart `try`/`catch` cannot intercept it because the exception fires inside Google's native SDK before control returns to the Flutter engine. `GoogleSignInService.signInForIdToken()` also throws a `StateError` early as defense-in-depth for any call site that bypasses the UI gating.
 5. Rebuild the app on each platform and confirm `signInForIdToken()` returns a non-null token, then that `POST /api/v1/auth/google` succeeds.
+
+## Apple Sign-In setup (manual, one-time)
+
+Apple Sign-In fails **on the device** with `com.apple.AuthenticationServices.AuthorizationError error 1000` when the app binary is not signed with the Sign in with Apple entitlement — this happens inside `SignInWithApple.getAppleIDCredential()` **before** `POST /api/v1/auth/apple`, so backend credentials cannot fix it.
+
+### Apple Developer portal
+
+1. [Identifiers](https://developer.apple.com/account/resources/identifiers/list) → App ID **`ai.enjoy.player`** → enable **Sign in with Apple** → Save.
+2. Create a **Sign in with Apple** key (`.p8`) if enjoy_web needs server-to-server token exchange; note **Key ID** and **Team ID**.
+
+### This repo (client)
+
+| Platform | File | What to verify |
+|----------|------|----------------|
+| **iOS** | `ios/Runner/Runner.entitlements` | `com.apple.developer.applesignin` → `Default` |
+| **iOS** | `ios/Runner.xcodeproj` | `CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements` on Debug/Release/Profile |
+| **macOS** | `macos/Runner/DebugProfile.entitlements` + `Release.entitlements` | same `com.apple.developer.applesignin` key |
+
+After editing entitlements, do a **clean rebuild** (`flutter clean && flutter run`) so Xcode regenerates the provisioning profile that includes the capability. If error 1000 persists on a physical device, open `ios/Runner.xcworkspace` (or `macos/Runner.xcworkspace`) → Runner target → **Signing & Capabilities** and confirm **Sign in with Apple** appears; toggle it off/on to refresh the profile.
+
+### enjoy_web (backend)
+
+Configure Apple verification credentials in Rails (`bin/rails credentials:edit`) — typically team ID, key ID, `.p8` private key, and bundle ID `ai.enjoy.player`. Backend issues only matter **after** the native sheet returns tokens; a 401 from `POST /api/v1/auth/apple` with a successful sheet means fix the server config, not entitlements.
 
 ## Secure storage configuration
 

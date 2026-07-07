@@ -104,6 +104,7 @@ class AuthCtrl extends _$AuthCtrl {
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) return;
       if (gen != _flowGeneration) return;
+      _log.warning('apple sign-in authorization failed: ${e.code} ${e.message}');
       throw AuthFailure(e.message, code: AuthFailureCode.invalidCredentials);
     } on AuthFailure {
       rethrow;
