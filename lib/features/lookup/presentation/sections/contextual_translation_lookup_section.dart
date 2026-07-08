@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/lookup_markdown_style.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
@@ -42,21 +43,7 @@ class ContextualTranslationLookupSection extends ConsumerWidget {
     );
     final theme = Theme.of(context);
     final t = EnjoyThemeTokens.of(context);
-    final mdStyle = MarkdownStyleSheet.fromTheme(theme).copyWith(
-      p: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
-      blockSpacing: t.space8,
-      h1: theme.textTheme.headlineSmall,
-      h2: theme.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-        height: 1.2,
-      ),
-      h2Padding: EdgeInsets.only(top: t.space8, bottom: t.space4),
-      h3: theme.textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        height: 1.2,
-      ),
-      h3Padding: EdgeInsets.only(top: t.space8, bottom: t.space4),
-    );
+    final mdStyle = buildLookupMarkdownStyleSheet(theme, t);
 
     return LookupExpansionCard(
       title: l10n.lookupSectionContextualTranslation,
