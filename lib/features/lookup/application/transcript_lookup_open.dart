@@ -35,6 +35,7 @@ void openTranscriptLookup({
   final prefs = ref.read(appPreferencesCtrlProvider).valueOrNull;
   final learnTag =
       prefs?.effectiveLearningLanguage ?? kDefaultLearningLanguageTag;
+  final nativeTag = prefs?.effectiveNativeLanguage;
   final echo = ref.read(echoModeProvider);
   final posAsync = ref.read(displayPositionProvider);
   final tSec = switch (posAsync) {
@@ -42,42 +43,18 @@ void openTranscriptLookup({
     _ => 0.0,
   };
 
-  final mediaId = chrome?.mediaId;
-  TranscriptTrack? activeTrack;
-  List<TranscriptTrack> allTracks = const <TranscriptTrack>[];
-  if (mediaId != null) {
-    final activeId = ref.read(activeTranscriptIdProvider(mediaId)).valueOrNull;
-    allTracks =
-        ref.read(allTranscriptsForMediaProvider(mediaId)).valueOrNull ??
-        const <TranscriptTrack>[];
-    if (activeId != null) {
-      for (final t in allTracks) {
-        if (t.id == activeId) {
-          activeTrack = t;
-          break;
-        }
-      }
-    }
-  }
-
-  // The active track is the user's currently selected primary. If its language
-  // metadata is missing (`und` / null / empty) — common for embedded subtitle
-  // streams in MP4 / MKV files without language tags — fall back to the first
-  // sibling track whose language is a valid lookup-catalog tag. This prevents
-  // the lookup sheet from silently defaulting to the learning language when
-  // the user is reading Korean / Japanese / Spanish / etc. content that the
-  // player has no explicit language metadata for.
+  // Source resolution per spec (FR-005): the video's stored language is the
+  // authoritative source — set by the user at import time on VideoRow.language
+  // and propagated to PlaybackChrome.language. If the video has no language
+  // (`und` / empty), fall back to the active transcript track's language
+  // (which is what the user is reading in the panel). If still missing, fall
+  // back to the learning language. No sibling-track fallback — picking the
+  // "first" track leads to wrong-language lookups when the user has tracks
+  // in multiple languages.
   final sourceLang = resolveLookupSourceLanguage(
-    activeTrack: activeTrack,
-    allTracks: allTracks,
+    chromeLanguage: chrome?.language,
+    activeTrackLanguage: _resolveActiveTrackLanguage(ref, chrome?.mediaId),
   );
-  if (sourceLang != activeTrack?.language) {
-    _log.info(
-      'lookup active track has no language '
-      '(id=${activeTrack?.id ?? "none"} lang="${activeTrack?.language ?? ""}"); '
-      'using sibling track lang=$sourceLang',
-    );
-  }
 
   final src = resolveLookupSource(sourceLang, learningTag: learnTag);
   final ctx = buildVocabularyContext(
@@ -90,48 +67,57 @@ void openTranscriptLookup({
     selectedText: selectedText,
     sourceLanguage: src,
     targetLanguage: resolveLookupTarget(
-      prefs?.nativeLanguage,
+      nativeTag,
       learningTag: learnTag,
+      sourceLanguage: src,
     ),
     contextualContext: ctx,
   );
   unawaited(
     ref.read(lookupCoordinatorProvider.notifier).open(context, request),
   );
+  _log.fine(
+    'lookup sheet: text="$selectedText" source=$src target=${request.targetLanguage} '
+    '(chrome=${chrome?.language ?? "?"} activeTrack=${_resolveActiveTrackLanguage(ref, chrome?.mediaId) ?? "?"} '
+    'learn=$learnTag native=$nativeTag)',
+  );
 }
 
-/// Returns the first [TranscriptTrack] in [tracks] whose `language` resolves to
-/// a tag in [kSupportedLookupLanguageTags] (full or primary-subtag match), or
-/// `null` if none qualifies.
-TranscriptTrack? firstLookupCatalogTrack(List<TranscriptTrack> tracks) {
+String? _resolveActiveTrackLanguage(WidgetRef ref, String? mediaId) {
+  if (mediaId == null) return null;
+  final activeId = ref.read(activeTranscriptIdProvider(mediaId)).valueOrNull;
+  if (activeId == null) return null;
+  final tracks =
+      ref.read(allTranscriptsForMediaProvider(mediaId)).valueOrNull ??
+          const <TranscriptTrack>[];
   for (final t in tracks) {
-    final lang = t.language.trim();
-    if (lang.isEmpty || lang == 'und') continue;
-    final resolved = resolveLookupSource(
-      lang,
-      learningTag: kDefaultLearningLanguageTag,
-    );
-    if (resolved != kDefaultLearningLanguageTag) return t;
+    if (t.id == activeId) return t.language;
   }
   return null;
 }
 
 /// Returns the language string to use as the lookup sheet's source.
 ///
-/// Prefers [activeTrack]?.language when it is a usable (non-empty, non-`und`)
-/// value; otherwise falls back to the first sibling track in [allTracks] that
-/// has a valid lookup-catalog language. Returns the raw track language so the
-/// caller can pass it through [resolveLookupSource] with the user's
-/// [learningTag].
+/// Precedence:
+/// 1. [chromeLanguage] — the video's stored language (set by the user at
+///    import time and propagated to `PlaybackChrome.language`). This is the
+///    authoritative source per the lookup spec.
+/// 2. [activeTrackLanguage] — the active transcript track's language, used
+///    when the video's language is `und` / null / empty (common when the user
+///    imported a video without picking a content language but did add a
+///    transcript for it).
+/// 3. `null` — caller falls back to the learning language via
+///    [resolveLookupSource].
+///
+/// Returns the raw BCP-47 string so the caller can pass it through
+/// [resolveLookupSource] with the user's [learningTag].
 String? resolveLookupSourceLanguage({
-  required TranscriptTrack? activeTrack,
-  required List<TranscriptTrack> allTracks,
+  required String? chromeLanguage,
+  required String? activeTrackLanguage,
 }) {
-  final activeLang = activeTrack?.language.trim() ?? '';
-  if (activeLang.isNotEmpty && activeLang != 'und') {
-    return activeLang;
-  }
-  final fallback = firstLookupCatalogTrack(allTracks);
-  if (fallback != null && fallback.id != activeTrack?.id) return fallback.language;
-  return activeTrack?.language;
+  final video = chromeLanguage?.trim() ?? '';
+  if (video.isNotEmpty && video != 'und') return video;
+  final track = activeTrackLanguage?.trim() ?? '';
+  if (track.isNotEmpty && track != 'und') return track;
+  return null;
 }
