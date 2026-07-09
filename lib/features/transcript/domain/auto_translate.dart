@@ -176,8 +176,28 @@ List<TranscriptLine> buildAutoTranslateSkeleton(List<TranscriptLine> primaryLine
       .toList();
 }
 
+/// Orders pending line indexes by distance from [anchorIndex] (ties: lower first).
+List<int> orderPendingLineIndexes({
+  required int anchorIndex,
+  required List<int> pending,
+}) {
+  if (pending.isEmpty) return const [];
+  final copy = List<int>.from(pending);
+  copy.sort((a, b) {
+    final da = (a - anchorIndex).abs();
+    final db = (b - anchorIndex).abs();
+    if (da != db) return da.compareTo(db);
+    return a.compareTo(b);
+  });
+  return copy;
+}
+
 /// Max concurrent in-flight translation requests per media.
 const kAutoTranslateMaxConcurrency = 2;
 
 /// Attempts per line (initial + one quiet retry) before marking failed.
 const kAutoTranslateMaxLineAttempts = 2;
+
+/// Only auto-request / keep waiting work within this many cues of the
+/// playback highlight (or estimated scroll window).
+const kAutoTranslateViewportWindow = 24;

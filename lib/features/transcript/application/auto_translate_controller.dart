@@ -20,6 +20,7 @@ import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_state.dart';
 import '../domain/auto_translate.dart';
 import 'active_transcript_provider.dart';
+import 'transcript_playback_highlight_provider.dart';
 import 'transcript_repository_provider.dart';
 
 part 'auto_translate_controller.g.dart';
@@ -49,6 +50,14 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
         _clearInFlightTracking();
         state = state.copyWith(status: AutoTranslateStatus.idle);
       }
+    });
+
+    // On seek / active-cue change, prefer the new viewport over a FIFO backlog
+    // of earlier lines that were requested while scrolled at the top.
+    ref.listen(transcriptPlaybackHighlightProvider(mediaId), (prev, next) {
+      if (prev == next) return;
+      if (state.status != AutoTranslateStatus.active) return;
+      _reprioritizeWaiting(anchor: next);
     });
 
     unawaited(_hydrateIfAiSecondaryActive());
@@ -181,7 +190,7 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
     if (secondaryId != null && secondaryId != state.aiTranscriptId) return;
 
     if (_inFlight.length >= kAutoTranslateMaxConcurrency) {
-      _waiting.add(lineIndex);
+      _enqueueWaiting(lineIndex);
       return;
     }
 
@@ -216,7 +225,7 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
 
     if (_inFlight.contains(lineIndex)) return;
     if (_inFlight.length >= kAutoTranslateMaxConcurrency) {
-      if (!_waiting.contains(lineIndex)) _waiting.addFirst(lineIndex);
+      _enqueueWaiting(lineIndex, preferFront: true);
       return;
     }
     unawaited(_translateLine(lineIndex, forceRefresh: true));
@@ -372,6 +381,7 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
   }
 
   void _drainWaiting() {
+    _reprioritizeWaiting();
     while (_waiting.isNotEmpty &&
         _inFlight.length < kAutoTranslateMaxConcurrency) {
       final next = _waiting.removeFirst();
@@ -383,6 +393,40 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
         ),
       );
     }
+  }
+
+  void _enqueueWaiting(int lineIndex, {bool preferFront = false}) {
+    if (_waiting.contains(lineIndex)) {
+      _reprioritizeWaiting();
+      return;
+    }
+    if (preferFront) {
+      _waiting.addFirst(lineIndex);
+    } else {
+      _waiting.add(lineIndex);
+    }
+    _reprioritizeWaiting();
+  }
+
+  /// Keep waiting work near the playback cue so seek jumps the queue ahead
+  /// of earlier cache-extent requests.
+  void _reprioritizeWaiting({int? anchor}) {
+    if (_waiting.isEmpty) return;
+    final int raw =
+        anchor ?? ref.read(transcriptPlaybackHighlightProvider(mediaId));
+    final focus = raw < 0 ? 0 : raw;
+    // Drop backlog far from the cue so a mid-video seek does not keep
+    // draining early lines that were queued from the list cache extent.
+    final nearby = _waiting
+        .where((i) => (i - focus).abs() <= kAutoTranslateViewportWindow)
+        .toList();
+    final ordered = orderPendingLineIndexes(
+      anchorIndex: focus,
+      pending: nearby,
+    );
+    _waiting
+      ..clear()
+      ..addAll(ordered);
   }
 
   void _publishInFlight() {

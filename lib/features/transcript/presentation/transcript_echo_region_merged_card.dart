@@ -88,6 +88,7 @@ class EchoRegionMergedCard extends ConsumerWidget {
           autoTranslateActive && autoTranslateState.isLineFailed(i);
       final lineInFlight =
           autoTranslateActive && autoTranslateState.isLineInFlight(i);
+      // Echo block is itself the viewport; request every empty cue in range.
       if (autoTranslateActive && secondaryEmpty && !lineFailed) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ref

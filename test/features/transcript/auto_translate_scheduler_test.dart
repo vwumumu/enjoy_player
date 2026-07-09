@@ -45,4 +45,14 @@ void main() {
     expect(kAutoTranslateMaxConcurrency, 2);
     expect(kAutoTranslateMaxLineAttempts, 2);
   });
+
+  test('orderPendingLineIndexes prefers lines near anchor', () {
+    final ordered = orderPendingLineIndexes(
+      anchorIndex: 100,
+      pending: [0, 5, 98, 101, 200],
+    );
+    expect(ordered.first, 101);
+    expect(ordered[1], 98);
+    expect(ordered.last, 200);
+  });
 }

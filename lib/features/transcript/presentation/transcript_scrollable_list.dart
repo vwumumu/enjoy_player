@@ -14,6 +14,7 @@ import 'package:enjoy_player/features/player/application/player_interactions.dar
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/transcript/application/active_transcript_provider.dart';
 import 'package:enjoy_player/features/transcript/application/auto_translate_controller.dart';
+import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
 import 'package:enjoy_player/features/transcript/application/echo_region_bounds.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_alignment.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_recording_counts_provider.dart';
@@ -168,6 +169,25 @@ class _TranscriptScrollableListState
       _secondaryMatcher = TranscriptSecondaryMatcher.from(secondary);
     }
     return _secondaryMatcher!;
+  }
+
+  /// Estimated cue index at the current scroll offset (manual scroll focus).
+  int _scrollFocusLineIndex() {
+    final lineCount = widget.lines.length;
+    if (lineCount <= 0) return 0;
+    if (!_scrollController.hasClients) return 0;
+    final pos = _scrollController.position;
+    if (pos.maxScrollExtent <= 0) return 0;
+    final ratio = (pos.pixels / pos.maxScrollExtent).clamp(0.0, 1.0);
+    return (ratio * (lineCount - 1)).round();
+  }
+
+  /// Request when near the playback cue (seek) or the scrolled viewport.
+  bool _shouldRequestAutoTranslate(int lineIndex, int playbackHighlight) {
+    final highlight = playbackHighlight >= 0 ? playbackHighlight : 0;
+    final scrollFocus = _scrollFocusLineIndex();
+    return (lineIndex - highlight).abs() <= kAutoTranslateViewportWindow ||
+        (lineIndex - scrollFocus).abs() <= kAutoTranslateViewportWindow;
   }
 
   /// Conservative bootstrap scroll before the scroll-target widget is built.
@@ -435,9 +455,19 @@ class _TranscriptScrollableListState
               final lineInFlight =
                   autoTranslateActive &&
                   autoTranslateState.isLineInFlight(lineIndex);
-              if (autoTranslateActive && secondaryEmpty && !lineFailed) {
+              if (autoTranslateActive &&
+                  secondaryEmpty &&
+                  !lineFailed &&
+                  _shouldRequestAutoTranslate(lineIndex, activeForUi)) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!mounted) return;
+                  // Re-check after seek/scroll jumps that happen this frame.
+                  final highlight = ref.read(
+                    transcriptPlaybackHighlightProvider(widget.mediaId),
+                  );
+                  if (!_shouldRequestAutoTranslate(lineIndex, highlight)) {
+                    return;
+                  }
                   ref
                       .read(autoTranslateCtrlProvider(widget.mediaId).notifier)
                       .requestTranslateLine(lineIndex);

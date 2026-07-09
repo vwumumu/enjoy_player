@@ -30,8 +30,9 @@ translationService.translate(
 | Rule | Requirement |
 |------|-------------|
 | S1 | Selecting Auto translate only ensures the AI track + sets secondary; it does **not** sweep the whole transcript |
-| S2 | The transcript list calls `requestTranslateLine(index)` when a built row has empty AI text |
+| S2 | The transcript list calls `requestTranslateLine(index)` when a built row has empty AI text **and** is near the current scroll/playback focus window |
 | S3 | `requestTranslateLine` is idempotent: no-op if cached, in-flight, failed, or Auto translate inactive |
+| S3b | Waiting queue is ordered by distance to playback highlight; far backlog is dropped on seek |
 | S4 | Max **2** concurrent in-flight translate calls per media |
 | S5 | Per-line: up to **2** attempts (initial + one quiet retry); then mark failed until explicit re-translate |
 | S6 | `AuthFailure` / `CreditsFailure` set status `blocked` with friendly reason; stop new requests |

@@ -15,6 +15,7 @@ import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/transcript/application/auto_translate_controller.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_playback_highlight_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_repository_provider.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_repository.dart';
 import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
@@ -219,6 +220,44 @@ void main() {
       g0.complete();
       await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(fake.calls.length, 3);
+
+      g1.complete();
+      g2.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    });
+
+    test('waiting queue prefers lines near playback highlight', () async {
+      // Highlight already at mid cue: early in-flight work may start, but the
+      // waiting queue should drain the viewport line next.
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          transcriptRepositoryProvider.overrideWithValue(repo),
+          translationCapabilityProvider.overrideWithValue(fake),
+          authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
+          appPreferencesCtrlProvider.overrideWith(_ZhNativePrefsCtrl.new),
+          transcriptPlaybackHighlightProvider(mediaId).overrideWithValue(2),
+        ],
+      );
+      await container.read(authCtrlProvider.future);
+      await container.read(appPreferencesCtrlProvider.future);
+
+      final ctrl = container.read(autoTranslateCtrlProvider(mediaId).notifier);
+      await ctrl.selectAutoTranslate();
+      final g0 = fake.delayNext();
+      final g1 = fake.delayNext();
+      final g2 = fake.delayNext();
+
+      ctrl.requestTranslateLine(0);
+      ctrl.requestTranslateLine(1);
+      await Future<void>.delayed(Duration.zero);
+      expect(fake.calls, ['Hello', 'World']);
+
+      ctrl.requestTranslateLine(2);
+      g0.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(fake.calls.last, 'Again');
 
       g1.complete();
       g2.complete();
