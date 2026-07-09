@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:enjoy_player/core/interaction/enjoy_tappable.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
@@ -7,9 +8,12 @@ import 'package:enjoy_player/features/player/application/player_engine_test_doub
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/global_transport_bar.dart';
+import 'package:enjoy_player/features/player/presentation/widgets/transport/transport_progress_strip.dart';
 import 'package:enjoy_player/features/transcript/application/all_transcripts_provider.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_blur_preferences_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_fetch_controller.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
+import 'package:enjoy_player/features/transcript/domain/transcript_blur.dart';
 import 'package:enjoy_player/features/transcript/domain/transcript_fetch_status.dart';
 import 'package:enjoy_player/features/transcript/domain/transcript_track.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -51,6 +55,9 @@ class _SessionPlayerController extends PlayerController {
 List<Override> _transportOverrides({
   required FakePlayerEngine fake,
   required AppDatabase db,
+  bool hasLines = true,
+  TranscriptBlurPreferences blurPrefs = TranscriptBlurPreferences.defaults,
+  TranscriptBlurPreferencesCtrl? blurCtrl,
 }) {
   return [
     appDatabaseProvider.overrideWithValue(db),
@@ -60,7 +67,7 @@ List<Override> _transportOverrides({
     ),
     transcriptHasLinesForMediaProvider(
       _kMediaId,
-    ).overrideWith((ref) => Stream.value(true)),
+    ).overrideWith((ref) => Stream.value(hasLines)),
     playerIsPlayingProvider.overrideWith((ref) => Stream.value(false)),
     playerIsBufferingProvider.overrideWith((ref) => Stream.value(false)),
     allTranscriptsForMediaProvider(
@@ -68,6 +75,9 @@ List<Override> _transportOverrides({
     ).overrideWith((ref) => Stream.value(const <TranscriptTrack>[])),
     transcriptFetchCtrlProvider(_kMediaId).overrideWithValue(
       const TranscriptFetchUiState(status: TranscriptFetchStatus.idle),
+    ),
+    transcriptBlurPreferencesCtrlProvider.overrideWith(
+      () => blurCtrl ?? _FakeBlurPrefsCtrl(blurPrefs),
     ),
   ];
 }
@@ -128,6 +138,30 @@ GoRouter _libraryRouter() {
   );
 }
 
+/// Router with both shell and player routes so tap-to-expand navigation can be
+/// observed via the body marker text.
+GoRouter _expandableRouter() {
+  return GoRouter(
+    initialLocation: '/library',
+    routes: [
+      GoRoute(
+        path: '/library',
+        builder: (_, _) => const Scaffold(
+          bottomNavigationBar: GlobalTransportBar(),
+          body: Center(child: Text('library-route')),
+        ),
+      ),
+      GoRoute(
+        path: '/player/:mediaId',
+        builder: (_, _) => const Scaffold(
+          bottomNavigationBar: GlobalTransportBar(),
+          body: Center(child: Text('player-route')),
+        ),
+      ),
+    ],
+  );
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -148,6 +182,9 @@ void main() {
     WidgetTester tester, {
     required GoRouter router,
     required double width,
+    bool hasLines = true,
+    TranscriptBlurPreferences blurPrefs = TranscriptBlurPreferences.defaults,
+    TranscriptBlurPreferencesCtrl? blurCtrl,
   }) async {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.binding.setSurfaceSize(Size(width, 800));
@@ -155,7 +192,13 @@ void main() {
     await tester.pumpWidget(
       _transportHarness(
         router: router,
-        overrides: _transportOverrides(fake: fake, db: db),
+        overrides: _transportOverrides(
+          fake: fake,
+          db: db,
+          hasLines: hasLines,
+          blurPrefs: blurPrefs,
+          blurCtrl: blurCtrl,
+        ),
         width: width,
       ),
     );
@@ -163,25 +206,233 @@ void main() {
     expect(tester.takeException(), isNull);
   }
 
-  group('GlobalTransportBar narrow layout', () {
-    for (final width in [320.0, 375.0, 430.0]) {
-      testWidgets('player at ${width.toInt()}px shows prev/next, not replay', (
-        tester,
-      ) async {
-        await pumpTransport(tester, router: _playerRouter(), width: width);
+  // The always-on five controls (play, echo, blur, subtitle/cc, speed) must
+  // be visible at the narrowest width on both routes — never clipped.
+  const alwaysOnIcons = <IconData>[
+    Icons.play_arrow_rounded, // play (not playing by default)
+    Icons.mic_none_rounded, // echo
+    Icons.visibility_outlined, // blur (off by default)
+    Icons.closed_caption_outlined, // subtitle/cc
+    Icons.speed_rounded, // speed
+  ];
 
-        expect(find.byIcon(Icons.skip_previous_rounded), findsOneWidget);
-        expect(find.byIcon(Icons.skip_next_rounded), findsOneWidget);
-        expect(find.byIcon(Icons.replay_rounded), findsNothing);
-      });
-    }
+  group('GlobalTransportBar narrow always-on controls (US1)', () {
+    testWidgets('player at 320px renders all five always-on controls', (
+      tester,
+    ) async {
+      await pumpTransport(tester, router: _playerRouter(), width: 320);
 
-    testWidgets('mini at 320px shows prev/next, hides expand', (tester) async {
+      for (final icon in alwaysOnIcons) {
+        expect(find.byIcon(icon), findsOneWidget, reason: '$icon visible');
+      }
+      expect(find.byIcon(Icons.replay_rounded), findsNothing);
+    });
+
+    testWidgets('mini at 320px renders all five always-on controls', (
+      tester,
+    ) async {
       await pumpTransport(tester, router: _libraryRouter(), width: 320);
+
+      for (final icon in alwaysOnIcons) {
+        expect(find.byIcon(icon), findsOneWidget, reason: '$icon visible');
+      }
+    });
+  });
+
+  group('GlobalTransportBar narrow drop sequence (US2)', () {
+    // Inner width = device width - 2 * space12 (24). Budget thresholds:
+    //   volume alone  -> 274 <= inner < 318
+    //   volume + next -> 318 <= inner < 362
+    //   + previous    -> 362 <= inner < 402
+    testWidgets('mini at 320px drops previous and next, keeps volume', (
+      tester,
+    ) async {
+      await pumpTransport(tester, router: _libraryRouter(), width: 320);
+
+      expect(find.byIcon(Icons.skip_previous_rounded), findsNothing);
+      expect(find.byIcon(Icons.skip_next_rounded), findsNothing);
+      expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
+    });
+
+    testWidgets('player at 375px drops previous, keeps next', (tester) async {
+      await pumpTransport(tester, router: _playerRouter(), width: 375);
+
+      expect(find.byIcon(Icons.skip_previous_rounded), findsNothing);
+      expect(find.byIcon(Icons.skip_next_rounded), findsOneWidget);
+    });
+
+    testWidgets('mini at 430px keeps previous and next', (tester) async {
+      await pumpTransport(tester, router: _libraryRouter(), width: 430);
 
       expect(find.byIcon(Icons.skip_previous_rounded), findsOneWidget);
       expect(find.byIcon(Icons.skip_next_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.open_in_full_rounded), findsNothing);
     });
   });
+
+  group('GlobalTransportBar collapsed expand (US3)', () {
+    testWidgets('tapping neutral area expands mini at 320px', (tester) async {
+      await pumpTransport(tester, router: _expandableRouter(), width: 320);
+
+      // Expand icon is dropped at this width; only the tap zone can expand.
+      expect(find.byIcon(Icons.open_in_full_rounded), findsNothing);
+      expect(find.text('library-route'), findsOneWidget);
+
+      final spacer = find.descendant(
+        of: find.byType(EnjoyTappableSurface),
+        matching: find.byType(Spacer),
+      );
+      // The Spacer is empty space by design — its hit target is the parent
+      // EnjoyTappableSurface, not itself — so silence the "would not hit test"
+      // warning. Tapping here targets the neutral expand zone between the play
+      // cluster and the trailing controls.
+      await tester.tap(spacer, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('player-route'), findsOneWidget);
+    });
+
+    testWidgets('tapping play does not expand', (tester) async {
+      await pumpTransport(tester, router: _expandableRouter(), width: 320);
+
+      await tester.tap(find.byIcon(Icons.play_arrow_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('library-route'), findsOneWidget);
+      expect(find.text('player-route'), findsNothing);
+    });
+
+    testWidgets('tapping a secondary control does not expand', (tester) async {
+      await pumpTransport(tester, router: _expandableRouter(), width: 320);
+
+      await tester.tap(find.byIcon(Icons.mic_none_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('library-route'), findsOneWidget);
+      expect(find.text('player-route'), findsNothing);
+    });
+
+    testWidgets('tapping the seek strip does not expand', (tester) async {
+      await pumpTransport(tester, router: _expandableRouter(), width: 320);
+
+      await tester.tap(find.byType(TransportProgressStrip));
+      await tester.pumpAndSettle();
+
+      expect(find.text('library-route'), findsOneWidget);
+      expect(find.text('player-route'), findsNothing);
+    });
+
+    testWidgets('expand affordance is absent on the player route', (
+      tester,
+    ) async {
+      await pumpTransport(tester, router: _playerRouter(), width: 320);
+
+      // Already expanded -> no tap surface wrapping the controls row.
+      expect(find.byType(EnjoyTappableSurface), findsNothing);
+    });
+  });
+
+  group('GlobalTransportBar no-regression wide + affordance (US4)', () {
+    testWidgets('wide mini renders full control set and meta-row expands', (
+      tester,
+    ) async {
+      await pumpTransport(tester, router: _expandableRouter(), width: 800);
+
+      // Full set present in wide layout.
+      expect(find.byIcon(Icons.skip_previous_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.skip_next_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.mic_none_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.open_in_full_rounded), findsOneWidget);
+
+      // Meta-row tap target still opens the player (no regression).
+      await tester.tap(find.text('Transport test'));
+      await tester.pumpAndSettle();
+      expect(find.text('player-route'), findsOneWidget);
+    });
+
+    testWidgets('collapsed narrow exposes the expand affordance surface', (
+      tester,
+    ) async {
+      await pumpTransport(tester, router: _libraryRouter(), width: 320);
+      expect(find.byType(EnjoyTappableSurface), findsOneWidget);
+    });
+  });
+
+  group('GlobalTransportBar blur toggle', () {
+    testWidgets('renders the blur toggle in off state', (tester) async {
+      await pumpTransport(
+        tester,
+        router: _playerRouter(),
+        width: 800,
+        blurPrefs: TranscriptBlurPreferences.defaults,
+      );
+      expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+    });
+
+    testWidgets('reflects on state with visibility_off icon', (tester) async {
+      await pumpTransport(
+        tester,
+        router: _playerRouter(),
+        width: 800,
+        blurPrefs: const TranscriptBlurPreferences(
+          enabled: true,
+          tapRevealSeconds: 3,
+        ),
+      );
+      expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+    });
+
+    testWidgets('disabled when there are no transcript lines', (tester) async {
+      await pumpTransport(
+        tester,
+        router: _playerRouter(),
+        width: 800,
+        hasLines: false,
+      );
+      final blurButton = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.visibility_outlined),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(blurButton.onPressed, isNull);
+    });
+
+    testWidgets('tap flips the blur enabled state', (tester) async {
+      final ctrl = _RecordingBlurPrefsCtrl(TranscriptBlurPreferences.defaults);
+      await pumpTransport(
+        tester,
+        router: _playerRouter(),
+        width: 800,
+        blurCtrl: ctrl,
+      );
+      await tester.tap(find.byIcon(Icons.visibility_outlined));
+      await tester.pump();
+      expect(ctrl.lastSetEnabled, isTrue);
+    });
+  });
+}
+
+class _FakeBlurPrefsCtrl extends TranscriptBlurPreferencesCtrl {
+  _FakeBlurPrefsCtrl(this._initial);
+  final TranscriptBlurPreferences _initial;
+
+  @override
+  Future<TranscriptBlurPreferences> build() async => _initial;
+
+  @override
+  Future<void> setEnabled(bool value) async {}
+
+  @override
+  Future<void> setTapRevealSeconds(int seconds) async {}
+}
+
+class _RecordingBlurPrefsCtrl extends _FakeBlurPrefsCtrl {
+  _RecordingBlurPrefsCtrl(super.initial);
+
+  bool? lastSetEnabled;
+
+  @override
+  Future<void> setEnabled(bool value) async {
+    lastSetEnabled = value;
+  }
 }

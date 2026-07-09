@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:enjoy_player/core/interaction/enjoy_tappable.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
@@ -23,6 +24,7 @@ import 'package:enjoy_player/features/player/application/player_preferences_prov
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/player/application/player_ui_provider.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_blur_preferences_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -46,25 +48,18 @@ const double kNarrowSpeedSlotExtra = 12;
 const double kNarrowLayoutSlack = 8;
 const double kNarrowLineNavGap = 4;
 
-enum _NarrowSecondarySlot {
-  echo,
-  cc,
-  speed,
-  volume,
-  fullscreen,
-  expand;
-
-  double get width => switch (this) {
-    _NarrowSecondarySlot.speed => kNarrowIconSlotWidth + kNarrowSpeedSlotExtra,
-    _ => kNarrowIconSlotWidth,
-  };
-}
-
 /// Which controls fit in the narrow single-row transport bar.
+///
+/// Play/pause, echo, blur, subtitle (cc), and speed are always-on (never
+/// subject to width pressure); only line navigation, volume, fullscreen, and
+/// the expand icon are droppable. Previous and next are independent so that
+/// previous can hide before next as width shrinks.
 class NarrowTransportBudget {
   const NarrowTransportBudget({
-    required this.showPrevNext,
+    required this.showPrevious,
+    required this.showNext,
     required this.showEcho,
+    required this.showBlur,
     required this.showCc,
     required this.showSpeed,
     required this.showVolume,
@@ -72,8 +67,10 @@ class NarrowTransportBudget {
     required this.showExpand,
   });
 
-  final bool showPrevNext;
+  final bool showPrevious;
+  final bool showNext;
   final bool showEcho;
+  final bool showBlur;
   final bool showCc;
   final bool showSpeed;
   final bool showVolume;
@@ -81,45 +78,68 @@ class NarrowTransportBudget {
   final bool showExpand;
 }
 
-/// Reserves prev/next first, then packs secondary tools; defers expand → volume.
+/// Resolves which controls fit in the narrow single-row transport bar.
+///
+/// The five practice controls — echo, blur, subtitle (cc), speed — plus the
+/// play/pause ring are ALWAYS shown; their combined cost is reserved first so
+/// the always-on invariant holds at every supported width. Only line
+/// navigation, volume, fullscreen, and the expand icon are droppable, packed
+/// greedily in strict priority order (highest priority first). The first
+/// droppable that does not fit terminates packing, so a lower-priority control
+/// can never survive at the expense of a higher-priority one. As width
+/// shrinks, controls therefore drop in this order: expand → previous → next →
+/// volume → fullscreen.
 NarrowTransportBudget resolveNarrowTransportBudget(
   double maxWidth, {
   required bool hasTranscriptLines,
   required bool onPlayer,
   required bool showFullscreenTransport,
 }) {
-  var remaining = maxWidth - kNarrowPlayRingWidth - kNarrowLayoutSlack;
-  final showPrevNext = hasTranscriptLines;
-  if (showPrevNext) {
-    remaining -= 2 * kNarrowIconSlotWidth + 2 * kNarrowLineNavGap;
+  // Always-on baseline: play ring + layout slack + echo + blur + cc + speed.
+  // These never drop, so their cost is reserved first (always-on invariant).
+  const alwaysOnCost = kNarrowPlayRingWidth +
+      kNarrowLayoutSlack +
+      kNarrowIconSlotWidth + // echo
+      kNarrowIconSlotWidth + // blur
+      kNarrowIconSlotWidth + // cc
+      (kNarrowIconSlotWidth + kNarrowSpeedSlotExtra); // speed
+
+  var remaining = maxWidth - alwaysOnCost;
+
+  // Pack droppables in strict priority order. Once one does not fit, stop — a
+  // lower-priority control must never be shown while a higher-priority one is
+  // dropped. Drop order (first dropped first) is the reverse of this packing
+  // order: expand, previous, next, volume, fullscreen.
+  var stopped = false;
+  bool tryAdd(double cost) {
+    if (stopped) return false;
+    if (remaining >= cost) {
+      remaining -= cost;
+      return true;
+    }
+    stopped = true;
+    return false;
   }
 
-  final slots = <_NarrowSecondarySlot>[
-    _NarrowSecondarySlot.echo,
-    _NarrowSecondarySlot.cc,
-    _NarrowSecondarySlot.speed,
-    _NarrowSecondarySlot.volume,
-    if (showFullscreenTransport) _NarrowSecondarySlot.fullscreen,
-    if (!onPlayer) _NarrowSecondarySlot.expand,
-  ];
-
-  final visible = List<_NarrowSecondarySlot>.from(slots);
-  while (visible.isNotEmpty) {
-    final needed = visible.fold<double>(0, (sum, s) => sum + s.width);
-    if (needed <= remaining) break;
-    visible.removeLast();
-  }
-
-  bool has(_NarrowSecondarySlot slot) => visible.contains(slot);
+  final showFullscreen =
+      showFullscreenTransport && tryAdd(kNarrowIconSlotWidth);
+  final showVolume = tryAdd(kNarrowIconSlotWidth);
+  final showNext = hasTranscriptLines &&
+      tryAdd(kNarrowIconSlotWidth + kNarrowLineNavGap);
+  final showPrevious = hasTranscriptLines &&
+      tryAdd(kNarrowIconSlotWidth + kNarrowLineNavGap);
+  final showExpand = !onPlayer && tryAdd(kNarrowIconSlotWidth);
 
   return NarrowTransportBudget(
-    showPrevNext: showPrevNext,
-    showEcho: has(_NarrowSecondarySlot.echo),
-    showCc: has(_NarrowSecondarySlot.cc),
-    showSpeed: has(_NarrowSecondarySlot.speed),
-    showVolume: has(_NarrowSecondarySlot.volume),
-    showFullscreen: has(_NarrowSecondarySlot.fullscreen),
-    showExpand: has(_NarrowSecondarySlot.expand),
+    showPrevious: showPrevious,
+    showNext: showNext,
+    showEcho: true,
+    showBlur: true,
+    showCc: true,
+    showSpeed: true,
+    showVolume: showVolume,
+    showFullscreen: showFullscreen,
+    showExpand: showExpand,
   );
 }
 
@@ -143,61 +163,63 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
 
   void _openPlaybackRateSheet() {
     final t = EnjoyThemeTokens.of(context);
-    unawaited(showEnjoySheet<void>(
-      context: context,
-      builder: (sheetCtx) {
-        final prefs = ref.read(playerPreferencesCtrlProvider);
-        final rate = prefs.playbackRate;
-        final l10n = AppLocalizations.of(sheetCtx)!;
-        return SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const PaddedSheetDragHandle(),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    t.space20,
-                    t.space4,
-                    t.space20,
-                    t.space8,
-                  ),
-                  child: Text(
-                    l10n.speed,
-                    style: Theme.of(sheetCtx).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+    unawaited(
+      showEnjoySheet<void>(
+        context: context,
+        builder: (sheetCtx) {
+          final prefs = ref.read(playerPreferencesCtrlProvider);
+          final rate = prefs.playbackRate;
+          final l10n = AppLocalizations.of(sheetCtx)!;
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const PaddedSheetDragHandle(),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      t.space20,
+                      t.space4,
+                      t.space20,
+                      t.space8,
+                    ),
+                    child: Text(
+                      l10n.speed,
+                      style: Theme.of(sheetCtx).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-                for (final r in kPlaybackRatePresets)
-                  ListTile(
-                    leading: Icon(
-                      playbackRatesEqual(rate, r)
-                          ? Icons.check_rounded
-                          : Icons.speed_rounded,
-                      color: playbackRatesEqual(rate, r)
-                          ? Theme.of(sheetCtx).colorScheme.primary
-                          : Theme.of(sheetCtx).colorScheme.onSurfaceVariant,
+                  for (final r in kPlaybackRatePresets)
+                    ListTile(
+                      leading: Icon(
+                        playbackRatesEqual(rate, r)
+                            ? Icons.check_rounded
+                            : Icons.speed_rounded,
+                        color: playbackRatesEqual(rate, r)
+                            ? Theme.of(sheetCtx).colorScheme.primary
+                            : Theme.of(sheetCtx).colorScheme.onSurfaceVariant,
+                      ),
+                      title: Text(l10n.playbackRateTimes(_formatRateCore(r))),
+                      onTap: () {
+                        Haptics.selection(sheetCtx);
+                        unawaited(
+                          ref
+                              .read(playerPreferencesCtrlProvider.notifier)
+                              .setPlaybackRate(r),
+                        );
+                        Navigator.pop(sheetCtx);
+                      },
                     ),
-                    title: Text(l10n.playbackRateTimes(_formatRateCore(r))),
-                    onTap: () {
-                      Haptics.selection(sheetCtx);
-                      unawaited(
-                        ref
-                            .read(playerPreferencesCtrlProvider.notifier)
-                            .setPlaybackRate(r),
-                      );
-                      Navigator.pop(sheetCtx);
-                    },
-                  ),
-                SizedBox(height: t.space8),
-              ],
+                  SizedBox(height: t.space8),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    ));
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -214,6 +236,9 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
       orElse: () => false,
     );
     final echo = ref.watch(echoModeProvider);
+    final blurEnabled = ref.watch(
+      transcriptBlurPreferencesProvider.select((p) => p.enabled),
+    );
     final playingAsync = ref.watch(playerIsPlayingProvider);
     final bufferingAsync = ref.watch(playerIsBufferingProvider);
     final isPlaying = playingAsync.value ?? false;
@@ -246,6 +271,11 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
       ref,
       'player.toggleEchoMode',
       l10n.echoMode,
+    );
+    final ttBlur = hotkeyTooltipLabel(
+      ref,
+      'player.toggleBlurPractice',
+      l10n.transcriptBlurToggleTooltip,
     );
     final ttSpeed = hotkeyTooltipPair(
       ref,
@@ -337,6 +367,27 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
       icon: const Icon(Icons.mic_none_rounded),
     );
 
+    final blurButton = IconButton(
+      tooltip: ttBlur,
+      color: blurEnabled ? t.blurActive : null,
+      style: blurEnabled
+          ? IconButton.styleFrom(
+              backgroundColor: t.blurActive.withValues(alpha: 0.18),
+            )
+          : null,
+      onPressed: blurEnabled || hasTranscriptLines
+          ? Haptics.wrapTap(
+              context,
+              () => ref
+                  .read(transcriptBlurPreferencesCtrlProvider.notifier)
+                  .setEnabled(!blurEnabled),
+            )
+          : null,
+      icon: Icon(
+        blurEnabled ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+      ),
+    );
+
     final ccButton = TransportCcButton(mediaId: chrome.mediaId);
 
     final speedButton = IconButton(
@@ -387,6 +438,7 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
 
     final secondaryEssentials = <Widget>[
       echoButton,
+      blurButton,
       ccButton,
       speedButton,
       volumeButton,
@@ -464,6 +516,8 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                             final narrowSecondaries = <Widget>[
                               if (budget.showEcho)
                                 _narrowTransportSlot(child: echoButton),
+                              if (budget.showBlur)
+                                _narrowTransportSlot(child: blurButton),
                               if (budget.showCc)
                                 _narrowTransportSlot(child: ccButton),
                               if (budget.showSpeed)
@@ -482,27 +536,48 @@ class _GlobalTransportBarState extends ConsumerState<GlobalTransportBar> {
                                 _narrowTransportSlot(child: expandButton),
                             ];
 
-                            final lineNavCluster = budget.showPrevNext
-                                ? Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      _narrowTransportSlot(child: prevButton),
-                                      const SizedBox(width: kNarrowLineNavGap),
-                                      playRing,
-                                      const SizedBox(width: kNarrowLineNavGap),
-                                      _narrowTransportSlot(child: nextButton),
-                                    ],
-                                  )
-                                : playRing;
+                            // Line navigation flanks the play ring; previous
+                            // and next are independent so the cluster collapses
+                            // cleanly (prev+play+next / play+next / play-alone).
+                            final lineNavCluster = <Widget>[
+                              if (budget.showPrevious) ...[
+                                _narrowTransportSlot(child: prevButton),
+                                const SizedBox(width: kNarrowLineNavGap),
+                              ],
+                              playRing,
+                              if (budget.showNext) ...[
+                                const SizedBox(width: kNarrowLineNavGap),
+                                _narrowTransportSlot(child: nextButton),
+                              ],
+                            ];
 
-                            return Row(
+                            final controlsRow = Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                lineNavCluster,
+                                ...lineNavCluster,
                                 const Spacer(),
                                 ...narrowSecondaries,
                               ],
                             );
+
+                            // Collapsed mini-player: tapping a neutral area of
+                            // the controls bar expands the full player.
+                            // Interactive controls (IconButtons / play ring) and
+                            // the seek strip consume their own taps via the
+                            // gesture arena, so only genuinely empty area (the
+                            // spacer / row padding) triggers expand. This is a
+                            // no-op on the player route (already expanded).
+                            if (!onPlayer) {
+                              return EnjoyTappableSurface(
+                                borderRadius: BorderRadius.zero,
+                                enableHoverScale: false,
+                                semanticsLabel: l10n.transportExpand,
+                                onTap: () =>
+                                    openPlayerRoute(context, chrome.mediaId),
+                                child: controlsRow,
+                              );
+                            }
+                            return controlsRow;
                           },
                         )
                       : Row(
