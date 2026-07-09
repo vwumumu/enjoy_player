@@ -10,9 +10,7 @@ void main() {
 
     test('rewrites Dicebear SVG URLs to PNG', () {
       expect(
-        rasterAvatarUrl(
-          'https://api.dicebear.com/9.x/thumbs/svg?seed=An%20Li',
-        ),
+        rasterAvatarUrl('https://api.dicebear.com/9.x/thumbs/svg?seed=An%20Li'),
         'https://api.dicebear.com/9.x/thumbs/png?seed=An%20Li',
       );
     });
@@ -23,8 +21,7 @@ void main() {
     });
 
     test('leaves Dicebear PNG URLs unchanged', () {
-      const png =
-          'https://api.dicebear.com/9.x/thumbs/png?seed=An%20Li';
+      const png = 'https://api.dicebear.com/9.x/thumbs/png?seed=An%20Li';
       expect(rasterAvatarUrl(png), png);
     });
   });

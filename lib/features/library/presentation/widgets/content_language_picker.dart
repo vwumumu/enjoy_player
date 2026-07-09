@@ -24,9 +24,7 @@ Future<String?> showContentLanguagePicker({
     selectedValue ?? prefsState?.effectiveLearningLanguage,
   );
   final opts = mediaLanguageChoices(l10n)
-      .map(
-        (e) => LanguageChoiceOption(value: e.value, label: e.label),
-      )
+      .map((e) => LanguageChoiceOption(value: e.value, label: e.label))
       .toList(growable: false);
   final picked = await showLanguageChoiceSheet(
     context: context,
@@ -46,9 +44,7 @@ Future<String?> showFocusLanguagePicker({
 }) async {
   final l10n = AppLocalizations.of(context)!;
   final opts = focusLanguageChoices(l10n)
-      .map(
-        (e) => LanguageChoiceOption(value: e.value, label: e.label),
-      )
+      .map((e) => LanguageChoiceOption(value: e.value, label: e.label))
       .toList(growable: false);
   return showLanguageChoiceSheet(
     context: context,

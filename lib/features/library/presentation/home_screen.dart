@@ -118,9 +118,7 @@ class HomeScreen extends ConsumerWidget {
                                 (context, index) {
                                   final m = recent[index];
                                   return Align(
-                                    key: ValueKey<String>(
-                                      'home-media-${m.id}',
-                                    ),
+                                    key: ValueKey<String>('home-media-${m.id}'),
                                     alignment: Alignment.topCenter,
                                     child: _HomeMediaTile(media: m),
                                   );

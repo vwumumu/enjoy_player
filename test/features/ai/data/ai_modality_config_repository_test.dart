@@ -46,11 +46,7 @@ void main() {
   setUp(() {
     db = AppDatabase(executor: NativeDatabase.memory());
     secrets = _FakeSecretStore();
-    repo = AiModalityConfigRepository(
-      db,
-      secrets,
-      const ByokConfigValidator(),
-    );
+    repo = AiModalityConfigRepository(db, secrets, const ByokConfigValidator());
   });
 
   tearDown(() async {

@@ -208,7 +208,10 @@ class _SubtitleTrackPickerSheetState
     }
   }
 
-  Future<void> _onSecondarySelectionChanged(String? id, String? autoSelectionId) async {
+  Future<void> _onSecondarySelectionChanged(
+    String? id,
+    String? autoSelectionId,
+  ) async {
     final ctrl = ref.read(autoTranslateCtrlProvider(widget.mediaId).notifier);
     if (id == null) {
       await ref
@@ -263,11 +266,15 @@ class _SubtitleTrackPickerSheetState
     required bool signedIn,
   }) {
     final theme = Theme.of(context);
-    final translationTracks =
-        tracks.where((track) => track.source != 'ai').toList();
+    final translationTracks = tracks
+        .where((track) => track.source != 'ai')
+        .toList();
     final autoTranslateSelected =
         autoSelectionId != null && secondaryId == autoSelectionId;
-    final blockedMessage = _autoTranslateBlockedMessage(l10n, autoTranslateState);
+    final blockedMessage = _autoTranslateBlockedMessage(
+      l10n,
+      autoTranslateState,
+    );
 
     return [
       if (isFetching)
@@ -656,7 +663,8 @@ class _SubtitleTrackPickerSheetState
       autoTranslateSelectionIdProvider(widget.mediaId),
     );
     final autoSelectionId = autoSelectionAsync.valueOrNull;
-    final targetLanguage = ref
+    final targetLanguage =
+        ref
             .watch(appPreferencesCtrlProvider)
             .valueOrNull
             ?.effectiveNativeLanguage ??

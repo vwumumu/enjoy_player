@@ -26,9 +26,7 @@ void main() {
 
       final hookVideoBody = kYoutubeMobileWatchInjectScript.substring(
         kYoutubeMobileWatchInjectScript.indexOf('function hookVideo(video){'),
-        kYoutubeMobileWatchInjectScript.indexOf(
-          'function syncState(video){',
-        ),
+        kYoutubeMobileWatchInjectScript.indexOf('function syncState(video){'),
       );
       expect(hookVideoBody, contains('disableTextTracks(video);'));
 

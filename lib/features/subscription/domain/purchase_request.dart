@@ -10,10 +10,7 @@ class PurchaseRequest {
   final PaymentProcessor processor;
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'months': months,
-      'processor': processor.apiValue,
-    };
+    return <String, dynamic>{'months': months, 'processor': processor.apiValue};
   }
 }
 

@@ -42,7 +42,8 @@ const llmPresets = <LlmPreset>[
     id: 'azureOpenAi',
     label: 'Azure OpenAI',
     apiSpec: LlmApiSpec.openAiCompatible,
-    baseUrl: 'https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT',
+    baseUrl:
+        'https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT',
     model: 'gpt-4o-mini',
   ),
   LlmPreset(

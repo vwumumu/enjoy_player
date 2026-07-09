@@ -82,26 +82,36 @@ void main() {
       expect(resolveLookupSource('und', learningTag: 'zh-cn'), 'zh-CN');
     });
 
-    test('prefers direct lookup catalog entry over primary-subtag fallback', () {
-      expect(resolveLookupTarget('ja-JP', learningTag: learn), 'ja-JP');
-      expect(resolveLookupTarget('de-DE', learningTag: learn), 'de-DE');
-      expect(resolveLookupTarget('it-IT', learningTag: learn), 'it-IT');
-      expect(resolveLookupTarget('ru-RU', learningTag: learn), 'ru-RU');
-    });
+    test(
+      'prefers direct lookup catalog entry over primary-subtag fallback',
+      () {
+        expect(resolveLookupTarget('ja-JP', learningTag: learn), 'ja-JP');
+        expect(resolveLookupTarget('de-DE', learningTag: learn), 'de-DE');
+        expect(resolveLookupTarget('it-IT', learningTag: learn), 'it-IT');
+        expect(resolveLookupTarget('ru-RU', learningTag: learn), 'ru-RU');
+      },
+    );
 
-    test('falls back to primary-subtag match when stored native is not in lookup list', () {
-      // de-AT → primary 'de' → first de-* in lookup list is de-DE
-      expect(resolveLookupTarget('de-AT', learningTag: learn), 'de-DE');
-      // fr-CH → primary 'fr' → first fr-* is fr-FR
-      expect(resolveLookupTarget('fr-CH', learningTag: learn), 'fr-FR');
-      // en-AU (not in lookup list, primary 'en', learning 'en-US') →
-      // first en-* != en-US = en-GB
-      expect(resolveLookupTarget('en-AU', learningTag: learn), 'en-GB');
-    });
+    test(
+      'falls back to primary-subtag match when stored native is not in lookup list',
+      () {
+        // de-AT → primary 'de' → first de-* in lookup list is de-DE
+        expect(resolveLookupTarget('de-AT', learningTag: learn), 'de-DE');
+        // fr-CH → primary 'fr' → first fr-* is fr-FR
+        expect(resolveLookupTarget('fr-CH', learningTag: learn), 'fr-FR');
+        // en-AU (not in lookup list, primary 'en', learning 'en-US') →
+        // first en-* != en-US = en-GB
+        expect(resolveLookupTarget('en-AU', learningTag: learn), 'en-GB');
+      },
+    );
 
     test('avoids picking source when a source tag is provided', () {
       expect(
-        resolveLookupTarget('de-AT', learningTag: learn, sourceLanguage: 'de-DE'),
+        resolveLookupTarget(
+          'de-AT',
+          learningTag: learn,
+          sourceLanguage: 'de-DE',
+        ),
         isNot('de-DE'),
       );
     });

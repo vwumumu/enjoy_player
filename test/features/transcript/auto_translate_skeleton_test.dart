@@ -20,9 +20,7 @@ void main() {
 
   group('isAutoTranslateTimelineStale', () {
     test('stale when reference primary id mismatches', () {
-      const primary = [
-        TranscriptLine(text: 'a', startMs: 0, durationMs: 1000),
-      ];
+      const primary = [TranscriptLine(text: 'a', startMs: 0, durationMs: 1000)];
       const ai = [TranscriptLine(text: '', startMs: 0, durationMs: 1000)];
       expect(
         isAutoTranslateTimelineStale(
@@ -161,9 +159,7 @@ void main() {
       const primary = [
         TranscriptLine(text: 'Hello', startMs: 0, durationMs: 1000),
       ];
-      const ai = [
-        TranscriptLine(text: '你好', startMs: 0, durationMs: 1000),
-      ];
+      const ai = [TranscriptLine(text: '你好', startMs: 0, durationMs: 1000)];
       expect(
         resolveAutoTranslateSecondaryText(
           primaryLines: primary,

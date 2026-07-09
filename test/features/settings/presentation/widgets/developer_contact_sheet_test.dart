@@ -148,10 +148,7 @@ void main() {
         (setCalls.single.arguments as Map)['text'],
         kDeveloperContactWeChatId,
       );
-      expect(
-        find.text(l10n.settingsAboutContactCopiedWeChat),
-        findsOneWidget,
-      );
+      expect(find.text(l10n.settingsAboutContactCopiedWeChat), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

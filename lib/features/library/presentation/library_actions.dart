@@ -56,7 +56,10 @@ Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
   if (path == null) return;
   if (!context.mounted) return;
 
-  final contentLanguage = await showContentLanguagePicker(context: context, ref: ref);
+  final contentLanguage = await showContentLanguagePicker(
+    context: context,
+    ref: ref,
+  );
   if (contentLanguage == null || !context.mounted) return;
 
   final l10n = AppLocalizations.of(context)!;
@@ -250,7 +253,10 @@ Future<void> importYoutubeFromDialog(
   if (submitted == null || submitted.isEmpty) return;
   if (!context.mounted) return;
 
-  final contentLanguage = await showContentLanguagePicker(context: context, ref: ref);
+  final contentLanguage = await showContentLanguagePicker(
+    context: context,
+    ref: ref,
+  );
   if (contentLanguage == null || !context.mounted) return;
 
   unawaited(
@@ -287,10 +293,7 @@ Future<void> importYoutubeFromDialog(
     if (auth is! AuthSignedIn) return;
     final id = await ref
         .read(mediaLibraryRepositoryProvider)
-        .importYoutubeVideo(
-          submitted,
-          contentLanguage: contentLanguage,
-        );
+        .importYoutubeVideo(submitted, contentLanguage: contentLanguage);
     if (!context.mounted) return;
     _dismissBlockingImportDialogThen(
       context,
@@ -327,15 +330,14 @@ Future<void> editMediaLanguage(
   if (tagsEqual(picked, media.language)) return;
 
   try {
-    await ref.read(mediaLibraryRepositoryProvider).updateMediaLanguage(
-      media.id,
-      picked,
-    );
+    await ref
+        .read(mediaLibraryRepositoryProvider)
+        .updateMediaLanguage(media.id, picked);
     final session = ref.read(playerControllerProvider);
     if (session?.mediaId == media.id) {
-      ref.read(playerControllerProvider.notifier).applySessionPatch(
-        session!.copyWith(language: picked),
-      );
+      ref
+          .read(playerControllerProvider.notifier)
+          .applySessionPatch(session!.copyWith(language: picked));
     }
     if (!context.mounted) return;
     AppNotice.success(context, l10n.mediaLanguageUpdated);

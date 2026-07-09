@@ -13,10 +13,10 @@ final Logger _log = logNamed('ai.azure_language');
 /// Callers must not fall back to English when this returns `null`.
 String? mapTranscriptLanguageToAzure(String? languageCode) {
   final resolved = resolveAzureAssessmentLocale(languageCode);
-  if (resolved == null && languageCode != null && languageCode.trim().isNotEmpty) {
-    _log.fine(
-      "Azure assessment locale unsupported for '$languageCode'",
-    );
+  if (resolved == null &&
+      languageCode != null &&
+      languageCode.trim().isNotEmpty) {
+    _log.fine("Azure assessment locale unsupported for '$languageCode'");
   }
   return resolved;
 }

@@ -33,13 +33,20 @@ class SubscriptionStatusCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(t.space20, t.space16, t.space20, t.space12),
+            padding: EdgeInsets.fromLTRB(
+              t.space20,
+              t.space16,
+              t.space20,
+              t.space12,
+            ),
             decoration: BoxDecoration(
               color: isPro
                   ? cs.primaryContainer.withValues(alpha: 0.35)
                   : cs.surfaceContainerHighest.withValues(alpha: 0.45),
               border: Border(
-                bottom: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.25)),
+                bottom: BorderSide(
+                  color: cs.outlineVariant.withValues(alpha: 0.25),
+                ),
               ),
             ),
             child: Row(
@@ -53,7 +60,9 @@ class SubscriptionStatusCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     l10n.subscriptionStatusCardTitle,
-                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: tt.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 _TierBadge(label: tierLabel, isPro: isPro),
@@ -95,7 +104,9 @@ class SubscriptionStatusCard extends StatelessWidget {
                   label: l10n.subscriptionStatusCreditsLimit,
                   child: Text(
                     l10n.subscriptionDailyCredits(
-                      NumberFormat.decimalPattern().format(status.dailyCreditsLimit),
+                      NumberFormat.decimalPattern().format(
+                        status.dailyCreditsLimit,
+                      ),
                     ),
                     style: tt.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
@@ -119,9 +130,9 @@ class SubscriptionStatusCard extends StatelessWidget {
     try {
       final date = DateTime.parse(iso).toLocal();
       return l10n.subscriptionExpiresOn(
-        DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(
-          date,
-        ),
+        DateFormat.yMMMMd(
+          Localizations.localeOf(context).toString(),
+        ).format(date),
       );
     } catch (_) {
       return iso;
@@ -140,7 +151,9 @@ class _DividerGap extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: tokens.space12),
       child: Divider(
         height: 1,
-        color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.25),
+        color: Theme.of(
+          context,
+        ).colorScheme.outlineVariant.withValues(alpha: 0.25),
       ),
     );
   }
@@ -175,7 +188,10 @@ class _StatusRow extends StatelessWidget {
             style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
           ),
         ),
-        Expanded(flex: 3, child: Align(alignment: Alignment.centerRight, child: child)),
+        Expanded(
+          flex: 3,
+          child: Align(alignment: Alignment.centerRight, child: child),
+        ),
       ],
     );
   }

@@ -6,62 +6,56 @@ import 'package:enjoy_player/data/db/settings_keys.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test(
-    'AppDatabase migration tolerates a column already added by an '
-    'interrupted previous migration',
-    () async {
-      final file = File(
-        '${Directory.systemTemp.path}/app_database_test_${DateTime.now().microsecondsSinceEpoch}.sqlite',
-      );
-      addTearDown(() {
-        if (file.existsSync()) file.deleteSync();
-      });
+  test('AppDatabase migration tolerates a column already added by an '
+      'interrupted previous migration', () async {
+    final file = File(
+      '${Directory.systemTemp.path}/app_database_test_${DateTime.now().microsecondsSinceEpoch}.sqlite',
+    );
+    addTearDown(() {
+      if (file.existsSync()) file.deleteSync();
+    });
 
-      // Simulate a migration that added `duration_seconds` /
-      // `language` on a previous launch but crashed before the schema
-      // version pragma was bumped past 6 (see the "duplicate column
-      // name" bug this regression-tests).
-      final seed = AppDatabase(executor: NativeDatabase(file));
-      await seed.customStatement('PRAGMA user_version = 6');
-      await seed.close();
+    // Simulate a migration that added `duration_seconds` /
+    // `language` on a previous launch but crashed before the schema
+    // version pragma was bumped past 6 (see the "duplicate column
+    // name" bug this regression-tests).
+    final seed = AppDatabase(executor: NativeDatabase(file));
+    await seed.customStatement('PRAGMA user_version = 6');
+    await seed.close();
 
-      final reopened = AppDatabase(executor: NativeDatabase(file));
-      addTearDown(reopened.close);
+    final reopened = AppDatabase(executor: NativeDatabase(file));
+    addTearDown(reopened.close);
 
-      // Opening triggers onUpgrade(from: 6, to: 10); it must not throw.
-      await reopened.customStatement('SELECT 1');
-    },
-  );
+    // Opening triggers onUpgrade(from: 6, to: 10); it must not throw.
+    await reopened.customStatement('SELECT 1');
+  });
 
-  test(
-    'AppDatabase migration is a no-op when the on-disk version is newer '
-    'than schemaVersion (downgrade)',
-    () async {
-      final file = File(
-        '${Directory.systemTemp.path}/app_database_test_downgrade_${DateTime.now().microsecondsSinceEpoch}.sqlite',
-      );
-      addTearDown(() {
-        if (file.existsSync()) file.deleteSync();
-      });
+  test('AppDatabase migration is a no-op when the on-disk version is newer '
+      'than schemaVersion (downgrade)', () async {
+    final file = File(
+      '${Directory.systemTemp.path}/app_database_test_downgrade_${DateTime.now().microsecondsSinceEpoch}.sqlite',
+    );
+    addTearDown(() {
+      if (file.existsSync()) file.deleteSync();
+    });
 
-      // Simulate opening a DB file that was last written by a newer app
-      // build (e.g. a rolled-back release, or a downgrade during testing).
-      // `onUpgrade` still fires whenever `versionBefore != versionNow`
-      // (drift doesn't distinguish upgrade from downgrade), so
-      // `_runMigrations`'s `from >= to` guard must short-circuit before any
-      // migration step tries to touch tables/columns that may not match
-      // this schemaVersion's expectations.
-      final seed = AppDatabase(executor: NativeDatabase(file));
-      await seed.customStatement('PRAGMA user_version = 999');
-      await seed.close();
+    // Simulate opening a DB file that was last written by a newer app
+    // build (e.g. a rolled-back release, or a downgrade during testing).
+    // `onUpgrade` still fires whenever `versionBefore != versionNow`
+    // (drift doesn't distinguish upgrade from downgrade), so
+    // `_runMigrations`'s `from >= to` guard must short-circuit before any
+    // migration step tries to touch tables/columns that may not match
+    // this schemaVersion's expectations.
+    final seed = AppDatabase(executor: NativeDatabase(file));
+    await seed.customStatement('PRAGMA user_version = 999');
+    await seed.close();
 
-      final reopened = AppDatabase(executor: NativeDatabase(file));
-      addTearDown(reopened.close);
+    final reopened = AppDatabase(executor: NativeDatabase(file));
+    addTearDown(reopened.close);
 
-      // Opening triggers onUpgrade(from: 999, to: 10); it must not throw.
-      await reopened.customStatement('SELECT 1');
-    },
-  );
+    // Opening triggers onUpgrade(from: 999, to: 10); it must not throw.
+    await reopened.customStatement('SELECT 1');
+  });
 
   test('AppDatabase can insert and read audio', () async {
     final db = AppDatabase(executor: NativeDatabase.memory());

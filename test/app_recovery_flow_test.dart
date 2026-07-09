@@ -170,7 +170,10 @@ void main() {
       'success',
       () async {
         final deviceGlobalDbFile = File(
-          p.join(docsDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite'),
+          p.join(
+            docsDir.path,
+            '${AppDatabase.deviceGlobalDatabaseName}.sqlite',
+          ),
         );
         deviceGlobalDbFile.writeAsStringSync('not-a-real-sqlite-file');
 
@@ -188,7 +191,11 @@ void main() {
         // thus eligible to be invalidated / rebuilt) before the reset runs —
         // mirrors how `EnjoyApp.build()` watches them.
         container.listen(appDatabaseProvider, (_, _) {});
-        container.listen(appPreferencesCtrlProvider, (_, _) {}, fireImmediately: true);
+        container.listen(
+          appPreferencesCtrlProvider,
+          (_, _) {},
+          fireImmediately: true,
+        );
         await container.read(appPreferencesCtrlProvider.future).catchError((_) {
           return AppPreferencesState.initial;
         });
@@ -203,9 +210,7 @@ void main() {
         // Invalidating a provider with an active listener schedules its
         // rebuild rather than running it inline, so wait for the rebuilt
         // future to settle before counting builds.
-        await container.read(appPreferencesCtrlProvider.future).catchError((
-          _,
-        ) {
+        await container.read(appPreferencesCtrlProvider.future).catchError((_) {
           return AppPreferencesState.initial;
         });
         // The provider was invalidated and rebuilt as a direct result of
@@ -217,16 +222,19 @@ void main() {
       },
     );
 
-    test('returns backupFailed and touches nothing when no DB exists', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'returns backupFailed and touches nothing when no DB exists',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      final outcome = await container.read(
-        recoveryResetResultProvider.future,
-      );
+        final outcome = await container.read(
+          recoveryResetResultProvider.future,
+        );
 
-      expect(outcome, RecoveryResetOutcome.backupFailed);
-    });
+        expect(outcome, RecoveryResetOutcome.backupFailed);
+      },
+    );
   });
 }
 

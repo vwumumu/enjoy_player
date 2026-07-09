@@ -30,57 +30,52 @@ void main() {
     );
   }
 
-  testWidgets(
-    'mouse hover over a blurred cue reveals it; mouse out re-blurs',
-    (tester) async {
-      const line = TranscriptLine(
-        text: 'Hover me',
-        startMs: 0,
-        durationMs: 2000,
-      );
-      await tester.pumpWidget(
-        harness(
-          TranscriptLineTile(
-            line: line,
-            mediaId: 'm1',
-            secondaryText: null,
-            isActive: false,
-            inEcho: false,
-            groupedInEcho: false,
-            selectable: false,
-            onTap: () {},
-          ),
+  testWidgets('mouse hover over a blurred cue reveals it; mouse out re-blurs', (
+    tester,
+  ) async {
+    const line = TranscriptLine(text: 'Hover me', startMs: 0, durationMs: 2000);
+    await tester.pumpWidget(
+      harness(
+        TranscriptLineTile(
+          line: line,
+          mediaId: 'm1',
+          secondaryText: null,
+          isActive: false,
+          inEcho: false,
+          groupedInEcho: false,
+          selectable: false,
+          onTap: () {},
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      final initial = tester.widget<TranscriptBlurText>(
-        find.byType(TranscriptBlurText),
-      );
-      expect(initial.revealed, isFalse);
+    final initial = tester.widget<TranscriptBlurText>(
+      find.byType(TranscriptBlurText),
+    );
+    expect(initial.revealed, isFalse);
 
-      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
-      final tileCenter = tester.getCenter(find.byType(TranscriptLineTile));
-      await gesture.moveTo(tileCenter);
-      await tester.pumpAndSettle();
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    final tileCenter = tester.getCenter(find.byType(TranscriptLineTile));
+    await gesture.moveTo(tileCenter);
+    await tester.pumpAndSettle();
 
-      final revealed = tester.widget<TranscriptBlurText>(
-        find.byType(TranscriptBlurText),
-      );
-      expect(revealed.revealed, isTrue);
+    final revealed = tester.widget<TranscriptBlurText>(
+      find.byType(TranscriptBlurText),
+    );
+    expect(revealed.revealed, isTrue);
 
-      await gesture.moveTo(const Offset(-100, -100));
-      await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(-100, -100));
+    await tester.pumpAndSettle();
 
-      final reblurred = tester.widget<TranscriptBlurText>(
-        find.byType(TranscriptBlurText),
-      );
-      expect(reblurred.revealed, isFalse);
+    final reblurred = tester.widget<TranscriptBlurText>(
+      find.byType(TranscriptBlurText),
+    );
+    expect(reblurred.revealed, isFalse);
 
-      await gesture.removePointer();
-    },
-  );
+    await gesture.removePointer();
+  });
 
   testWidgets(
     'when blur practice is OFF the cue is always revealed regardless of hover',

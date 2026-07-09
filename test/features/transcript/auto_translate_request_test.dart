@@ -54,20 +54,14 @@ class _FakeTranslation implements TranslationCapability {
 class _SignedInAuthCtrl extends AuthCtrl {
   @override
   Future<AuthState> build() async => const AuthSignedIn(
-        profile: UserProfile(
-          id: 'u1',
-          email: 't@example.com',
-          name: 'Test',
-        ),
-      );
+    profile: UserProfile(id: 'u1', email: 't@example.com', name: 'Test'),
+  );
 }
 
 class _ZhNativePrefsCtrl extends AppPreferencesCtrl {
   @override
-  Future<AppPreferencesState> build() async => AppPreferencesState.initial.copyWith(
-        nativeLanguage: 'zh-CN',
-        learningLanguage: 'en-US',
-      );
+  Future<AppPreferencesState> build() async => AppPreferencesState.initial
+      .copyWith(nativeLanguage: 'zh-CN', learningLanguage: 'en-US');
 }
 
 void main() {
@@ -262,8 +256,9 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(fake.calls, ['Hello']);
 
-      final aiId =
-          container.read(autoTranslateCtrlProvider(mediaDup)).aiTranscriptId!;
+      final aiId = container
+          .read(autoTranslateCtrlProvider(mediaDup))
+          .aiTranscriptId!;
       final aiLines = repo.linesForRow((await repo.transcriptRowById(aiId))!);
       expect(aiLines[0].text, 'ZH:Hello');
       expect(aiLines[1].text, 'ZH:Hello');
@@ -332,7 +327,10 @@ void main() {
 
       expect(fake.calls.length, 2);
       expect(
-        container.read(autoTranslateCtrlProvider(mediaId)).inFlightIndexes.length,
+        container
+            .read(autoTranslateCtrlProvider(mediaId))
+            .inFlightIndexes
+            .length,
         2,
       );
 

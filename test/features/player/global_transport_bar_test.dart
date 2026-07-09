@@ -97,8 +97,11 @@ Future<void> _seedTranscript(AppDatabase db) async {
       language: 'en',
       source: 'user',
       timelineJson: jsonEncode([
-        const TranscriptLine(text: 'hello', startMs: 0, durationMs: 1000)
-            .toJson(),
+        const TranscriptLine(
+          text: 'hello',
+          startMs: 0,
+          durationMs: 1000,
+        ).toJson(),
       ]),
       referenceId: null,
       label: 'en',

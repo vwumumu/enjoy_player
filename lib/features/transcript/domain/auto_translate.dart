@@ -140,13 +140,12 @@ String autoTranslateAiTrackId({
   required String targetType,
   required String mediaId,
   required String targetLanguage,
-}) =>
-    enjoyTranscriptId(
-      targetType: targetType,
-      targetId: mediaId,
-      language: targetLanguage,
-      source: 'ai',
-    );
+}) => enjoyTranscriptId(
+  targetType: targetType,
+  targetId: mediaId,
+  language: targetLanguage,
+  source: 'ai',
+);
 
 /// Returns indexes with empty [text] in [aiLines], excluding [exclude].
 List<int> pendingLineIndexes(
@@ -180,7 +179,9 @@ bool isAutoTranslateTimelineStale({
 }
 
 /// Builds a skeleton timeline mirroring primary timings with empty text.
-List<TranscriptLine> buildAutoTranslateSkeleton(List<TranscriptLine> primaryLines) {
+List<TranscriptLine> buildAutoTranslateSkeleton(
+  List<TranscriptLine> primaryLines,
+) {
   return primaryLines
       .map(
         (p) => TranscriptLine(
@@ -231,10 +232,7 @@ String? resolveAutoTranslateSecondaryText({
 
   final src = sourceLanguage;
   final tgt = targetLanguage;
-  if (src != null &&
-      src.isNotEmpty &&
-      tgt != null &&
-      tgt.isNotEmpty) {
+  if (src != null && src.isNotEmpty && tgt != null && tgt.isNotEmpty) {
     final expected = autoTranslateSourceKey(
       primaryText: primaryLines[lineIndex].text,
       sourceLanguage: src,

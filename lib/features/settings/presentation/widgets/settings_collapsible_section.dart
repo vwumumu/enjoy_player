@@ -135,7 +135,11 @@ class _AttentionBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.warning_amber_rounded, size: 14, color: cs.onErrorContainer),
+          Icon(
+            Icons.warning_amber_rounded,
+            size: 14,
+            color: cs.onErrorContainer,
+          ),
           SizedBox(width: t.space4),
           Text(
             label,

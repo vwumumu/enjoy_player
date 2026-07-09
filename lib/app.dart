@@ -165,11 +165,7 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp> {
     );
   }
 
-  Widget _errorBranch(
-    ThemeData theme,
-    Object error,
-    StackTrace? stack,
-  ) {
+  Widget _errorBranch(ThemeData theme, Object error, StackTrace? stack) {
     final isDb = isUnrecoverableDatabaseError(error);
     return _baseMaterialApp(
       theme: theme,

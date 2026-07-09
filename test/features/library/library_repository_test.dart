@@ -532,56 +532,59 @@ void main() {
       expect(row!.language, 'ko-KR');
     });
 
-    test('updateMediaLanguage updates row and clears transcript fetch state', () async {
-      var syncCalls = 0;
-      final syncingRepo = MediaLibraryRepository(
-        db,
-        FileStorage(),
-        enqueueSync: (_, _, _) async {
-          syncCalls++;
-        },
-      );
+    test(
+      'updateMediaLanguage updates row and clears transcript fetch state',
+      () async {
+        var syncCalls = 0;
+        final syncingRepo = MediaLibraryRepository(
+          db,
+          FileStorage(),
+          enqueueSync: (_, _, _) async {
+            syncCalls++;
+          },
+        );
 
-      final now = DateTime.now();
-      const id = 'yt-lang';
-      await db.videoDao.insertRow(
-        VideoRow(
-          id: id,
-          vid: 'abcdefghijk',
-          provider: 'youtube',
-          title: 'Clip',
-          description: null,
-          thumbnailUrl: null,
-          durationSeconds: 0,
-          language: 'und',
-          source: 'youtube',
-          localUri: null,
-          md5: null,
-          size: null,
-          mediaUrl: 'https://www.youtube.com/watch?v=abcdefghijk',
-          syncStatus: null,
-          serverUpdatedAt: null,
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
-      await db.transcriptFetchStateDao.upsertOutcome(
-        targetType: 'video',
-        targetId: id,
-        lastFetchedAt: now,
-        lastStatus: 'error',
-        lastError: 'wrong language',
-      );
+        final now = DateTime.now();
+        const id = 'yt-lang';
+        await db.videoDao.insertRow(
+          VideoRow(
+            id: id,
+            vid: 'abcdefghijk',
+            provider: 'youtube',
+            title: 'Clip',
+            description: null,
+            thumbnailUrl: null,
+            durationSeconds: 0,
+            language: 'und',
+            source: 'youtube',
+            localUri: null,
+            md5: null,
+            size: null,
+            mediaUrl: 'https://www.youtube.com/watch?v=abcdefghijk',
+            syncStatus: null,
+            serverUpdatedAt: null,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+        await db.transcriptFetchStateDao.upsertOutcome(
+          targetType: 'video',
+          targetId: id,
+          lastFetchedAt: now,
+          lastStatus: 'error',
+          lastError: 'wrong language',
+        );
 
-      await syncingRepo.updateMediaLanguage(id, 'fr');
-      final row = await db.videoDao.getById(id);
-      expect(row!.language, 'fr-FR');
-      expect(syncCalls, 1);
-      final fetchState = await db.transcriptFetchStateDao.getForTarget(
-        'video',
-        id,
-      );
-      expect(fetchState, isNull);
-    });
+        await syncingRepo.updateMediaLanguage(id, 'fr');
+        final row = await db.videoDao.getById(id);
+        expect(row!.language, 'fr-FR');
+        expect(syncCalls, 1);
+        final fetchState = await db.transcriptFetchStateDao.getForTarget(
+          'video',
+          id,
+        );
+        expect(fetchState, isNull);
+      },
+    );
   });
 }

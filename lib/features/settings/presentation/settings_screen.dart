@@ -31,7 +31,9 @@ class SettingsScreen extends ConsumerWidget {
         builder: (context, constraints) {
           final twoPane = constraints.maxWidth >= t.breakpointRail;
           return CenteredMaxWidthScrollView(
-            maxWidth: twoPane ? contentMaxWidth + t.sidebarWidth : contentMaxWidth,
+            maxWidth: twoPane
+                ? contentMaxWidth + t.sidebarWidth
+                : contentMaxWidth,
             slivers: [
               SliverToBoxAdapter(
                 child: EditorialHeader(

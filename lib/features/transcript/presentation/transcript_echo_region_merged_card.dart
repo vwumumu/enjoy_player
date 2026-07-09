@@ -136,10 +136,10 @@ class EchoRegionMergedCard extends ConsumerWidget {
         ),
         onRetranslateSecondary: canRetranslate
             ? () => unawaited(
-                  ref
-                      .read(autoTranslateCtrlProvider(mediaId).notifier)
-                      .retranslateLine(i),
-                )
+                ref
+                    .read(autoTranslateCtrlProvider(mediaId).notifier)
+                    .retranslateLine(i),
+              )
             : null,
         onTap: () =>
             ref.read(playerInteractionsProvider.notifier).seekToLine(line, i),

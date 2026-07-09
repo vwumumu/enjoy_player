@@ -89,7 +89,7 @@ String? _resolveActiveTrackLanguage(WidgetRef ref, String? mediaId) {
   if (activeId == null) return null;
   final tracks =
       ref.read(allTranscriptsForMediaProvider(mediaId)).valueOrNull ??
-          const <TranscriptTrack>[];
+      const <TranscriptTrack>[];
   for (final t in tracks) {
     if (t.id == activeId) return t.language;
   }

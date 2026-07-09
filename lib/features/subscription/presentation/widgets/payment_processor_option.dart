@@ -118,7 +118,9 @@ class PaymentProcessorOption extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                      style: tt.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     SizedBox(height: t.space8),
                     Wrap(

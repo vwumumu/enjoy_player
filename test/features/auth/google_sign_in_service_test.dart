@@ -7,19 +7,16 @@ void main() {
   group('GoogleSignInService Apple guard', () {
     tearDown(() => debugDefaultTargetPlatformOverride = null);
 
-    test(
-      'nativeGoogleSignInSupported is true on Apple targets once '
-      'kGoogleNativeSignInConfiguredOnApple is true, so sign-in UI and service '
-      'may call into the native SDK',
-      () {
-        expect(kGoogleNativeSignInConfiguredOnApple, isTrue);
+    test('nativeGoogleSignInSupported is true on Apple targets once '
+        'kGoogleNativeSignInConfiguredOnApple is true, so sign-in UI and service '
+        'may call into the native SDK', () {
+      expect(kGoogleNativeSignInConfiguredOnApple, isTrue);
 
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-        expect(nativeGoogleSignInSupported, isTrue);
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      expect(nativeGoogleSignInSupported, isTrue);
 
-        debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-        expect(nativeGoogleSignInSupported, isTrue);
-      },
-    );
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      expect(nativeGoogleSignInSupported, isTrue);
+    });
   });
 }

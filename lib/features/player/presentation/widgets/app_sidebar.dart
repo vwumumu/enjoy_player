@@ -108,122 +108,122 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
             ),
           ),
           child: FocusTraversalGroup(
-          policy: WidgetOrderTraversalPolicy(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (isDesktop && defaultTargetPlatform == TargetPlatform.macOS)
-                SizedBox(height: t.space8),
-              // Brand row
-              SizedBox(
-                height: t.sidebarBrandHeight,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: t.space20),
-                  child: Row(
-                    children: [
-                      const EnjoyLogo(size: 30),
-                      SizedBox(width: t.space12),
-                      Expanded(
-                        child: Text(
-                          l10n.appTitle,
-                          style: tt.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.2,
+            policy: WidgetOrderTraversalPolicy(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (isDesktop && defaultTargetPlatform == TargetPlatform.macOS)
+                  SizedBox(height: t.space8),
+                // Brand row
+                SizedBox(
+                  height: t.sidebarBrandHeight,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: t.space20),
+                    child: Row(
+                      children: [
+                        const EnjoyLogo(size: 30),
+                        SizedBox(width: t.space12),
+                        Expanded(
+                          child: Text(
+                            l10n.appTitle,
+                            style: tt.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Search
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  t.space12,
-                  0,
-                  t.space12,
-                  t.space12,
-                ),
-                child: Tooltip(
-                  message: searchTooltip,
-                  child: TextField(
-                    focusNode: searchFocusNode,
-                    controller: _searchController,
-                    onTap: () =>
-                        ensureLibraryRouteForSearch(GoRouter.of(context)),
-                    onChanged: (v) =>
-                        ref.read(librarySearchProvider.notifier).setQuery(v),
-                    onSubmitted: (_) =>
-                        ref.read(librarySearchProvider.notifier).commit(),
-                    style: tt.bodyMedium,
-                    decoration: InputDecoration(
-                      hintText: l10n.searchHint,
-                      prefixIcon: Icon(
-                        Icons.search_rounded,
-                        color: cs.onSurfaceVariant,
-                        size: 20,
-                      ),
-                      filled: true,
-                      fillColor: cs.surfaceContainerHighest.withValues(
-                        alpha: 0.6,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(t.radiusSm),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: t.space12,
-                        vertical: t.space8,
-                      ),
-                      isDense: true,
+                      ],
                     ),
                   ),
                 ),
-              ),
 
-              // Nav items
-              _SidebarNavItem(
-                icon: Icons.home_outlined,
-                selectedIcon: Icons.home_rounded,
-                label: l10n.homeTitle,
-                selected: path == '/',
-                onTap: () => context.go('/'),
-              ),
-              _SidebarNavItem(
-                icon: Icons.explore_outlined,
-                selectedIcon: Icons.explore_rounded,
-                label: l10n.discoverTitle,
-                selected: path.startsWith('/discover'),
-                onTap: () => context.go('/discover'),
-              ),
-              _SidebarNavItem(
-                icon: Icons.collections_bookmark_outlined,
-                selectedIcon: Icons.collections_bookmark_rounded,
-                label: l10n.libraryTitle,
-                selected:
-                    path.startsWith('/library') || path.startsWith('/cloud'),
-                onTap: () => context.go('/library'),
-              ),
-
-              const Spacer(),
-
-              // Account + Settings at bottom
-              const SidebarAccountChip(),
-              Padding(
-                padding: EdgeInsets.only(bottom: t.space8),
-                child: _SidebarNavItem(
-                  icon: Icons.settings_outlined,
-                  selectedIcon: Icons.settings_rounded,
-                  label: l10n.settingsTitle,
-                  selected: path.startsWith('/settings'),
-                  onTap: () => context.go('/settings'),
+                // Search
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    t.space12,
+                    0,
+                    t.space12,
+                    t.space12,
+                  ),
+                  child: Tooltip(
+                    message: searchTooltip,
+                    child: TextField(
+                      focusNode: searchFocusNode,
+                      controller: _searchController,
+                      onTap: () =>
+                          ensureLibraryRouteForSearch(GoRouter.of(context)),
+                      onChanged: (v) =>
+                          ref.read(librarySearchProvider.notifier).setQuery(v),
+                      onSubmitted: (_) =>
+                          ref.read(librarySearchProvider.notifier).commit(),
+                      style: tt.bodyMedium,
+                      decoration: InputDecoration(
+                        hintText: l10n.searchHint,
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: cs.onSurfaceVariant,
+                          size: 20,
+                        ),
+                        filled: true,
+                        fillColor: cs.surfaceContainerHighest.withValues(
+                          alpha: 0.6,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(t.radiusSm),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: t.space12,
+                          vertical: t.space8,
+                        ),
+                        isDense: true,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+
+                // Nav items
+                _SidebarNavItem(
+                  icon: Icons.home_outlined,
+                  selectedIcon: Icons.home_rounded,
+                  label: l10n.homeTitle,
+                  selected: path == '/',
+                  onTap: () => context.go('/'),
+                ),
+                _SidebarNavItem(
+                  icon: Icons.explore_outlined,
+                  selectedIcon: Icons.explore_rounded,
+                  label: l10n.discoverTitle,
+                  selected: path.startsWith('/discover'),
+                  onTap: () => context.go('/discover'),
+                ),
+                _SidebarNavItem(
+                  icon: Icons.collections_bookmark_outlined,
+                  selectedIcon: Icons.collections_bookmark_rounded,
+                  label: l10n.libraryTitle,
+                  selected:
+                      path.startsWith('/library') || path.startsWith('/cloud'),
+                  onTap: () => context.go('/library'),
+                ),
+
+                const Spacer(),
+
+                // Account + Settings at bottom
+                const SidebarAccountChip(),
+                Padding(
+                  padding: EdgeInsets.only(bottom: t.space8),
+                  child: _SidebarNavItem(
+                    icon: Icons.settings_outlined,
+                    selectedIcon: Icons.settings_rounded,
+                    label: l10n.settingsTitle,
+                    selected: path.startsWith('/settings'),
+                    onTap: () => context.go('/settings'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

@@ -118,7 +118,10 @@ void main() {
       () async {
         for (final ext in <String>['', '-wal', '-shm']) {
           await File(
-            p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite$ext'),
+            p.join(
+              dbDir.path,
+              '${AppDatabase.deviceGlobalDatabaseName}.sqlite$ext',
+            ),
           ).writeAsString('x');
         }
         // Add an unrelated file to make sure we don't over-delete.
@@ -129,7 +132,10 @@ void main() {
         for (final ext in <String>['', '-wal', '-shm']) {
           expect(
             File(
-              p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite$ext'),
+              p.join(
+                dbDir.path,
+                '${AppDatabase.deviceGlobalDatabaseName}.sqlite$ext',
+              ),
             ).existsSync(),
             isFalse,
             reason: 'device-global DB $ext should be deleted',
@@ -147,7 +153,10 @@ void main() {
       'wipeLocalDatabaseFiles also removes per-user session DB files',
       () async {
         final perUserFile = File(
-          p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}_abc123.sqlite'),
+          p.join(
+            dbDir.path,
+            '${AppDatabase.deviceGlobalDatabaseName}_abc123.sqlite',
+          ),
         );
         await perUserFile.writeAsString('x');
 
@@ -175,7 +184,10 @@ void main() {
         expect(outcome, RecoveryResetOutcome.success);
         expect(
           File(
-            p.join(dbDir.path, '${AppDatabase.deviceGlobalDatabaseName}.sqlite'),
+            p.join(
+              dbDir.path,
+              '${AppDatabase.deviceGlobalDatabaseName}.sqlite',
+            ),
           ).existsSync(),
           isFalse,
         );

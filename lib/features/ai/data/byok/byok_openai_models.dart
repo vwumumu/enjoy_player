@@ -37,11 +37,12 @@ Future<List<String>> fetchOpenAiCompatibleModels({
   final data = decoded['data'];
   if (data is! List) return const [];
 
-  final ids = data
-      .map((row) => (row as Map)['id']?.toString())
-      .whereType<String>()
-      .where((id) => id.isNotEmpty)
-      .toList()
-    ..sort();
+  final ids =
+      data
+          .map((row) => (row as Map)['id']?.toString())
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toList()
+        ..sort();
   return ids;
 }

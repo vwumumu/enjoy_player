@@ -246,10 +246,7 @@ class _AllFilterChip extends StatelessWidget {
 }
 
 class _LanguageScopeFilterChip extends StatelessWidget {
-  const _LanguageScopeFilterChip({
-    required this.label,
-    required this.onTap,
-  });
+  const _LanguageScopeFilterChip({required this.label, required this.onTap});
 
   final String label;
   final VoidCallback onTap;
@@ -263,9 +260,7 @@ class _LanguageScopeFilterChip extends StatelessWidget {
     return Material(
       color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
       shape: StadiumBorder(
-        side: BorderSide(
-          color: cs.outlineVariant.withValues(alpha: 0.35),
-        ),
+        side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.35)),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(

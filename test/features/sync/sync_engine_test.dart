@@ -27,19 +27,14 @@ void main() {
     });
 
     test('blocks permanently failed rows (retryCount >= 5)', () {
-      expect(
-        shouldRetryQueueItem(_row(id: 1, retryCount: 5)),
-        isFalse,
-      );
+      expect(shouldRetryQueueItem(_row(id: 1, retryCount: 5)), isFalse);
     });
 
     test('applies exponential backoff from lastAttempt', () {
       final now = DateTime.now();
       // retryCount 1 → delay 2000 ms
       expect(
-        shouldRetryQueueItem(
-          _row(id: 1, retryCount: 1, lastAttempt: now),
-        ),
+        shouldRetryQueueItem(_row(id: 1, retryCount: 1, lastAttempt: now)),
         isFalse,
       );
       expect(

@@ -368,7 +368,9 @@ class _TranscriptScrollableListState
     final autoTranslateState = ref.watch(
       autoTranslateCtrlProvider(widget.mediaId),
     );
-    final secondaryId = ref.watch(secondaryTranscriptIdProvider(widget.mediaId)).value;
+    final secondaryId = ref
+        .watch(secondaryTranscriptIdProvider(widget.mediaId))
+        .value;
     final autoTranslateActive =
         autoTranslateState.isActive &&
         autoTranslateState.aiTranscriptId != null &&
@@ -490,8 +492,7 @@ class _TranscriptScrollableListState
                   : secondaryTextRaw;
               final canRetranslateLine =
                   autoTranslateActive &&
-                  (lineFailed ||
-                      (secondaryText != null && !secondaryEmpty));
+                  (lineFailed || (secondaryText != null && !secondaryEmpty));
 
               final selectable = isActive;
               Widget tile = TranscriptLineTile(
@@ -513,14 +514,14 @@ class _TranscriptScrollableListState
                     : null,
                 onRetranslateSecondary: canRetranslateLine
                     ? () => unawaited(
-                          ref
-                              .read(
-                                autoTranslateCtrlProvider(
-                                  widget.mediaId,
-                                ).notifier,
-                              )
-                              .retranslateLine(lineIndex),
-                        )
+                        ref
+                            .read(
+                              autoTranslateCtrlProvider(
+                                widget.mediaId,
+                              ).notifier,
+                            )
+                            .retranslateLine(lineIndex),
+                      )
                     : null,
                 onTap: () => ref
                     .read(playerInteractionsProvider.notifier)

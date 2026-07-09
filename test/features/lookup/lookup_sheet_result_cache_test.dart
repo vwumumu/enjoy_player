@@ -4,33 +4,23 @@ import 'package:enjoy_player/features/lookup/application/lookup_section_params.d
 import 'package:enjoy_player/features/lookup/application/lookup_sheet_result_cache.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-ContextualTranslationResult _ctxResult(String tag) => ContextualTranslationResult(
-      translatedText: 'ctx-$tag',
-    );
+ContextualTranslationResult _ctxResult(String tag) =>
+    ContextualTranslationResult(translatedText: 'ctx-$tag');
 
 DictionaryResult _dictResult(String tag) => DictionaryResult(
-      word: tag,
-      sourceLanguage: tag,
-      targetLanguage: tag,
-      senses: const [],
-    );
+  word: tag,
+  sourceLanguage: tag,
+  targetLanguage: tag,
+  senses: const [],
+);
 
 void main() {
   group('LookupSheetResultCache.evictForPair', () {
     test('removes only matching pair entries from both maps', () {
       final cache = LookupSheetResultCache();
-      const pairA = (
-        source: 'ko-KR',
-        target: 'ja-JP',
-      );
-      const pairB = (
-        source: 'ko-KR',
-        target: 'es-ES',
-      );
-      const pairC = (
-        source: 'ja-JP',
-        target: 'ko-KR',
-      );
+      const pairA = (source: 'ko-KR', target: 'ja-JP');
+      const pairB = (source: 'ko-KR', target: 'es-ES');
+      const pairC = (source: 'ja-JP', target: 'ko-KR');
 
       final ctxA = LookupContextualParams(
         text: '안녕',

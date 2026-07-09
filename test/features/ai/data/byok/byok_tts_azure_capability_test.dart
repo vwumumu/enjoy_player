@@ -45,16 +45,16 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-      expect(call.method, 'synthesize');
-      final args = Map<String, dynamic>.from(
-        call.arguments as Map<Object?, Object?>,
-      );
-      expect(args['subscriptionKey'], 'azure-sub-key');
-      expect(args['region'], 'eastus');
-      expect(args['language'], 'en-US');
-      expect(args['text'], 'Hello');
-      return encoded;
-    });
+          expect(call.method, 'synthesize');
+          final args = Map<String, dynamic>.from(
+            call.arguments as Map<Object?, Object?>,
+          );
+          expect(args['subscriptionKey'], 'azure-sub-key');
+          expect(args['region'], 'eastus');
+          expect(args['language'], 'en-US');
+          expect(args['text'], 'Hello');
+          return encoded;
+        });
 
     final cap = ByokTtsAzureCapability(
       config: const SpeechByokConfig(

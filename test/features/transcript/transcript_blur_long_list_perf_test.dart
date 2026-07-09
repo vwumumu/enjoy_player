@@ -59,9 +59,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TranscriptBlurText), findsWidgets);
-      final first = tester.widgetList<TranscriptBlurText>(
-        find.byType(TranscriptBlurText),
-      ).first;
+      final first = tester
+          .widgetList<TranscriptBlurText>(find.byType(TranscriptBlurText))
+          .first;
       expect(first.revealed, isFalse);
 
       await tester.fling(find.byType(ListView), const Offset(0, -4000), 8000);

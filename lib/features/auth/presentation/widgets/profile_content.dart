@@ -217,8 +217,7 @@ class _ProfileContentState extends ConsumerState<ProfileContent> {
                                 ),
                                 initialValue: displayTag,
                                 decoration: InputDecoration(
-                                  labelText:
-                                      l10n.profileFieldDisplayLanguage,
+                                  labelText: l10n.profileFieldDisplayLanguage,
                                 ),
                                 items: [
                                   for (final loc in kAppDisplayLocales)
@@ -242,9 +241,7 @@ class _ProfileContentState extends ConsumerState<ProfileContent> {
                                                   .notifier,
                                             )
                                             .setLocale(
-                                              displayLocaleFromRawOrDefault(
-                                                v,
-                                              ),
+                                              displayLocaleFromRawOrDefault(v),
                                             );
                                       },
                               ),
@@ -255,14 +252,12 @@ class _ProfileContentState extends ConsumerState<ProfileContent> {
                                 ),
                                 initialValue: learnTag,
                                 decoration: InputDecoration(
-                                  labelText:
-                                      l10n.profileFieldLearningLanguage,
+                                  labelText: l10n.profileFieldLearningLanguage,
                                   helperText:
                                       l10n.profileLearningLanguageReadOnly,
                                 ),
                                 items: [
-                                  for (final tag
-                                      in kSupportedFocusLanguageTags)
+                                  for (final tag in kSupportedFocusLanguageTags)
                                     DropdownMenuItem(
                                       value: tag,
                                       child: Text(
@@ -294,10 +289,8 @@ class _ProfileContentState extends ConsumerState<ProfileContent> {
                                     ? nativeTag
                                     : nativeAllowed.first,
                                 decoration: InputDecoration(
-                                  labelText:
-                                      l10n.profileFieldNativeLanguage,
-                                  helperText:
-                                      l10n.settingsNativeMustDifferHint,
+                                  labelText: l10n.profileFieldNativeLanguage,
+                                  helperText: l10n.settingsNativeMustDifferHint,
                                 ),
                                 items: [
                                   for (final tag in nativeAllowed)
@@ -308,8 +301,7 @@ class _ProfileContentState extends ConsumerState<ProfileContent> {
                                       ),
                                     ),
                                 ],
-                                onChanged:
-                                    _saving || nativeAllowed.length <= 1
+                                onChanged: _saving || nativeAllowed.length <= 1
                                     ? null
                                     : (v) async {
                                         if (v == null) return;

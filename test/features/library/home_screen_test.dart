@@ -56,17 +56,14 @@ void main() {
                 (ref) async => LearningStatistics.empty(),
               ),
               activeUsersProvider.overrideWith(
-                (ref) async =>
-                    const ActiveUsersResponse(users: [], count: 0),
+                (ref) async => const ActiveUsersResponse(users: [], count: 0),
               ),
             ],
           ),
         );
         await tester.pumpAndSettle();
 
-        final l10n = await AppLocalizations.delegate.load(
-          const Locale('en'),
-        );
+        final l10n = await AppLocalizations.delegate.load(const Locale('en'));
 
         // Empty-state copy is still shown for the recents section.
         expect(find.text(l10n.homeEmptyTitle), findsOneWidget);

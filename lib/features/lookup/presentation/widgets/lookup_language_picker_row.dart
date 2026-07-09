@@ -66,9 +66,9 @@ class LookupLanguagePickerRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final learn = learningTag ?? sourceLanguage;
     final allowed = sortLookupLanguages(
-      kSupportedLookupLanguageTags.where(
-        (t) => !tagsEqual(t, sourceLanguage),
-      ).toList(growable: false),
+      kSupportedLookupLanguageTags
+          .where((t) => !tagsEqual(t, sourceLanguage))
+          .toList(growable: false),
       learningTag: learn,
     );
     if (allowed.isEmpty) return;

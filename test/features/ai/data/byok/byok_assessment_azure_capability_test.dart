@@ -79,13 +79,13 @@ void main() {
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (call) async {
-        expect(call.method, 'assess');
-        final args = call.arguments as Map<Object?, Object?>;
-        expect(args['subscriptionKey'], 'azure-sub-key');
-        expect(args['region'], 'eastus');
-        expect(args.containsKey('token'), isFalse);
-        return json;
-      });
+            expect(call.method, 'assess');
+            final args = call.arguments as Map<Object?, Object?>;
+            expect(args['subscriptionKey'], 'azure-sub-key');
+            expect(args['region'], 'eastus');
+            expect(args.containsKey('token'), isFalse);
+            return json;
+          });
 
       final tmp = await Directory.systemTemp.createTemp('byok_assess_test');
       final wav = File('${tmp.path}/t.wav');

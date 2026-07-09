@@ -6,10 +6,7 @@ import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Routes reachable without a signed-in Enjoy account session.
-const signInAllowlistedLocations = <String>{
-  '/sign-in',
-  '/sign-in/email',
-};
+const signInAllowlistedLocations = <String>{'/sign-in', '/sign-in/email'};
 
 /// Returns `true` when [matchedLocation] is the sign-in hub or email OTP sub-route.
 bool isSignInAllowlisted(String matchedLocation) {

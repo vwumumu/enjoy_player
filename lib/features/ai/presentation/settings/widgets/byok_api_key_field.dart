@@ -51,7 +51,8 @@ class _ByokApiKeyFieldState extends State<ByokApiKeyField> {
     final tt = Theme.of(context).textTheme;
 
     if (widget.hasExistingKey && !_editing) {
-      final preview = widget.maskedPreview ?? l10n.settingsAiProvidersApiKeySavedMask;
+      final preview =
+          widget.maskedPreview ?? l10n.settingsAiProvidersApiKeySavedMask;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -69,7 +70,11 @@ class _ByokApiKeyFieldState extends State<ByokApiKeyField> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.lock_outline, size: 18, color: cs.onSurfaceVariant),
+                  Icon(
+                    Icons.lock_outline,
+                    size: 18,
+                    color: cs.onSurfaceVariant,
+                  ),
                   SizedBox(width: t.space8),
                   Expanded(
                     child: Text(

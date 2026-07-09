@@ -79,9 +79,7 @@ String resolveLookupTarget(
   String? sourceLanguage,
 }) {
   final learn = normalizeBcp47Tag(learningTag);
-  final src = sourceLanguage != null
-      ? normalizeBcp47Tag(sourceLanguage)
-      : null;
+  final src = sourceLanguage != null ? normalizeBcp47Tag(sourceLanguage) : null;
   final supported = kSupportedLookupLanguageTags;
   final normalized = nativeLanguage == null || nativeLanguage.trim().isEmpty
       ? null

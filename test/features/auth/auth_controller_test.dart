@@ -112,42 +112,37 @@ void main() {
     expect(await fake.hasAccessToken(), isFalse);
   });
 
-  test(
-    'handleAuthCallbackUri resets to AuthSignedOut and surfaces an '
-    'AuthFailure when persisting tokens throws a non-AuthFailure error '
-    '(e.g. a keychain PlatformException), instead of leaving the flow '
-    'stuck on AuthSigningInWebPkce forever',
-    () async {
-      FlutterSecureStorage.setMockInitialValues({});
-      final fake = _PersistFailsAuthRepository();
-      final container = ProviderContainer(
-        overrides: [authRepositoryProvider.overrideWithValue(fake)],
-      );
-      addTearDown(container.dispose);
+  test('handleAuthCallbackUri resets to AuthSignedOut and surfaces an '
+      'AuthFailure when persisting tokens throws a non-AuthFailure error '
+      '(e.g. a keychain PlatformException), instead of leaving the flow '
+      'stuck on AuthSigningInWebPkce forever', () async {
+    FlutterSecureStorage.setMockInitialValues({});
+    final fake = _PersistFailsAuthRepository();
+    final container = ProviderContainer(
+      overrides: [authRepositoryProvider.overrideWithValue(fake)],
+    );
+    addTearDown(container.dispose);
 
-      await container.read(authCtrlProvider.future);
-      final notifier = container.read(authCtrlProvider.notifier);
-      final pkce = generatePkcePair();
-      const oauthState = 'state-123';
-      notifier.state = AsyncData(
-        AuthSigningInWebPkce(
-          oauthState: oauthState,
-          codeVerifier: pkce.verifier,
-          redirectUri: 'enjoyplayer://auth/callback',
-          startedAt: DateTime.now(),
-        ),
-      );
+    await container.read(authCtrlProvider.future);
+    final notifier = container.read(authCtrlProvider.notifier);
+    final pkce = generatePkcePair();
+    const oauthState = 'state-123';
+    notifier.state = AsyncData(
+      AuthSigningInWebPkce(
+        oauthState: oauthState,
+        codeVerifier: pkce.verifier,
+        redirectUri: 'enjoyplayer://auth/callback',
+        startedAt: DateTime.now(),
+      ),
+    );
 
-      await expectLater(
-        notifier.handleAuthCallbackUri(
-          Uri.parse(
-            'enjoyplayer://auth/callback?code=abc&state=$oauthState',
-          ),
-        ),
-        throwsA(isA<AuthFailure>()),
-      );
+    await expectLater(
+      notifier.handleAuthCallbackUri(
+        Uri.parse('enjoyplayer://auth/callback?code=abc&state=$oauthState'),
+      ),
+      throwsA(isA<AuthFailure>()),
+    );
 
-      expect(container.read(authCtrlProvider).value, isA<AuthSignedOut>());
-    },
-  );
+    expect(container.read(authCtrlProvider).value, isA<AuthSignedOut>());
+  });
 }

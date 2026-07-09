@@ -101,10 +101,9 @@ class _DictionaryLookupSheetState extends ConsumerState<DictionaryLookupSheet> {
   void _evictPriorPair(String source, String target) {
     if (source.isEmpty || target.isEmpty) return;
     if (tagsEqual(source, target)) return;
-    ref.read(lookupSheetResultCacheProvider).evictForPair(
-          sourceLanguage: source,
-          targetLanguage: target,
-        );
+    ref
+        .read(lookupSheetResultCacheProvider)
+        .evictForPair(sourceLanguage: source, targetLanguage: target);
   }
 
   @override

@@ -14,10 +14,7 @@ import 'package:enjoy_player/features/subscription/presentation/widgets/purchase
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class TierComparison extends StatelessWidget {
-  const TierComparison({
-    required this.status,
-    super.key,
-  });
+  const TierComparison({required this.status, super.key});
 
   final SubscriptionStatus status;
 
@@ -34,7 +31,11 @@ class TierComparison extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.compare_arrows_rounded, size: 22, color: Theme.of(context).colorScheme.primary),
+            Icon(
+              Icons.compare_arrows_rounded,
+              size: 22,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             SizedBox(width: t.space8),
             Flexible(
               child: Text(
@@ -174,133 +175,132 @@ class _PlanCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: stretchVertically ? MainAxisSize.max : MainAxisSize.min,
         children: [
-            SizedBox(
-              height: 28,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: showRecommended
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [cs.primary, cs.tertiary],
-                          ),
-                          borderRadius: BorderRadius.circular(999),
+          SizedBox(
+            height: 28,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: showRecommended
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [cs.primary, cs.tertiary],
                         ),
-                        child: Text(
-                          l10n.subscriptionRecommendedPlan,
-                          style: tt.labelSmall?.copyWith(
-                            color: cs.onPrimary,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        l10n.subscriptionRecommendedPlan,
+                        style: tt.labelSmall?.copyWith(
+                          color: cs.onPrimary,
+                          fontWeight: FontWeight.w700,
                         ),
-                      )
-                    : isCurrent
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: cs.secondaryContainer,
-                          borderRadius: BorderRadius.circular(999),
+                      ),
+                    )
+                  : isCurrent
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: cs.secondaryContainer,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        l10n.subscriptionCurrentPlan,
+                        style: tt.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
-                        child: Text(
-                          l10n.subscriptionCurrentPlan,
-                          style: tt.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
             ),
-            SizedBox(height: t.space8),
-            Row(
-              children: [
-                if (emphasize) ...[
-                  Icon(Icons.auto_awesome_rounded, size: 20, color: cs.primary),
-                  SizedBox(width: t.space4),
-                ],
-                Expanded(
-                  child: Text(
-                    title,
-                    style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-                  ),
+          ),
+          SizedBox(height: t.space8),
+          Row(
+            children: [
+              if (emphasize) ...[
+                Icon(Icons.auto_awesome_rounded, size: 20, color: cs.primary),
+                SizedBox(width: t.space4),
+              ],
+              Expanded(
+                child: Text(
+                  title,
+                  style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
+              ),
+            ],
+          ),
+          SizedBox(height: t.space4),
+          Text(
+            description,
+            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+          ),
+          SizedBox(height: t.space16),
+          Text(
+            price,
+            style: tt.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: emphasize ? cs.primary : null,
+            ),
+          ),
+          SizedBox(height: t.space4),
+          Text(
+            dailyCredits,
+            style: tt.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+              fontWeight: emphasize ? FontWeight.w600 : null,
+            ),
+          ),
+          SizedBox(height: t.space16),
+          for (final feature in features) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.check_circle_rounded,
+                  size: 18,
+                  color: emphasize ? cs.primary : cs.onSurfaceVariant,
+                ),
+                SizedBox(width: t.space8),
+                Expanded(child: Text(feature, style: tt.bodyMedium)),
               ],
             ),
-            SizedBox(height: t.space4),
-            Text(
-              description,
-              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-            SizedBox(height: t.space16),
-            Text(
-              price,
-              style: tt.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: emphasize ? cs.primary : null,
-              ),
-            ),
-            SizedBox(height: t.space4),
-            Text(
-              dailyCredits,
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-                fontWeight: emphasize ? FontWeight.w600 : null,
-              ),
-            ),
-            SizedBox(height: t.space16),
-            for (final feature in features) ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    size: 18,
-                    color: emphasize ? cs.primary : cs.onSurfaceVariant,
-                  ),
-                  SizedBox(width: t.space8),
-                  Expanded(child: Text(feature, style: tt.bodyMedium)),
-                ],
-              ),
-              SizedBox(height: t.space8),
-            ],
-            if (stretchVertically) const Spacer(),
-            if (!stretchVertically) SizedBox(height: t.space16),
-            if (onAction == null)
-              EnjoyButton.secondary(
-                onPressed: null,
-                child: Text(actionLabel),
-              )
-            else
-              EnjoyButton.primary(
-                onPressed: onAction,
-                child: Text(actionLabel),
-              ),
+            SizedBox(height: t.space8),
           ],
-        ),
+          if (stretchVertically) const Spacer(),
+          if (!stretchVertically) SizedBox(height: t.space16),
+          if (onAction == null)
+            EnjoyButton.secondary(onPressed: null, child: Text(actionLabel))
+          else
+            EnjoyButton.primary(onPressed: onAction, child: Text(actionLabel)),
+        ],
+      ),
     );
 
     if (!emphasize) return card;
 
     return DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(t.radiusLg + 2),
-          gradient: LinearGradient(
-            colors: [
-              cs.primary.withValues(alpha: 0.85),
-              cs.tertiary.withValues(alpha: 0.75),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: cs.primary.withValues(alpha: 0.22),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(t.radiusLg + 2),
+        gradient: LinearGradient(
+          colors: [
+            cs.primary.withValues(alpha: 0.85),
+            cs.tertiary.withValues(alpha: 0.75),
           ],
         ),
-      child: Padding(
-        padding: const EdgeInsets.all(1.5),
-        child: card,
+        boxShadow: [
+          BoxShadow(
+            color: cs.primary.withValues(alpha: 0.22),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
+      child: Padding(padding: const EdgeInsets.all(1.5), child: card),
     );
   }
 }

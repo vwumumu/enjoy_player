@@ -40,15 +40,15 @@ void main() {
   test('ByokAsrAzureCapability with mocked transcribe channel', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-      expect(call.method, 'transcribe');
-      final args = Map<String, dynamic>.from(
-        call.arguments as Map<Object?, Object?>,
-      );
-      expect(args['subscriptionKey'], 'azure-sub-key');
-      expect(args['region'], 'eastus');
-      expect(args['language'], 'en-US');
-      return 'Hello from Azure';
-    });
+          expect(call.method, 'transcribe');
+          final args = Map<String, dynamic>.from(
+            call.arguments as Map<Object?, Object?>,
+          );
+          expect(args['subscriptionKey'], 'azure-sub-key');
+          expect(args['region'], 'eastus');
+          expect(args['language'], 'en-US');
+          return 'Hello from Azure';
+        });
 
     final cap = ByokAsrAzureCapability(
       config: const SpeechByokConfig(

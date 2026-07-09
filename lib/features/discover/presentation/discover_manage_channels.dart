@@ -95,9 +95,7 @@ class DiscoverManageChannelsView extends ConsumerWidget {
                   discoverRecommendedShowAllLanguagesProvider,
                 );
                 ref
-                    .read(
-                      discoverRecommendedShowAllLanguagesProvider.notifier,
-                    )
+                    .read(discoverRecommendedShowAllLanguagesProvider.notifier)
                     .setShowAll(!cur);
               },
               child: Text(

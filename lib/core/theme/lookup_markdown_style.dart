@@ -52,10 +52,7 @@ MarkdownStyleSheet buildLookupMarkdownStyleSheet(
       backgroundColor: calloutFill,
       color: scheme.onSurface,
     ),
-    blockquote: body?.copyWith(
-      color: scheme.onSurfaceVariant,
-      height: 1.45,
-    ),
+    blockquote: body?.copyWith(color: scheme.onSurfaceVariant, height: 1.45),
     blockquotePadding: EdgeInsets.fromLTRB(
       tokens.space12,
       tokens.space8,
@@ -79,9 +76,7 @@ MarkdownStyleSheet buildLookupMarkdownStyleSheet(
       border: Border.all(color: subtleBorder),
     ),
     horizontalRuleDecoration: BoxDecoration(
-      border: Border(
-        top: BorderSide(color: subtleBorder),
-      ),
+      border: Border(top: BorderSide(color: subtleBorder)),
     ),
     listIndent: tokens.space24,
     listBullet: body?.copyWith(color: scheme.onSurfaceVariant),

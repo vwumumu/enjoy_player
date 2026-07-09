@@ -86,10 +86,7 @@ void main() {
 
     test('auth loading redirects protected routes to sign-in', () {
       expect(
-        resolveAuthRedirect(
-          matchedLocation: '/',
-          auth: const AsyncLoading(),
-        ),
+        resolveAuthRedirect(matchedLocation: '/', auth: const AsyncLoading()),
         '/sign-in?from=%2F',
       );
       expect(
@@ -120,10 +117,7 @@ void main() {
 
     test('signed-in users skip gate for app routes', () {
       const signedIn = AsyncData(AuthSignedIn(profile: _profile));
-      expect(
-        resolveAuthRedirect(matchedLocation: '/', auth: signedIn),
-        isNull,
-      );
+      expect(resolveAuthRedirect(matchedLocation: '/', auth: signedIn), isNull);
       expect(
         resolveAuthRedirect(matchedLocation: '/library', auth: signedIn),
         isNull,

@@ -98,19 +98,16 @@ class _WidgetErrorSurfaceState extends State<WidgetErrorSurface>
   }
 
   Future<void> _onCopy() => runBusyAction<bool>(
-        () => copyErrorToClipboard(
-          widget.details.exception,
-          widget.details.stack,
-        ),
-        (ctx, ok) async {
-          final l10n = AppLocalizations.of(ctx)!;
-          if (ok) {
-            AppNotice.success(ctx, l10n.recoveryCopiedToClipboard);
-          } else {
-            AppNotice.error(ctx, l10n.recoveryCopiedToClipboard);
-          }
-        },
-      );
+    () => copyErrorToClipboard(widget.details.exception, widget.details.stack),
+    (ctx, ok) async {
+      final l10n = AppLocalizations.of(ctx)!;
+      if (ok) {
+        AppNotice.success(ctx, l10n.recoveryCopiedToClipboard);
+      } else {
+        AppNotice.error(ctx, l10n.recoveryCopiedToClipboard);
+      }
+    },
+  );
 }
 
 /// Installs [ErrorWidget.builder] for release/profile (debug keeps red screen).

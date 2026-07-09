@@ -77,10 +77,7 @@ void main() {
 
     await expectLater(
       cap.transcribe(
-        AsrRequest(
-          audioBytes: Uint8List.fromList([1]),
-          filename: 'a.wav',
-        ),
+        AsrRequest(audioBytes: Uint8List.fromList([1]), filename: 'a.wav'),
       ),
       throwsA(isA<Exception>()),
     );

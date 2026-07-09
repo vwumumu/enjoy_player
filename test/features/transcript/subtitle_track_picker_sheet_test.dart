@@ -37,9 +37,9 @@ List<Override> _pickerOverrides({required List<TranscriptTrack> tracks}) => [
   allTranscriptsForMediaProvider(
     _mediaId,
   ).overrideWith((ref) => Stream.value(tracks)),
-  activeTranscriptIdProvider(
-    _mediaId,
-  ).overrideWith((ref) => Stream.value(tracks.isEmpty ? null : tracks.first.id)),
+  activeTranscriptIdProvider(_mediaId).overrideWith(
+    (ref) => Stream.value(tracks.isEmpty ? null : tracks.first.id),
+  ),
   secondaryTranscriptIdProvider(
     _mediaId,
   ).overrideWith((ref) => Stream.value(null)),
@@ -47,8 +47,12 @@ List<Override> _pickerOverrides({required List<TranscriptTrack> tracks}) => [
   transcriptFetchStatusProvider(_mediaId).overrideWithValue(
     const TranscriptFetchUiState(status: TranscriptFetchStatus.idle),
   ),
-  autoTranslateCtrlProvider(_mediaId).overrideWith(() => _IdleAutoTranslateCtrl()),
-  autoTranslateSelectionIdProvider(_mediaId).overrideWith((ref) async => 'ai-selection-id'),
+  autoTranslateCtrlProvider(
+    _mediaId,
+  ).overrideWith(() => _IdleAutoTranslateCtrl()),
+  autoTranslateSelectionIdProvider(
+    _mediaId,
+  ).overrideWith((ref) async => 'ai-selection-id'),
   appPreferencesCtrlProvider.overrideWith(() => _ZhNativePrefsCtrl()),
   authCtrlProvider.overrideWith(() => _SignedInAuthCtrl()),
 ];
@@ -61,20 +65,14 @@ class _IdleAutoTranslateCtrl extends AutoTranslateCtrl {
 class _SignedInAuthCtrl extends AuthCtrl {
   @override
   Future<AuthState> build() async => const AuthSignedIn(
-        profile: UserProfile(
-          id: 'u1',
-          email: 't@example.com',
-          name: 'Test',
-        ),
-      );
+    profile: UserProfile(id: 'u1', email: 't@example.com', name: 'Test'),
+  );
 }
 
 class _ZhNativePrefsCtrl extends AppPreferencesCtrl {
   @override
-  Future<AppPreferencesState> build() async => AppPreferencesState.initial.copyWith(
-        nativeLanguage: 'zh-CN',
-        learningLanguage: 'en-US',
-      );
+  Future<AppPreferencesState> build() async => AppPreferencesState.initial
+      .copyWith(nativeLanguage: 'zh-CN', learningLanguage: 'en-US');
 }
 
 Widget _harness({required List<Override> overrides}) {

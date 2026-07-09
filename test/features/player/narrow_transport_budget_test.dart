@@ -73,11 +73,11 @@ void main() {
   group('resolveNarrowTransportBudget drop order (C3)', () {
     // Phone profile: transcript loaded, collapsed mini, no desktop fullscreen.
     NarrowTransportBudget at(double width) => resolveNarrowTransportBudget(
-          width,
-          hasTranscriptLines: true,
-          onPlayer: false,
-          showFullscreenTransport: false,
-        );
+      width,
+      hasTranscriptLines: true,
+      onPlayer: false,
+      showFullscreenTransport: false,
+    );
 
     test('widest shows every droppable', () {
       final b = at(424);

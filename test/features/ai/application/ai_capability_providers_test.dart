@@ -10,11 +10,11 @@ import 'package:http/http.dart' as http;
 
 class _NullApiClient extends ApiClient {
   _NullApiClient()
-      : super(
-          httpClient: _NullHttpClient(),
-          getBaseUrl: () async => 'https://test.invalid',
-          getAccessToken: () async => null,
-        );
+    : super(
+        httpClient: _NullHttpClient(),
+        getBaseUrl: () async => 'https://test.invalid',
+        getAccessToken: () async => null,
+      );
 }
 
 class _NullHttpClient extends http.BaseClient {
@@ -25,15 +25,20 @@ class _NullHttpClient extends http.BaseClient {
 }
 
 void main() {
-  test('llmCapabilityProvider returns EnjoyLlmCapability for default config', () {
-    final container = ProviderContainer(
-      overrides: [
-        aiModalityConfigsProvider.overrideWithValue(AiModalityConfigs.defaults),
-        chatApiProvider.overrideWithValue(ChatApi(_NullApiClient())),
-      ],
-    );
-    addTearDown(container.dispose);
+  test(
+    'llmCapabilityProvider returns EnjoyLlmCapability for default config',
+    () {
+      final container = ProviderContainer(
+        overrides: [
+          aiModalityConfigsProvider.overrideWithValue(
+            AiModalityConfigs.defaults,
+          ),
+          chatApiProvider.overrideWithValue(ChatApi(_NullApiClient())),
+        ],
+      );
+      addTearDown(container.dispose);
 
-    expect(container.read(llmCapabilityProvider), isA<EnjoyLlmCapability>());
-  });
+      expect(container.read(llmCapabilityProvider), isA<EnjoyLlmCapability>());
+    },
+  );
 }

@@ -274,7 +274,9 @@ class _SummaryBody extends StatelessWidget {
               if (data.recordingsDurationToday != null)
                 _InlineMetric(
                   icon: Icons.schedule,
-                  value: formatPracticeDurationMs(data.recordingsDurationToday!),
+                  value: formatPracticeDurationMs(
+                    data.recordingsDurationToday!,
+                  ),
                   label: l10n.homePracticeTime,
                   cs: cs,
                   tabular: tabular,
@@ -685,7 +687,9 @@ class _TodayStatsBody extends StatelessWidget {
               Expanded(
                 child: _StatBlock(
                   icon: Icons.schedule,
-                  valueText: formatPracticeDurationMs(data.recordingsDurationToday!),
+                  valueText: formatPracticeDurationMs(
+                    data.recordingsDurationToday!,
+                  ),
                   label: l10n.homePracticeTime,
                   compactValue: compactValues,
                 ),

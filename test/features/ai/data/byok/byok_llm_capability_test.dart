@@ -84,18 +84,19 @@ void main() {
           model: 'gpt-4o-mini',
         ),
         _FakeSecretStore('sk-test'),
-        generateTextRunner: ({
-          required LanguageModelV3 model,
-          String? system,
-          List<ai_sdk.ModelMessage>? messages,
-          int? maxOutputTokens,
-          double? temperature,
-        }) async {
-          expect(model.modelId, 'gpt-4o-mini');
-          expect(system, 'sys');
-          expect(messages?.single.content, 'hello');
-          return _fakeResult('  world  ');
-        },
+        generateTextRunner:
+            ({
+              required LanguageModelV3 model,
+              String? system,
+              List<ai_sdk.ModelMessage>? messages,
+              int? maxOutputTokens,
+              double? temperature,
+            }) async {
+              expect(model.modelId, 'gpt-4o-mini');
+              expect(system, 'sys');
+              expect(messages?.single.content, 'hello');
+              return _fakeResult('  world  ');
+            },
       );
 
       final out = await capability.generateText(
@@ -113,16 +114,17 @@ void main() {
           model: 'claude-sonnet-4-20250514',
         ),
         _FakeSecretStore('key'),
-        generateTextRunner: ({
-          required LanguageModelV3 model,
-          String? system,
-          List<ai_sdk.ModelMessage>? messages,
-          int? maxOutputTokens,
-          double? temperature,
-        }) async {
-          expect(messages, hasLength(2));
-          return _fakeResult('ok');
-        },
+        generateTextRunner:
+            ({
+              required LanguageModelV3 model,
+              String? system,
+              List<ai_sdk.ModelMessage>? messages,
+              int? maxOutputTokens,
+              double? temperature,
+            }) async {
+              expect(messages, hasLength(2));
+              return _fakeResult('ok');
+            },
       );
 
       final out = await capability.generateChatCompletion(

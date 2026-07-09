@@ -159,10 +159,7 @@ class _SidebarTierBadge extends StatelessWidget {
 }
 
 class _SidebarUpgradeButton extends StatelessWidget {
-  const _SidebarUpgradeButton({
-    required this.label,
-    required this.onPressed,
-  });
+  const _SidebarUpgradeButton({required this.label, required this.onPressed});
 
   final String label;
   final VoidCallback onPressed;

@@ -172,7 +172,8 @@ final class UnimplementedAssessmentCapability implements AssessmentCapability {
   }
 }
 
-final class ByokNotConfiguredAssessmentCapability implements AssessmentCapability {
+final class ByokNotConfiguredAssessmentCapability
+    implements AssessmentCapability {
   const ByokNotConfiguredAssessmentCapability();
 
   @override

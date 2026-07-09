@@ -81,9 +81,7 @@ void main() {
     'picking a different display language updates the row value badge '
     'immediately without leaving the hub',
     (tester) async {
-      await tester.pumpWidget(
-        _harness(db: db, learningLanguage: 'en-US'),
-      );
+      await tester.pumpWidget(_harness(db: db, learningLanguage: 'en-US'));
       await tester.pumpAndSettle();
 
       final l10n = await AppLocalizations.delegate.load(
@@ -133,9 +131,7 @@ void main() {
     'the learning language leaves only one native choice',
     (tester) async {
       // en-US learning language leaves only zh-CN as a native choice.
-      await tester.pumpWidget(
-        _harness(db: db, learningLanguage: 'en-US'),
-      );
+      await tester.pumpWidget(_harness(db: db, learningLanguage: 'en-US'));
       await tester.pumpAndSettle();
 
       final l10n = await AppLocalizations.delegate.load(
@@ -166,9 +162,7 @@ void main() {
     'more than one native choice',
     (tester) async {
       // ja-JP learning language leaves both en-US and zh-CN as native choices.
-      await tester.pumpWidget(
-        _harness(db: db, learningLanguage: 'ja-JP'),
-      );
+      await tester.pumpWidget(_harness(db: db, learningLanguage: 'ja-JP'));
       await tester.pumpAndSettle();
 
       final l10n = await AppLocalizations.delegate.load(

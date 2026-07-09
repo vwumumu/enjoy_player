@@ -16,9 +16,7 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
-        transcriptBlurModeProvider.overrideWith(
-          () => _BlurMode(blurActive),
-        ),
+        transcriptBlurModeProvider.overrideWith(() => _BlurMode(blurActive)),
       ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

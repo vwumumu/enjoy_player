@@ -25,7 +25,9 @@ final class ByokAsrOpenAiCapability implements AsrCapability {
   @override
   Future<AsrResult> transcribe(AsrRequest request) async {
     if (_config.kind != SpeechByokKind.openAiCompatible) {
-      throw StateError('OpenAI ASR BYOK requires openAiCompatible configuration');
+      throw StateError(
+        'OpenAI ASR BYOK requires openAiCompatible configuration',
+      );
     }
 
     final baseUrl = _config.baseUrl?.trim();

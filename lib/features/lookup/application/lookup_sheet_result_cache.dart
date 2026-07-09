@@ -53,10 +53,14 @@ final class LookupSheetResultCache {
     required String targetLanguage,
   }) {
     _contextual.removeWhere(
-      (k, _) => k.sourceLanguage == sourceLanguage && k.targetLanguage == targetLanguage,
+      (k, _) =>
+          k.sourceLanguage == sourceLanguage &&
+          k.targetLanguage == targetLanguage,
     );
     _dictionary.removeWhere(
-      (k, _) => k.sourceLanguage == sourceLanguage && k.targetLanguage == targetLanguage,
+      (k, _) =>
+          k.sourceLanguage == sourceLanguage &&
+          k.targetLanguage == targetLanguage,
     );
   }
 }

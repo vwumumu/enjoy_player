@@ -109,66 +109,69 @@ class _PurchaseSheetBodyState extends ConsumerState<_PurchaseSheetBody> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             children: [
-                SubscriptionDurationSelector(
-                  months: _months,
-                  enabled: !busy,
-                  onMonthsChanged: (v) => setState(() => _months = v),
+              SubscriptionDurationSelector(
+                months: _months,
+                enabled: !busy,
+                onMonthsChanged: (v) => setState(() => _months = v),
+              ),
+              SizedBox(height: t.space16),
+              Text(
+                l10n.subscriptionPurchasePaymentMethod,
+                style: tt.titleSmall,
+              ),
+              SizedBox(height: t.space8),
+              PaymentProcessorOption(
+                processor: PaymentProcessor.stripe,
+                selected: _processor == PaymentProcessor.stripe,
+                enabled: !busy,
+                onSelected: () =>
+                    setState(() => _processor = PaymentProcessor.stripe),
+              ),
+              SizedBox(height: t.space8),
+              PaymentProcessorOption(
+                processor: PaymentProcessor.mixin,
+                selected: _processor == PaymentProcessor.mixin,
+                enabled: !busy,
+                onSelected: () =>
+                    setState(() => _processor = PaymentProcessor.mixin),
+              ),
+              SizedBox(height: t.space12),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(t.radiusMd),
                 ),
-                SizedBox(height: t.space16),
-                Text(l10n.subscriptionPurchasePaymentMethod, style: tt.titleSmall),
-                SizedBox(height: t.space8),
-                PaymentProcessorOption(
-                  processor: PaymentProcessor.stripe,
-                  selected: _processor == PaymentProcessor.stripe,
-                  enabled: !busy,
-                  onSelected: () =>
-                      setState(() => _processor = PaymentProcessor.stripe),
-                ),
-                SizedBox(height: t.space8),
-                PaymentProcessorOption(
-                  processor: PaymentProcessor.mixin,
-                  selected: _processor == PaymentProcessor.mixin,
-                  enabled: !busy,
-                  onSelected: () =>
-                      setState(() => _processor = PaymentProcessor.mixin),
-                ),
-                SizedBox(height: t.space12),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(t.radiusMd),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(t.space16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(l10n.subscriptionTotalPriceLabel),
-                        Text(
-                          l10n.subscriptionTotalPrice(
-                            _totalPrice.toStringAsFixed(2),
-                          ),
-                          style: tt.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                child: Padding(
+                  padding: EdgeInsets.all(t.space16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(l10n.subscriptionTotalPriceLabel),
+                      Text(
+                        l10n.subscriptionTotalPrice(
+                          _totalPrice.toStringAsFixed(2),
                         ),
-                      ],
-                    ),
+                        style: tt.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: t.space16),
-                EnjoyButton.primary(
-                  onPressed: busy ? null : _purchaseExternal,
-                  child: busy
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.subscriptionContinueToPayment),
-                ),
-              ],
-            ),
+              ),
+              SizedBox(height: t.space16),
+              EnjoyButton.primary(
+                onPressed: busy ? null : _purchaseExternal,
+                child: busy
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n.subscriptionContinueToPayment),
+              ),
+            ],
+          ),
         ],
       ),
     );

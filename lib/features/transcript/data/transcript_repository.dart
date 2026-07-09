@@ -128,7 +128,7 @@ class TranscriptRepository {
     int? youtubeWorkerWaitMs,
   ]) : _maxYoutubeWorkerPollAttempts = maxYoutubeWorkerPollAttempts ?? 4,
        _youtubeWorkerPollDelay =
-            youtubeWorkerPollDelay ?? const Duration(seconds: 5),
+           youtubeWorkerPollDelay ?? const Duration(seconds: 5),
        _youtubeWorkerWaitMs = youtubeWorkerWaitMs ?? 20000;
 
   final AppDatabase _db;

@@ -71,9 +71,7 @@ void main() {
         modality: ModalityKind.assessment,
         config: const AIServiceConfig(
           provider: AIProvider.byok,
-          speechByok: SpeechByokConfig(
-            kind: SpeechByokKind.openAiCompatible,
-          ),
+          speechByok: SpeechByokConfig(kind: SpeechByokKind.openAiCompatible),
         ),
         hasExistingApiKey: true,
       );

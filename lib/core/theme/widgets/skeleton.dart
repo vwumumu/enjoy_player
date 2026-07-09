@@ -214,10 +214,7 @@ class SkeletonMediaList extends StatelessWidget {
               children: [
                 Skeleton.line(width: double.infinity, height: 16),
                 SizedBox(height: t.space8),
-                Skeleton.line(
-                  width: i.isEven ? 180.0 : 220.0,
-                  height: 12,
-                ),
+                Skeleton.line(width: i.isEven ? 180.0 : 220.0, height: 12),
               ],
             ),
           ),

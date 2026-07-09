@@ -21,9 +21,7 @@ void main() {
     test('toggle flips only the targeted section', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
-      final notifier = container.read(
-        settingsSectionCollapseProvider.notifier,
-      );
+      final notifier = container.read(settingsSectionCollapseProvider.notifier);
 
       notifier.toggle(SettingsSectionIds.developer);
 
@@ -35,9 +33,7 @@ void main() {
     test('setCollapsed is idempotent and only notifies on change', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
-      final notifier = container.read(
-        settingsSectionCollapseProvider.notifier,
-      );
+      final notifier = container.read(settingsSectionCollapseProvider.notifier);
 
       var notifications = 0;
       container.listen(

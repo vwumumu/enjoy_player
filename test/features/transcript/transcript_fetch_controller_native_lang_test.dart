@@ -13,10 +13,10 @@ import 'package:flutter_test/flutter_test.dart';
 class _NativePrefsCtrl extends AppPreferencesCtrl {
   @override
   Future<AppPreferencesState> build() async => const AppPreferencesState(
-        locale: kAppDefaultDisplayLocale,
-        learningLanguage: 'en-US',
-        nativeLanguage: 'zh-CN',
-      );
+    locale: kAppDefaultDisplayLocale,
+    learningLanguage: 'en-US',
+    nativeLanguage: 'zh-CN',
+  );
 }
 
 /// Records every `resolveOnOpen` invocation so the controller test can assert
@@ -24,8 +24,8 @@ class _NativePrefsCtrl extends AppPreferencesCtrl {
 class _RecordingRepo extends TranscriptRepository {
   _RecordingRepo(super.db);
 
-  final List<({bool forceCloud, bool fetchCloud, String? nativeLanguage})> calls =
-      [];
+  final List<({bool forceCloud, bool fetchCloud, String? nativeLanguage})>
+  calls = [];
 
   @override
   Future<TranscriptResolveResult> resolveOnOpen(
@@ -34,13 +34,11 @@ class _RecordingRepo extends TranscriptRepository {
     bool fetchCloud = true,
     String? nativeLanguage,
   }) async {
-    calls.add(
-      (
-        forceCloud: forceCloud,
-        fetchCloud: fetchCloud,
-        nativeLanguage: nativeLanguage,
-      ),
-    );
+    calls.add((
+      forceCloud: forceCloud,
+      fetchCloud: fetchCloud,
+      nativeLanguage: nativeLanguage,
+    ));
     return const TranscriptResolveResult(hasTracks: false);
   }
 }
@@ -75,21 +73,24 @@ void main() {
       await db.close();
     });
 
-    test('T009: resolveOnOpen forwards native language when signed in', () async {
-      // Prime the (async) prefs so valueOrNull is populated before the call.
-      await container.read(appPreferencesCtrlProvider.future);
+    test(
+      'T009: resolveOnOpen forwards native language when signed in',
+      () async {
+        // Prime the (async) prefs so valueOrNull is populated before the call.
+        await container.read(appPreferencesCtrlProvider.future);
 
-      const mediaId = 'media-native-open';
-      final ctrl = container.read(
-        transcriptFetchCtrlProvider(mediaId).notifier,
-      );
-      await ctrl.resolveOnOpen(signedIn: true);
+        const mediaId = 'media-native-open';
+        final ctrl = container.read(
+          transcriptFetchCtrlProvider(mediaId).notifier,
+        );
+        await ctrl.resolveOnOpen(signedIn: true);
 
-      expect(repo.calls, hasLength(1));
-      expect(repo.calls.single.fetchCloud, isTrue);
-      expect(repo.calls.single.forceCloud, isFalse);
-      expect(repo.calls.single.nativeLanguage, 'zh-CN');
-    });
+        expect(repo.calls, hasLength(1));
+        expect(repo.calls.single.fetchCloud, isTrue);
+        expect(repo.calls.single.forceCloud, isFalse);
+        expect(repo.calls.single.nativeLanguage, 'zh-CN');
+      },
+    );
 
     test('T009: unsigned open forwards no native language', () async {
       await container.read(appPreferencesCtrlProvider.future);
@@ -105,24 +106,21 @@ void main() {
       expect(repo.calls.single.nativeLanguage, isNull);
     });
 
-    test(
-      'T014: refreshFromCloud forwards native language (FR-010)',
-      () async {
-        await container.read(appPreferencesCtrlProvider.future);
+    test('T014: refreshFromCloud forwards native language (FR-010)', () async {
+      await container.read(appPreferencesCtrlProvider.future);
 
-        const mediaId = 'media-native-refresh';
-        final ctrl = container.read(
-          transcriptFetchCtrlProvider(mediaId).notifier,
-        );
-        await ctrl.refreshFromCloud(signedIn: true);
+      const mediaId = 'media-native-refresh';
+      final ctrl = container.read(
+        transcriptFetchCtrlProvider(mediaId).notifier,
+      );
+      await ctrl.refreshFromCloud(signedIn: true);
 
-        expect(repo.calls, hasLength(1));
-        expect(repo.calls.single.fetchCloud, isTrue);
-        expect(repo.calls.single.forceCloud, isTrue);
-        // The refresh path must see the same native language as open — this is
-        // the FR-010 gap that reading inside _runResolve closes.
-        expect(repo.calls.single.nativeLanguage, 'zh-CN');
-      },
-    );
+      expect(repo.calls, hasLength(1));
+      expect(repo.calls.single.fetchCloud, isTrue);
+      expect(repo.calls.single.forceCloud, isTrue);
+      // The refresh path must see the same native language as open — this is
+      // the FR-010 gap that reading inside _runResolve closes.
+      expect(repo.calls.single.nativeLanguage, 'zh-CN');
+    });
   });
 }

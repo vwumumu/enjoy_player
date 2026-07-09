@@ -41,19 +41,16 @@ void main() {
     },
   );
 
-  test(
-    'AiApiBaseUrl honours a persisted apiAiBaseUrl override',
-    () async {
-      await db.settingsDao.setValue(
-        SettingsKeys.apiAiBaseUrl,
-        'https://ai-staging.example.com',
-      );
+  test('AiApiBaseUrl honours a persisted apiAiBaseUrl override', () async {
+    await db.settingsDao.setValue(
+      SettingsKeys.apiAiBaseUrl,
+      'https://ai-staging.example.com',
+    );
 
-      final resolved = await container.read(aiApiBaseUrlProvider.future);
+    final resolved = await container.read(aiApiBaseUrlProvider.future);
 
-      expect(resolved, 'https://ai-staging.example.com');
-    },
-  );
+    expect(resolved, 'https://ai-staging.example.com');
+  });
 
   test(
     'clearOverride removes the row and rebuilds to the worker default',
@@ -69,16 +66,11 @@ void main() {
         'https://ai-staging.example.com',
       );
 
-      await container
-          .read(aiApiBaseUrlProvider.notifier)
-          .clearOverride();
+      await container.read(aiApiBaseUrlProvider.notifier).clearOverride();
 
       // The persisted row must actually be deleted (not just nulled) —
       // see `SettingsDao.deleteValue`'s contract on `abcdee4`.
-      expect(
-        await db.settingsDao.getValue(SettingsKeys.apiAiBaseUrl),
-        isNull,
-      );
+      expect(await db.settingsDao.getValue(SettingsKeys.apiAiBaseUrl), isNull);
 
       // Force the provider to rebuild so we exercise the no-override branch
       // of `build()` rather than the cached state set by `clearOverride`.

@@ -12,9 +12,9 @@ ThemeData _testTheme() {
     colorScheme: scheme,
     useMaterial3: true,
     brightness: Brightness.dark,
-    textTheme: Typography.material2021(platform: TargetPlatform.android)
-        .white
-        .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface),
+    textTheme: Typography.material2021(
+      platform: TargetPlatform.android,
+    ).white.apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface),
     extensions: [EnjoyThemeTokens.build(scheme)],
   );
 }

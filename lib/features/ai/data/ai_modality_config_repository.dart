@@ -20,7 +20,9 @@ class AiModalityConfigRepository {
   final ByokConfigValidator _validator;
 
   Future<AiModalityConfigs> load() async {
-    final raw = await _db.settingsDao.getValue(SettingsKeys.aiModalityConfigsV1);
+    final raw = await _db.settingsDao.getValue(
+      SettingsKeys.aiModalityConfigsV1,
+    );
     if (raw == null || raw.isEmpty) {
       return AiModalityConfigs.defaults;
     }
@@ -80,8 +82,9 @@ class AiModalityConfigRepository {
       llm: llm,
       asr: modality == ModalityKind.asr ? config : configs.asr,
       tts: modality == ModalityKind.tts ? config : configs.tts,
-      assessment:
-          modality == ModalityKind.assessment ? config : configs.assessment,
+      assessment: modality == ModalityKind.assessment
+          ? config
+          : configs.assessment,
       translation: llm,
       dictionary: llm,
     );
@@ -105,9 +108,7 @@ class AiModalityConfigRepository {
   }
 
   Map<String, dynamic> _encodeConfig(AIServiceConfig config) {
-    final map = <String, dynamic>{
-      'provider': config.provider.name,
-    };
+    final map = <String, dynamic>{'provider': config.provider.name};
     if (config.provider == AIProvider.byok) {
       if (config.llmByok != null) {
         map['llmByok'] = _encodeLlmByok(config.llmByok!);
@@ -120,19 +121,19 @@ class AiModalityConfigRepository {
   }
 
   Map<String, dynamic> _encodeLlmByok(LlmByokConfig config) => {
-        'apiSpec': config.apiSpec.toJsonKey(),
-        'baseUrl': config.baseUrl,
-        'model': config.model,
-        if (config.presetId != null) 'presetId': config.presetId,
-      };
+    'apiSpec': config.apiSpec.toJsonKey(),
+    'baseUrl': config.baseUrl,
+    'model': config.model,
+    if (config.presetId != null) 'presetId': config.presetId,
+  };
 
   Map<String, dynamic> _encodeSpeechByok(SpeechByokConfig config) => {
-        'kind': config.kind.toJsonKey(),
-        if (config.baseUrl != null) 'baseUrl': config.baseUrl,
-        if (config.model != null) 'model': config.model,
-        if (config.region != null) 'region': config.region,
-        if (config.presetId != null) 'presetId': config.presetId,
-      };
+    'kind': config.kind.toJsonKey(),
+    if (config.baseUrl != null) 'baseUrl': config.baseUrl,
+    if (config.model != null) 'model': config.model,
+    if (config.region != null) 'region': config.region,
+    if (config.presetId != null) 'presetId': config.presetId,
+  };
 
   AiModalityConfigs _decodeSnapshot(Map<String, dynamic> map) {
     final llm = _decodeModality(map[ModalityKind.llm.toJsonKey()]);

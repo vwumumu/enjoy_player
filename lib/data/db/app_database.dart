@@ -383,8 +383,7 @@ class TranscriptFetchStateDao extends DatabaseAccessor<AppDatabase>
 
   Future<void> clearForTarget(String targetType, String targetId) async {
     await (delete(transcriptFetchStates)..where(
-          (t) =>
-              t.targetType.equals(targetType) & t.targetId.equals(targetId),
+          (t) => t.targetType.equals(targetType) & t.targetId.equals(targetId),
         ))
         .go();
   }
@@ -800,11 +799,9 @@ class YoutubeChannelSubscriptionDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<void> updateLanguage(String channelId, String language) async {
-    await (update(
-      youtubeChannelSubscriptions,
-    )..where((t) => t.channelId.equals(channelId))).write(
-      YoutubeChannelSubscriptionsCompanion(language: Value(language)),
-    );
+    await (update(youtubeChannelSubscriptions)
+          ..where((t) => t.channelId.equals(channelId)))
+        .write(YoutubeChannelSubscriptionsCompanion(language: Value(language)));
   }
 }
 

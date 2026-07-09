@@ -75,20 +75,12 @@ class PaymentMethodIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.string(
-      _svgs[kind]!,
-      width: size,
-      height: size,
-    );
+    return SvgPicture.string(_svgs[kind]!, width: size, height: size);
   }
 }
 
 class PaymentMethodChip extends StatelessWidget {
-  const PaymentMethodChip({
-    required this.label,
-    super.key,
-    this.icon,
-  });
+  const PaymentMethodChip({required this.label, super.key, this.icon});
 
   final PaymentMethodIcon? icon;
   final String label;
@@ -101,14 +93,8 @@ class PaymentMethodChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (icon != null) ...[
-          icon!,
-          const SizedBox(width: 4),
-        ],
-        Text(
-          label,
-          style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant),
-        ),
+        if (icon != null) ...[icon!, const SizedBox(width: 4)],
+        Text(label, style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
       ],
     );
   }

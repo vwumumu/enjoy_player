@@ -39,11 +39,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        _harness(
-          source: 'ko-KR',
-          target: 'ja-JP',
-          learningTag: 'en-US',
-        ),
+        _harness(source: 'ko-KR', target: 'ja-JP', learningTag: 'en-US'),
       );
       // Korean label (catalog or fallback) and Japanese label.
       expect(find.text('한국어'), findsOneWidget);
@@ -96,7 +92,9 @@ void main() {
       expect(captured, 'ja-JP');
     });
 
-    testWidgets('swap control is enabled when source != target', (tester) async {
+    testWidgets('swap control is enabled when source != target', (
+      tester,
+    ) async {
       var swapped = 0;
       await tester.pumpWidget(
         _harness(

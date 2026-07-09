@@ -9,10 +9,10 @@ import 'package:http/testing.dart';
 void main() {
   group('YoutubeTranscriptsApi', () {
     ApiClient apiClient(http.Client client) => ApiClient(
-          httpClient: client,
-          getBaseUrl: () async => 'https://worker.example.com',
-          getAccessToken: () async => 'tok',
-        );
+      httpClient: client,
+      getBaseUrl: () async => 'https://worker.example.com',
+      getAccessToken: () async => 'tok',
+    );
 
     test('pollTranscript posts single-language body as snake_case', () async {
       http.Request? captured;
@@ -103,8 +103,7 @@ void main() {
         languages: const ['en'],
       );
 
-      final body =
-          jsonDecode(captured!.body) as Map<String, dynamic>;
+      final body = jsonDecode(captured!.body) as Map<String, dynamic>;
       expect(body['video_id'], 'dQw4w9WgXcQ');
       expect(body['languages'], ['en']);
       expect(body.containsKey('caption_fetch'), isFalse);

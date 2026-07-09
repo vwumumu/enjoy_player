@@ -112,38 +112,41 @@ void main() {
       expect(decoded.first.startMs, 0);
     });
 
-    test('updateAutoTranslateLineText persists one line with sourceKey', () async {
-      const mediaId = 'media-auto-2';
-      const lines = [
-        TranscriptLine(text: 'Hello', startMs: 0, durationMs: 1000),
-      ];
-      final primaryId = await insertPrimary(mediaId: mediaId, lines: lines);
-      final aiId = (await repo.ensureAutoTranslateTrack(
-        mediaId: mediaId,
-        primaryTranscriptId: primaryId,
-        targetLanguage: 'zh-CN',
-        primaryLines: lines,
-      ))!;
+    test(
+      'updateAutoTranslateLineText persists one line with sourceKey',
+      () async {
+        const mediaId = 'media-auto-2';
+        const lines = [
+          TranscriptLine(text: 'Hello', startMs: 0, durationMs: 1000),
+        ];
+        final primaryId = await insertPrimary(mediaId: mediaId, lines: lines);
+        final aiId = (await repo.ensureAutoTranslateTrack(
+          mediaId: mediaId,
+          primaryTranscriptId: primaryId,
+          targetLanguage: 'zh-CN',
+          primaryLines: lines,
+        ))!;
 
-      final key = autoTranslateSourceKey(
-        primaryText: 'Hello',
-        sourceLanguage: 'en',
-        targetLanguage: 'zh-CN',
-      );
-      await repo.updateAutoTranslateLineText(
-        aiTranscriptId: aiId,
-        lineIndex: 0,
-        text: '你好',
-        sourceKey: key,
-      );
+        final key = autoTranslateSourceKey(
+          primaryText: 'Hello',
+          sourceLanguage: 'en',
+          targetLanguage: 'zh-CN',
+        );
+        await repo.updateAutoTranslateLineText(
+          aiTranscriptId: aiId,
+          lineIndex: 0,
+          text: '你好',
+          sourceKey: key,
+        );
 
-      final row = await db.transcriptDao.getById(aiId);
-      final cue = repo.linesForRow(row!).first;
-      expect(cue.text, '你好');
-      expect(cue.sourceKey, key);
-      final decoded = jsonDecode(row.timelineJson) as List<dynamic>;
-      expect((decoded.first as Map)['sourceKey'], key);
-    });
+        final row = await db.transcriptDao.getById(aiId);
+        final cue = repo.linesForRow(row!).first;
+        expect(cue.text, '你好');
+        expect(cue.sourceKey, key);
+        final decoded = jsonDecode(row.timelineJson) as List<dynamic>;
+        expect((decoded.first as Map)['sourceKey'], key);
+      },
+    );
 
     test('setSecondaryTranscript wires echo session', () async {
       const mediaId = 'media-auto-3';

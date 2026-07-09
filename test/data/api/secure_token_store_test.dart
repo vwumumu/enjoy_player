@@ -75,22 +75,17 @@ class _AlwaysFailsStorage extends FlutterSecureStorage {
 
 void main() {
   group('SecureTokenStore write self-healing', () {
-    test(
-      'writeAccessToken deletes the stale item and retries once on '
-      'errSecDuplicateItem (-25299)',
-      () async {
-        final storage = _DuplicateItemOnceStorage({
-          'enjoy_player.access_token',
-        });
-        final store = SecureTokenStore(storage);
+    test('writeAccessToken deletes the stale item and retries once on '
+        'errSecDuplicateItem (-25299)', () async {
+      final storage = _DuplicateItemOnceStorage({'enjoy_player.access_token'});
+      final store = SecureTokenStore(storage);
 
-        await store.writeAccessToken('token-123');
+      await store.writeAccessToken('token-123');
 
-        expect(storage.deletedKeys, ['enjoy_player.access_token']);
-        expect(storage.writeAttempts, 2);
-        expect(storage.written['enjoy_player.access_token'], 'token-123');
-      },
-    );
+      expect(storage.deletedKeys, ['enjoy_player.access_token']);
+      expect(storage.writeAttempts, 2);
+      expect(storage.written['enjoy_player.access_token'], 'token-123');
+    });
 
     test(
       'writeRefreshToken and writeCachedProfileJson also self-heal',

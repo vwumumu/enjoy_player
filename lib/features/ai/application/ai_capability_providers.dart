@@ -147,7 +147,8 @@ AssessmentCapability resolveAssessmentCapability(
       );
     case AIProvider.byok:
       final speechByok = config.speechByok;
-      if (speechByok == null) return const ByokNotConfiguredAssessmentCapability();
+      if (speechByok == null)
+        return const ByokNotConfiguredAssessmentCapability();
       return ByokAssessmentAzureCapability(
         config: speechByok,
         secrets: ref.read(byokSecretStoreProvider),

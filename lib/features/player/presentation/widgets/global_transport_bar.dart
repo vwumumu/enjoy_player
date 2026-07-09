@@ -97,7 +97,8 @@ NarrowTransportBudget resolveNarrowTransportBudget(
 }) {
   // Always-on baseline: play ring + layout slack + echo + blur + cc + speed.
   // These never drop, so their cost is reserved first (always-on invariant).
-  const alwaysOnCost = kNarrowPlayRingWidth +
+  const alwaysOnCost =
+      kNarrowPlayRingWidth +
       kNarrowLayoutSlack +
       kNarrowIconSlotWidth + // echo
       kNarrowIconSlotWidth + // blur
@@ -124,10 +125,10 @@ NarrowTransportBudget resolveNarrowTransportBudget(
   final showFullscreen =
       showFullscreenTransport && tryAdd(kNarrowIconSlotWidth);
   final showVolume = tryAdd(kNarrowIconSlotWidth);
-  final showNext = hasTranscriptLines &&
-      tryAdd(kNarrowIconSlotWidth + kNarrowLineNavGap);
-  final showPrevious = hasTranscriptLines &&
-      tryAdd(kNarrowIconSlotWidth + kNarrowLineNavGap);
+  final showNext =
+      hasTranscriptLines && tryAdd(kNarrowIconSlotWidth + kNarrowLineNavGap);
+  final showPrevious =
+      hasTranscriptLines && tryAdd(kNarrowIconSlotWidth + kNarrowLineNavGap);
   final showExpand = !onPlayer && tryAdd(kNarrowIconSlotWidth);
 
   return NarrowTransportBudget(

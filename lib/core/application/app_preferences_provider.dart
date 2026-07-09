@@ -233,7 +233,8 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
       nextLocale = displayLocaleFromRawOrDefault(profile.locale);
     }
 
-    final learnCanonical = profile.learningLanguage != null &&
+    final learnCanonical =
+        profile.learningLanguage != null &&
             profile.learningLanguage!.trim().isNotEmpty
         ? canonicalFocusLanguageTag(profile.learningLanguage)
         : canonicalFocusLanguageTag(prev.learningLanguage);

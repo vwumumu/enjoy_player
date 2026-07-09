@@ -39,8 +39,7 @@ List<FeedEntry> filterDiscoverFeedByFocusLanguage({
   };
   final matched = entries
       .where((entry) {
-        final lang =
-            langByChannel[entry.channelId] ?? kUnknownMediaLanguageTag;
+        final lang = langByChannel[entry.channelId] ?? kUnknownMediaLanguageTag;
         if (lang == kUnknownMediaLanguageTag) return true;
         return matchesLanguageBroad(lang, focusLanguage);
       })
@@ -63,7 +62,8 @@ Future<List<RecommendedChannel>> recommendedChannels(Ref ref) {
 
 /// When false, recommended channels are filtered to the user's focus learning language.
 @Riverpod(keepAlive: true)
-class DiscoverRecommendedShowAllLanguages extends _$DiscoverRecommendedShowAllLanguages {
+class DiscoverRecommendedShowAllLanguages
+    extends _$DiscoverRecommendedShowAllLanguages {
   @override
   bool build() => false;
 
@@ -89,7 +89,10 @@ Stream<List<DiscoverChannel>> discoverSubscriptions(Ref ref) {
 }
 
 /// Waits until [channelId] appears on [discoverSubscriptionsProvider]'s stream.
-Future<void> waitForDiscoverSubscription(WidgetRef ref, String channelId) async {
+Future<void> waitForDiscoverSubscription(
+  WidgetRef ref,
+  String channelId,
+) async {
   final repo = ref.read(discoverRepositoryProvider);
   if (await repo.getSubscription(channelId) != null) return;
 
@@ -112,7 +115,10 @@ Stream<List<FeedEntry>> filteredDiscoverTimeline(Ref ref) {
     final subs =
         ref.watch(discoverSubscriptionsProvider).valueOrNull ?? const [];
     final focus =
-        ref.watch(appPreferencesCtrlProvider).valueOrNull?.effectiveLearningLanguage ??
+        ref
+            .watch(appPreferencesCtrlProvider)
+            .valueOrNull
+            ?.effectiveLearningLanguage ??
         kDefaultLearningLanguageTag;
     return filterDiscoverFeedByFocusLanguage(
       entries: entries,
@@ -270,10 +276,9 @@ Future<String> addDiscoverFeedEntryToLibrary(
   if (auth is! AuthSignedIn) {
     throw StateError('addDiscoverFeedEntryToLibrary requires AuthSignedIn');
   }
-  return ref.read(discoverRepositoryProvider).addFeedEntryToLibrary(
-    entry,
-    contentLanguage: contentLanguage,
-  );
+  return ref
+      .read(discoverRepositoryProvider)
+      .addFeedEntryToLibrary(entry, contentLanguage: contentLanguage);
 }
 
 Future<bool> discoverVideoInLibrary(WidgetRef ref, String videoId) {

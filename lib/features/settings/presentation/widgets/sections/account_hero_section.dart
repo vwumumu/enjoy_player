@@ -73,9 +73,7 @@ class AccountHeroSection extends ConsumerWidget {
           primaryActionLabel: l10n.settingsAccountSignIn,
           onPrimaryAction: () => context.push('/sign-in'),
           avatar: CircleAvatar(
-            backgroundColor: cs.surfaceContainerHighest.withValues(
-              alpha: 0.9,
-            ),
+            backgroundColor: cs.surfaceContainerHighest.withValues(alpha: 0.9),
             radius: 28,
             child: Icon(
               Icons.person_outline_rounded,

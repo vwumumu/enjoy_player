@@ -144,7 +144,8 @@ class _SignedInBody extends ConsumerWidget {
                 title: l10n.syncScreenLastSyncLabel,
                 showChevron: false,
                 valueBadge: lastSyncAsync.when(
-                  data: (iso) => SettingsValuePill(label: lastSyncLine(l10n, iso)),
+                  data: (iso) =>
+                      SettingsValuePill(label: lastSyncLine(l10n, iso)),
                   loading: () => const SizedBox(
                     height: 18,
                     width: 18,
@@ -233,9 +234,9 @@ class _SignedInBody extends ConsumerWidget {
                 EnjoyCard(
                   padding: EdgeInsets.zero,
                   child: Theme(
-                    data: Theme.of(context).copyWith(
-                      dividerColor: Colors.transparent,
-                    ),
+                    data: Theme.of(
+                      context,
+                    ).copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
                       title: Text(l10n.syncQueueDetails),
                       initiallyExpanded: false,

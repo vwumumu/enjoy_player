@@ -119,7 +119,9 @@ class DiscoverSubscriptionRow extends ConsumerWidget {
         onTap: navigateToFeed
             ? () {
                 Haptics.selection(context);
-                unawaited(context.push('/discover/channel/${channel.channelId}'));
+                unawaited(
+                  context.push('/discover/channel/${channel.channelId}'),
+                );
               }
             : null,
         child: row,

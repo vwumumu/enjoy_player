@@ -65,9 +65,7 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
   }
 
   Future<void> _hydrateIfAiSecondaryActive() async {
-    final secondaryId = ref
-        .read(secondaryTranscriptIdProvider(mediaId))
-        .value;
+    final secondaryId = ref.read(secondaryTranscriptIdProvider(mediaId)).value;
     if (secondaryId == null) return;
 
     final repo = ref.read(transcriptRepositoryProvider);
@@ -104,8 +102,10 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
       return;
     }
 
-    final native =
-        ref.read(appPreferencesCtrlProvider).valueOrNull?.effectiveNativeLanguage;
+    final native = ref
+        .read(appPreferencesCtrlProvider)
+        .valueOrNull
+        ?.effectiveNativeLanguage;
     if (native == null || native.isEmpty) {
       state = state.copyWith(
         status: AutoTranslateStatus.blocked,
@@ -192,9 +192,7 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
 
     // Stream providers can lag behind setSecondaryTranscript; only bail when
     // secondary has a concrete non-AI id.
-    final secondaryId = ref
-        .read(secondaryTranscriptIdProvider(mediaId))
-        .value;
+    final secondaryId = ref.read(secondaryTranscriptIdProvider(mediaId)).value;
     if (secondaryId != null && secondaryId != state.aiTranscriptId) return;
 
     if (_inFlight.length >= kAutoTranslateMaxConcurrency) {
@@ -226,7 +224,8 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
     );
     if (!ref.mounted) return;
 
-    final nextFailed = Set<int>.from(state.failedLineIndexes)..remove(lineIndex);
+    final nextFailed = Set<int>.from(state.failedLineIndexes)
+      ..remove(lineIndex);
     _waiting.remove(lineIndex);
     _forceRefreshLines.add(lineIndex);
     state = state.copyWith(failedLineIndexes: nextFailed);
@@ -288,11 +287,16 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
     _publishInFlight();
 
     try {
-      for (var attempt = 1; attempt <= kAutoTranslateMaxLineAttempts; attempt++) {
+      for (
+        var attempt = 1;
+        attempt <= kAutoTranslateMaxLineAttempts;
+        attempt++
+      ) {
         if (!ref.mounted) return;
         if (state.status != AutoTranslateStatus.active) return;
-        final secondaryNow =
-            ref.read(secondaryTranscriptIdProvider(mediaId)).value;
+        final secondaryNow = ref
+            .read(secondaryTranscriptIdProvider(mediaId))
+            .value;
         if (secondaryNow != null && secondaryNow != aiId) return;
 
         final repo = ref.read(transcriptRepositoryProvider);
@@ -357,7 +361,9 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
         }
 
         try {
-          final result = await ref.read(translationServiceProvider).translate(
+          final result = await ref
+              .read(translationServiceProvider)
+              .translate(
                 text: plain,
                 sourceLanguage: sourceLang,
                 targetLanguage: targetLang,
@@ -365,8 +371,9 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
               );
 
           if (!ref.mounted) return;
-          final secondaryAfter =
-              ref.read(secondaryTranscriptIdProvider(mediaId)).value;
+          final secondaryAfter = ref
+              .read(secondaryTranscriptIdProvider(mediaId))
+              .value;
           if (secondaryAfter != null && secondaryAfter != aiId) return;
 
           await repo.updateAutoTranslateLineText(
@@ -424,10 +431,7 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
       final next = _waiting.removeFirst();
       if (_inFlight.contains(next) || state.isLineFailed(next)) continue;
       unawaited(
-        _translateLine(
-          next,
-          forceRefresh: _forceRefreshLines.contains(next),
-        ),
+        _translateLine(next, forceRefresh: _forceRefreshLines.contains(next)),
       );
     }
   }

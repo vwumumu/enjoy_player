@@ -34,14 +34,17 @@ void main() {
     if (root.existsSync()) root.deleteSync(recursive: true);
   });
 
-  test('deviceGlobalAppDatabaseProvider reuses one AppDatabase per container', () {
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
+  test(
+    'deviceGlobalAppDatabaseProvider reuses one AppDatabase per container',
+    () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
 
-    final a = container.read(deviceGlobalAppDatabaseProvider);
-    final b = container.read(deviceGlobalAppDatabaseProvider);
-    expect(identical(a, b), isTrue);
-  });
+      final a = container.read(deviceGlobalAppDatabaseProvider);
+      final b = container.read(deviceGlobalAppDatabaseProvider);
+      expect(identical(a, b), isTrue);
+    },
+  );
 
   test('appDatabaseProvider opens per-user file when signed in', () async {
     final container = ProviderContainer(
@@ -63,44 +66,54 @@ void main() {
 
     expect(
       () => container.read(appDatabaseProvider),
-      throwsA(
-        predicate<Object>((e) => e.toString().contains('AuthSignedIn')),
-      ),
+      throwsA(predicate<Object>((e) => e.toString().contains('AuthSignedIn'))),
     );
   });
 
-  test('closeAndClearAllAppDatabases allows a fresh device-global open', () async {
-    final first = ProviderContainer();
-    final old = first.read(deviceGlobalAppDatabaseProvider);
-    first.dispose();
-    await closeAndClearAllAppDatabases();
+  test(
+    'closeAndClearAllAppDatabases allows a fresh device-global open',
+    () async {
+      final first = ProviderContainer();
+      final old = first.read(deviceGlobalAppDatabaseProvider);
+      first.dispose();
+      await closeAndClearAllAppDatabases();
 
-    final second = ProviderContainer();
-    addTearDown(second.dispose);
-    final fresh = second.read(deviceGlobalAppDatabaseProvider);
-    expect(identical(fresh, old), isFalse);
-  });
+      final second = ProviderContainer();
+      addTearDown(second.dispose);
+      final fresh = second.read(deviceGlobalAppDatabaseProvider);
+      expect(identical(fresh, old), isFalse);
+    },
+  );
 
-  test('device-global singleton survives container dispose without reopening', () {
-    final first = ProviderContainer();
-    final old = first.read(deviceGlobalAppDatabaseProvider);
-    first.dispose();
+  test(
+    'device-global singleton survives container dispose without reopening',
+    () {
+      final first = ProviderContainer();
+      final old = first.read(deviceGlobalAppDatabaseProvider);
+      first.dispose();
 
-    final second = ProviderContainer();
-    addTearDown(second.dispose);
-    final reused = second.read(deviceGlobalAppDatabaseProvider);
-    expect(identical(reused, old), isTrue);
-  });
+      final second = ProviderContainer();
+      addTearDown(second.dispose);
+      final reused = second.read(deviceGlobalAppDatabaseProvider);
+      expect(identical(reused, old), isTrue);
+    },
+  );
 
-  test('withDeviceGlobalAppDatabaseForBootstrap does not leak wrappers', () async {
-    await withDeviceGlobalAppDatabaseForBootstrap((db) async {
-      expect(db.isDeviceGlobalDatabase, isTrue);
-    });
+  test(
+    'withDeviceGlobalAppDatabaseForBootstrap does not leak wrappers',
+    () async {
+      await withDeviceGlobalAppDatabaseForBootstrap((db) async {
+        expect(db.isDeviceGlobalDatabase, isTrue);
+      });
 
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-    expect(container.read(deviceGlobalAppDatabaseProvider), isA<AppDatabase>());
-  });
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      expect(
+        container.read(deviceGlobalAppDatabaseProvider),
+        isA<AppDatabase>(),
+      );
+    },
+  );
 
   test('overrideWithValue bypasses singletons', () async {
     await closeAndClearAllAppDatabases();

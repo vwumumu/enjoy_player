@@ -174,13 +174,17 @@ void main() {
       payloadJson: '{}',
     );
 
-    expect(await deviceGlobalDb.select(deviceGlobalDb.syncQueue).get(), hasLength(1));
+    expect(
+      await deviceGlobalDb.select(deviceGlobalDb.syncQueue).get(),
+      hasLength(1),
+    );
     expect(await userDb.select(userDb.syncQueue).get(), hasLength(1));
     expect(deviceGlobalDb.isDeviceGlobalDatabase, isTrue);
     expect(userDb.isDeviceGlobalDatabase, isFalse);
 
-    final deviceGlobalRow =
-        await deviceGlobalDb.select(deviceGlobalDb.syncQueue).getSingle();
+    final deviceGlobalRow = await deviceGlobalDb
+        .select(deviceGlobalDb.syncQueue)
+        .getSingle();
     final userRow = await userDb.select(userDb.syncQueue).getSingle();
     expect(deviceGlobalRow.entityId, 'device-global-only');
     expect(userRow.entityId, 'user-only');

@@ -20,8 +20,7 @@ class PaymentSession {
       processor:
           PaymentProcessor.fromJson(json['processor']) ??
           PaymentProcessor.stripe,
-      status:
-          PaymentStatus.fromJson(json['status']) ?? PaymentStatus.pending,
+      status: PaymentStatus.fromJson(json['status']) ?? PaymentStatus.pending,
       payUrl: json['payUrl'] as String?,
       createdAt: json['createdAt']?.toString() ?? '',
     );

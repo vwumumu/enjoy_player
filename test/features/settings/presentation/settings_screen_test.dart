@@ -207,12 +207,13 @@ void main() {
         await tester.pumpWidget(_harness(db: db));
         await tester.pumpAndSettle();
 
-        final l10n = await AppLocalizations.delegate.load(
-          const Locale('en'),
-        );
+        final l10n = await AppLocalizations.delegate.load(const Locale('en'));
 
         // Always-expanded sections show their bodies immediately.
-        expect(find.text(l10n.settingsAppearanceDisplayLanguage), findsOneWidget);
+        expect(
+          find.text(l10n.settingsAppearanceDisplayLanguage),
+          findsOneWidget,
+        );
         expect(find.text(l10n.settingsAiProvidersTileTitle), findsOneWidget);
 
         // Developer/About default-collapsed: their row content is hidden.

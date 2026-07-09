@@ -52,28 +52,25 @@ void main() {
     },
   );
 
-  testWidgets(
-    'a wide row keeps the title and value badge on one line without '
-    'overflowing',
-    (tester) async {
-      const longValue = 'someone.with.a.really.long.email@example.com';
+  testWidgets('a wide row keeps the title and value badge on one line without '
+      'overflowing', (tester) async {
+    const longValue = 'someone.with.a.really.long.email@example.com';
 
-      await tester.pumpWidget(
-        _harness(
-          SettingsRow(
-            title: 'Account',
-            leadingIcon: Icons.person_outline_rounded,
-            valueBadge: const SettingsValuePill(label: longValue),
-            onTap: () {},
-          ),
-          width: 700,
+    await tester.pumpWidget(
+      _harness(
+        SettingsRow(
+          title: 'Account',
+          leadingIcon: Icons.person_outline_rounded,
+          valueBadge: const SettingsValuePill(label: longValue),
+          onTap: () {},
         ),
-      );
-      await tester.pumpAndSettle();
+        width: 700,
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.text('Account'), findsOneWidget);
-      expect(find.byType(SettingsValuePill), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(find.text('Account'), findsOneWidget);
+    expect(find.byType(SettingsValuePill), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

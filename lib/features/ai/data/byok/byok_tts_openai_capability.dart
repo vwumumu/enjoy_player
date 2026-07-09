@@ -25,7 +25,9 @@ final class ByokTtsOpenAiCapability implements TtsCapability {
   @override
   Future<TtsResult> synthesize(TtsRequest request) async {
     if (_config.kind != SpeechByokKind.openAiCompatible) {
-      throw StateError('OpenAI TTS BYOK requires openAiCompatible configuration');
+      throw StateError(
+        'OpenAI TTS BYOK requires openAiCompatible configuration',
+      );
     }
 
     final baseUrl = _config.baseUrl?.trim();
@@ -55,7 +57,9 @@ final class ByokTtsOpenAiCapability implements TtsCapability {
       apiKey: apiKey.trim(),
       model: model,
       input: text,
-      voice: request.voice?.trim().isNotEmpty == true ? request.voice!.trim() : 'alloy',
+      voice: request.voice?.trim().isNotEmpty == true
+          ? request.voice!.trim()
+          : 'alloy',
       client: _httpClient,
     );
 

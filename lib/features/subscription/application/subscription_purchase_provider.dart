@@ -38,7 +38,10 @@ class SubscriptionPurchaseCtrl extends _$SubscriptionPurchaseCtrl {
       if (uri == null) {
         throw StateError('invalid_pay_url');
       }
-      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
       if (!launched) {
         throw StateError('launch_failed');
       }

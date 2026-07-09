@@ -97,9 +97,7 @@ final class ByokLlmCapability implements LlmCapability {
   }) {
     return _run(
       systemPrompt: systemPrompt,
-      messages: [
-        ChatMessage(role: ChatMessage.roleUser, content: userPrompt),
-      ],
+      messages: [ChatMessage(role: ChatMessage.roleUser, content: userPrompt)],
       temperature: temperature,
       maxTokens: maxTokens,
     );

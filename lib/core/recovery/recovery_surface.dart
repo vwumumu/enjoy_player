@@ -151,25 +151,23 @@ class _RecoverySurfaceState extends State<RecoverySurface>
   }
 
   Future<void> _onCopy() => runBusyAction<bool>(
-        () => copyErrorToClipboard(widget.error, widget.stack),
-        (ctx, ok) async {
-          final l10n = AppLocalizations.of(ctx)!;
-          if (ok) {
-            AppNotice.success(ctx, l10n.recoveryCopiedToClipboard);
-          } else {
-            AppNotice.error(ctx, l10n.recoveryCopiedToClipboard);
-          }
-        },
-      );
+    () => copyErrorToClipboard(widget.error, widget.stack),
+    (ctx, ok) async {
+      final l10n = AppLocalizations.of(ctx)!;
+      if (ok) {
+        AppNotice.success(ctx, l10n.recoveryCopiedToClipboard);
+      } else {
+        AppNotice.error(ctx, l10n.recoveryCopiedToClipboard);
+      }
+    },
+  );
 
-  Future<void> _onOpenLogs() => runBusyAction<bool>(
-        openLogsFolder,
-        (ctx, ok) async {
-          if (ok) return;
-          final l10n = AppLocalizations.of(ctx)!;
-          AppNotice.error(ctx, l10n.recoveryOpenLogsError);
-        },
-      );
+  Future<void> _onOpenLogs() =>
+      runBusyAction<bool>(openLogsFolder, (ctx, ok) async {
+        if (ok) return;
+        final l10n = AppLocalizations.of(ctx)!;
+        AppNotice.error(ctx, l10n.recoveryOpenLogsError);
+      });
 
   Future<void> _onResetRequest() async {
     final l10n = AppLocalizations.of(context)!;
@@ -202,17 +200,17 @@ class _RecoverySurfaceState extends State<RecoverySurface>
   }
 
   Future<void> _onResetConfirm() => runBusyAction<RecoveryResetOutcome>(
-        () => (widget.onReset ?? resetLocalLibraryWithBackup)(),
-        (ctx, outcome) async {
-          final l10n = AppLocalizations.of(ctx)!;
-          switch (outcome) {
-            case RecoveryResetOutcome.success:
-              AppNotice.success(ctx, l10n.recoveryResetLibrarySuccess);
-            case RecoveryResetOutcome.backupFailed:
-              AppNotice.error(ctx, l10n.recoveryResetLibraryBackupError);
-            case RecoveryResetOutcome.wipeFailed:
-              AppNotice.error(ctx, l10n.recoveryResetLibraryError);
-          }
-        },
-      );
+    () => (widget.onReset ?? resetLocalLibraryWithBackup)(),
+    (ctx, outcome) async {
+      final l10n = AppLocalizations.of(ctx)!;
+      switch (outcome) {
+        case RecoveryResetOutcome.success:
+          AppNotice.success(ctx, l10n.recoveryResetLibrarySuccess);
+        case RecoveryResetOutcome.backupFailed:
+          AppNotice.error(ctx, l10n.recoveryResetLibraryBackupError);
+        case RecoveryResetOutcome.wipeFailed:
+          AppNotice.error(ctx, l10n.recoveryResetLibraryError);
+      }
+    },
+  );
 }

@@ -73,7 +73,8 @@ void main() {
   });
 
   test('assess sends subscriptionKey when provided', () async {
-    const json = '{"RecognitionStatus":"Success","DisplayText":"Hi.","NBest":[]}';
+    const json =
+        '{"RecognitionStatus":"Success","DisplayText":"Hi.","NBest":[]}';
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {

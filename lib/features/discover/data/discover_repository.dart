@@ -240,7 +240,9 @@ class DiscoverRepository {
       throw StateError('DiscoverRepository library bridge not bound');
     }
     var lang = contentLanguage;
-    if (lang == null || lang.trim().isEmpty || lang == kUnknownMediaLanguageTag) {
+    if (lang == null ||
+        lang.trim().isEmpty ||
+        lang == kUnknownMediaLanguageTag) {
       final sub = await _db.youtubeChannelSubscriptionDao.getByChannelId(
         entry.channelId,
       );

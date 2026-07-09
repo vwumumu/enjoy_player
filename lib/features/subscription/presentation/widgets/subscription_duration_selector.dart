@@ -7,12 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-enum SubscriptionDurationPreset {
-  oneMonth,
-  oneSeason,
-  oneYear,
-  custom,
-}
+enum SubscriptionDurationPreset { oneMonth, oneSeason, oneYear, custom }
 
 const kSubscriptionSeasonMonths = 3;
 const kSubscriptionYearMonths = 12;
@@ -45,15 +40,14 @@ class _SubscriptionDurationSelectorState
   void initState() {
     super.initState();
     _preset = _presetForMonths(widget.months);
-    _customController = TextEditingController(
-      text: widget.months.toString(),
-    );
+    _customController = TextEditingController(text: widget.months.toString());
   }
 
   @override
   void didUpdateWidget(covariant SubscriptionDurationSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.months != widget.months && _preset != SubscriptionDurationPreset.custom) {
+    if (oldWidget.months != widget.months &&
+        _preset != SubscriptionDurationPreset.custom) {
       _preset = _presetForMonths(widget.months);
     }
   }
@@ -84,8 +78,15 @@ class _SubscriptionDurationSelectorState
 
   int _parseCustomMonths() {
     final parsed = int.tryParse(_customController.text.trim());
-    if (parsed == null) return widget.months.clamp(kSubscriptionMinCustomMonths, kSubscriptionMaxCustomMonths);
-    return parsed.clamp(kSubscriptionMinCustomMonths, kSubscriptionMaxCustomMonths);
+    if (parsed == null)
+      return widget.months.clamp(
+        kSubscriptionMinCustomMonths,
+        kSubscriptionMaxCustomMonths,
+      );
+    return parsed.clamp(
+      kSubscriptionMinCustomMonths,
+      kSubscriptionMaxCustomMonths,
+    );
   }
 
   void _selectPreset(SubscriptionDurationPreset preset) {
@@ -112,9 +113,15 @@ class _SubscriptionDurationSelectorState
 
     final options = <(SubscriptionDurationPreset, String)>[
       (SubscriptionDurationPreset.oneMonth, l10n.subscriptionPurchaseOneMonth),
-      (SubscriptionDurationPreset.oneSeason, l10n.subscriptionPurchaseOneSeason),
+      (
+        SubscriptionDurationPreset.oneSeason,
+        l10n.subscriptionPurchaseOneSeason,
+      ),
       (SubscriptionDurationPreset.oneYear, l10n.subscriptionPurchaseOneYear),
-      (SubscriptionDurationPreset.custom, l10n.subscriptionPurchaseCustomDuration),
+      (
+        SubscriptionDurationPreset.custom,
+        l10n.subscriptionPurchaseCustomDuration,
+      ),
     ];
 
     return Column(

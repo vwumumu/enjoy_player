@@ -39,8 +39,9 @@ final LinkedHashMap<String, AppDatabase> _userSessionDatabases =
 
 AppDatabase _acquireDeviceGlobalDatabase() {
   _deviceGlobalDatabaseRefCount++;
-  return _deviceGlobalDatabaseInstance ??=
-      AppDatabase(name: AppDatabase.deviceGlobalDatabaseName);
+  return _deviceGlobalDatabaseInstance ??= AppDatabase(
+    name: AppDatabase.deviceGlobalDatabaseName,
+  );
 }
 
 Future<void> _releaseDeviceGlobalDatabase() async {

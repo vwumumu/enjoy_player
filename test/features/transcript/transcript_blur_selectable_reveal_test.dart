@@ -18,11 +18,7 @@ class _BlurMode extends TranscriptBlurMode {
 
 void main() {
   Widget harness({required bool blurActive}) {
-    const line = TranscriptLine(
-      text: 'Echo cue',
-      startMs: 0,
-      durationMs: 2000,
-    );
+    const line = TranscriptLine(text: 'Echo cue', startMs: 0, durationMs: 2000);
     return ProviderScope(
       overrides: [
         transcriptBlurModeProvider.overrideWith(() => _BlurMode(blurActive)),

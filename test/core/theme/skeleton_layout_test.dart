@@ -12,9 +12,7 @@ void main() {
         home: Scaffold(
           body: CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(
-                child: SkeletonMediaList(itemCount: 3),
-              ),
+              SliverToBoxAdapter(child: SkeletonMediaList(itemCount: 3)),
             ],
           ),
         ),
@@ -32,11 +30,7 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           body: SingleChildScrollView(
-            child: Column(
-              children: [
-                SkeletonSettingsList(rowCount: 4),
-              ],
-            ),
+            child: Column(children: [SkeletonSettingsList(rowCount: 4)]),
           ),
         ),
       ),

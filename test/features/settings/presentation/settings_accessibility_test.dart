@@ -134,9 +134,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
 
-      final l10n = await AppLocalizations.delegate.load(
-        const Locale('en'),
-      );
+      final l10n = await AppLocalizations.delegate.load(const Locale('en'));
 
       // Collapsed-by-default section still has a real, always-visible tap
       // target that toggles instantly (no animation dependency) even with

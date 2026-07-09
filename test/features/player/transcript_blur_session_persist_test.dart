@@ -41,29 +41,32 @@ void main() {
     );
   }
 
-  test('writeNow persists blur_active; restoreFromSession reads it back', () async {
-    const mediaId = 'blur-media';
-    container.read(transcriptBlurModeProvider.notifier).activate();
-    await container
-        .read(playbackSessionPersisterProvider)
-        .writeNow(
-          mediaId: mediaId,
-          dexieTargetType: 'Audio',
-          session: sessionFor(mediaId),
-        );
+  test(
+    'writeNow persists blur_active; restoreFromSession reads it back',
+    () async {
+      const mediaId = 'blur-media';
+      container.read(transcriptBlurModeProvider.notifier).activate();
+      await container
+          .read(playbackSessionPersisterProvider)
+          .writeNow(
+            mediaId: mediaId,
+            dexieTargetType: 'Audio',
+            session: sessionFor(mediaId),
+          );
 
-    final row = await db.echoSessionDao.getLatestForTarget('Audio', mediaId);
-    expect(row, isNotNull);
-    expect(row!.blurActive, isTrue);
+      final row = await db.echoSessionDao.getLatestForTarget('Audio', mediaId);
+      expect(row, isNotNull);
+      expect(row!.blurActive, isTrue);
 
-    container.read(transcriptBlurModeProvider.notifier).deactivate();
-    expect(container.read(transcriptBlurModeProvider), isFalse);
+      container.read(transcriptBlurModeProvider.notifier).deactivate();
+      expect(container.read(transcriptBlurModeProvider), isFalse);
 
-    container
-        .read(transcriptBlurModeProvider.notifier)
-        .restoreFromSession(row.blurActive);
-    expect(container.read(transcriptBlurModeProvider), isTrue);
-  });
+      container
+          .read(transcriptBlurModeProvider.notifier)
+          .restoreFromSession(row.blurActive);
+      expect(container.read(transcriptBlurModeProvider), isTrue);
+    },
+  );
 
   test('PlayerController.clear deactivates blur mode', () async {
     container.read(transcriptBlurModeProvider.notifier).activate();

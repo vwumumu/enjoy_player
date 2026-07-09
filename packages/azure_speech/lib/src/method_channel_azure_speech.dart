@@ -103,9 +103,7 @@ final class MethodChannelAzureSpeech extends AzureSpeechPlatform {
         );
       }
       final bytes = base64Decode(raw);
-      return AzureSpeechSynthesisOutcome(
-        audioBytes: Uint8List.fromList(bytes),
-      );
+      return AzureSpeechSynthesisOutcome(audioBytes: Uint8List.fromList(bytes));
     } on PlatformException catch (e, st) {
       Error.throwWithStackTrace(
         AzureSpeechException(

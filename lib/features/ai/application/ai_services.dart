@@ -20,9 +20,8 @@ final class AsrService {
 
   final Ref _ref;
 
-  Future<AsrResult> transcribe(AsrRequest request) => guardAiCall(
-        () => _ref.read(asrCapabilityProvider).transcribe(request),
-      );
+  Future<AsrResult> transcribe(AsrRequest request) =>
+      guardAiCall(() => _ref.read(asrCapabilityProvider).transcribe(request));
 }
 
 final class ChatService {
@@ -34,14 +33,15 @@ final class ChatService {
     required List<ChatMessage> messages,
     double? temperature,
     int? maxTokens,
-  }) =>
-      guardAiCall(
-        () => _ref.read(llmCapabilityProvider).generateChatCompletion(
-              messages: messages,
-              temperature: temperature,
-              maxTokens: maxTokens,
-            ),
-      );
+  }) => guardAiCall(
+    () => _ref
+        .read(llmCapabilityProvider)
+        .generateChatCompletion(
+          messages: messages,
+          temperature: temperature,
+          maxTokens: maxTokens,
+        ),
+  );
 }
 
 final class TranslationService {
@@ -54,15 +54,16 @@ final class TranslationService {
     required String sourceLanguage,
     required String targetLanguage,
     bool? forceRefresh,
-  }) =>
-      guardAiCall(
-        () => _ref.read(translationCapabilityProvider).translate(
-              text: text,
-              sourceLanguage: sourceLanguage,
-              targetLanguage: targetLanguage,
-              forceRefresh: forceRefresh,
-            ),
-      );
+  }) => guardAiCall(
+    () => _ref
+        .read(translationCapabilityProvider)
+        .translate(
+          text: text,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
+          forceRefresh: forceRefresh,
+        ),
+  );
 }
 
 final class ContextualTranslationService {
@@ -75,15 +76,16 @@ final class ContextualTranslationService {
     required String sourceLanguage,
     required String targetLanguage,
     String? context,
-  }) =>
-      guardAiCall(
-        () => _ref.read(contextualTranslationCapabilityProvider).translate(
-              text: text,
-              sourceLanguage: sourceLanguage,
-              targetLanguage: targetLanguage,
-              context: context,
-            ),
-      );
+  }) => guardAiCall(
+    () => _ref
+        .read(contextualTranslationCapabilityProvider)
+        .translate(
+          text: text,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
+          context: context,
+        ),
+  );
 }
 
 final class DictionaryService {
@@ -96,15 +98,16 @@ final class DictionaryService {
     required String sourceLanguage,
     required String targetLanguage,
     bool? forceRefresh,
-  }) =>
-      guardAiCall(
-        () => _ref.read(dictionaryCapabilityProvider).lookupDictionary(
-              word: word,
-              sourceLanguage: sourceLanguage,
-              targetLanguage: targetLanguage,
-              forceRefresh: forceRefresh,
-            ),
-      );
+  }) => guardAiCall(
+    () => _ref
+        .read(dictionaryCapabilityProvider)
+        .lookupDictionary(
+          word: word,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
+          forceRefresh: forceRefresh,
+        ),
+  );
 }
 
 final class TtsService {
@@ -112,9 +115,8 @@ final class TtsService {
 
   final Ref _ref;
 
-  Future<TtsResult> synthesize(TtsRequest request) => guardAiCall(
-        () => _ref.read(ttsCapabilityProvider).synthesize(request),
-      );
+  Future<TtsResult> synthesize(TtsRequest request) =>
+      guardAiCall(() => _ref.read(ttsCapabilityProvider).synthesize(request));
 }
 
 final class AssessmentService {
@@ -123,8 +125,8 @@ final class AssessmentService {
   final Ref _ref;
 
   Future<AssessmentResult> assess(AssessmentRequest request) => guardAiCall(
-        () => _ref.read(assessmentCapabilityProvider).assess(request),
-      );
+    () => _ref.read(assessmentCapabilityProvider).assess(request),
+  );
 }
 
 @Riverpod(keepAlive: true)

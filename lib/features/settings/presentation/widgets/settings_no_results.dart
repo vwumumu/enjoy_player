@@ -22,10 +22,7 @@ class SettingsNoResults extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: t.space24,
-        vertical: t.space40,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: t.space24, vertical: t.space40),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

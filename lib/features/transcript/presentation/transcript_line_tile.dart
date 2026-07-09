@@ -461,8 +461,10 @@ class _TranscriptLineTileState extends ConsumerState<TranscriptLineTile> {
                       SizedBox(width: tok.space4),
                       EnjoyTappableIcon(
                         icon: Icons.refresh_rounded,
-                        tooltip: AppLocalizations.of(context)
-                                ?.subtitlesAutoTranslateRetranslateLine ??
+                        tooltip:
+                            AppLocalizations.of(
+                              context,
+                            )?.subtitlesAutoTranslateRetranslateLine ??
                             'Re-translate this line',
                         iconSize: 18,
                         color: scheme.onSurfaceVariant,

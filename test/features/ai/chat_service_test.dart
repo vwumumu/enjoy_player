@@ -80,26 +80,23 @@ void main() {
     expect(out, 'echo:ping');
   });
 
-  test(
-    'ChatService.complete translates ApiException via guardAiCall to an '
-    'AppFailure subtree member',
-    () async {
-      final container = ProviderContainer(
-        overrides: [
-          llmCapabilityProvider.overrideWithValue(const _ThrowingLlm(503)),
-        ],
-      );
-      addTearDown(container.dispose);
+  test('ChatService.complete translates ApiException via guardAiCall to an '
+      'AppFailure subtree member', () async {
+    final container = ProviderContainer(
+      overrides: [
+        llmCapabilityProvider.overrideWithValue(const _ThrowingLlm(503)),
+      ],
+    );
+    addTearDown(container.dispose);
 
-      final chat = container.read(chatServiceProvider);
-      await expectLater(
-        chat.complete(
-          messages: const [
-            ChatMessage(role: ChatMessage.roleUser, content: 'ping'),
-          ],
-        ),
-        throwsA(isA<AppFailure>()),
-      );
-    },
-  );
+    final chat = container.read(chatServiceProvider);
+    await expectLater(
+      chat.complete(
+        messages: const [
+          ChatMessage(role: ChatMessage.roleUser, content: 'ping'),
+        ],
+      ),
+      throwsA(isA<AppFailure>()),
+    );
+  });
 }

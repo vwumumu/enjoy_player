@@ -31,39 +31,46 @@ class _FakeSecretStore implements ByokSecretStoreBase {
 }
 
 void main() {
-  test('ByokTtsOpenAiCapability synthesizes via OpenAI speech endpoint', () async {
-    final audio = Uint8List.fromList([0xFF, 0xFB, 0x90]);
+  test(
+    'ByokTtsOpenAiCapability synthesizes via OpenAI speech endpoint',
+    () async {
+      final audio = Uint8List.fromList([0xFF, 0xFB, 0x90]);
 
-    final client = MockClient((request) async {
-      expect(request.method, 'POST');
-      expect(request.url.path, '/v1/audio/speech');
-      expect(request.headers['Authorization'], 'Bearer sk-test');
-      expect(request.headers['Accept'], 'audio/mpeg');
-      final body = jsonDecode(request.body) as Map<String, dynamic>;
-      expect(body['model'], 'tts-1');
-      expect(body['input'], 'Hello');
-      expect(body['voice'], 'alloy');
-      return http.Response.bytes(audio, 200, headers: {'content-type': 'audio/mpeg'});
-    });
+      final client = MockClient((request) async {
+        expect(request.method, 'POST');
+        expect(request.url.path, '/v1/audio/speech');
+        expect(request.headers['Authorization'], 'Bearer sk-test');
+        expect(request.headers['Accept'], 'audio/mpeg');
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(body['model'], 'tts-1');
+        expect(body['input'], 'Hello');
+        expect(body['voice'], 'alloy');
+        return http.Response.bytes(
+          audio,
+          200,
+          headers: {'content-type': 'audio/mpeg'},
+        );
+      });
 
-    final cap = ByokTtsOpenAiCapability(
-      config: const SpeechByokConfig(
-        kind: SpeechByokKind.openAiCompatible,
-        baseUrl: 'https://api.openai.com/v1',
-        model: 'tts-1',
-      ),
-      secrets: _FakeSecretStore('sk-test'),
-      httpClient: client,
-    );
+      final cap = ByokTtsOpenAiCapability(
+        config: const SpeechByokConfig(
+          kind: SpeechByokKind.openAiCompatible,
+          baseUrl: 'https://api.openai.com/v1',
+          model: 'tts-1',
+        ),
+        secrets: _FakeSecretStore('sk-test'),
+        httpClient: client,
+      );
 
-    final result = await cap.synthesize(
-      const TtsRequest(text: 'Hello', language: 'en'),
-    );
+      final result = await cap.synthesize(
+        const TtsRequest(text: 'Hello', language: 'en'),
+      );
 
-    expect(result.format, 'mp3');
-    expect(result.audioBytes, audio);
-    client.close();
-  });
+      expect(result.format, 'mp3');
+      expect(result.audioBytes, audio);
+      client.close();
+    },
+  );
 
   test('uses request voice when provided', () async {
     final client = MockClient((request) async {

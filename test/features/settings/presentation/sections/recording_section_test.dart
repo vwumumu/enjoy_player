@@ -30,9 +30,7 @@ class _FakeRecordingInputDeviceCtrl extends RecordingInputDeviceCtrl {
 
   @override
   Future<void> selectDeviceId(String? deviceId) async {
-    final normalized = (deviceId == null || deviceId.isEmpty)
-        ? null
-        : deviceId;
+    final normalized = (deviceId == null || deviceId.isEmpty) ? null : deviceId;
     state = AsyncData(
       RecordingInputDeviceState(
         devices: _devices,
@@ -82,8 +80,10 @@ void main() {
       );
 
       // Auto-picked mic-1 is shown via the "Auto · <label>" subtitle.
-      expect(find.text(l10n.settingsRecordingMicAuto('USB Microphone')),
-          findsOneWidget);
+      expect(
+        find.text(l10n.settingsRecordingMicAuto('USB Microphone')),
+        findsOneWidget,
+      );
 
       await tester.tap(find.text(l10n.settingsRecordingMicTitle));
       await tester.pumpAndSettle();
