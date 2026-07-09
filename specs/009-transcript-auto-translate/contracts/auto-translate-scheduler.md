@@ -38,6 +38,7 @@ translationService.translate(
 | S6 | Successful line → write text into AI `timelineJson` at that index → upsert |
 | S7 | Empty text = pending; non-empty = ready (UI) |
 | S8 | Selecting away from Auto translate pauses the job; selecting back resumes |
+| S8b | Closing or switching away from the media pauses the job; reopening the same media with Auto translate still selected resumes pending lines only |
 | S9 | Re-translate bumps `generation`; completions from older generation are ignored |
 | S10 | Stale primary (`referenceId` / fingerprint mismatch) must not present old
   AI text as valid without rebuild or Re-translate |

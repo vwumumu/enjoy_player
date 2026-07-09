@@ -18,6 +18,7 @@ import '../../../data/subtitle/transcript_line.dart';
 import '../../ai/application/ai_services.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_state.dart';
+import '../../player/application/player_controller.dart';
 import '../domain/auto_translate.dart';
 import 'active_transcript_provider.dart';
 import 'transcript_playback_highlight_provider.dart';
@@ -79,6 +80,19 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
       }
     });
 
+    // Stop the job when this media is no longer the open playback session
+    // (close / switch). Resume pending work when the same media is reopened
+    // and Auto translate is still the secondary track.
+    ref.listen(playerControllerProvider, (prev, next) {
+      final wasActive = prev?.mediaId == mediaId;
+      final isActive = next?.mediaId == mediaId;
+      if (wasActive && !isActive) {
+        pause();
+      } else if (!wasActive && isActive) {
+        unawaited(resumeIfPending());
+      }
+    });
+
     unawaited(_hydrateIfAiSecondaryActive());
     return const AutoTranslateUiState();
   }
@@ -114,6 +128,82 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
                 : AutoTranslateJobStatus.paused)
           : AutoTranslateJobStatus.paused,
     );
+
+    // Provider may be created after open (transcript panel); resume if this
+    // media is already the active session and work remains.
+    if (pending.isNotEmpty &&
+        ref.read(playerControllerProvider)?.mediaId == mediaId) {
+      await resumeIfPending();
+    }
+  }
+
+  /// Continues a paused Auto translate job when the media is open again and
+  /// the AI secondary track still has empty lines. No-op when blocked,
+  /// completed, or Auto translate is not the active secondary.
+  Future<void> resumeIfPending() async {
+    if (!ref.mounted) return;
+    if (ref.read(playerControllerProvider)?.mediaId != mediaId) return;
+
+    if (_schedulerLoop != null) {
+      await _schedulerLoop;
+    }
+    if (!ref.mounted) return;
+    if (ref.read(playerControllerProvider)?.mediaId != mediaId) return;
+
+    if (state.status == AutoTranslateJobStatus.running ||
+        state.status == AutoTranslateJobStatus.blocked ||
+        state.status == AutoTranslateJobStatus.completed) {
+      return;
+    }
+
+    final auth = ref.read(authCtrlProvider).valueOrNull;
+    if (auth is! AuthSignedIn) return;
+
+    final secondaryId = ref
+        .read(secondaryTranscriptIdProvider(mediaId))
+        .value;
+    if (secondaryId == null) return;
+
+    final repo = ref.read(transcriptRepositoryProvider);
+    final row = await repo.transcriptRowById(secondaryId);
+    if (!ref.mounted) return;
+    if (row == null || row.source != 'ai') return;
+
+    final primaryId = ref.read(activeTranscriptIdProvider(mediaId)).value;
+    final aiLines = repo.linesForRow(row);
+    final pending = pendingLineIndexes(aiLines, exclude: _excludeFromPending);
+    final ready = readyLineCount(aiLines);
+    final anchor = ref.read(transcriptPlaybackHighlightProvider(mediaId));
+
+    if (pending.isEmpty) {
+      state = state.copyWith(
+        aiTranscriptId: row.id,
+        primaryTranscriptId: primaryId,
+        targetLanguage: row.language,
+        pendingCount: 0,
+        readyCount: ready,
+        failedCount: state.failedLineIndexes.length,
+        priorityAnchorIndex: anchor,
+        status: state.failedLineIndexes.isEmpty
+            ? AutoTranslateJobStatus.completed
+            : AutoTranslateJobStatus.paused,
+      );
+      return;
+    }
+
+    _cancelRequested = false;
+    state = state.copyWith(
+      status: AutoTranslateJobStatus.running,
+      clearBlockReason: true,
+      aiTranscriptId: row.id,
+      primaryTranscriptId: primaryId,
+      targetLanguage: row.language,
+      pendingCount: pending.length,
+      readyCount: ready,
+      failedCount: state.failedLineIndexes.length,
+      priorityAnchorIndex: anchor,
+    );
+    _startSchedulerLoop();
   }
 
   Future<void> selectAutoTranslate() async {
@@ -206,15 +296,22 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
     _lineBackoffUntil.clear();
     _consecutiveServiceFailures = 0;
     _circuitOpenUntil = null;
-    _cancelRequested = false;
 
     if (!ref.mounted) return;
+    // Media may have been closed while ensure/setSecondary awaited.
+    final mediaStillOpen =
+        ref.read(playerControllerProvider)?.mediaId == mediaId;
+    final shouldRun = pending.isNotEmpty && mediaStillOpen;
+    _cancelRequested = !shouldRun;
+
     state = state.copyWith(
       status: pending.isEmpty
           ? (priorFailed.isEmpty
                 ? AutoTranslateJobStatus.completed
                 : AutoTranslateJobStatus.paused)
-          : AutoTranslateJobStatus.running,
+          : (shouldRun
+                ? AutoTranslateJobStatus.running
+                : AutoTranslateJobStatus.paused),
       clearBlockReason: true,
       aiTranscriptId: aiId,
       primaryTranscriptId: primaryRow.id,
@@ -226,7 +323,7 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
       priorityAnchorIndex: anchor,
     );
 
-    if (pending.isNotEmpty) {
+    if (shouldRun) {
       _startSchedulerLoop();
     }
   }

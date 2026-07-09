@@ -44,4 +44,15 @@ void main() {
     expect(a.isLineFailed(1), isTrue);
     expect(a.isLineFailed(2), isFalse);
   });
+
+  test('paused job with pending work is considered active for resume', () {
+    const state = AutoTranslateUiState(
+      status: AutoTranslateJobStatus.paused,
+      pendingCount: 3,
+      readyCount: 2,
+    );
+    expect(state.isActive, isTrue);
+    expect(state.status, AutoTranslateJobStatus.paused);
+    expect(state.pendingCount, greaterThan(0));
+  });
 }
