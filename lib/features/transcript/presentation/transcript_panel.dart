@@ -82,99 +82,98 @@ class TranscriptPanel extends ConsumerWidget {
 
     final signedIn = ref.watch(authCtrlProvider).valueOrNull is AuthSignedIn;
 
-    return Expanded(
-      child: linesAsync.when(
-        data: (lines) {
-          if (lines.isEmpty) {
-            if (fetchState.status == TranscriptFetchStatus.loading) {
-              return Center(
+    // Layout parents size this panel; Expanded here is invalid under DecoratedBox.
+    return linesAsync.when(
+      data: (lines) {
+        if (lines.isEmpty) {
+          if (fetchState.status == TranscriptFetchStatus.loading) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.transcriptFetchingSubtitles,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          if (fetchState.status == TranscriptFetchStatus.error) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 16),
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 40,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(height: 12),
                     Text(
-                      l10n.transcriptFetchingSubtitles,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      l10n.transcriptErrorFriendlyTitle,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.transcriptErrorFriendlyHint,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    FilledButton.tonal(
+                      onPressed: () => ref
+                          .read(transcriptFetchCtrlProvider(mediaId).notifier)
+                          .refreshFromCloud(signedIn: signedIn),
+                      child: Text(l10n.retry),
+                    ),
                   ],
                 ),
-              );
-            }
-            if (fetchState.status == TranscriptFetchStatus.error) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.error_outline_rounded,
-                        size: 40,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        l10n.transcriptErrorFriendlyTitle,
-                        style: Theme.of(context).textTheme.titleMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.transcriptErrorFriendlyHint,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      FilledButton.tonal(
-                        onPressed: () => ref
-                            .read(transcriptFetchCtrlProvider(mediaId).notifier)
-                            .refreshFromCloud(signedIn: signedIn),
-                        child: Text(l10n.retry),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            return TranscriptEmptyState(
-              onImport: () => _import(context, ref),
-              onExtract: showExtractButton
-                  ? () => runEmbeddedSubtitleExtract(
-                      context: context,
-                      ref: ref,
-                      mediaId: mediaId,
-                    )
-                  : null,
-              showImportButton: showLocalActions,
-              showExtractButton: showExtractButton,
+              ),
             );
           }
-          return TranscriptScrollableList(mediaId: mediaId, lines: lines);
-        },
-        loading: () => const SkeletonTranscript(),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  l10n.transcriptErrorFriendlyTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.transcriptErrorFriendlyHint,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
+          return TranscriptEmptyState(
+            onImport: () => _import(context, ref),
+            onExtract: showExtractButton
+                ? () => runEmbeddedSubtitleExtract(
+                    context: context,
+                    ref: ref,
+                    mediaId: mediaId,
+                  )
+                : null,
+            showImportButton: showLocalActions,
+            showExtractButton: showExtractButton,
+          );
+        }
+        return TranscriptScrollableList(mediaId: mediaId, lines: lines);
+      },
+      loading: () => const SkeletonTranscript(),
+      error: (e, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.transcriptErrorFriendlyTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.transcriptErrorFriendlyHint,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ),
         ),
       ),
