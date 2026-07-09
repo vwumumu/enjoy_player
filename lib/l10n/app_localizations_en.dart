@@ -517,16 +517,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'The primary subtitle changed. Auto translate will rebuild from the new primary.';
 
   @override
-  String get subtitlesAutoTranslateBlockedServiceUnavailable =>
-      'Translation service is temporarily unavailable. Tap Retry to try again.';
-
-  @override
   String get subtitlesAutoTranslateLineFailed => 'Couldn’t translate this line';
-
-  @override
-  String subtitlesAutoTranslateProgress(int ready, int total) {
-    return 'Translating… $ready of $total';
-  }
 
   @override
   String get subtitlesAutoTranslatePendingLine => 'Translating…';
@@ -546,13 +537,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get subtitlesAutoTranslateBlockedCredits =>
       'Not enough credits to translate. Check your subscription.';
-
-  @override
-  String get subtitlesAutoTranslateFailed =>
-      'Some lines could not be translated.';
-
-  @override
-  String get subtitlesAutoTranslateRetry => 'Retry';
 
   @override
   String get subtitlesExtractNoTracks =>

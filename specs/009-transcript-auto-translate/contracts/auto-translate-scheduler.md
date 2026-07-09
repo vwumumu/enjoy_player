@@ -1,10 +1,10 @@
-# Contract: Auto-Translate Scheduler & Translation Calls
+# Contract: Auto-Translate Per-Line Requests
 
 **Feature**: [spec.md](../spec.md) · **Plan**: [plan.md](../plan.md) · **Data model**: [data-model.md](../data-model.md)
 
-Application-level contract for `AutoTranslateCtrl` (name may vary) and its use
-of the existing translation capability. No new public HTTP surface is added;
-this documents the **client orchestration** contract tests must pin.
+Application-level contract for `AutoTranslateCtrl` and its use of the existing
+translation capability. No new public HTTP surface is added; this documents the
+**client orchestration** contract tests must pin.
 
 ## Translation capability (existing)
 
@@ -25,36 +25,32 @@ translationService.translate(
 - Markup: strip subtitle markup to plain text before translate; store plain
   translated text in the AI timeline (v1).
 
-## Scheduling rules
+## Request rules (viewport-driven)
 
 | Rule | Requirement |
 |------|-------------|
-| S1 | Prefer lines whose index is closest to the current playback cue index |
-| S2 | On seek/scrub, re-order the pending queue; do not re-translate ready lines |
-| S3 | Max **2** concurrent in-flight translate calls per media job |
-| S4 | Per-line retries: max **3** attempts with exponential backoff (≥1s base) |
-| S5 | Transient failures retry; `AuthFailure` / `CreditsFailure` stop **new**
-  scheduling and set job `blocked`/`failed` with friendly reason |
-| S6 | Successful line → write text into AI `timelineJson` at that index → upsert |
-| S7 | Empty text = pending; non-empty = ready (UI) |
-| S8 | Selecting away from Auto translate pauses the job; selecting back resumes |
-| S8b | Closing or switching away from the media pauses the job; reopening the same media with Auto translate still selected resumes pending lines only |
-| S9 | Re-translate bumps `generation`; completions from older generation are ignored |
-| S10 | Stale primary (`referenceId` / fingerprint mismatch) must not present old
-  AI text as valid without rebuild or Re-translate |
+| S1 | Selecting Auto translate only ensures the AI track + sets secondary; it does **not** sweep the whole transcript |
+| S2 | The transcript list calls `requestTranslateLine(index)` when a built row has empty AI text |
+| S3 | `requestTranslateLine` is idempotent: no-op if cached, in-flight, failed, or Auto translate inactive |
+| S4 | Max **2** concurrent in-flight translate calls per media |
+| S5 | Per-line: up to **2** attempts (initial + one quiet retry); then mark failed until explicit re-translate |
+| S6 | `AuthFailure` / `CreditsFailure` set status `blocked` with friendly reason; stop new requests |
+| S7 | Successful line → write text into AI `timelineJson` at that index → upsert |
+| S8 | Empty text = pending; non-empty = ready (UI). Show “Translating…” only while that index is in-flight |
+| S9 | Selecting away from Auto translate clears secondary; in-flight completions no-op if secondary ≠ AI |
+| S10 | Stale primary (`referenceId` / fingerprint mismatch) must not present old AI text as valid without rebuild |
+| S11 | No media-close / reopen job lifecycle — cache in Drift is enough for display |
 
 ## Progressive persistence
 
 1. Ensure AI row + full timing skeleton before first display as secondary.
-2. Upsert after each success (or coalesced micro-batch ≤ N lines) so process
-   death loses at most the in-flight set.
-3. Reopen: load AI timeline; schedule only empty (and optionally failed) indexes.
+2. Upsert after each success so process death loses at most the in-flight set.
+3. Reopen: load AI timeline; request translate only for empty lines that enter the viewport again.
 
 ## Observability
 
-- Log via `logNamed` (job start, block reasons, retry exhaustion) — never `print`.
-- Do not surface raw exception strings as primary UI copy (`guardAiCall` /
-  friendly mapping).
+- Log via `logNamed` (block reasons, retry exhaustion) — never `print`.
+- Do not surface raw exception strings as primary UI copy.
 
 ## Test doubles
 
@@ -62,5 +58,5 @@ Unit tests MUST inject a fake `TranslationCapability` / `TranslationService`
 that can:
 
 - delay, fail transiently, fail permanently, or succeed per line index;
-- assert call ordering prioritizes the anchor index;
-- assert concurrency never exceeds 2.
+- assert concurrency never exceeds 2;
+- assert a second `requestTranslateLine` for an in-flight or ready line does not double-call.

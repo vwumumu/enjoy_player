@@ -211,7 +211,6 @@ class _SubtitleTrackPickerSheetState
   Future<void> _onSecondarySelectionChanged(String? id, String? autoSelectionId) async {
     final ctrl = ref.read(autoTranslateCtrlProvider(widget.mediaId).notifier);
     if (id == null) {
-      ctrl.pause();
       await ref
           .read(transcriptRepositoryProvider)
           .setSecondaryTranscript(widget.mediaId, null);
@@ -221,7 +220,6 @@ class _SubtitleTrackPickerSheetState
       await ctrl.selectAutoTranslate();
       return;
     }
-    ctrl.pause();
     await ref
         .read(transcriptRepositoryProvider)
         .setSecondaryTranscript(widget.mediaId, id);
@@ -244,8 +242,6 @@ class _SubtitleTrackPickerSheetState
         l10n.subtitlesAutoTranslateBlockedSignedOut,
       AutoTranslateBlockReason.stalePrimary =>
         l10n.subtitlesAutoTranslateBlockedStalePrimary,
-      AutoTranslateBlockReason.serviceUnavailable =>
-        l10n.subtitlesAutoTranslateBlockedServiceUnavailable,
       null => null,
     };
   }
@@ -415,25 +411,6 @@ class _SubtitleTrackPickerSheetState
                     targetLanguage: targetLanguage,
                     enabled: primaryId != null,
                   ),
-                if (autoTranslateState.status == AutoTranslateJobStatus.running)
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      sheetHorizontalPadding(t),
-                      t.space4,
-                      sheetHorizontalPadding(t),
-                      t.space4,
-                    ),
-                    child: Text(
-                      l10n.subtitlesAutoTranslateProgress(
-                        autoTranslateState.readyCount,
-                        autoTranslateState.readyCount +
-                            autoTranslateState.pendingCount,
-                      ),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
                 if (blockedMessage != null)
                   Padding(
                     padding: EdgeInsets.fromLTRB(
@@ -442,33 +419,11 @@ class _SubtitleTrackPickerSheetState
                       sheetHorizontalPadding(t),
                       t.space8,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          blockedMessage,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.error,
-                          ),
-                        ),
-                        if (autoTranslateState.blockReason ==
-                                AutoTranslateBlockReason.serviceUnavailable ||
-                            autoTranslateState.failedCount > 0) ...[
-                          SizedBox(height: t.space8),
-                          TextButton(
-                            onPressed: () => unawaited(
-                              ref
-                                  .read(
-                                    autoTranslateCtrlProvider(
-                                      widget.mediaId,
-                                    ).notifier,
-                                  )
-                                  .retryAfterBlock(),
-                            ),
-                            child: Text(l10n.subtitlesAutoTranslateRetry),
-                          ),
-                        ],
-                      ],
+                    child: Text(
+                      blockedMessage,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
                     ),
                   ),
                 if (!signedIn &&

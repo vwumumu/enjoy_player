@@ -58,7 +58,7 @@ final class AutoTranslateCtrlProvider
   }
 }
 
-String _$autoTranslateCtrlHash() => r'519aab544ef8b203316d68aa5b8852d4a73d60ed';
+String _$autoTranslateCtrlHash() => r'a02b7001af06b681c2c1efb363323344075cbdbf';
 
 final class AutoTranslateCtrlFamily extends $Family
     with

@@ -18,17 +18,6 @@ void main() {
     });
   });
 
-  group('orderPendingLineIndexes', () {
-    test('prefers lines near anchor index', () {
-      final ordered = orderPendingLineIndexes(
-        anchorIndex: 10,
-        pending: [0, 5, 11, 20],
-      );
-      expect(ordered.first, 11);
-      expect(ordered[1], 5);
-    });
-  });
-
   group('isAutoTranslateTimelineStale', () {
     test('stale when reference primary id mismatches', () {
       const primary = [

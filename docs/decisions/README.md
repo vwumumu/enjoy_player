@@ -60,4 +60,5 @@ Trade-offs, follow-up work, risks.
 | [0034](0034-custom-scheme-only-pkce-callback.md) | Custom-scheme-only PKCE callback — drops universal/app links (partial supersession of 0027) |
 | [0035](0035-responsive-transport-priorities.md) | Responsive transport priorities and collapsed-expand recovery |
 | [0036](0036-youtube-bilingual-transcripts.md) | YouTube bilingual transcripts via multi-language worker contract |
-| [0037](0037-transcript-auto-translate.md) | Transcript auto-translate (AI secondary track + lazy scheduler) |
+| [0037](0037-transcript-auto-translate.md) | Transcript auto-translate (AI secondary track + lazy scheduler; superseded by 0038 for orchestration) |
+| [0038](0038-viewport-per-line-auto-translate.md) | Viewport-driven per-line auto-translate (supersedes 0037 orchestration) |

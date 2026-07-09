@@ -56,6 +56,7 @@ class EchoRegionMergedCard extends ConsumerWidget {
     final autoTranslateState = ref.watch(autoTranslateCtrlProvider(mediaId));
     final secondaryId = ref.watch(secondaryTranscriptIdProvider(mediaId)).value;
     final autoTranslateActive =
+        autoTranslateState.isActive &&
         autoTranslateState.aiTranscriptId != null &&
         secondaryId == autoTranslateState.aiTranscriptId;
 
@@ -85,9 +86,22 @@ class EchoRegionMergedCard extends ConsumerWidget {
           secondaryTextRaw == null || secondaryTextRaw.trim().isEmpty;
       final lineFailed =
           autoTranslateActive && autoTranslateState.isLineFailed(i);
+      final lineInFlight =
+          autoTranslateActive && autoTranslateState.isLineInFlight(i);
+      if (autoTranslateActive && secondaryEmpty && !lineFailed) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref
+              .read(autoTranslateCtrlProvider(mediaId).notifier)
+              .requestTranslateLine(i);
+        });
+      }
       final l10n = AppLocalizations.of(context);
-      final secondaryText = secondaryEmpty && lineFailed && l10n != null
-          ? l10n.subtitlesAutoTranslateLineFailed
+      final secondaryText = secondaryEmpty && l10n != null
+          ? (lineFailed
+                ? l10n.subtitlesAutoTranslateLineFailed
+                : (lineInFlight
+                      ? l10n.subtitlesAutoTranslatePendingLine
+                      : secondaryTextRaw))
           : secondaryTextRaw;
       final canRetranslate =
           autoTranslateActive &&

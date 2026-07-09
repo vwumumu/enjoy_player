@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-0038](0038-viewport-per-line-auto-translate.md) for orchestration (viewport per-line requests). Persistence and picker shape below still apply unless ADR-0038 says otherwise.
 
 ## Context
 

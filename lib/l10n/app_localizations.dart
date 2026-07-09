@@ -1035,23 +1035,11 @@ abstract class AppLocalizations {
   /// **'The primary subtitle changed. Auto translate will rebuild from the new primary.'**
   String get subtitlesAutoTranslateBlockedStalePrimary;
 
-  /// No description provided for @subtitlesAutoTranslateBlockedServiceUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation service is temporarily unavailable. Tap Retry to try again.'**
-  String get subtitlesAutoTranslateBlockedServiceUnavailable;
-
   /// No description provided for @subtitlesAutoTranslateLineFailed.
   ///
   /// In en, this message translates to:
   /// **'Couldn’t translate this line'**
   String get subtitlesAutoTranslateLineFailed;
-
-  /// No description provided for @subtitlesAutoTranslateProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Translating… {ready} of {total}'**
-  String subtitlesAutoTranslateProgress(int ready, int total);
 
   /// No description provided for @subtitlesAutoTranslatePendingLine.
   ///
@@ -1082,18 +1070,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not enough credits to translate. Check your subscription.'**
   String get subtitlesAutoTranslateBlockedCredits;
-
-  /// No description provided for @subtitlesAutoTranslateFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Some lines could not be translated.'**
-  String get subtitlesAutoTranslateFailed;
-
-  /// No description provided for @subtitlesAutoTranslateRetry.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry'**
-  String get subtitlesAutoTranslateRetry;
 
   /// No description provided for @subtitlesExtractNoTracks.
   ///

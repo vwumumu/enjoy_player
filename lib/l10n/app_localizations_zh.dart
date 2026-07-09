@@ -497,16 +497,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '主字幕已更改，自动翻译将根据新的主字幕重建。';
 
   @override
-  String get subtitlesAutoTranslateBlockedServiceUnavailable =>
-      '翻译服务暂时不可用，请点重试。';
-
-  @override
   String get subtitlesAutoTranslateLineFailed => '此行未能翻译';
-
-  @override
-  String subtitlesAutoTranslateProgress(int ready, int total) {
-    return '翻译中… $ready/$total';
-  }
 
   @override
   String get subtitlesAutoTranslatePendingLine => '翻译中…';
@@ -522,12 +513,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get subtitlesAutoTranslateBlockedCredits => '积分不足，无法翻译。请查看订阅。';
-
-  @override
-  String get subtitlesAutoTranslateFailed => '部分行未能翻译。';
-
-  @override
-  String get subtitlesAutoTranslateRetry => '重试';
 
   @override
   String get subtitlesExtractNoTracks =>
@@ -2944,16 +2929,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
       '主字幕已更改，自动翻译将根据新的主字幕重建。';
 
   @override
-  String get subtitlesAutoTranslateBlockedServiceUnavailable =>
-      '翻译服务暂时不可用，请点重试。';
-
-  @override
   String get subtitlesAutoTranslateLineFailed => '此行未能翻译';
-
-  @override
-  String subtitlesAutoTranslateProgress(int ready, int total) {
-    return '翻译中… $ready/$total';
-  }
 
   @override
   String get subtitlesAutoTranslatePendingLine => '翻译中…';
@@ -2969,12 +2945,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get subtitlesAutoTranslateBlockedCredits => '积分不足，无法翻译。请查看订阅。';
-
-  @override
-  String get subtitlesAutoTranslateFailed => '部分行未能翻译。';
-
-  @override
-  String get subtitlesAutoTranslateRetry => '重试';
 
   @override
   String get subtitlesExtractNoTracks =>

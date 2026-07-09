@@ -6,13 +6,16 @@ import 'package:meta/meta.dart';
 import 'package:enjoy_player/core/ids/enjoy_ids.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 
-enum AutoTranslateJobStatus {
+/// Setup / eligibility state for Auto translate (not a media-wide job).
+enum AutoTranslateStatus {
+  /// AI track not selected / not hydrated.
   idle,
-  running,
-  paused,
+
+  /// AI secondary is active; lines translate on demand when visible.
+  active,
+
+  /// Eligibility or auth/credits block; picker shows a reason.
   blocked,
-  completed,
-  failed,
 }
 
 enum AutoTranslateBlockReason {
@@ -22,52 +25,42 @@ enum AutoTranslateBlockReason {
   credits,
   auth,
   stalePrimary,
-  /// Worker/network kept failing; job paused until the learner retries.
-  serviceUnavailable,
 }
 
-enum AutoTranslateLineStatus { pending, inFlight, ready, failed }
-
-/// UI-facing job state for a media item's auto-translate run.
+/// UI-facing state for a media item's Auto translate secondary track.
 @immutable
 class AutoTranslateUiState {
   const AutoTranslateUiState({
-    this.status = AutoTranslateJobStatus.idle,
+    this.status = AutoTranslateStatus.idle,
     this.blockReason,
     this.aiTranscriptId,
     this.primaryTranscriptId,
     this.targetLanguage,
-    this.generation = 0,
-    this.pendingCount = 0,
-    this.failedCount = 0,
-    this.readyCount = 0,
-    this.priorityAnchorIndex = -1,
+    this.inFlightIndexes = const {},
     this.failedLineIndexes = const {},
   });
 
-  final AutoTranslateJobStatus status;
+  final AutoTranslateStatus status;
   final AutoTranslateBlockReason? blockReason;
   final String? aiTranscriptId;
   final String? primaryTranscriptId;
   final String? targetLanguage;
-  final int generation;
-  final int pendingCount;
-  final int failedCount;
-  final int readyCount;
-  final int priorityAnchorIndex;
 
-  /// Lines that exhausted retries (or were skipped). Not scheduled again until
-  /// the learner explicitly re-translates that line.
+  /// Lines currently calling the translation API.
+  final Set<int> inFlightIndexes;
+
+  /// Lines that failed (exhausted quiet retries). Not auto-requested again
+  /// until the learner explicitly re-translates that line.
   final Set<int> failedLineIndexes;
 
-  bool get isActive =>
-      status == AutoTranslateJobStatus.running ||
-      status == AutoTranslateJobStatus.paused;
+  bool get isActive => status == AutoTranslateStatus.active;
+
+  bool isLineInFlight(int lineIndex) => inFlightIndexes.contains(lineIndex);
 
   bool isLineFailed(int lineIndex) => failedLineIndexes.contains(lineIndex);
 
   AutoTranslateUiState copyWith({
-    AutoTranslateJobStatus? status,
+    AutoTranslateStatus? status,
     AutoTranslateBlockReason? blockReason,
     bool clearBlockReason = false,
     String? aiTranscriptId,
@@ -76,11 +69,7 @@ class AutoTranslateUiState {
     bool clearPrimaryTranscriptId = false,
     String? targetLanguage,
     bool clearTargetLanguage = false,
-    int? generation,
-    int? pendingCount,
-    int? failedCount,
-    int? readyCount,
-    int? priorityAnchorIndex,
+    Set<int>? inFlightIndexes,
     Set<int>? failedLineIndexes,
   }) {
     return AutoTranslateUiState(
@@ -95,11 +84,7 @@ class AutoTranslateUiState {
       targetLanguage: clearTargetLanguage
           ? null
           : (targetLanguage ?? this.targetLanguage),
-      generation: generation ?? this.generation,
-      pendingCount: pendingCount ?? this.pendingCount,
-      failedCount: failedCount ?? this.failedCount,
-      readyCount: readyCount ?? this.readyCount,
-      priorityAnchorIndex: priorityAnchorIndex ?? this.priorityAnchorIndex,
+      inFlightIndexes: inFlightIndexes ?? this.inFlightIndexes,
       failedLineIndexes: failedLineIndexes ?? this.failedLineIndexes,
     );
   }
@@ -113,11 +98,7 @@ class AutoTranslateUiState {
           other.aiTranscriptId == aiTranscriptId &&
           other.primaryTranscriptId == primaryTranscriptId &&
           other.targetLanguage == targetLanguage &&
-          other.generation == generation &&
-          other.pendingCount == pendingCount &&
-          other.failedCount == failedCount &&
-          other.readyCount == readyCount &&
-          other.priorityAnchorIndex == priorityAnchorIndex &&
+          _setEquals(other.inFlightIndexes, inFlightIndexes) &&
           _setEquals(other.failedLineIndexes, failedLineIndexes);
 
   @override
@@ -127,11 +108,7 @@ class AutoTranslateUiState {
     aiTranscriptId,
     primaryTranscriptId,
     targetLanguage,
-    generation,
-    pendingCount,
-    failedCount,
-    readyCount,
-    priorityAnchorIndex,
+    Object.hashAllUnordered(inFlightIndexes),
     Object.hashAllUnordered(failedLineIndexes),
   );
 }
@@ -155,22 +132,6 @@ String autoTranslateAiTrackId({
       source: 'ai',
     );
 
-/// Orders pending line indexes by distance from [anchorIndex] (ties: lower index first).
-List<int> orderPendingLineIndexes({
-  required int anchorIndex,
-  required List<int> pending,
-}) {
-  if (pending.isEmpty) return const [];
-  final copy = List<int>.from(pending);
-  copy.sort((a, b) {
-    final da = (a - anchorIndex).abs();
-    final db = (b - anchorIndex).abs();
-    if (da != db) return da.compareTo(db);
-    return a.compareTo(b);
-  });
-  return copy;
-}
-
 /// Returns indexes with empty [text] in [aiLines], excluding [exclude].
 List<int> pendingLineIndexes(
   List<TranscriptLine> aiLines, {
@@ -182,15 +143,6 @@ List<int> pendingLineIndexes(
     if (aiLines[i].text.trim().isEmpty) out.add(i);
   }
   return out;
-}
-
-/// Counts non-empty translated lines.
-int readyLineCount(List<TranscriptLine> aiLines) {
-  var n = 0;
-  for (final line in aiLines) {
-    if (line.text.trim().isNotEmpty) n++;
-  }
-  return n;
 }
 
 /// Whether [aiLines] no longer matches [primaryLines] timings/count or [primaryId].
@@ -224,17 +176,8 @@ List<TranscriptLine> buildAutoTranslateSkeleton(List<TranscriptLine> primaryLine
       .toList();
 }
 
-/// Max concurrent in-flight translation requests per job.
+/// Max concurrent in-flight translation requests per media.
 const kAutoTranslateMaxConcurrency = 2;
 
-/// Per-line retry budget before marking failed (no further auto-scheduling).
-const kAutoTranslateMaxLineRetries = 3;
-
-/// Base backoff for line retries.
-const kAutoTranslateRetryBaseDelay = Duration(seconds: 1);
-
-/// Consecutive worker/network failures before pausing the whole job.
-const kAutoTranslateCircuitBreakerThreshold = 5;
-
-/// Pause duration after the circuit breaker trips.
-const kAutoTranslateCircuitBreakerCooldown = Duration(seconds: 30);
+/// Attempts per line (initial + one quiet retry) before marking failed.
+const kAutoTranslateMaxLineAttempts = 2;

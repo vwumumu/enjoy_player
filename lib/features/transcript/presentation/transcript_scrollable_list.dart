@@ -14,7 +14,6 @@ import 'package:enjoy_player/features/player/application/player_interactions.dar
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/transcript/application/active_transcript_provider.dart';
 import 'package:enjoy_player/features/transcript/application/auto_translate_controller.dart';
-import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
 import 'package:enjoy_player/features/transcript/application/echo_region_bounds.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_alignment.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_recording_counts_provider.dart';
@@ -351,11 +350,9 @@ class _TranscriptScrollableListState
     );
     final secondaryId = ref.watch(secondaryTranscriptIdProvider(widget.mediaId)).value;
     final autoTranslateActive =
+        autoTranslateState.isActive &&
         autoTranslateState.aiTranscriptId != null &&
         secondaryId == autoTranslateState.aiTranscriptId;
-    final showAutoTranslatePending =
-        autoTranslateActive &&
-        autoTranslateState.status == AutoTranslateJobStatus.running;
     final l10n = AppLocalizations.of(context);
     final items = _virtualItems(echo);
     final lineRecordingCounts = ref.watch(
@@ -435,10 +432,21 @@ class _TranscriptScrollableListState
               final lineFailed =
                   autoTranslateActive &&
                   autoTranslateState.isLineFailed(lineIndex);
+              final lineInFlight =
+                  autoTranslateActive &&
+                  autoTranslateState.isLineInFlight(lineIndex);
+              if (autoTranslateActive && secondaryEmpty && !lineFailed) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  ref
+                      .read(autoTranslateCtrlProvider(widget.mediaId).notifier)
+                      .requestTranslateLine(lineIndex);
+                });
+              }
               final secondaryText = secondaryEmpty && l10n != null
                   ? (lineFailed
                         ? l10n.subtitlesAutoTranslateLineFailed
-                        : (showAutoTranslatePending
+                        : (lineInFlight
                               ? l10n.subtitlesAutoTranslatePendingLine
                               : secondaryTextRaw))
                   : secondaryTextRaw;
