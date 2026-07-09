@@ -829,9 +829,22 @@ class _CapturingYoutubeClient implements YoutubeTranscriptsClient {
     required String language,
     String? captionFetch,
     bool? forceRefresh,
+    int? waitMs,
   }) async {
     lastVideoId = videoId;
     lastLanguage = language;
+    return Map<String, dynamic>.from(response);
+  }
+
+  @override
+  Future<Map<String, dynamic>> pollTranscripts({
+    required String videoId,
+    required List<String> languages,
+    String? captionFetch,
+    bool? forceRefresh,
+    int? waitMs,
+  }) async {
+    lastVideoId = videoId;
     return Map<String, dynamic>.from(response);
   }
 }
@@ -848,12 +861,29 @@ class _SequencedYoutubeClient implements YoutubeTranscriptsClient {
     required String language,
     String? captionFetch,
     bool? forceRefresh,
-  }) async {
+    int? waitMs,
+  }) {
     final idx = _i < _responses.length ? _i : _responses.length - 1;
     final m = _responses[idx];
     _i++;
-    return Map<String, dynamic>.from(m);
+    return Future.value(Map<String, dynamic>.from(m));
   }
+
+  @override
+  Future<Map<String, dynamic>> pollTranscripts({
+    required String videoId,
+    required List<String> languages,
+    String? captionFetch,
+    bool? forceRefresh,
+    int? waitMs,
+  }) =>
+      pollTranscript(
+        videoId: videoId,
+        language: languages.first,
+        captionFetch: captionFetch,
+        forceRefresh: forceRefresh,
+        waitMs: waitMs,
+      );
 }
 
 class _ThrowingYoutubeClient implements YoutubeTranscriptsClient {
@@ -863,6 +893,17 @@ class _ThrowingYoutubeClient implements YoutubeTranscriptsClient {
     required String language,
     String? captionFetch,
     bool? forceRefresh,
+    int? waitMs,
+  }) =>
+      throw StateError('YouTube client must not be used for non-YouTube media');
+
+  @override
+  Future<Map<String, dynamic>> pollTranscripts({
+    required String videoId,
+    required List<String> languages,
+    String? captionFetch,
+    bool? forceRefresh,
+    int? waitMs,
   }) =>
       throw StateError('YouTube client must not be used for non-YouTube media');
 }

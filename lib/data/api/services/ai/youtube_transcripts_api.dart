@@ -10,6 +10,17 @@ abstract class YoutubeTranscriptsClient {
     required String language,
     String? captionFetch,
     bool? forceRefresh,
+    int? waitMs,
+  });
+
+  /// Multi-language path: the first entry of [languages] is the source language
+  /// (the original caption); the remaining entries are translation targets.
+  Future<Map<String, dynamic>> pollTranscripts({
+    required String videoId,
+    required List<String> languages,
+    String? captionFetch,
+    bool? forceRefresh,
+    int? waitMs,
   });
 }
 
@@ -25,6 +36,7 @@ class YoutubeTranscriptsApi extends RestApi
     required String language,
     String? captionFetch,
     bool? forceRefresh,
+    int? waitMs,
   }) {
     return client.postJson(
       _path,
@@ -33,6 +45,27 @@ class YoutubeTranscriptsApi extends RestApi
         'language': language,
         'captionFetch': ?captionFetch,
         'forceRefresh': ?forceRefresh,
+        'waitMs': ?waitMs,
+      },
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> pollTranscripts({
+    required String videoId,
+    required List<String> languages,
+    String? captionFetch,
+    bool? forceRefresh,
+    int? waitMs,
+  }) {
+    return client.postJson(
+      _path,
+      body: {
+        'videoId': videoId,
+        'languages': languages,
+        'captionFetch': ?captionFetch,
+        'forceRefresh': ?forceRefresh,
+        'waitMs': ?waitMs,
       },
     );
   }

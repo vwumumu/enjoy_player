@@ -124,9 +124,11 @@ class TranscriptRepository {
     this._youtubeTranscripts,
     int? maxYoutubeWorkerPollAttempts,
     Duration? youtubeWorkerPollDelay,
-  ]) : _maxYoutubeWorkerPollAttempts = maxYoutubeWorkerPollAttempts ?? 30,
+    int? youtubeWorkerWaitMs,
+  ]) : _maxYoutubeWorkerPollAttempts = maxYoutubeWorkerPollAttempts ?? 4,
        _youtubeWorkerPollDelay =
-           youtubeWorkerPollDelay ?? const Duration(seconds: 2);
+            youtubeWorkerPollDelay ?? const Duration(seconds: 5),
+       _youtubeWorkerWaitMs = youtubeWorkerWaitMs ?? 20000;
 
   final AppDatabase _db;
   final TranscriptApi? _transcriptApi;
@@ -134,6 +136,10 @@ class TranscriptRepository {
 
   final int _maxYoutubeWorkerPollAttempts;
   final Duration _youtubeWorkerPollDelay;
+  // Server-side long-poll window sent on every worker POST (worker `wait_ms`,
+  // clamped to [0, 25000]). The worker responds with `Retry-After: 5` while
+  // generating, which [_youtubeWorkerPollDelay] honours between attempts.
+  final int _youtubeWorkerWaitMs;
 
   final Map<String, _LinesCacheEntry> _linesCache = {};
 
@@ -179,6 +185,7 @@ class TranscriptRepository {
     String mediaId, {
     bool forceCloud = false,
     bool fetchCloud = true,
+    String? nativeLanguage,
   }) async {
     final tt = await dexieTargetTypeForId(_db, mediaId);
     if (tt == null) {
@@ -197,7 +204,11 @@ class TranscriptRepository {
       status: TranscriptCloudFetchStatus.skipped,
     );
     if (fetchCloud) {
-      cloud = await fetchCloudTranscripts(mediaId, force: forceCloud);
+      cloud = await fetchCloudTranscripts(
+        mediaId,
+        force: forceCloud,
+        nativeLanguage: nativeLanguage,
+      );
       await ensurePrimaryTranscript(mediaId);
     }
 
@@ -309,6 +320,7 @@ class TranscriptRepository {
   Future<TranscriptCloudFetchResult> fetchCloudTranscripts(
     String mediaId, {
     bool force = false,
+    String? nativeLanguage,
   }) async {
     final tt = await dexieTargetTypeForId(_db, mediaId);
     if (tt == null) {
@@ -341,6 +353,7 @@ class TranscriptRepository {
               mediaId: mediaId,
               video: video,
               force: force,
+              nativeLanguage: nativeLanguage,
             );
           } on Object catch (e, st) {
             _log.warning(
@@ -422,10 +435,20 @@ class TranscriptRepository {
     return workerLanguageBase(lang);
   }
 
+  /// Native language as a worker base code, or `null` when it is unknown /
+  /// invalid / und (which routes to the single-language path). See R2/R6.
+  String? _workerNativeLanguage(String? nativeLanguage) {
+    if (nativeLanguage == null) return null;
+    final base = workerLanguageBase(nativeLanguage);
+    if (base.isEmpty || kInvalidLanguageTags.contains(base)) return null;
+    return base;
+  }
+
   Future<TranscriptCloudFetchResult> _fetchYoutubeWorkerTranscripts({
     required String mediaId,
     required VideoRow video,
     required bool force,
+    String? nativeLanguage,
   }) async {
     final api = _youtubeTranscripts;
     if (api == null) {
@@ -441,18 +464,70 @@ class TranscriptRepository {
         status: TranscriptCloudFetchStatus.skipped,
       );
     }
+    // Bilingual only when a valid, *different* native language is known;
+    // otherwise keep the single-language path (Apify fallback preserved).
+    final native = _workerNativeLanguage(nativeLanguage);
+    final useBilingual = native != null && native != language;
     final now = DateTime.now();
 
     for (var attempt = 0; attempt < _maxYoutubeWorkerPollAttempts; attempt++) {
-      final map = await api.pollTranscript(
-        videoId: workerVideoId,
-        language: language,
-        captionFetch: 'auto',
-        forceRefresh: attempt == 0 && force,
-      );
+      final forceRefresh = attempt == 0 && force;
+      final map = useBilingual
+          ? await api.pollTranscripts(
+              videoId: workerVideoId,
+              languages: [language, native],
+              captionFetch: 'auto',
+              forceRefresh: forceRefresh,
+              waitMs: _youtubeWorkerWaitMs,
+            )
+          : await api.pollTranscript(
+              videoId: workerVideoId,
+              language: language,
+              captionFetch: 'auto',
+              forceRefresh: forceRefresh,
+              waitMs: _youtubeWorkerWaitMs,
+            );
 
       final status = map['status'] as String?;
-      if (status == 'ready') {
+
+      if (status == 'failed') {
+        final err = map['error']?.toString() ?? 'YouTube transcript failed';
+        _log.warning('YouTube worker transcript failed for $mediaId: $err');
+        return TranscriptCloudFetchResult(
+          status: TranscriptCloudFetchStatus.error,
+          errorMessage: err,
+        );
+      }
+
+      if (useBilingual) {
+        if (status == 'ready' || status == 'partial') {
+          if (status == 'partial') {
+            final missing = map['missingLanguages'];
+            if (missing is List && missing.isNotEmpty) {
+              _log.info(
+                'YouTube bilingual partial for $mediaId, missing: $missing',
+              );
+            }
+          }
+          final stored = await _storeWorkerTranscriptList(
+            mediaId: mediaId,
+            response: map,
+            sourceLanguage: language,
+            nativeLanguage: native,
+            fallbackNow: now,
+          );
+          if (stored > 0) {
+            await ensurePrimaryTranscript(mediaId);
+            return TranscriptCloudFetchResult(
+              status: TranscriptCloudFetchStatus.success,
+              storedCount: stored,
+            );
+          }
+          return const TranscriptCloudFetchResult(
+            status: TranscriptCloudFetchStatus.empty,
+          );
+        }
+      } else if (status == 'ready') {
         final stored = await _upsertYoutubeWorkerReadyTranscript(
           mediaId: mediaId,
           response: map,
@@ -470,15 +545,7 @@ class TranscriptRepository {
         );
       }
 
-      if (status == 'failed') {
-        final err = map['error']?.toString() ?? 'YouTube transcript failed';
-        _log.warning('YouTube worker transcript failed for $mediaId: $err');
-        return TranscriptCloudFetchResult(
-          status: TranscriptCloudFetchStatus.error,
-          errorMessage: err,
-        );
-      }
-
+      // `generating` (or any non-terminal status): honour Retry-After then retry.
       if (attempt < _maxYoutubeWorkerPollAttempts - 1) {
         await Future<void>.delayed(_youtubeWorkerPollDelay);
       }
@@ -488,6 +555,90 @@ class TranscriptRepository {
       status: TranscriptCloudFetchStatus.error,
       errorMessage: 'Timed out waiting for YouTube transcripts',
     );
+  }
+
+  /// Upserts every transcript in a multi-language `ready`/`partial` response
+  /// and assigns primary (= source/original) and secondary (= native
+  /// translation) explicitly (R3/R4). Returns the number of rows stored.
+  ///
+  /// When the *source* language itself is the missing entry of a `partial`
+  /// (B1), no primary is invented here — the caller's `ensurePrimaryTranscript`
+  /// sort fallback picks a readable track instead, and secondary is left
+  /// untouched to avoid a primary==secondary collision.
+  Future<int> _storeWorkerTranscriptList({
+    required String mediaId,
+    required Map<String, dynamic> response,
+    required String sourceLanguage,
+    required String? nativeLanguage,
+    required DateTime fallbackNow,
+  }) async {
+    final transcripts = response['transcripts'];
+    if (transcripts is! List) return 0;
+
+    var stored = 0;
+    String? sourceRowId;
+    String? nativeRowId;
+
+    for (final entry in transcripts) {
+      if (entry is! Map) continue;
+      final map = Map<String, dynamic>.from(entry);
+      final language = map['language'] as String?;
+      if (language == null) continue;
+      final source = _normalizeSource((map['source'] ?? 'official') as String);
+      final lines = transcriptLinesFromApiTimeline(map['timeline']);
+      if (lines.isEmpty) continue;
+
+      final id = enjoyTranscriptId(
+        targetType: 'Video',
+        targetId: mediaId,
+        language: language,
+        source: source,
+      );
+      final label = _youtubeWorkerTranscriptLabel(map, language);
+      final rawUrl = map['rawUrl'] as String?;
+      final timelineJson = jsonEncode(lines.map((e) => e.toJson()).toList());
+      final updated = DateTime.now();
+
+      await _db.transcriptDao.upsert(
+        TranscriptRow(
+          id: id,
+          targetType: 'Video',
+          targetId: mediaId,
+          language: language,
+          source: source,
+          timelineJson: timelineJson,
+          referenceId: rawUrl,
+          label: label,
+          trackIndex: null,
+          syncStatus: 'synced',
+          serverUpdatedAt: updated,
+          createdAt: fallbackNow,
+          updatedAt: updated,
+        ),
+      );
+      stored++;
+
+      if (language == sourceLanguage) {
+        sourceRowId = id;
+      } else if (language == nativeLanguage) {
+        nativeRowId = id;
+      }
+    }
+
+    if (sourceRowId != null) {
+      await _db.echoSessionDao.updatePrimaryTranscriptForTarget(
+        'Video',
+        mediaId,
+        sourceRowId,
+      );
+      await _db.echoSessionDao.updateSecondaryTranscriptForTarget(
+        'Video',
+        mediaId,
+        nativeRowId,
+      );
+    }
+
+    return stored;
   }
 
   /// Returns whether a non-empty transcript row was written.

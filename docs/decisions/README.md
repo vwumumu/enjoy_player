@@ -59,3 +59,4 @@ Trade-offs, follow-up work, risks.
 | [0033](0033-byok-ai-provider-settings.md) | BYOK AI provider settings — per-modality Enjoy vs BYOK, secure secrets, direct vendor HTTP |
 | [0034](0034-custom-scheme-only-pkce-callback.md) | Custom-scheme-only PKCE callback — drops universal/app links (partial supersession of 0027) |
 | [0035](0035-responsive-transport-priorities.md) | Responsive transport priorities and collapsed-expand recovery |
+| [0036](0036-youtube-bilingual-transcripts.md) | YouTube bilingual transcripts via multi-language worker contract |

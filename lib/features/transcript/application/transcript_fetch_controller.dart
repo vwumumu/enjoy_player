@@ -5,6 +5,8 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/application/app_preferences_provider.dart';
+import '../../../core/riverpod/async_value_x.dart';
 import '../../../data/db/app_database_provider.dart';
 import '../../../data/db/media_target_resolver.dart';
 import '../domain/transcript_fetch_status.dart';
@@ -97,11 +99,22 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
     required bool forceCloud,
   }) async {
     final repo = ref.read(transcriptRepositoryProvider);
+    // Read the learner's native language here, in the single shared helper
+    // used by BOTH `resolveOnOpen` (media open) and `refreshFromCloud`
+    // (manual refresh), so the bilingual request path is engaged on refresh
+    // too (FR-010). Kept out of the repository to keep it UI-free.
+    final nativeLanguage = signedIn
+        ? ref
+              .read(appPreferencesCtrlProvider)
+              .valueOrNull
+              ?.effectiveNativeLanguage
+        : null;
     try {
       final result = await repo.resolveOnOpen(
         mediaId,
         forceCloud: forceCloud,
         fetchCloud: signedIn,
+        nativeLanguage: nativeLanguage,
       );
 
       if (!ref.mounted) return;

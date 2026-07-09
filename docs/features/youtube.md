@@ -34,9 +34,28 @@ While a video is open, the player WebView [`shouldOverrideUrlLoading`](../../lib
 
 ## Transcripts
 
-Only the **Enjoy API** path (`GET /api/v1/transcripts` with local row `targetId`) — same as other videos. The row must sync to the cloud for server-side transcripts to attach. Local subtitle file import is disabled for YouTube rows.
+Signed-in learners get **bilingual** captions automatically: when the video's
+content language differs from the learner's native language, the app requests
+the **original** caption and a **native-language translation** together in a
+single Enjoy Worker `POST /youtube/transcripts` call (the worker's `languages`
+array), then stores the original as the **primary** subtitle and the translation
+as the **secondary** subtitle so both appear with no extra taps. When the content
+language equals the native language (or the native language is unknown), the app
+uses the existing **single-language** path (`language:` only), preserving the
+worker's Apify fallback. Source language `und`/empty skips cloud entirely.
 
-When the **worker** transcript poll returns `status: failed`, the app records a **fetched** state so the UI does not spin forever; users can retry later (e.g. after captions exist or policy changes) without an infinite poll loop. See [`transcript_repository.dart`](../../lib/features/transcript/data/transcript_repository.dart).
+The worker is **server-side long-polled** (`wait_ms`), so a video typically
+resolves in a handful of POSTs rather than the prior fixed 2 s × 30 loop; a
+`partial` result (some languages missing) is treated as success — every caption
+that *is* ready is stored and shown, never an error. See
+[ADR-0036](../decisions/0036-youtube-bilingual-transcripts.md) and the YouTube
+(Worker) section of [transcript.md](transcript.md). Local subtitle file import
+remains disabled for YouTube rows.
+
+When the worker poll returns `status: failed`, the app records a **fetched**
+state so the UI does not spin forever; users can retry later (e.g. after captions
+exist or policy changes) without an infinite poll loop. See
+[`transcript_repository.dart`](../../lib/features/transcript/data/transcript_repository.dart).
 
 ## Limitations
 
