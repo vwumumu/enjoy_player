@@ -434,7 +434,7 @@ class _SubtitleTrackPickerSheetState
                       horizontal: sheetHorizontalPadding(t),
                       vertical: t.space8,
                     ),
-                    child: AuthRequiredCallout(
+                    child: const AuthRequiredCallout(
                       surface: AuthRequiredSurface.lookupTranslation,
                     ),
                   ),
