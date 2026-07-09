@@ -64,6 +64,7 @@ exist or policy changes) without an infinite poll loop. See
 - Position updates while playing are polled (~250 ms); echo clamp may overshoot slightly vs `media_kit`.
 - Embedded MKV/MP4 subtitle track extraction is unavailable for YouTube (no `media_kit` decode of the stream).
 - Ad behavior depends on YouTube, cookies, and account; “no ads” is best-effort when signed in with Premium where applicable.
+- **Captions**: YouTube's own captions/CC (`.ytp-caption-window-container` and any native `<track>` cues) are force-hidden by [`kYoutubeMobileWatchInjectScript`](../../lib/features/player/application/engines/youtube/youtube_page_inject.dart) — injected CSS, disabling `video.textTracks`, and unloading the player `captions`/`cc` modules on every hook/enforce cycle. Some videos default captions on (auto-captions, saved viewer prefs), and since the native control bar is also hidden there would otherwise be no way to turn them off; the app's own transcript panel (see [Transcripts](#transcripts) above) is the only caption source shown to users.
 
 ## Buffering transitions
 

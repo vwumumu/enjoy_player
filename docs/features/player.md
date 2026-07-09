@@ -27,7 +27,7 @@
 ## Engine contract (ADR-0015)
 
 - `PlayerEngine` continues to expose **`buildVideoStage`** alongside transport commands so YouTube can keep a **single long-lived** `InAppWebView` (no `Key` by `videoId`) without duplicating lifecycle between layers. Splitting a separate “video surface factory” from playback ports would be possible later but is **not** planned unless tests or reuse demand it — the WebView ordering constraints are easy to regress.
-- **`supportsSubtitleDisabling`** tells the open coordinator whether `disableRenderedSubtitles()` is meaningful for the active engine. `MediaKitPlayerEngine` returns `true` (it owns the libmpv embedded track list); `YoutubePlayerEngine` returns `false` because the WebView watch page renders its own captions and there is no engine-side track to disable — the open coordinator short-circuits the await on YouTube opens. Callers that need to gate UI on this capability should read it instead of branching on engine type.
+- **`supportsSubtitleDisabling`** tells the open coordinator whether `disableRenderedSubtitles()` is meaningful for the active engine. `MediaKitPlayerEngine` returns `true` (it owns the libmpv embedded track list); `YoutubePlayerEngine` returns `false` because there is no libmpv track list to clear — native YouTube CC is instead force-suppressed in the WebView inject script (see [youtube.md](youtube.md) Captions). The open coordinator short-circuits the await on YouTube opens. Callers that need to gate UI on this capability should read it instead of branching on engine type.
 
 ## Fullscreen (desktop)
 

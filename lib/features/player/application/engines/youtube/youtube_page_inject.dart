@@ -50,14 +50,91 @@ const String kYoutubeMobileWatchInjectScript = r'''
       '.ytp-fullscreen-button,.ytp-size-button,.fullscreen-icon',
       '{display:none!important;pointer-events:none!important;}',
       'button[aria-label*="Fullscreen"],button[aria-label*="全屏"]',
-      '{display:none!important;pointer-events:none!important;}'
+      '{display:none!important;pointer-events:none!important;}',
+      // Captions must never render — app transcripts are the only caption
+      // source (see docs/features/youtube.md). YouTube toggles these on by
+      // default for some videos (auto-captions / saved viewer prefs), and
+      // since the native control bar is hidden there is no way to turn them
+      // off from the page itself.
+      '.ytp-caption-window-container,.caption-window,',
+      '.ytp-caption-window-bottom,.ytp-caption-window-top,',
+      '.ytp-caption-window-rollup,.ytp-caption-segment,',
+      '.player-captions-container,.captions-text',
+      '{display:none!important;visibility:hidden!important;',
+      'pointer-events:none!important;opacity:0!important;}'
     ].join('');
     document.head.appendChild(style);
+  }
+
+  // --- Never let native <track>-based captions render either ---
+  function disableTextTracks(video){
+    if(!video||!video.textTracks) return;
+    try{
+      for(var i=0;i<video.textTracks.length;i++){
+        video.textTracks[i].mode='disabled';
+      }
+    }catch(e){}
+  }
+
+  var captionSel='.ytp-caption-window-container,.caption-window,'+
+    '.ytp-caption-window-bottom,.ytp-caption-window-top,'+
+    '.ytp-caption-window-rollup,.ytp-caption-segment,'+
+    '.player-captions-container,.captions-text';
+
+  // Re-apply inline hide — YouTube sometimes sets competing inline styles
+  // that outrank a one-shot <style> rule after track changes.
+  function hideCaptionDom(){
+    var root=player||document;
+    var nodes=root.querySelectorAll
+      ? root.querySelectorAll(captionSel)
+      : [];
+    for(var i=0;i<nodes.length;i++){
+      nodes[i].style.setProperty('display','none','important');
+      nodes[i].style.setProperty('visibility','hidden','important');
+      nodes[i].style.setProperty('opacity','0','important');
+      nodes[i].style.setProperty('pointer-events','none','important');
+    }
+  }
+
+  // Turn off YouTube's own captions module when the player API is available
+  // (watch-page #movie_player / .html5-video-player). CSS alone can miss
+  // transient overlays / language pickers that sit outside caption nodes.
+  // Only hit the player API when caption DOM is present so we do not spam
+  // unloadModule every enforce tick.
+  function disableYoutubeCaptions(){
+    if(isAd()) return;
+    var p=player||document.querySelector('.html5-video-player');
+    if(!p) return;
+    var hasCaptionDom=!!(
+      p.querySelector(captionSel)||
+      document.querySelector('.ytp-caption-window-container,.caption-window')
+    );
+    if(!hasCaptionDom && typeof p.getOption!=='function') return;
+    if(!hasCaptionDom){
+      try{
+        var track=p.getOption('captions','track');
+        if(!track||!track.languageCode) return;
+      }catch(e){return;}
+    }
+    try{
+      if(typeof p.unloadModule==='function'){
+        p.unloadModule('captions');
+        p.unloadModule('cc');
+      }
+    }catch(e){}
+    try{
+      if(typeof p.setOption==='function'){
+        p.setOption('captions','track',{});
+        p.setOption('cc','track',{});
+      }
+    }catch(e){}
   }
 
   // --- Attach event hooks to a <video> element ---
   function hookVideo(video){
     enableInlinePlayback(video);
+    disableTextTracks(video);
+    disableYoutubeCaptions();
     video.addEventListener('webkitbeginfullscreen',function(){
       if(typeof video.webkitSetPresentationMode==='function'){
         try{video.webkitSetPresentationMode('inline');}catch(e){}
@@ -138,6 +215,9 @@ const String kYoutubeMobileWatchInjectScript = r'''
     if(!v) return;
 
     enableInlinePlayback(v);
+    disableTextTracks(v);
+    hideCaptionDom();
+    disableYoutubeCaptions();
 
     var de=document.documentElement;
     de.style.setProperty('overflow','hidden','important');
